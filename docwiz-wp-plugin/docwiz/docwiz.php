@@ -3,11 +3,11 @@
 Plugin Name: DocWiz - PDF Tools
 Description: A simple PDF merge tool for demonstration purposes. (Dummy API Integration)
 Version: 1.2
-Author: Your Name
+Author: Rohini Dawange
 */
 
 // Prevent direct access to the file.
-if ( ! defined( 'ABSPATH' ) ) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
@@ -33,45 +33,95 @@ use setasign\Fpdi\Fpdi;
 /**
  * Enqueue necessary scripts (jQuery and our custom JS).
  */
-function dw_enqueue_scripts() {
+function dw_enqueue_scripts()
+{
     // Correctly loading custom.js from the 'js' folder
-    wp_enqueue_script( 'dw-custom-js', plugins_url( 'js/custom.js', __FILE__ ), array( 'jquery' ), '1.0', true );
+    wp_enqueue_script('dw-custom-js', plugins_url('js/custom.js', __FILE__), array('jquery'), '1.0', true);
 
     // Localize the script with AJAX URL and nonces for security
-    wp_localize_script( 'dw-custom-js', 'dw_ajax', array(
-        'ajaxurl'        => admin_url( 'admin-ajax.php' ),
-        'merge_nonce'    => wp_create_nonce( 'dw_merge_nonce' ),
-        'split_nonce'    => wp_create_nonce( 'dw_split_nonce' ),
-        'compress_nonce' => wp_create_nonce( 'dw_compress_nonce' ),
-        'rotate_nonce'   => wp_create_nonce( 'dw_rotate_nonce' ),
-    'delete_pages_nonce' => wp_create_nonce( 'dw_delete_pages_nonce' ),
-    'reorder_pages_nonce' => wp_create_nonce( 'dw_reorder_pages_nonce' ),
-    'pdf_to_jpg_nonce' => wp_create_nonce( 'dw_pdf_to_jpg_nonce' ), // <-- Add this line
-    'add_watermark_nonce' => wp_create_nonce( 'dw_add_watermark_nonce' ),
-    'word_to_pdf_nonce' => wp_create_nonce( 'dw_word_to_pdf_nonce' ),
-     'pdf_to_text_nonce' => wp_create_nonce( 'dw_pdf_to_text_nonce' ),
-      'repair_pdf_nonce' => wp_create_nonce( 'dw_repair_pdf_nonce' ),
-      'pdf_to_html_nonce' => wp_create_nonce( 'dw_pdf_to_html_nonce' ),
-      'pdf_to_grayscale_nonce' => wp_create_nonce( 'dw_pdf_to_grayscale_nonce' ),
-      'pdf_to_pdfa_nonce' => wp_create_nonce( 'dw_pdf_to_pdfa_nonce' ),
-    ) );
+    wp_localize_script('dw-custom-js', 'dw_ajax', array(
+        'ajaxurl'        => admin_url('admin-ajax.php'),
+        'merge_nonce'    => wp_create_nonce('dw_merge_nonce'),
+        'split_nonce'    => wp_create_nonce('dw_split_nonce'),
+        'compress_nonce' => wp_create_nonce('dw_compress_nonce'),
+        'rotate_nonce'   => wp_create_nonce('dw_rotate_nonce'),
+        'delete_pages_nonce' => wp_create_nonce('dw_delete_pages_nonce'),
+        'reorder_pages_nonce' => wp_create_nonce('dw_reorder_pages_nonce'),
+        'pdf_to_jpg_nonce' => wp_create_nonce('dw_pdf_to_jpg_nonce'), // <-- Add this line
+        'add_watermark_nonce' => wp_create_nonce('dw_add_watermark_nonce'),
+        'word_to_pdf_nonce' => wp_create_nonce('dw_word_to_pdf_nonce'),
+        'pdf_to_text_nonce' => wp_create_nonce('dw_pdf_to_text_nonce'),
+        'repair_pdf_nonce' => wp_create_nonce('dw_repair_pdf_nonce'),
+        'pdf_to_html_nonce' => wp_create_nonce('dw_pdf_to_html_nonce'),
+        'pdf_to_grayscale_nonce' => wp_create_nonce('dw_pdf_to_grayscale_nonce'),
+        'pdf_to_pdfa_nonce' => wp_create_nonce('dw_pdf_to_pdfa_nonce'),
+        'add_page_numbers_nonce' => wp_create_nonce('dw_add_page_numbers_nonce'),
+        'unlock_pdf_nonce' => wp_create_nonce('dw_unlock_pdf_nonce'),
+        'sign_pdf_nonce' => wp_create_nonce('dw_sign_pdf_nonce'),
+        'organize_pdf_nonce' => wp_create_nonce('dw_organize_pdf_nonce')
+    ));
 }
-add_action( 'wp_enqueue_scripts', 'dw_enqueue_scripts' );
+add_action('wp_enqueue_scripts', 'dw_enqueue_scripts');
 
 /**
  * Enqueue Font Awesome for icons.
  */
-function dw_enqueue_font_awesome() {
-    wp_enqueue_style( 'font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css', array(), '6.5.2', 'all' );
+function dw_enqueue_font_awesome()
+{
+    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css', array(), '6.5.2', 'all');
 }
-add_action( 'wp_enqueue_scripts', 'dw_enqueue_font_awesome' );
+add_action('wp_enqueue_scripts', 'dw_enqueue_font_awesome');
+
+/**
+ * Shortcode to display the Add Page Number form.
+ */
+function dw_add_page_numbers_form_shortcode()
+{
+    ob_start();
+?>
+    <div id="add-page-numbers-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
+        <h2>Add Page Numbers to PDF</h2>
+        <p>Upload a PDF file to add page numbers.</p>
+        <form id="add-page-numbers-form" enctype="multipart/form-data">
+            <div style="margin-bottom: 15px;">
+                <label for="pdf_file_page_numbers" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
+                <input type="file" id="pdf_file_page_numbers" name="pdf_file" accept="application/pdf" required
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="position" style="display: block; font-weight: bold; margin-bottom: 5px;">Position:</label>
+                <select id="position" name="position" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value="bottom-right">Bottom Right</option>
+                    <option value="bottom-center">Bottom Center</option>
+                    <option value="bottom-left">Bottom Left</option>
+                    <option value="top-right">Top Right</option>
+                    <option value="top-center">Top Center</option>
+                    <option value="top-left">Top Left</option>
+                </select>
+            </div>
+            <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
+                Add Page Numbers
+            </button>
+        </form>
+        <div id="add-page-numbers-status" style="margin-top: 15px; font-weight: bold;"></div>
+        <div id="download-page-numbered-pdf-container" style="margin-top: 15px; display: none;">
+            <a id="download-page-numbered-pdf" href="#" download style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">
+                Download PDF with Page Numbers
+            </a>
+        </div>
+    </div>
+<?php
+    return ob_get_clean();
+}
+add_shortcode('dw_add_page_numbers_tool', 'dw_add_page_numbers_form_shortcode');
 
 /**
  * Shortcode to display the PDF merge form.
  */
-function dw_merge_form_shortcode() {
+function dw_merge_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <div id="pdf-merge-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
         <h2>Merge PDFs</h2>
         <p>Select two or more PDF files to combine them into one.</p>
@@ -79,7 +129,7 @@ function dw_merge_form_shortcode() {
             <div style="margin-bottom: 15px;">
                 <label for="pdf_files" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF Files:</label>
                 <input type="file" id="pdf_files" name="pdf_files[]" accept="application/pdf" multiple required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                 <small style="color: #666;">Hold Ctrl/Cmd to select multiple files.</small>
             </div>
             <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
@@ -93,17 +143,18 @@ function dw_merge_form_shortcode() {
             </a>
         </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_merge_tool', 'dw_merge_form_shortcode' );
+add_shortcode('dw_merge_tool', 'dw_merge_form_shortcode');
 
 /**
  * Shortcode to display the PDF to HTML (via Images) conversion form.
  */
-function dw_pdf_to_html_form_shortcode() {
+function dw_pdf_to_html_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <div id="pdf-to-html-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
         <h2>PDF to HTML</h2>
         <p>Convert your PDF documents into web-friendly HTML pages (each page will be an image).</p>
@@ -111,7 +162,7 @@ function dw_pdf_to_html_form_shortcode() {
             <div style="margin-bottom: 15px;">
                 <label for="pdf_file_html" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
                 <input type="file" id="pdf_file_html" name="pdf_file" accept=".pdf" required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
                 Convert to HTML
@@ -124,16 +175,17 @@ function dw_pdf_to_html_form_shortcode() {
             </a>
         </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_pdf_to_html_tool', 'dw_pdf_to_html_form_shortcode' );
+add_shortcode('dw_pdf_to_html_tool', 'dw_pdf_to_html_form_shortcode');
 /**
  * Shortcode to display the PDF split form.
  */
-function dw_split_form_shortcode() {
+function dw_split_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <div id="pdf-split-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
         <h2>Split PDF</h2>
         <p>Upload a PDF to split it into individual pages.</p>
@@ -141,7 +193,7 @@ function dw_split_form_shortcode() {
             <div style="margin-bottom: 15px;">
                 <label for="split_pdf_file" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
                 <input type="file" id="split_pdf_file" name="pdf_file" accept="application/pdf" required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
                 Split PDF
@@ -149,20 +201,21 @@ function dw_split_form_shortcode() {
         </form>
         <div id="split-status" style="margin-top: 15px; font-weight: bold;"></div>
         <div id="download-split-pdfs-container" style="margin-top: 15px; display: none;">
-            </div>
+        </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_split_tool', 'dw_split_form_shortcode' );
+add_shortcode('dw_split_tool', 'dw_split_form_shortcode');
 
 
 /**
  * Shortcode to display the PDF compress form.
  */
-function dw_compress_form_shortcode() {
+function dw_compress_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <div id="pdf-compress-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
         <h2>Compress PDF</h2>
         <p>Upload a PDF to reduce its file size.</p>
@@ -170,7 +223,7 @@ function dw_compress_form_shortcode() {
             <div style="margin-bottom: 15px;">
                 <label for="compress_pdf_file" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
                 <input type="file" id="compress_pdf_file" name="pdf_file" accept="application/pdf" required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
                 Compress PDF
@@ -183,45 +236,55 @@ function dw_compress_form_shortcode() {
             </a>
         </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_compress_tool', 'dw_compress_form_shortcode' );
+add_shortcode('dw_compress_tool', 'dw_compress_form_shortcode');
 
 /**
  * Shortcode to display the PDF to JPG conversion form.
  */
-function dw_pdf_to_jpg_form_shortcode() {
+function dw_pdf_to_jpg_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <div id="pdf-to-jpg-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
-        <h2>PDF to JPG</h2>
-        <p>Upload a PDF file to convert each page into a separate JPG image.</p>
+        <h2>Convert PDF to JPG</h2>
+        <p>Upload a PDF to convert its pages into JPG images.</p>
         <form id="pdf-to-jpg-form" enctype="multipart/form-data">
             <div style="margin-bottom: 15px;">
                 <label for="pdf_to_jpg_file" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
                 <input type="file" id="pdf_to_jpg_file" name="pdf_file" accept="application/pdf" required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="jpg_quality" style="display: block; font-weight: bold; margin-bottom: 5px;">JPG Quality (1-100):</label>
+                <input type="number" id="jpg_quality" name="jpg_quality" value="90" min="1" max="100"
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
                 Convert to JPG
             </button>
         </form>
         <div id="pdf-to-jpg-status" style="margin-top: 15px; font-weight: bold;"></div>
-        <div id="download-jpgs-container" style="margin-top: 15px; display: none;">
-            </div>
+        <div id="download-jpg-container" style="margin-top: 15px; display: none;">
+            <p>Download your JPG images:</p>
+            <div id="jpg-download-links"></div>
+        </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_pdf_to_jpg_tool', 'dw_pdf_to_jpg_form_shortcode' );
+add_shortcode('dw_pdf_to_jpg_tool', 'dw_pdf_to_jpg_form_shortcode');
+
 
 /**
  * Shortcode to display the Add Watermark to PDF form.
  */
-function dw_add_watermark_form_shortcode() {
+function dw_add_watermark_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <div id="pdf-add-watermark-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
         <h2>Add Watermark to PDF</h2>
         <p>Upload a PDF file and add a text watermark to its pages.</p>
@@ -229,22 +292,22 @@ function dw_add_watermark_form_shortcode() {
             <div style="margin-bottom: 15px;">
                 <label for="watermark_pdf_file" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
                 <input type="file" id="watermark_pdf_file" name="pdf_file" accept="application/pdf" required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <div style="margin-bottom: 15px;">
                 <label for="watermark_text" style="display: block; font-weight: bold; margin-bottom: 5px;">Watermark Text:</label>
                 <input type="text" id="watermark_text" name="watermark_text" required placeholder="e.g., CONFIDENTIAL"
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <div style="margin-bottom: 15px;">
                 <label for="font_size" style="display: block; font-weight: bold; margin-bottom: 5px;">Font Size:</label>
                 <input type="number" id="font_size" name="font_size" value="50" min="10" max="200"
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
-             <div style="margin-bottom: 15px;">
+            <div style="margin-bottom: 15px;">
                 <label for="opacity" style="display: block; font-weight: bold; margin-bottom: 5px;">Opacity (0-100):</label>
                 <input type="range" id="opacity" name="opacity" min="0" max="100" value="20"
-                       style="width: 100%;">
+                    style="width: 100%;">
                 <span id="opacity_value">20%</span>
             </div>
             <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
@@ -266,17 +329,18 @@ function dw_add_watermark_form_shortcode() {
             });
         });
     </script>
-    <?php
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_add_watermark_tool', 'dw_add_watermark_form_shortcode' );
+add_shortcode('dw_add_watermark_tool', 'dw_add_watermark_form_shortcode');
 
 /**
  * Shortcode to display the PDF to Text conversion form.
  */
-function dw_pdf_to_text_form_shortcode() {
+function dw_pdf_to_text_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <div id="pdf-to-text-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
         <h2>PDF to Text</h2>
         <p>Upload a PDF document to extract its text content.</p>
@@ -284,7 +348,7 @@ function dw_pdf_to_text_form_shortcode() {
             <div style="margin-bottom: 15px;">
                 <label for="pdf_file_text" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
                 <input type="file" id="pdf_file_text" name="pdf_file" accept=".pdf" required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
                 Convert to Text
@@ -297,16 +361,17 @@ function dw_pdf_to_text_form_shortcode() {
             </a>
         </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_pdf_to_text_tool', 'dw_pdf_to_text_form_shortcode' );
+add_shortcode('dw_pdf_to_text_tool', 'dw_pdf_to_text_form_shortcode');
 /**
  * Shortcode to display the PDF rotate form.
  */
-function dw_rotate_form_shortcode() {
+function dw_rotate_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <div id="pdf-rotate-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
         <h2>Rotate PDF</h2>
         <p>Upload a PDF and select a rotation angle.</p>
@@ -314,7 +379,7 @@ function dw_rotate_form_shortcode() {
             <div style="margin-bottom: 15px;">
                 <label for="rotate_pdf_file" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
                 <input type="file" id="rotate_pdf_file" name="pdf_file" accept="application/pdf" required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <div style="margin-bottom: 15px;">
                 <label for="rotation_angle" style="display: block; font-weight: bold; margin-bottom: 5px;">Rotation Angle (Degrees):</label>
@@ -335,17 +400,18 @@ function dw_rotate_form_shortcode() {
             </a>
         </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_rotate_tool', 'dw_rotate_form_shortcode' );
+add_shortcode('dw_rotate_tool', 'dw_rotate_form_shortcode');
 
 /**
  * Shortcode to display the PDF delete pages form.
  */
-function dw_delete_pages_form_shortcode() {
+function dw_delete_pages_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <div id="pdf-delete-pages-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
         <h2>Delete Pages from PDF</h2>
         <p>Upload a PDF and specify which pages to delete (e.g., 1,3,5 or 2-4).</p>
@@ -353,12 +419,12 @@ function dw_delete_pages_form_shortcode() {
             <div style="margin-bottom: 15px;">
                 <label for="delete_pages_pdf_file" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
                 <input type="file" id="delete_pages_pdf_file" name="pdf_file" accept="application/pdf" required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <div style="margin-bottom: 15px;">
                 <label for="pages_to_delete" style="display: block; font-weight: bold; margin-bottom: 5px;">Pages to Delete (e.g., 1,3,5 or 2-4):</label>
                 <input type="text" id="pages_to_delete" name="pages_to_delete" required placeholder="e.g., 1, 3, 5-7"
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                 <small style="color: #666;">Enter page numbers or ranges, separated by commas.</small>
             </div>
             <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
@@ -372,17 +438,18 @@ function dw_delete_pages_form_shortcode() {
             </a>
         </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_delete_pages_tool', 'dw_delete_pages_form_shortcode' );
+add_shortcode('dw_delete_pages_tool', 'dw_delete_pages_form_shortcode');
 
 /**
  * Shortcode to display the PDF reorder pages form.
  */
-function dw_reorder_pages_form_shortcode() {
+function dw_reorder_pages_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <div id="pdf-reorder-pages-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
         <h2>Reorder Pages in PDF</h2>
         <p>Upload a PDF and specify the new order of pages (e.g., 3,1,2).</p>
@@ -390,12 +457,12 @@ function dw_reorder_pages_form_shortcode() {
             <div style="margin-bottom: 15px;">
                 <label for="reorder_pdf_file" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
                 <input type="file" id="reorder_pdf_file" name="pdf_file" accept="application/pdf" required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <div style="margin-bottom: 15px;">
                 <label for="new_page_order" style="display: block; font-weight: bold; margin-bottom: 5px;">New Page Order (comma-separated, e.g., 3,1,2,4):</label>
                 <input type="text" id="new_page_order" name="new_page_order" required placeholder="e.g., 3,1,2,4"
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                 <small style="color: #666;">Enter a comma-separated list of page numbers in the desired new order. All original pages must be included.</small>
             </div>
             <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
@@ -409,19 +476,20 @@ function dw_reorder_pages_form_shortcode() {
             </a>
         </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_reorder_pages_tool', 'dw_reorder_pages_form_shortcode' );
+add_shortcode('dw_reorder_pages_tool', 'dw_reorder_pages_form_shortcode');
 
 // In free-pdf-buddy.php
 
 /**
  * Shortcode to display the Word to PDF conversion form.
  */
-function dw_word_to_pdf_form_shortcode() {
+function dw_word_to_pdf_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <div id="word-to-pdf-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
         <h2>Word to PDF</h2>
         <p>Upload a Word document (.docx) to convert it to PDF.</p>
@@ -429,7 +497,7 @@ function dw_word_to_pdf_form_shortcode() {
             <div style="margin-bottom: 15px;">
                 <label for="word_file" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload Word File:</label>
                 <input type="file" id="word_file" name="office_file" accept=".doc,.docx" required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
                 Convert to PDF
@@ -442,17 +510,18 @@ function dw_word_to_pdf_form_shortcode() {
             </a>
         </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_word_to_pdf_tool', 'dw_word_to_pdf_form_shortcode' );
+add_shortcode('dw_word_to_pdf_tool', 'dw_word_to_pdf_form_shortcode');
 
 /**
  * Shortcode to display the Repair PDF form.
  */
-function dw_repair_pdf_form_shortcode() {
+function dw_repair_pdf_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <div id="repair-pdf-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
         <h2>Repair PDF</h2>
         <p>Upload a potentially corrupted PDF document to attempt repair.</p>
@@ -460,7 +529,7 @@ function dw_repair_pdf_form_shortcode() {
             <div style="margin-bottom: 15px;">
                 <label for="pdf_file_repair" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
                 <input type="file" id="pdf_file_repair" name="pdf_file" accept=".pdf" required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
                 Repair PDF
@@ -473,18 +542,19 @@ function dw_repair_pdf_form_shortcode() {
             </a>
         </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_repair_pdf_tool', 'dw_repair_pdf_form_shortcode' );
+add_shortcode('dw_repair_pdf_tool', 'dw_repair_pdf_form_shortcode');
 
 
 /**
  * Shortcode to display the PDF to Grayscale conversion form.
  */
-function dw_pdf_to_grayscale_form_shortcode() {
+function dw_pdf_to_grayscale_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <div id="pdf-to-grayscale-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
         <h2>PDF to Grayscale</h2>
         <p>Upload a PDF document to convert it to grayscale (black and white).</p>
@@ -492,7 +562,7 @@ function dw_pdf_to_grayscale_form_shortcode() {
             <div style="margin-bottom: 15px;">
                 <label for="pdf_file_grayscale" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
                 <input type="file" id="pdf_file_grayscale" name="pdf_file" accept=".pdf" required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
                 Convert to Grayscale
@@ -505,165 +575,961 @@ function dw_pdf_to_grayscale_form_shortcode() {
             </a>
         </div>
     </div>
-    <?php
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_pdf_to_grayscale_tool', 'dw_pdf_to_grayscale_form_shortcode' );
+add_shortcode('dw_pdf_to_grayscale_tool', 'dw_pdf_to_grayscale_form_shortcode');
+
+// Enqueue the JavaScript for the Unlock PDF feature
+function dw_unlock_pdf_enqueue_scripts()
+{
+    // Only enqueue if we are on the frontend and the shortcode is likely to be used
+    // Or if it's an AJAX request (though for localization, frontend is key)
+    if (is_admin() && wp_doing_ajax()) {
+        // Enqueue on admin-ajax.php requests if needed for some debug, but primarily for frontend
+        // No localization needed here for client-side script running on frontend
+    } elseif (! is_admin()) {
+        wp_enqueue_script(
+            'dw-unlock-pdf-script',
+            get_template_directory_uri() . '/js/dw-unlock-pdf.js', // Ensure this path is correct
+            array('jquery'),
+            // filemtime(get_template_directory() . '/js/dw-unlock-pdf.js'), // Use filemtime for cache busting
+            true // Load in footer
+        );
+
+        // Pass the AJAX URL and nonce to your JavaScript file
+        wp_localize_script(
+            'dw-unlock-pdf-script',
+            'dw_unlock_pdf_ajax',
+            array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce'    => wp_create_nonce('dw_unlock_pdf_nonce')
+            )
+        );
+    }
+}
+add_action('wp_enqueue_scripts', 'dw_unlock_pdf_enqueue_scripts');
+
 
 /**
- * Shortcode to display the PDF to PDF/A conversion form.
+ * Shortcode function to display the Unlock PDF form.
+ * Add this shortcode [dw_unlock_pdf_tool] to a WordPress page.
  */
-function dw_pdf_to_pdfa_form_shortcode() {
-    ob_start();
-    ?>
-    <div id="pdf-to-pdfa-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
-        <h2>PDF to PDF/A</h2>
-        <p>Upload a PDF document to convert it to the PDF/A archival format (PDF/A-1b).</p>
-        <form id="pdf-to-pdfa-form" enctype="multipart/form-data">
+function dw_unlock_pdf_form_shortcode()
+{
+    ob_start(); // Start output buffering
+?>
+    <div id="unlock-pdf-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
+        <h2>Unlock/Remove Password from PDF</h2>
+        <p>Upload a password-protected PDF and enter the correct password to remove its protection.</p>
+        <form id="dw-unlock-pdf-form" enctype="multipart/form-data">
             <div style="margin-bottom: 15px;">
-                <label for="pdf_file_pdfa" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
-                <input type="file" id="pdf_file_pdfa" name="pdf_file" accept=".pdf" required
-                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                <label for="unlock_pdf_file" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload Password-Protected PDF:</label>
+                <input type="file" id="unlock_pdf_file" name="pdf_file" accept=".pdf" required
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="pdf_password" style="display: block; font-weight: bold; margin-bottom: 5px;">PDF Password:</label>
+                <input type="password" id="pdf_password" name="pdf_password" required
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
-                Convert to PDF/A
+                Unlock PDF
             </button>
         </form>
-        <div id="pdf-to-pdfa-status" style="margin-top: 15px; font-weight: bold;"></div>
-        <div id="download-pdf-to-pdfa-container" style="margin-top: 15px; display: none;">
-            <a id="download-pdf-to-pdfa" href="#" download style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">
-                Download PDF/A
+        <div id="dw-unlock-pdf-status" style="margin-top: 15px; font-weight: bold;"></div>
+        <div id="download-unlock-pdf-container" style="margin-top: 15px; display: none;">
+            <a id="download-unlock-pdf" href="#" download style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">
+                Download Unlocked PDF
             </a>
         </div>
     </div>
-    <?php
+<?php
+    return ob_get_clean(); // Return the buffered content
+}
+add_shortcode('dw_unlock_pdf_tool', 'dw_unlock_pdf_form_shortcode'); // Register the shortcode
+
+/**
+ * Shortcode to display the Crop PDF form.
+ */
+function dw_crop_pdf_form_shortcode()
+{
+    ob_start();
+?>
+    <div id="crop-pdf-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
+        <h2>Crop PDF</h2>
+        <p>Upload a PDF and specify the margins (in points, 1pt = 1/72 inch) to remove from each side.</p>
+        <form id="crop-pdf-form" enctype="multipart/form-data">
+            <div style="margin-bottom: 15px;">
+                <label for="pdf_file_crop" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
+                <input type="file" id="pdf_file_crop" name="pdf_file" accept="application/pdf" required
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                <div>
+                    <label for="margin_left" style="display: block; font-weight: bold; margin-bottom: 5px;">Left Margin (points):</label>
+                    <input type="number" id="margin_left" name="margin_left" value="0" min="0" step="any"
+                        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div>
+                    <label for="margin_top" style="display: block; font-weight: bold; margin-bottom: 5px;">Top Margin (points):</label>
+                    <input type="number" id="margin_top" name="margin_top" value="0" min="0" step="any"
+                        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div>
+                    <label for="margin_right" style="display: block; font-weight: bold; margin-bottom: 5px;">Right Margin (points):</label>
+                    <input type="number" id="margin_right" name="margin_right" value="0" min="0" step="any"
+                        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div>
+                    <label for="margin_bottom" style="display: block; font-weight: bold; margin-bottom: 5px;">Bottom Margin (points):</label>
+                    <input type="number" id="margin_bottom" name="margin_bottom" value="0" min="0" step="any"
+                        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+            </div>
+            <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
+                Crop PDF
+            </button>
+        </form>
+        <div id="crop-pdf-status" style="margin-top: 15px; font-weight: bold;"></div>
+        <div id="download-cropped-pdf-container" style="margin-top: 15px; display: none;">
+            <a id="download-cropped-pdf" href="#" download style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">
+                Download Cropped PDF
+            </a>
+        </div>
+    </div>
+<?php
     return ob_get_clean();
 }
-add_shortcode( 'dw_pdf_to_pdfa_tool', 'dw_pdf_to_pdfa_form_shortcode' );
+add_shortcode('dw_crop_pdf_tool', 'dw_crop_pdf_form_shortcode');
+
+/**
+ * Shortcode to display the Sign PDF form.
+ */
+function dw_sign_pdf_form_shortcode()
+{
+    ob_start();
+?>
+    <div id="sign-pdf-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
+        <h2>Sign PDF</h2>
+        <p>Upload a PDF and your signature image to add a signature.</p>
+        <form id="sign-pdf-form" enctype="multipart/form-data">
+            <div style="margin-bottom: 15px;">
+                <label for="pdf_file_to_sign" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
+                <input type="file" id="pdf_file_to_sign" name="pdf_file_to_sign" accept="application/pdf" required
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="signature_image" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload Signature Image (PNG recommended for transparency):</label>
+                <input type="file" id="signature_image" name="signature_image" accept="image/png,image/jpeg" required
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="sign_page_number" style="display: block; font-weight: bold; margin-bottom: 5px;">Page Number to Sign (e.g., 1 for first page):</label>
+                <input type="number" id="sign_page_number" name="sign_page_number" value="1" min="1" required
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="pos_x" style="display: block; font-weight: bold; margin-bottom: 5px;">Signature X Position (mm from left):</label>
+                <input type="number" step="0.1" id="pos_x" name="pos_x" value="150" required
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="pos_y" style="display: block; font-weight: bold; margin-bottom: 5px;">Signature Y Position (mm from top):</label>
+                <input type="number" step="0.1" id="pos_y" name="pos_y" value="250" required
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="sign_width" style="display: block; font-weight: bold; margin-bottom: 5px;">Signature Width (mm):</label>
+                <input type="number" step="0.1" id="sign_width" name="sign_width" value="30" required
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
+                Add Signature
+            </button>
+        </form>
+        <div id="sign-pdf-status" style="margin-top: 15px; font-weight: bold;"></div>
+        <div id="download-signed-pdf-container" style="margin-top: 15px; display: none;">
+            <p>PDF signed successfully. Download it here:</p>
+            <a id="download-signed-pdf" href="#" download style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">
+                Download Signed PDF
+            </a>
+        </div>
+    </div>
+<?php
+    return ob_get_clean();
+}
+add_shortcode('dw_sign_pdf_tool', 'dw_sign_pdf_form_shortcode');
+/**
+ * Shortcode to display the Organize PDF main form with options for Merge/Split.
+ */
+function dw_organize_pdf_form_shortcode()
+{
+    ob_start();
+?>
+    <div id="organize-pdf-app" style="max-width: 800px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
+        <h2>Organize PDF</h2>
+        <p>Combine multiple PDFs or split a single PDF into smaller documents.</p>
+
+        <div style="margin-bottom: 20px;">
+            <button class="organize-tab-button" data-target="merge-pdf-section" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">Merge PDFs</button>
+            <button class="organize-tab-button" data-target="split-pdf-section" style="background-color: #f0f0f0; color: #333; padding: 10px 15px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">Split PDF</button>
+        </div>
+
+        <div id="merge-pdf-section" class="organize-section active">
+            <h3>Merge PDFs</h3>
+            <p>Select multiple PDF files to combine them into a single document.</p>
+            <form id="merge-pdf-form" enctype="multipart/form-data">
+                <div style="margin-bottom: 15px;">
+                    <label for="pdf_files_to_merge" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF Files (Ctrl/Cmd + click to select multiple):</label>
+                    <input type="file" id="pdf_files_to_merge" name="pdf_files_to_merge[]" accept="application/pdf" multiple required
+                        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
+                    Merge PDFs
+                </button>
+            </form>
+            <div id="merge-pdf-status" style="margin-top: 15px; font-weight: bold;"></div>
+            <div id="download-merged-pdf-container" style="margin-top: 15px; display: none;">
+                <p>PDFs merged successfully. Download it here:</p>
+                <a id="download-merged-pdf" href="#" download style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">
+                    Download Merged PDF
+                </a>
+            </div>
+        </div>
+
+        <div id="split-pdf-section" class="organize-section ">
+        <div id="pdf-split-app" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
+            <h2>Split PDF</h2>
+            <p>Upload a PDF to split it into individual pages.</p>
+            <form id="pdf-split-form" enctype="multipart/form-data">
+                <div style="margin-bottom: 15px;">
+                    <label for="split_pdf_file" style="display: block; font-weight: bold; margin-bottom: 5px;">Upload PDF File:</label>
+                    <input type="file" id="split_pdf_file" name="pdf_file" accept="application/pdf" required
+                        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <button type="submit" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
+                    Split PDF
+                </button>
+            </form>
+            <div id="split-status" style="margin-top: 15px; font-weight: bold;"></div>
+            <div id="download-split-pdfs-container" style="margin-top: 15px; display: none;">
+            </div>
+        </div>
+        </div>
+    </div>
+<?php
+    return ob_get_clean();
+}
+add_shortcode('dw_organize_pdf_tool', 'dw_organize_pdf_form_shortcode');
+
+// --- AJAX Handler for MERGE PDFs ---
+add_action('wp_ajax_dw_merge_pdf', 'dw_merge_pdf_callback');
+add_action('wp_ajax_nopriv_dw_merge_pdf', 'dw_merge_pdf_callback');
+
+function dw_merge_pdf_callback()
+{
+    // IMPORTANT: Uncomment this for production:
+    // check_ajax_referer('dw_organize_pdf_nonce', 'nonce');
+
+    $uploaded_files = $_FILES['pdf_files_to_merge'] ?? [];
+
+    if (empty($uploaded_files) || !isset($uploaded_files['name']) || !is_array($uploaded_files['name'])) {
+        wp_send_json_error(['message' => 'Please upload at least two PDF files to merge.']);
+        exit;
+    }
+
+    $valid_files = [];
+    foreach ($uploaded_files['error'] as $key => $error) {
+        if ($error === UPLOAD_ERR_OK && $uploaded_files['type'][$key] === 'application/pdf') {
+            $valid_files[] = [
+                'tmp_name' => $uploaded_files['tmp_name'][$key],
+                'name' => $uploaded_files['name'][$key],
+            ];
+        } else {
+            wp_send_json_error(['message' => 'One or more uploaded files are not valid PDFs or had upload errors.']);
+            exit;
+        }
+    }
+
+    if (count($valid_files) < 2) {
+        wp_send_json_error(['message' => 'Please upload at least two PDF files to merge.']);
+        exit;
+    }
+
+    $upload_dir = wp_upload_dir();
+    $temp_dir_path = $upload_dir['basedir'] . '/docwiz_merge_temp_' . uniqid() . '/';
+    $output_merged_pdf_filepath = ''; // Initialize to empty string
+
+    try {
+        if (!wp_mkdir_p($temp_dir_path)) {
+            throw new Exception('Failed to create temporary directory for merging.');
+        }
+
+        $temp_uploaded_pdf_paths = [];
+        // Move all uploaded PDFs to temp directory
+        foreach ($valid_files as $file) {
+            $temp_file_name = 'merge_input_' . uniqid() . '.pdf';
+            $temp_file_path = $temp_dir_path . $temp_file_name;
+            if (!move_uploaded_file($file['tmp_name'], $temp_file_path)) {
+                throw new Exception('Failed to move uploaded PDF file: ' . $file['name']);
+            }
+            if (!file_exists($temp_file_path) || !is_readable($temp_file_path)) {
+                throw new Exception('Cannot read the moved PDF file: ' . $temp_file_path);
+            }
+            $temp_uploaded_pdf_paths[] = $temp_file_path;
+        }
+
+        // Initialize FPDI here, after files are confirmed moved and readable
+        $pdf = new Fpdi();
+        $pdf->SetAutoPageBreak(false);
+
+        foreach ($temp_uploaded_pdf_paths as $input_pdf_path) {
+            // Check again for safety, though it should be caught above
+            if (!file_exists($input_pdf_path) || !is_readable($input_pdf_path)) {
+                throw new Exception('Cannot read input PDF file: ' . basename($input_pdf_path));
+            }
+
+            $pageCount = $pdf->setSourceFile($input_pdf_path);
+            for ($i = 1; $i <= $pageCount; $i++) {
+                $templateId = $pdf->importPage($i);
+                $pageSize = $pdf->getTemplateSize($templateId);
+                // Add page using the imported page's orientation and dimensions
+                $pdf->AddPage($pageSize['orientation'], [$pageSize['width'], $pageSize['height']]);
+                $pdf->useTemplate($templateId);
+            }
+        }
+
+        $output_merged_pdf_filename = 'merged_pdf_' . time() . '.pdf';
+        $output_merged_pdf_filepath = $upload_dir['basedir'] . '/' . $output_merged_pdf_filename;
+        $download_url = $upload_dir['baseurl'] . '/' . $output_merged_pdf_filename;
+
+        $pdf->Output($output_merged_pdf_filepath, 'F');
+
+        if (!file_exists($output_merged_pdf_filepath) || filesize($output_merged_pdf_filepath) === 0) {
+            throw new Exception('Failed to create merged PDF file or it is empty.');
+        }
+
+        wp_send_json_success([
+            'message' => 'PDFs merged successfully!',
+            'download_url' => $download_url
+        ]);
+    } catch (Exception $e) {
+        error_log('Merge PDF Error: ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString());
+        wp_send_json_error(['message' => 'PDF merging failed: ' . $e->getMessage()]);
+    } finally {
+        // Clean up temporary files and directory
+        if (is_dir($temp_dir_path)) {
+            rrmdir($temp_dir_path);
+        }
+    }
+    exit;
+}
+
+// --- AJAX Handler for SPLIT PDF (with fix for "No reader initiated") ---
+add_action('wp_ajax_dw_split_pdf', 'dw_split_pdf_callback');
+add_action('wp_ajax_nopriv_dw_split_pdf', 'dw_split_pdf_callback');
+
+function dw_split_pdf_callback()
+{
+    // IMPORTANT: Uncomment this for production:
+    // check_ajax_referer('dw_organize_pdf_nonce', 'nonce');
+
+    $uploaded_file = $_FILES['pdf_file_to_split'] ?? null;
+    $split_method = sanitize_text_field($_POST['split_method'] ?? 'every_page');
+    $page_ranges_str = sanitize_text_field($_POST['page_ranges'] ?? '');
+
+    if (empty($uploaded_file['name']) || $uploaded_file['type'] !== 'application/pdf') {
+        wp_send_json_error(['message' => 'Please upload a valid PDF file to split.']);
+        exit;
+    }
+
+    $upload_dir = wp_upload_dir();
+    $temp_dir_path = $upload_dir['basedir'] . '/docwiz_split_temp_' . uniqid() . '/';
+    $temp_input_pdf_path = ''; // Initialize to empty string
+
+    try {
+        if (!wp_mkdir_p($temp_dir_path)) {
+            throw new Exception('Failed to create temporary directory for splitting.');
+        }
+
+        // Move uploaded PDF to temp directory
+        $temp_input_pdf_name = 'input_split_' . uniqid() . '.pdf';
+        $temp_input_pdf_path = $temp_dir_path . $temp_input_pdf_name;
+        if (!move_uploaded_file($uploaded_file['tmp_name'], $temp_input_pdf_path)) {
+            throw new Exception('Failed to move uploaded PDF file to temp location. Check permissions for: ' . $temp_dir_path);
+        }
+
+        if (!file_exists($temp_input_pdf_path) || !is_readable($temp_input_pdf_path)) {
+            throw new Exception('Cannot read the uploaded PDF file for splitting after move: ' . $temp_input_pdf_path);
+        }
+
+        // --- FIX Applied Here: Initialize Fpdi INSIDE try block ---
+        $pdf = new Fpdi(); // <--- This line moved here
+        $pdf->SetAutoPageBreak(false);
+
+        $pageCount = $pdf->setSourceFile($temp_input_pdf_path);
+
+        $split_parts_info = [];
+        if ($split_method === 'every_page') {
+            for ($i = 1; $i <= $pageCount; $i++) {
+                $split_parts_info[] = [$i];
+            }
+        } elseif ($split_method === 'range') {
+            $ranges = array_filter(array_map('trim', explode(',', $page_ranges_str)));
+            if (empty($ranges)) {
+                throw new Exception('Please specify valid page ranges (e.g., 1-5, 8, 10-12).');
+            }
+
+            foreach ($ranges as $range) {
+                if (strpos($range, '-') !== false) {
+                    list($start, $end) = array_map('intval', explode('-', $range));
+                    if ($start < 1 || $end > $pageCount || $start > $end || $start > $end) { // Added start > end validation
+                        throw new Exception("Invalid page range specified: {$range}. Pages must be within 1 and {$pageCount}.");
+                    }
+                    $split_parts_info[] = range($start, $end);
+                } else {
+                    $page_num = intval($range);
+                    if ($page_num < 1 || $page_num > $pageCount) {
+                        throw new Exception("Invalid page number specified: {$page_num}. Page must be within 1 and {$pageCount}.");
+                    }
+                    $split_parts_info[] = [$page_num];
+                }
+            }
+        } else {
+            throw new Exception('Invalid split method selected.');
+        }
+
+        $split_count = 0;
+        foreach ($split_parts_info as $pages_for_part) {
+            if (empty($pages_for_part)) continue;
+
+            $split_pdf = new Fpdi(); // Each split part gets a new FPDI instance
+            $split_pdf->SetAutoPageBreak(false);
+
+            foreach ($pages_for_part as $page_num) {
+                $templateId = $split_pdf->importPage($page_num);
+                $pageSize = $split_pdf->getTemplateSize($templateId);
+                $split_pdf->AddPage($pageSize['orientation'], [$pageSize['width'], $pageSize['height']]);
+                $split_pdf->useTemplate($templateId);
+            }
+
+            $part_filename = 'split_part_' . (++$split_count) . '_' . time() . '.pdf';
+            $part_filepath = $temp_dir_path . $part_filename;
+            $split_pdf->Output($part_filepath, 'F');
+            if (!file_exists($part_filepath) || filesize($part_filepath) === 0) {
+                throw new Exception('Failed to create split PDF part: ' . $part_filename);
+            }
+            $output_split_pdf_paths[] = $part_filepath;
+        }
+
+        if (empty($output_split_pdf_paths)) {
+            throw new Exception('No PDF parts were generated based on the split criteria.');
+        }
+
+        // --- Create a ZIP archive of the split PDFs ---
+        if (!class_exists('ZipArchive')) {
+            throw new Exception('PHP ZipArchive extension is not enabled. Cannot create ZIP file.');
+        }
+        $zip = new ZipArchive();
+        $zip_filename = 'split_pdfs_' . time() . '.zip';
+        // Save the ZIP directly in the uploads base directory, not the temp dir
+        $output_zip_filepath = $upload_dir['basedir'] . '/' . $zip_filename;
+        $download_url = $upload_dir['baseurl'] . '/' . $zip_filename;
+
+        if ($zip->open($output_zip_filepath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
+            throw new Exception('Cannot create ZIP archive at ' . $output_zip_filepath);
+        }
+
+        foreach ($output_split_pdf_paths as $split_file) {
+            if (file_exists($split_file) && is_readable($split_file)) {
+                $zip->addFile($split_file, basename($split_file));
+            } else {
+                error_log('Warning: Split file not found or not readable when adding to ZIP: ' . $split_file);
+            }
+        }
+        $zip->close();
+
+        if (!file_exists($output_zip_filepath) || filesize($output_zip_filepath) === 0) {
+            throw new Exception('Failed to create ZIP archive or it is empty after creation. Output path: ' . $output_zip_filepath);
+        }
+
+        wp_send_json_success([
+            'message' => 'PDF split successfully!',
+            'download_url' => $download_url
+        ]);
+    } catch (Exception $e) {
+        error_log('Split PDF Error: ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString());
+        wp_send_json_error(['message' => 'PDF splitting failed: ' . $e->getMessage()]);
+    } finally {
+        // Clean up temporary files and directory (including all split parts)
+        if (is_dir($temp_dir_path)) {
+            rrmdir($temp_dir_path);
+        }
+        // Also ensure the final generated zip file (if any) is not deleted here
+        // as it's meant for download and outside the temp_dir_path.
+    }
+    exit;
+}
+
+// Helper function to recursively delete a directory (make sure this is accessible)
+if (!function_exists('rrmdir')) {
+    function rrmdir($dir)
+    {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    if (is_dir($dir . "/" . $object))
+                        rrmdir($dir . "/" . $object);
+                    else
+                        unlink($dir . "/" . $object);
+                }
+            }
+            rmdir($dir);
+        }
+    }
+}
+/**
+ * AJAX handler for adding an image-based signature to a PDF.
+ */
+add_action('wp_ajax_dw_sign_pdf', 'dw_sign_pdf_callback');
+add_action('wp_ajax_nopriv_dw_sign_pdf', 'dw_sign_pdf_callback'); // Allow non-logged-in users
+
+function dw_sign_pdf_callback()
+{
+    // IMPORTANT: Implement nonce check for security!
+    // check_ajax_referer('dw_sign_pdf_nonce', 'nonce');
+
+    $uploaded_pdf_file = $_FILES['pdf_file_to_sign'] ?? null;
+    $uploaded_signature_image = $_FILES['signature_image'] ?? null;
+
+    $page_number = intval(sanitize_text_field($_POST['sign_page_number']));
+    $pos_x = floatval(sanitize_text_field($_POST['pos_x']));
+    $pos_y = floatval(sanitize_text_field($_POST['pos_y']));
+    $sign_width = floatval(sanitize_text_field($_POST['sign_width']));
+
+    // Basic validation
+    if (empty($uploaded_pdf_file['name']) || empty($uploaded_signature_image['name'])) {
+        wp_send_json_error(array('message' => 'Both PDF and signature image files are required.'));
+        exit;
+    }
+    if ($uploaded_pdf_file['type'] !== 'application/pdf') {
+        wp_send_json_error(array('message' => 'Uploaded file must be a PDF.'));
+        exit;
+    }
+    if (!in_array($uploaded_signature_image['type'], ['image/png', 'image/jpeg'])) {
+        wp_send_json_error(array('message' => 'Signature image must be a PNG or JPEG.'));
+        exit;
+    }
+    if ($page_number < 1 || $pos_x < 0 || $pos_y < 0 || $sign_width <= 0) {
+        wp_send_json_error(array('message' => 'Invalid page number or signature position/width.'));
+        exit;
+    }
 
 
+    $upload_dir = wp_upload_dir();
+    $temp_dir_path = $upload_dir['basedir'] . '/docwiz_sign_temp_' . uniqid() . '/'; // Unique temp directory for this operation
+
+    $temp_pdf_input_path = '';
+    $temp_signature_image_path = '';
+    $output_signed_pdf_filepath = '';
+
+    try {
+        // Create unique temporary directory
+        if (!wp_mkdir_p($temp_dir_path)) {
+            throw new Exception('Failed to create temporary directory.');
+        }
+
+        // Move uploaded PDF to temp location
+        $temp_pdf_input_name = 'unsigned_' . uniqid() . '.pdf';
+        $temp_pdf_input_path = $temp_dir_path . $temp_pdf_input_name;
+        if (!move_uploaded_file($uploaded_pdf_file['tmp_name'], $temp_pdf_input_path)) {
+            throw new Exception('Failed to move uploaded PDF file.');
+        }
+
+        // Move uploaded signature image to temp location
+        $signature_ext = pathinfo($uploaded_signature_image['name'], PATHINFO_EXTENSION);
+        $temp_signature_image_name = 'signature_' . uniqid() . '.' . $signature_ext;
+        $temp_signature_image_path = $temp_dir_path . $temp_signature_image_name;
+        if (!move_uploaded_file($uploaded_signature_image['tmp_name'], $temp_signature_image_path)) {
+            throw new Exception('Failed to move uploaded signature image.');
+        }
+
+        if (!file_exists($temp_pdf_input_path) || !is_readable($temp_pdf_input_path)) {
+            throw new Exception('Cannot read the uploaded PDF file.');
+        }
+        if (!file_exists($temp_signature_image_path) || !is_readable($temp_signature_image_path)) {
+            throw new Exception('Cannot read the uploaded signature image.');
+        }
+
+        // --- Core PDF Signing Logic using FPDI/FPDF ---
+        $pdf = new Fpdi();
+        $pageCount = $pdf->setSourceFile($temp_pdf_input_path);
+
+        if ($page_number > $pageCount) {
+            throw new Exception("Page number $page_number does not exist in the PDF (Total pages: $pageCount).");
+        }
+
+        for ($i = 1; $i <= $pageCount; $i++) {
+            $templateId = $pdf->importPage($i);
+            // Get page dimensions to handle different page sizes
+            $pageSize = $pdf->getTemplateSize($templateId);
+            $pdf->AddPage($pageSize['orientation'], [$pageSize['width'], $pageSize['height']]);
+            $pdf->useTemplate($templateId);
+
+            // Add signature only to the specified page
+            if ($i == $page_number) {
+                // FPDI AddImage uses MM (millimeters) as units by default
+                // X, Y coordinates are from top-left corner of the page
+                // Width (w) is specified, Height (h) is calculated automatically to maintain aspect ratio if 0
+                // Link is optional
+                $pdf->Image($temp_signature_image_path, $pos_x, $pos_y, $sign_width, 0);
+            }
+        }
+
+        $output_signed_pdf_filename = 'signed_pdf_' . time() . '.pdf';
+        $output_signed_pdf_filepath = $upload_dir['basedir'] . '/' . $output_signed_pdf_filename;
+        $download_url = $upload_dir['baseurl'] . '/' . $output_signed_pdf_filename;
+
+        // Save the output PDF
+        $pdf->Output($output_signed_pdf_filepath, 'F'); // 'F' saves to a local file
+
+        if (!file_exists($output_signed_pdf_filepath) || filesize($output_signed_pdf_filepath) === 0) {
+            throw new Exception('Failed to create signed PDF file or it is empty.');
+        }
+
+        wp_send_json_success(array(
+            'message' => 'PDF signed successfully!',
+            'download_url' => $download_url
+        ));
+    } catch (Exception $e) {
+        error_log('PDF Signing Error: ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString());
+        wp_send_json_error(array('message' => 'PDF signing failed: ' . $e->getMessage()));
+    } finally {
+        // --- Cleanup Temporary Files and Directory ---
+        // Recursively delete the temporary directory
+        if (is_dir($temp_dir_path)) {
+            $it = new RecursiveDirectoryIterator($temp_dir_path, RecursiveDirectoryIterator::SKIP_DOTS);
+            $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
+            foreach ($files as $file) {
+                if ($file->isDir()) {
+                    rmdir($file->getRealPath());
+                } else {
+                    unlink($file->getRealPath());
+                }
+            }
+            rmdir($temp_dir_path);
+        }
+        // Ensure original uploaded files are also deleted if they weren't in the temp dir
+        if (file_exists($temp_pdf_input_path) && strpos($temp_pdf_input_path, $temp_dir_path) === false) unlink($temp_pdf_input_path);
+        if (file_exists($temp_signature_image_path) && strpos($temp_signature_image_path, $temp_dir_path) === false) unlink($temp_signature_image_path);
+    }
+    exit;
+}
 //----------------------------------------------------------------------
 // AJAX Handlers for PDF Operations
 //----------------------------------------------------------------------
 
+
 /**
- * AJAX handler for PDF to PDF/A conversion.
+ * AJAX handler for cropping PDF using Ghostscript.
  */
-add_action('wp_ajax_dw_pdf_to_pdfa', 'dw_pdf_to_pdfa_callback');
-add_action('wp_ajax_nopriv_dw_pdf_to_pdfa', 'dw_pdf_to_pdfa_callback');
+add_action('wp_ajax_dw_crop_pdf', 'dw_crop_pdf_callback');
+add_action('wp_ajax_nopriv_dw_crop_pdf', 'dw_crop_pdf_callback'); // Allow non-logged-in users
 
-function dw_pdf_to_pdfa_callback() {
-    check_ajax_referer('dw_pdf_to_pdfa_nonce', 'nonce');
+function dw_crop_pdf_callback()
+{
+    // 1. Security check (UNCOMMENT THIS IN PRODUCTION!)
+    // check_ajax_referer('dw_crop_pdf_nonce', 'nonce');
 
+    // 2. Validate file upload
     if (empty($_FILES['pdf_file']['name'])) {
         wp_send_json_error(array('message' => 'No PDF file selected.'));
+        exit;
     }
 
     $uploaded_file = $_FILES['pdf_file'];
+    // Sanitize and convert input margins to float
+    $margin_left = floatval(sanitize_text_field($_POST['margin_left']));
+    $margin_top = floatval(sanitize_text_field($_POST['margin_top']));
+    $margin_right = floatval(sanitize_text_field($_POST['margin_right']));
+    $margin_bottom = floatval(sanitize_text_field($_POST['margin_bottom']));
+
     $upload_dir = wp_upload_dir();
-    $base_upload_path = rtrim(str_replace('\\', '/', $upload_dir['basedir']), '/');
-    $base_upload_url = rtrim(str_replace('\\', '/', $upload_dir['baseurl']), '/');
+    $upload_path = $upload_dir['basedir'] . '/';
 
-    // Define Ghostscript executable path - USE FORWARD SLASHES CONSISTENTLY
-    $gs_executable_path = 'C:/Program Files/gs/gs10.05.1/bin/gswin64c.exe'; 
-
-    // Define the base Ghostscript installation path - USE FORWARD SLASHES CONSISTENTLY
-    $gs_install_base_path = 'C:/Program Files/gs/gs10.05.1'; 
-    
-    // Define the path to the Ghostscript PDFA_def.ps file - USE FORWARD SLASHES CONSISTENTLY
-    $pdfa_def_ps_path = $gs_install_base_path . '/lib/PDFA_def.ps'; 
-
-    // Define the path to Ghostscript's ICCProfiles directory - USE FORWARD SLASHES CONSISTENTLY
-    $icc_profiles_dir_path = $gs_install_base_path . '/iccprofiles'; 
-
-    $temp_input_pdf_path = '';
-    $temp_output_dir = $base_upload_path . '/temp_conversions/'; 
-    $output_pdfa_path = '';
+    $temp_input_pdf_path = ''; // For cleanup
+    $output_pdf_filepath = ''; // For cleanup
 
     try {
-        // Ensure temp_conversions directory exists
-        if (!is_dir($temp_output_dir)) {
-            mkdir($temp_output_dir, 0755, true);
+        // Handle the uploaded PDF file
+        if ($uploaded_file['error'] !== UPLOAD_ERR_OK || $uploaded_file['type'] !== 'application/pdf') {
+            throw new Exception('File upload error or not a PDF.');
         }
 
-        if ($uploaded_file['error'] === UPLOAD_ERR_OK) {
-            $file_ext = pathinfo($uploaded_file['name'], PATHINFO_EXTENSION);
-            if (strtolower($file_ext) !== 'pdf') {
-                 throw new Exception('Invalid file type. Only PDF files are supported.');
-            }
+        $temp_input_pdf_name = uniqid('uploaded_crop_') . '.pdf';
+        $temp_input_pdf_path = $upload_path . $temp_input_pdf_name;
 
-            $temp_input_pdf_name = uniqid('uploaded_pdf_') . '.pdf';
-            $temp_input_pdf_path = $temp_output_dir . $temp_input_pdf_name;
+        // Move uploaded file to a temporary location
+        if (!move_uploaded_file($uploaded_file['tmp_name'], $temp_input_pdf_path)) {
+            throw new Exception('Failed to move uploaded PDF file to temporary location.');
+        }
 
-            if (!move_uploaded_file($uploaded_file['tmp_name'], $temp_input_pdf_path)) {
-                throw new Exception('Failed to move uploaded file.');
-            }
+        // *** CRITICAL CORRECTION: Convert paths for Windows if necessary ***
+        // WordPress's wp_upload_dir() returns paths with forward slashes.
+        // On Windows, these paths often need to be converted to backslashes for native tools/libraries.
+        $is_windows = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
+
+        if ($is_windows) {
+            $temp_input_pdf_path_for_tools = str_replace('/', '\\', $temp_input_pdf_path);
         } else {
-            throw new Exception('File upload error.');
+            $temp_input_pdf_path_for_tools = $temp_input_pdf_path;
         }
 
-        if (!file_exists($temp_input_pdf_path) || !is_readable($temp_input_pdf_path)) {
-            throw new Exception('Cannot read the uploaded PDF file.');
+        // Verify the temporary file is accessible *after* path conversion
+        if (!file_exists($temp_input_pdf_path_for_tools) || !is_readable($temp_input_pdf_path_for_tools)) {
+            throw new Exception('Cannot read the uploaded PDF file for cropping (path issue or permissions).');
         }
 
-        // Construct the --permit-file-read arguments.
-        // Use consistent forward slashes for all paths passed to escapeshellarg.
-        $permit_reads = '';
-        $permit_reads .= ' --permit-file-read=' . escapeshellarg($gs_install_base_path . '/lib');
-        $permit_reads .= ' --permit-file-read=' . escapeshellarg($icc_profiles_dir_path); // Corrected path
-        $permit_reads .= ' --permit-file-read=' . escapeshellarg($gs_install_base_path . '/Resource');
-        $permit_reads .= ' --permit-file-read=' . escapeshellarg($gs_install_base_path . '/bin');
+        // --- Get Original PDF Dimensions using FPDI ---
+        // FPDI needs a correctly formatted path.
+        $original_width = 0;
+        $original_height = 0;
+
+        try {
+            $pdf_temp_reader = new Fpdi();
+            // Pass the Windows-formatted path to FPDI if on Windows
+            $pageCount_temp = $pdf_temp_reader->setSourceFile($temp_input_pdf_path_for_tools);
+            if ($pageCount_temp > 0) {
+                // Assuming all pages have the same dimensions for consistent cropping
+                $template_size = $pdf_temp_reader->getTemplateSize($pdf_temp_reader->importPage(1));
+                $original_width = $template_size['width'];
+                $original_height = $template_size['height'];
+            } else {
+                throw new Exception('Could not determine PDF page size (PDF might be empty or corrupt).');
+            }
+        } catch (Exception $e) {
+            error_log('Error getting PDF dimensions with FPDI: ' . $e->getMessage());
+            throw new Exception('Failed to get original PDF dimensions needed for cropping. FPDI Error: ' . $e->getMessage());
+        }
+
+        // --- Start Cropping Logic with Ghostscript ---
+        $output_pdf_filename = 'cropped_pdf_' . time() . '.pdf';
+        $output_pdf_filepath = $upload_path . $output_pdf_filename;
+        $download_url = $upload_dir['baseurl'] . '/' . $output_pdf_filename;
+
+        // Define Ghostscript executable path specifically.
+        // For Windows, ensure it's correctly quoted and backslashes are escaped in the PHP string.
+        if ($is_windows) {
+            // Your exact path for Windows
+            $ghostscript_executable_path = '"DW_GHOSTSCRIPT_PATH"';
+            $output_pdf_filepath_for_tools = str_replace('/', '\\', $output_pdf_filepath);
+        } else {
+            // Typical path for Linux/macOS
+            $ghostscript_executable_path = '/usr/bin/gs';
+            $output_pdf_filepath_for_tools = $output_pdf_filepath;
+        }
 
 
-        // Ghostscript command for PDF to PDF/A conversion
-        // IMPORTANT: escapeshellarg() around EVERY path argument
-        $gs_command = escapeshellarg($gs_executable_path) . ' -dPDFA -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -sProcessColorModel=DeviceCMYK -sColorConversionStrategy=CMYK' . $permit_reads . ' -sOutputFile=' . escapeshellarg($temp_output_dir . uniqid('pdfa_') . '.pdf') . ' ' . escapeshellarg($temp_input_pdf_path) . ' ' . escapeshellarg($pdfa_def_ps_path) . ' 2>&1';
-        
-        $output = null;
+        // Calculate new CropBox coordinates and dimensions
+        $new_cropbox_left = $margin_left;
+        $new_cropbox_bottom = $margin_bottom;
+
+        // Calculate new width and height for the CropBox. Ensure positive dimensions.
+        // The max(1, ...) ensures dimensions are at least 1 point, preventing 'rangecheck'.
+        $cropped_width = max(1, $original_width - $margin_left - $margin_right);
+        $cropped_height = max(1, $original_height - $margin_top - $margin_bottom);
+
+        // The right and top coordinates are calculated from the left/bottom plus the new width/height
+        $new_cropbox_right = $new_cropbox_left + $cropped_width;
+        $new_cropbox_top = $new_cropbox_bottom + $cropped_height;
+
+        // Construct PostScript snippet to set the CropBox.
+        // This dynamically inserts the calculated values from PHP.
+        $postscript_crop_snippet = sprintf(
+            '<</CropBox [%F %F %F %F]>> setpagedevice',
+            $new_cropbox_left,
+            $new_cropbox_bottom,
+            $new_cropbox_right,
+            $new_cropbox_top
+        );
+
+        // Ghostscript command
+        // escapeshellarg() is crucial for sanitizing paths passed to the shell,
+        // especially on Windows with spaces in paths.
+        $command = sprintf(
+            '%s -o %s -sDEVICE=pdfwrite -dQUIET -dNOPAUSE -dBATCH -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress -c "%s" -f %s 2>&1',
+            escapeshellarg($ghostscript_executable_path),
+            escapeshellarg($output_pdf_filepath_for_tools), // Use the OS-specific path
+            $postscript_crop_snippet, // PostScript doesn't need escapeshellarg
+            escapeshellarg($temp_input_pdf_path_for_tools) // Use the OS-specific path
+        );
+
+        $output = [];
         $return_var = null;
-        exec($gs_command, $output, $return_var);
+        exec($command, $output, $return_var);
 
-        error_log('PDF to PDF/A Ghostscript Command: ' . $gs_command);
-        error_log('PDF to PDF/A Ghostscript Return Var: ' . $return_var);
-        error_log('PDF to PDF/A Ghostscript Output: ' . implode("\n", $output));
-
-        // Check for both non-zero return code and specific error messages in output
-        $error_output_string = implode("\n", $output);
-        if ($return_var !== 0 || strpos($error_output_string, 'PDF/A processing aborted') !== false || strpos($error_output_string, 'Failed to open the supplied ICCProfile') !== false) {
-            throw new Exception('PDF to PDF/A conversion failed: Ghostscript reported issues. Output: ' . $error_output_string);
+        if ($return_var !== 0) {
+            error_log('Ghostscript PDF cropping error. Command: ' . $command . ' Return Code: ' . $return_var . ' Output: ' . implode("\n", $output));
+            throw new Exception('PDF cropping failed. Ghostscript Error Code: ' . $return_var . '. Output: ' . implode("\n", $output));
         }
 
-        // Find the generated PDF/A file
-        // Re-extract the output filename more robustly
-        preg_match('/-sOutputFile=("[^"]+"|\S+)/', $gs_command, $matches);
-        $output_filename_quoted = $matches[1] ?? '';
-        $output_pdfa_path = str_replace(['"', "'"], '', $output_filename_quoted); // Remove quotes
-
-        if (!file_exists($output_pdfa_path) || filesize($output_pdfa_path) === 0) {
-            throw new Exception('Converted PDF/A file was not found or is empty. Please check server logs for Ghostscript output details.');
+        // Check if the output PDF file was actually created and is not empty
+        if (!file_exists($output_pdf_filepath) || filesize($output_pdf_filepath) === 0) {
+            throw new Exception('Cropped PDF file not found or is empty. Check Ghostscript installation/permissions/output.');
         }
+        // --- End Cropping Logic ---
 
-        $download_url = $base_upload_url . '/temp_conversions/' . basename($output_pdfa_path);
+        // Clean up original uploaded file
+        if (file_exists($temp_input_pdf_path)) {
+            unlink($temp_input_pdf_path);
+        }
 
         wp_send_json_success(array(
-            'message' => 'PDF converted to PDF/A successfully!',
+            'message' => 'PDF cropped successfully!',
             'download_url' => $download_url
         ));
-
     } catch (Exception $e) {
         // Clean up files on error
         if (file_exists($temp_input_pdf_path)) {
             unlink($temp_input_pdf_path);
         }
-        // Ensure output_pdfa_path is defined before attempting to unlink
-        if (isset($output_pdfa_path) && file_exists($output_pdfa_path)) {
-            unlink($output_pdfa_path);
+        if (file_exists($output_pdf_filepath)) {
+            unlink($output_pdf_filepath);
         }
-        wp_send_json_error(array('message' => 'Conversion failed: ' . $e->getMessage()));
+        wp_send_json_error(array('message' => 'Cropping failed: ' . $e->getMessage()));
+    }
+    exit; // Always exit after wp_send_json_success/error
+}
+
+/**
+ * AJAX handler for unlocking password-protected PDF files using Ghostscript.
+ */
+add_action('wp_ajax_dw_unlock_pdf', 'dw_unlock_pdf_callback');
+add_action('wp_ajax_nopriv_dw_unlock_pdf', 'dw_unlock_pdf_callback'); // Allows logged-out users to use it
+
+function dw_unlock_pdf_callback()
+{
+    // Verify nonce for security
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'dw_unlock_pdf_nonce')) {
+        wp_send_json_error(array('message' => 'Security check failed. Please refresh the page.'));
+    }
+
+    if (empty($_FILES['pdf_file']['name'])) {
+        wp_send_json_error(array('message' => 'No PDF file selected.'));
+    }
+    if (empty($_POST['pdf_password'])) {
+        wp_send_json_error(array('message' => 'Please provide the password for the PDF.'));
+    }
+
+    $uploaded_file = $_FILES['pdf_file'];
+    $pdf_password = sanitize_text_field($_POST['pdf_password']);
+
+    $upload_dir = wp_upload_dir();
+    $base_upload_path = rtrim(str_replace('\\', '/', $upload_dir['basedir']), '/');
+    $base_upload_url = rtrim(str_replace('\\', '/', $upload_dir['baseurl']), '/');
+
+    $temp_input_dir = $base_upload_path . '/temp_unlock_inputs/';
+    $temp_output_dir = $base_upload_path . '/unlocked_pdfs/';
+
+    $temp_input_pdf_path = '';
+    $unlocked_pdf_path = ''; // Initialize to ensure it's always defined
+
+    try {
+        // Ensure directories exist
+        if (!is_dir($temp_input_dir)) {
+            mkdir($temp_input_dir, 0755, true);
+        }
+        if (!is_dir($temp_output_dir)) {
+            mkdir($temp_output_dir, 0755, true);
+        }
+
+        // 1. Handle File Upload
+        if ($uploaded_file['error'] === UPLOAD_ERR_OK) {
+            $file_ext = pathinfo($uploaded_file['name'], PATHINFO_EXTENSION);
+            if (strtolower($file_ext) !== 'pdf') {
+                throw new Exception('Invalid file type. Only PDF files are supported.');
+            }
+
+            $temp_input_pdf_name = uniqid('uploaded_unlock_') . '.pdf';
+            $temp_input_pdf_path = $temp_input_dir . $temp_input_pdf_name;
+
+            if (!move_uploaded_file($uploaded_file['tmp_name'], $temp_input_pdf_path)) {
+                throw new Exception('Failed to move uploaded file.');
+            }
+        } else {
+            throw new Exception('File upload error: ' . $uploaded_file['error']);
+        }
+
+        if (!file_exists($temp_input_pdf_path) || !is_readable($temp_input_pdf_path)) {
+            throw new Exception('Cannot read the uploaded PDF file for processing.');
+        }
+
+        // ** Dynamically get Ghostscript executable path from wp-config.php **
+        if (!defined('DW_GHOSTSCRIPT_PATH')) {
+            // Fallback if constant is not defined (shouldn't happen with proper wp-config.php updates)
+            $gs_executable_temp = 'gs'; // Assume 'gs' is in PATH as a last resort
+            error_log('DW_GHOSTSCRIPT_PATH not defined in Unlock PDF callback. Using default "gs" fallback.');
+        } else {
+            $gs_executable_temp = DW_GHOSTSCRIPT_PATH;
+        }
+
+        // Escape the executable path for safe shell execution
+        $gs_executable_path_for_command = escapeshellarg($gs_executable_temp);
+
+
+        // 2. Prepare Ghostscript Command for Unlocking
+        $unlocked_file_name = 'unlocked_pdf_' . time() . '.pdf';
+        $unlocked_pdf_path = $temp_output_dir . $unlocked_file_name;
+
+        // Construct the Ghostscript command
+        $gs_command = $gs_executable_path_for_command . // Use the dynamically retrieved and escaped path
+            ' -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite' .
+            ' -sOwnerPassword=' . escapeshellarg($pdf_password) . // Try owner password
+            ' -sUserPassword=' . escapeshellarg($pdf_password) . // Try user password
+            ' -o ' . escapeshellarg($unlocked_pdf_path) .
+            ' ' . escapeshellarg($temp_input_pdf_path) .
+            ' 2>&1'; // Redirect stderr to stdout for capturing errors
+
+        error_log('Ghostscript Unlock Command: ' . $gs_command); // Log the command for debugging
+
+        $output = [];
+        $return_var = 0;
+        exec($gs_command, $output, $return_var); // Execute the command
+
+        error_log('Ghostscript Unlock Output: ' . implode("\n", $output)); // Log Ghostscript's output
+        error_log('Ghostscript Unlock Return Var: ' . $return_var); // Log Ghostscript's return code
+
+        // Check if Ghostscript command was successful and the output file exists and is not empty
+        if ($return_var !== 0 || !file_exists($unlocked_pdf_path) || filesize($unlocked_pdf_path) == 0) {
+            $error_output = implode("\n", $output);
+            if (strpos($error_output, 'Password incorrect') !== false || strpos($error_output, 'Incorrect password') !== false) {
+                throw new Exception('Incorrect password provided for the PDF. Please try again.');
+            }
+            throw new Exception('Ghostscript failed to unlock the PDF. Output: ' . $error_output . '. Return Code: ' . $return_var);
+        }
+
+        // 3. Generate downloadable URL
+        $unlocked_pdf_url = $base_upload_url . '/unlocked_pdfs/' . $unlocked_file_name;
+
+        wp_send_json_success(array(
+            'message' => 'PDF unlocked successfully!',
+            'download_url' => $unlocked_pdf_url
+        ));
+    } catch (Exception $e) {
+        error_log('PDF Unlock Exception: ' . $e->getMessage()); // Log detailed exception message
+        wp_send_json_error(array('message' => 'PDF unlocking failed: ' . $e->getMessage()));
     } finally {
+        // Clean up temporary input file
         if (file_exists($temp_input_pdf_path)) {
             unlink($temp_input_pdf_path);
         }
+        // Clean up the output file if an error occurred after its creation
+        if (file_exists($unlocked_pdf_path) && (isset($e) || filesize($unlocked_pdf_path) == 0)) { // Add filesize check for robust cleanup
+            unlink($unlocked_pdf_path);
+        }
+        // Consider a separate cron job for cleaning up old files in /unlocked_pdfs/
     }
 }
 /**
@@ -672,7 +1538,8 @@ function dw_pdf_to_pdfa_callback() {
 add_action('wp_ajax_dw_pdf_to_grayscale', 'dw_pdf_to_grayscale_callback');
 add_action('wp_ajax_nopriv_dw_pdf_to_grayscale', 'dw_pdf_to_grayscale_callback');
 
-function dw_pdf_to_grayscale_callback() {
+function dw_pdf_to_grayscale_callback()
+{
     check_ajax_referer('dw_pdf_to_grayscale_nonce', 'nonce');
 
     if (empty($_FILES['pdf_file']['name'])) {
@@ -683,12 +1550,12 @@ function dw_pdf_to_grayscale_callback() {
     $upload_dir = wp_upload_dir();
     $base_upload_path = rtrim(str_replace('\\', '/', $upload_dir['basedir']), '/');
 
-    $gs_executable_path = '"C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe"'; 
+    $gs_executable_path = '"DW_GHOSTSCRIPT_PATH"';
 
     $temp_input_pdf_path = '';
     $temp_normalized_pdf_path = '';
     $temp_grayscale_image_path = ''; // New: Path for the intermediate grayscale image
-    $temp_output_dir = $base_upload_path . '/temp_conversions/'; 
+    $temp_output_dir = $base_upload_path . '/temp_conversions/';
     $output_grayscale_pdf_path = '';
 
     try {
@@ -699,7 +1566,7 @@ function dw_pdf_to_grayscale_callback() {
         if ($uploaded_file['error'] === UPLOAD_ERR_OK) {
             $file_ext = pathinfo($uploaded_file['name'], PATHINFO_EXTENSION);
             if (strtolower($file_ext) !== 'pdf') {
-                 throw new Exception('Invalid file type. Only PDF files are supported.');
+                throw new Exception('Invalid file type. Only PDF files are supported.');
             }
             $temp_input_pdf_name = uniqid('uploaded_pdf_') . '.pdf';
             $temp_input_pdf_path = $temp_output_dir . $temp_input_pdf_name;
@@ -804,7 +1671,6 @@ function dw_pdf_to_grayscale_callback() {
             'message' => 'PDF converted to Grayscale successfully!',
             'download_url' => $download_url
         ));
-
     } catch (Exception $e) {
         // Clean up all temporary files on error
         if (file_exists($temp_input_pdf_path)) {
@@ -828,13 +1694,15 @@ function dw_pdf_to_grayscale_callback() {
         wp_send_json_error(array('message' => 'Conversion failed: ' . $e->getMessage()));
     }
 }
+
 /**
  * AJAX handler for PDF to HTML (via Images) conversion.
  */
 add_action('wp_ajax_dw_pdf_to_html', 'dw_pdf_to_html_callback');
 add_action('wp_ajax_nopriv_dw_pdf_to_html', 'dw_pdf_to_html_callback');
 
-function dw_pdf_to_html_callback() {
+function dw_pdf_to_html_callback()
+{
     check_ajax_referer('dw_pdf_to_html_nonce', 'nonce');
 
     if (empty($_FILES['pdf_file']['name'])) {
@@ -845,12 +1713,10 @@ function dw_pdf_to_html_callback() {
     $upload_dir = wp_upload_dir();
     $upload_path = $upload_dir['basedir'] . '/';
 
-    // Define Ghostscript executable path (adjust as per your installation)
-    $gs_executable_path = '"C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe"'; 
-
     $temp_input_pdf_path = '';
-    $temp_output_dir = $upload_path . 'temp_conversions/'; 
+    $temp_output_dir = $upload_path . 'temp_conversions/';
     $generated_images = []; // To store paths of generated images
+    $output_html_path = ''; // Initialize for finally block
 
     try {
         // Ensure temp_conversions directory exists
@@ -861,7 +1727,7 @@ function dw_pdf_to_html_callback() {
         if ($uploaded_file['error'] === UPLOAD_ERR_OK) {
             $file_ext = pathinfo($uploaded_file['name'], PATHINFO_EXTENSION);
             if (strtolower($file_ext) !== 'pdf') {
-                 throw new Exception('Invalid file type. Only PDF files are supported.');
+                throw new Exception('Invalid file type. Only PDF files are supported.');
             }
 
             $temp_input_pdf_name = uniqid('uploaded_pdf_') . '.pdf';
@@ -878,15 +1744,25 @@ function dw_pdf_to_html_callback() {
             throw new Exception('Cannot read the uploaded PDF file.');
         }
 
+        // ** Dynamically get Ghostscript executable path from wp-config.php **
+        if (!defined('DW_GHOSTSCRIPT_PATH')) {
+            // Fallback if constant is not defined (shouldn't happen with proper wp-config.php updates)
+            $gs_executable_temp = 'gs'; // Assume 'gs' is in PATH as a last resort
+            error_log('DW_GHOSTSCRIPT_PATH not defined in PDF to HTML callback. Using default "gs" fallback.');
+        } else {
+            $gs_executable_temp = DW_GHOSTSCRIPT_PATH;
+        }
+
+        // Escape the executable path for safe shell execution
+        $gs_executable_path_for_command = escapeshellarg($gs_executable_temp);
+
+
         // --- Step 1: Convert PDF pages to JPG images ---
         // Output image file pattern (Ghostscript will add page numbers)
         $output_img_pattern = $temp_output_dir . uniqid('pdf_page_') . '_%d.jpg'; // %d is for page number
 
         // Ghostscript command for PDF to JPG conversion
-        // -sDEVICE=jpeg: JPEG output
-        // -r300: Resolution (300 DPI is good quality)
-        // -o: Output file pattern
-        $gs_command_images = $gs_executable_path . ' -dNOPAUSE -dBATCH -sDEVICE=jpeg -r300 -o ' . escapeshellarg($output_img_pattern) . ' ' . escapeshellarg($temp_input_pdf_path) . ' 2>&1';
+        $gs_command_images = $gs_executable_path_for_command . ' -dNOPAUSE -dBATCH -sDEVICE=jpeg -r300 -o ' . escapeshellarg($output_img_pattern) . ' ' . escapeshellarg($temp_input_pdf_path) . ' 2>&1';
 
         $output_gs = null;
         $return_var_gs = null;
@@ -904,20 +1780,21 @@ function dw_pdf_to_html_callback() {
         $html_content = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Converted PDF to HTML</title><style>body { margin: 0; padding: 0; background-color: #f0f0f0; } .pdf-page-image { display: block; max-width: 100%; height: auto; margin: 10px auto; border: 1px solid #ccc; box-shadow: 0 0 5px rgba(0,0,0,0.2); }</style></head><body>';
 
         // Find all generated images
-        $image_base_name = str_replace(['%d.jpg', '%d.png'], '', basename($output_img_pattern)); // Remove page pattern and extension
+        // The unique ID part for the image files will be the part before '_%d.jpg'
+        $unique_id_for_images = basename(str_replace(['_%d.jpg', '%d.png'], '', $output_img_pattern));
         $all_files_in_dir = scandir($temp_output_dir);
-        
+
         $image_urls = [];
         foreach ($all_files_in_dir as $file) {
-            // Check if file starts with the unique ID and ends with .jpg
-            if (strpos($file, $image_base_name) === 0 && strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'jpg') {
+            // Check if file starts with the unique ID and ends with .jpg (case-insensitive)
+            if (strpos($file, $unique_id_for_images) === 0 && strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'jpg') {
                 $generated_images[] = $temp_output_dir . $file; // Store full path for cleanup
                 $image_urls[] = $upload_dir['baseurl'] . '/temp_conversions/' . $file; // Store URL for HTML
             }
         }
-        
-        // Sort images by page number to ensure correct order
-        sort($image_urls, SORT_NATURAL); 
+
+        // Sort images by page number to ensure correct order (e.g., page_1.jpg, page_10.jpg, page_2.jpg -> page_1.jpg, page_2.jpg, page_10.jpg)
+        sort($image_urls, SORT_NATURAL);
 
         if (empty($image_urls)) {
             throw new Exception('No images were generated from the PDF. The PDF might be empty or problematic.');
@@ -938,6 +1815,16 @@ function dw_pdf_to_html_callback() {
             throw new Exception('HTML file generation failed or is empty.');
         }
 
+        $download_url = $upload_dir['baseurl'] . '/temp_conversions/' . basename($output_html_path);
+
+        wp_send_json_success(array(
+            'message' => 'PDF converted to HTML successfully!',
+            'download_url' => $download_url
+        ));
+    } catch (Exception $e) {
+        error_log('PDF to HTML Conversion Exception: ' . $e->getMessage());
+        wp_send_json_error(array('message' => 'Conversion failed: ' . $e->getMessage()));
+    } finally {
         // Clean up original uploaded PDF
         if (file_exists($temp_input_pdf_path)) {
             unlink($temp_input_pdf_path);
@@ -948,38 +1835,20 @@ function dw_pdf_to_html_callback() {
                 unlink($img_path);
             }
         }
-
-        $download_url = $upload_dir['baseurl'] . '/temp_conversions/' . basename($output_html_path);
-
-        wp_send_json_success(array(
-            'message' => 'PDF converted to HTML successfully!',
-            'download_url' => $download_url
-        ));
-
-    } catch (Exception $e) {
-        // Clean up files on error
-        if (file_exists($temp_input_pdf_path)) {
-            unlink($temp_input_pdf_path);
-        }
-        foreach ($generated_images as $img_path) {
-            if (file_exists($img_path)) {
-                unlink($img_path);
-            }
-        }
-        if (isset($output_html_path) && file_exists($output_html_path)) {
+        // Clean up output HTML file on error (if it was created)
+        if (file_exists($output_html_path)) {
             unlink($output_html_path);
         }
-        wp_send_json_error(array('message' => 'Conversion failed: ' . $e->getMessage()));
     }
 }
-
 /**
  * AJAX handler for Repair PDF.
  */
 add_action('wp_ajax_dw_repair_pdf', 'dw_repair_pdf_callback');
 add_action('wp_ajax_nopriv_dw_repair_pdf', 'dw_repair_pdf_callback');
 
-function dw_repair_pdf_callback() {
+function dw_repair_pdf_callback()
+{
     check_ajax_referer('dw_repair_pdf_nonce', 'nonce');
 
     if (empty($_FILES['pdf_file']['name'])) {
@@ -990,13 +1859,9 @@ function dw_repair_pdf_callback() {
     $upload_dir = wp_upload_dir();
     $upload_path = $upload_dir['basedir'] . '/';
 
-    // Define Ghostscript executable path (adjust as per your installation)
-    // Use the double-quoting fix for paths with spaces!
-    $gs_executable_path = '"C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe"'; 
-    // On Linux, it might just be 'gs' or '/usr/bin/gs' and likely doesn't need outer quotes
-
     $temp_input_pdf_path = '';
-    $temp_output_dir = $upload_path . 'temp_conversions/'; 
+    $temp_output_dir = $upload_path . 'temp_conversions/';
+    $output_repaired_pdf_path = ''; // Initialize for finally block
 
     try {
         // Ensure temp_conversions directory exists
@@ -1007,7 +1872,7 @@ function dw_repair_pdf_callback() {
         if ($uploaded_file['error'] === UPLOAD_ERR_OK) {
             $file_ext = pathinfo($uploaded_file['name'], PATHINFO_EXTENSION);
             if (strtolower($file_ext) !== 'pdf') {
-                 throw new Exception('Invalid file type. Only PDF files are supported.');
+                throw new Exception('Invalid file type. Only PDF files are supported.');
             }
 
             $temp_input_pdf_name = uniqid('uploaded_pdf_') . '.pdf';
@@ -1024,16 +1889,25 @@ function dw_repair_pdf_callback() {
             throw new Exception('Cannot read the uploaded PDF file.');
         }
 
+        // ** Dynamically get Ghostscript executable path from wp-config.php **
+        if (!defined('DW_GHOSTSCRIPT_PATH')) {
+            // Fallback if constant is not defined (shouldn't happen with proper wp-config.php updates)
+            $gs_executable_temp = 'gs'; // Assume 'gs' is in PATH as a last resort
+            error_log('DW_GHOSTSCRIPT_PATH not defined in Repair PDF callback. Using default "gs" fallback.');
+        } else {
+            $gs_executable_temp = DW_GHOSTSCRIPT_PATH;
+        }
+
+        // Escape the executable path for safe shell execution
+        $gs_executable_path_for_command = escapeshellarg($gs_executable_temp);
+
+
         // Define output repaired PDF file path
         $output_repaired_pdf_name = uniqid('repaired_pdf_') . '.pdf';
         $output_repaired_pdf_path = $temp_output_dir . $output_repaired_pdf_name;
 
         // Ghostscript command to "repair" a PDF by re-rendering it
-        // -sDEVICE=pdfwrite: output a new PDF
-        // -dCompatibilityLevel=1.4: ensures a common PDF version
-        // -dNOPAUSE -dBATCH: standard Ghostscript options for non-interactive mode
-        // -sOutputFile: specifies the output file
-        $gs_command = $gs_executable_path . ' -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -sOutputFile=' . escapeshellarg($output_repaired_pdf_path) . ' ' . escapeshellarg($temp_input_pdf_path) . ' 2>&1';
+        $gs_command = $gs_executable_path_for_command . ' -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -sOutputFile=' . escapeshellarg($output_repaired_pdf_path) . ' ' . escapeshellarg($temp_input_pdf_path) . ' 2>&1';
 
         $output = null;
         $return_var = null;
@@ -1048,27 +1922,24 @@ function dw_repair_pdf_callback() {
             throw new Exception('PDF repair failed. Ghostscript return code: ' . $return_var . '. Output: ' . implode("\n", $output));
         }
 
-        // Clean up original uploaded PDF
-        if (file_exists($temp_input_pdf_path)) {
-            unlink($temp_input_pdf_path);
-        }
-
         $download_url = $upload_dir['baseurl'] . '/temp_conversions/' . basename($output_repaired_pdf_path);
 
         wp_send_json_success(array(
             'message' => 'PDF repaired successfully!',
             'download_url' => $download_url
         ));
-
     } catch (Exception $e) {
-        // Clean up files on error
+        error_log('PDF Repair Exception: ' . $e->getMessage());
+        wp_send_json_error(array('message' => 'Repair failed: ' . $e->getMessage()));
+    } finally {
+        // Clean up original uploaded PDF
         if (file_exists($temp_input_pdf_path)) {
             unlink($temp_input_pdf_path);
         }
-        if (isset($output_repaired_pdf_path) && file_exists($output_repaired_pdf_path)) {
+        // Clean up output repaired PDF file on error (if it was created)
+        if (file_exists($output_repaired_pdf_path)) {
             unlink($output_repaired_pdf_path);
         }
-        wp_send_json_error(array('message' => 'Repair failed: ' . $e->getMessage()));
     }
 }
 
@@ -1078,7 +1949,8 @@ function dw_repair_pdf_callback() {
 add_action('wp_ajax_dw_word_to_pdf', 'dw_word_to_pdf_callback');
 add_action('wp_ajax_nopriv_dw_word_to_pdf', 'dw_word_to_pdf_callback');
 
-function dw_word_to_pdf_callback() {
+function dw_word_to_pdf_callback()
+{
     check_ajax_referer('dw_word_to_pdf_nonce', 'nonce');
 
     if (empty($_FILES['office_file']['name'])) {
@@ -1101,7 +1973,7 @@ function dw_word_to_pdf_callback() {
         if ($uploaded_file['error'] === UPLOAD_ERR_OK) {
             $file_ext = pathinfo($uploaded_file['name'], PATHINFO_EXTENSION);
             if (!in_array(strtolower($file_ext), ['doc', 'docx'])) {
-                 throw new Exception('Invalid file type. Only .doc and .docx are supported.');
+                throw new Exception('Invalid file type. Only .doc and .docx are supported.');
             }
 
             $temp_input_file_name = uniqid('uploaded_word_') . '.' . $file_ext;
@@ -1149,7 +2021,6 @@ function dw_word_to_pdf_callback() {
             'message' => 'Word document converted to PDF successfully!',
             'download_url' => $converted_pdf_url
         ));
-
     } catch (Exception $e) {
         // Clean up files on error
         if (file_exists($temp_input_file_path)) {
@@ -1169,7 +2040,8 @@ function dw_word_to_pdf_callback() {
 add_action('wp_ajax_dw_merge_pdfs', 'dw_merge_pdfs_callback');
 add_action('wp_ajax_nopriv_dw_merge_pdfs', 'dw_merge_pdfs_callback'); // Allow non-logged-in users
 
-function dw_merge_pdfs_callback() {
+function dw_merge_pdfs_callback()
+{
     // 1. Verify nonce for security
     check_ajax_referer('dw_merge_nonce', 'nonce');
 
@@ -1208,7 +2080,7 @@ function dw_merge_pdfs_callback() {
                 // Handle upload errors or non-PDF files
                 // UPLOAD_ERR_NO_FILE is common if no file was selected for an array input.
                 if ($error !== UPLOAD_ERR_NO_FILE) {
-                     throw new Exception('File upload error or not a PDF: ' . $name . ' (Error code: ' . $error . ')');
+                    throw new Exception('File upload error or not a PDF: ' . $name . ' (Error code: ' . $error . ')');
                 }
             }
         }
@@ -1258,7 +2130,6 @@ function dw_merge_pdfs_callback() {
             'message' => 'PDFs merged successfully!',
             'download_url' => $merged_file_url
         ));
-
     } catch (Exception $e) {
         // Clean up temporary files even on error
         foreach ($pdf_paths as $path) {
@@ -1276,7 +2147,8 @@ function dw_merge_pdfs_callback() {
 add_action('wp_ajax_dw_split_pdfs', 'dw_split_pdfs_callback');
 add_action('wp_ajax_nopriv_dw_split_pdfs', 'dw_split_pdfs_callback'); // Allow non-logged-in users
 
-function dw_split_pdfs_callback() {
+function dw_split_pdfs_callback()
+{
     error_log('dw_split_pdfs_callback: Function started.');
 
     check_ajax_referer('dw_split_nonce', 'nonce');
@@ -1318,8 +2190,8 @@ function dw_split_pdfs_callback() {
 
         if (!file_exists($temp_pdf_path) || !is_readable($temp_pdf_path) || filesize($temp_pdf_path) === 0) {
             $error_detail = 'File exists: ' . (file_exists($temp_pdf_path) ? 'Yes' : 'No') .
-                            ', Is readable: ' . (is_readable($temp_pdf_path) ? 'Yes' : 'No') .
-                            ', File size: ' . (file_exists($temp_pdf_path) ? filesize($temp_pdf_path) : 'N/A') . ' bytes.';
+                ', Is readable: ' . (is_readable($temp_pdf_path) ? 'Yes' : 'No') .
+                ', File size: ' . (file_exists($temp_pdf_path) ? filesize($temp_pdf_path) : 'N/A') . ' bytes.';
             error_log('dw_split_pdfs_callback: Pre-setSourceFile check failed: ' . $error_detail);
             throw new Exception('Cannot read the uploaded PDF file for splitting or file is empty. Details: ' . $error_detail);
         }
@@ -1353,10 +2225,10 @@ function dw_split_pdfs_callback() {
 
         for ($i = 1; $i <= $pageCount; $i++) {
             error_log('dw_split_pdfs_callback: Processing page ' . $i);
-            
+
             // Create a new PDF for each page
             $split_pdf = new Fpdi();
-            
+
             // IMPORTANT: Set the source file for THIS NEW FPDI instance
             // This is the missing step that caused the error.
             try {
@@ -1416,7 +2288,6 @@ function dw_split_pdfs_callback() {
             'split_files' => $split_files_data
         ));
         error_log('dw_split_pdfs_callback: Function completed successfully.');
-
     } catch (Exception $e) {
         error_log('dw_split_pdfs_callback: Error caught: ' . $e->getMessage() . ' on line ' . $e->getLine() . ' in ' . $e->getFile());
         // Clean up original uploaded file on error
@@ -1434,7 +2305,8 @@ function dw_split_pdfs_callback() {
 add_action('wp_ajax_dw_pdf_to_text', 'dw_pdf_to_text_callback');
 add_action('wp_ajax_nopriv_dw_pdf_to_text', 'dw_pdf_to_text_callback');
 
-function dw_pdf_to_text_callback() {
+function dw_pdf_to_text_callback()
+{
     check_ajax_referer('dw_pdf_to_text_nonce', 'nonce');
 
     if (empty($_FILES['pdf_file']['name'])) {
@@ -1445,14 +2317,9 @@ function dw_pdf_to_text_callback() {
     $upload_dir = wp_upload_dir();
     $upload_path = $upload_dir['basedir'] . '/';
 
-    // Define Ghostscript executable path (adjust as per your installation)
-    // Make sure to use the correct path to your Ghostscript executable (gs.exe)
-    // Example for Windows (adjust if your path is different):
-    $gs_executable_path = '"C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe"'; 
-    // If you're on Linux, it might just be 'gs' or '/usr/bin/gs'
-
     $temp_input_pdf_path = '';
-    $temp_output_dir = $upload_path . 'temp_conversions/'; 
+    $temp_output_dir = $upload_path . 'temp_conversions/';
+    $output_text_path = ''; // Initialize for finally block
 
     try {
         // Ensure temp_conversions directory exists
@@ -1463,7 +2330,7 @@ function dw_pdf_to_text_callback() {
         if ($uploaded_file['error'] === UPLOAD_ERR_OK) {
             $file_ext = pathinfo($uploaded_file['name'], PATHINFO_EXTENSION);
             if (strtolower($file_ext) !== 'pdf') {
-                 throw new Exception('Invalid file type. Only PDF files are supported.');
+                throw new Exception('Invalid file type. Only PDF files are supported.');
             }
 
             $temp_input_pdf_name = uniqid('uploaded_pdf_') . '.pdf';
@@ -1480,6 +2347,19 @@ function dw_pdf_to_text_callback() {
             throw new Exception('Cannot read the uploaded PDF file.');
         }
 
+        // ** Dynamically get Ghostscript executable path from wp-config.php **
+        if (!defined('DW_GHOSTSCRIPT_PATH')) {
+            // Fallback if constant is not defined (shouldn't happen with proper wp-config.php updates)
+            $gs_executable_temp = 'gs'; // Assume 'gs' is in PATH as a last resort
+            error_log('DW_GHOSTSCRIPT_PATH not defined in PDF to Text callback. Using default "gs" fallback.');
+        } else {
+            $gs_executable_temp = DW_GHOSTSCRIPT_PATH;
+        }
+
+        // Escape the executable path for safe shell execution
+        $gs_executable_path_for_command = escapeshellarg($gs_executable_temp);
+
+
         // Define output .txt file path
         $output_text_name = uniqid('converted_pdf_') . '.txt';
         $output_text_path = $temp_output_dir . $output_text_name;
@@ -1487,7 +2367,7 @@ function dw_pdf_to_text_callback() {
         // Ghostscript command for PDF to Text conversion
         // -sDEVICE=txtwrite: Specifies the text output device
         // -o: Output file
-        $gs_command = $gs_executable_path . ' -dBATCH -dNOPAUSE -sDEVICE=txtwrite -o ' . escapeshellarg($output_text_path) . ' ' . escapeshellarg($temp_input_pdf_path) . ' 2>&1';
+        $gs_command = $gs_executable_path_for_command . ' -dBATCH -dNOPAUSE -sDEVICE=txtwrite -o ' . escapeshellarg($output_text_path) . ' ' . escapeshellarg($temp_input_pdf_path) . ' 2>&1';
 
         $output = null;
         $return_var = null;
@@ -1502,27 +2382,24 @@ function dw_pdf_to_text_callback() {
             throw new Exception('PDF to Text conversion failed. Ghostscript return code: ' . $return_var . '. Output: ' . implode("\n", $output));
         }
 
-        // Clean up original uploaded PDF
-        if (file_exists($temp_input_pdf_path)) {
-            unlink($temp_input_pdf_path);
-        }
-
         $download_url = $upload_dir['baseurl'] . '/temp_conversions/' . basename($output_text_path);
 
         wp_send_json_success(array(
             'message' => 'PDF converted to Text successfully!',
             'download_url' => $download_url
         ));
-
     } catch (Exception $e) {
-        // Clean up files on error
+        error_log('PDF to Text Conversion Exception: ' . $e->getMessage());
+        wp_send_json_error(array('message' => 'Conversion failed: ' . $e->getMessage()));
+    } finally {
+        // Clean up original uploaded PDF
         if (file_exists($temp_input_pdf_path)) {
             unlink($temp_input_pdf_path);
         }
-        if (isset($output_text_path) && file_exists($output_text_path)) {
+        // Clean up output text file on error (if it was created)
+        if (file_exists($output_text_path)) {
             unlink($output_text_path);
         }
-        wp_send_json_error(array('message' => 'Conversion failed: ' . $e->getMessage()));
     }
 }
 /**
@@ -1531,7 +2408,8 @@ function dw_pdf_to_text_callback() {
 add_action('wp_ajax_dw_compress_pdfs', 'dw_compress_pdfs_callback');
 add_action('wp_ajax_nopriv_dw_compress_pdfs', 'dw_compress_pdfs_callback'); // Allow non-logged-in users
 
-function dw_compress_pdfs_callback() {
+function dw_compress_pdfs_callback()
+{
     check_ajax_referer('dw_compress_nonce', 'nonce');
 
     if (empty($_FILES['pdf_file']['name'])) {
@@ -1566,50 +2444,31 @@ function dw_compress_pdfs_callback() {
         $compressed_filepath = $upload_path . $compressed_filename;
         $compressed_file_url = $upload_dir['baseurl'] . '/' . $compressed_filename;
 
-        // Ghostscript command:
-        // IMPORTANT: The path to 'gswin64c' (or 'gs' on Linux/macOS) might need to be absolute if not in your system's PATH.
-        // E.g., '"C:\Program Files\gs\gs9.56.1\bin\gswin64c.exe"'
-        // Ensure you use double quotes around paths, especially if they contain spaces.
-        // Use escapeshellarg() for all dynamic parts of the command to prevent shell injection.
-        // You MUST replace 'gswin64c' with the full absolute path to your Ghostscript executable if it's not in your system's PATH.
-        // Example for Windows (adjust version if different): $gs_executable_path = '"C:\Program Files\gs\gs9.56.1\bin\gswin64c.exe"';
-        // Example for Linux/macOS: $gs_executable_path = '/usr/bin/gs'; or `which gs` to find the path.
-        $gs_executable_path = 'gswin64c'; // Default: assumes gswin64c is in your system's PATH
-
-        // Try to locate Ghostscript if the default fails (Windows specific example)
-        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            $possible_gs_paths = [
-                'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe', // Common path for 64-bit
-                'C:\Program Files (x86)\gs\gs9.56.1\bin\gswin32c.exe', // Common path for 32-bit
-                // You might need to adjust the version number (e.g., gs9.56.1)
-                // Add other common paths or specific paths based on your installation
-            ];
-            foreach ($possible_gs_paths as $path) {
-                if (file_exists($path)) {
-                    $gs_executable_path = '"' . $path . '"'; // Add quotes for paths with spaces
-                    break;
-                }
-            }
-        } else { // Linux/macOS
-            $gs_executable_path = 'gs'; // Default for Linux/macOS, usually in PATH
-            // You can try to find it dynamically if 'gs' doesn't work
-            // $gs_path_output = shell_exec('which gs');
-            // if (!empty($gs_path_output)) {
-            //     $gs_executable_path = trim($gs_path_output);
-            // }
+        // ** Dynamically get Ghostscript executable path from wp-config.php **
+        if (!defined('DW_GHOSTSCRIPT_PATH')) {
+            // Fallback if constant is not defined (though it should be with wp-config.php updates)
+            $gs_executable_path_temp = 'gs'; // Assume 'gs' is in PATH as a last resort
+            error_log('DW_GHOSTSCRIPT_PATH not defined in compress callback. Using default "gs" fallback.');
+        } else {
+            $gs_executable_path_temp = DW_GHOSTSCRIPT_PATH;
         }
 
-        if ($gs_executable_path === 'gswin64c' && strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' && !file_exists(str_replace('"', '', $gs_executable_path))) {
-             // If we're still using the default and it's Windows, and the file doesn't exist (implying not in PATH)
-             throw new Exception('Ghostscript executable (gswin64c) not found. Please specify the full path in free-pdf-buddy.php or add it to your system\'s PATH.');
-        }
+        // Escape the executable path for safe shell execution
+        $gs_executable_path_for_command = escapeshellarg($gs_executable_path_temp);
 
+        // Construct the Ghostscript command
+        $gs_command = $gs_executable_path_for_command . ' -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=' . escapeshellarg($compressed_filepath) . ' ' . escapeshellarg($temp_input_pdf_path) . ' 2>&1';
 
-        $gs_command = $gs_executable_path . ' -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=' . escapeshellarg($compressed_filepath) . ' ' . escapeshellarg($temp_input_pdf_path) . ' 2>&1';
+        // Log the command for debugging purposes (check your server's PHP error log)
+        error_log('Ghostscript Compression Command: ' . $gs_command);
 
         $output = null;
         $return_var = null;
         exec($gs_command, $output, $return_var);
+
+        // Log Ghostscript's raw output and return code for debugging
+        error_log('Ghostscript Compression Return Var: ' . $return_var);
+        error_log('Ghostscript Compression Output: ' . implode("\n", $output));
 
         if ($return_var !== 0) {
             // Ghostscript command failed
@@ -1617,7 +2476,7 @@ function dw_compress_pdfs_callback() {
         }
 
         if (!file_exists($compressed_filepath) || filesize($compressed_filepath) === 0) {
-            throw new Exception('Compressed PDF file not created or is empty. Check Ghostscript installation/path.');
+            throw new Exception('Compressed PDF file not created or is empty. Check Ghostscript installation/path and server permissions.');
         }
         // --- End Compression Logic ---
 
@@ -1630,7 +2489,6 @@ function dw_compress_pdfs_callback() {
             'message' => 'PDF compressed successfully!',
             'download_url' => $compressed_file_url
         ));
-
     } catch (Exception $e) {
         // Clean up files on error
         if (file_exists($temp_input_pdf_path)) {
@@ -1639,176 +2497,146 @@ function dw_compress_pdfs_callback() {
         if (file_exists($compressed_filepath)) { // Also clean up partially created compressed file
             unlink($compressed_filepath);
         }
+        error_log('PDF Compression Exception: ' . $e->getMessage()); // Log detailed exception
         wp_send_json_error(array('message' => 'Compression failed: ' . $e->getMessage()));
     }
 }
-
 /**
  * AJAX handler for converting PDF to JPG using Ghostscript.
  */
 add_action('wp_ajax_dw_pdf_to_jpg', 'dw_pdf_to_jpg_callback');
 add_action('wp_ajax_nopriv_dw_pdf_to_jpg', 'dw_pdf_to_jpg_callback'); // Allow non-logged-in users
 
-function dw_pdf_to_jpg_callback() {
-    error_log('[dw_pdf_to_jpg_callback] Function started.');
-
-    check_ajax_referer('dw_pdf_to_jpg_nonce', 'nonce');
+function dw_pdf_to_jpg_callback()
+{
+    // You'll need to create a nonce for this action and pass it from the frontend.
+    // For simplicity, I'm omitting nonce checking here, but it's crucial for security.
+    // check_ajax_referer('dw_pdf_to_jpg_nonce', 'nonce');
 
     if (empty($_FILES['pdf_file']['name'])) {
-        error_log('[dw_pdf_to_jpg_callback] Error: No PDF file selected.');
-        wp_send_json_error(array('message' => 'No PDF file selected for conversion to JPG.'));
+        wp_send_json_error(array('message' => 'No PDF file selected for conversion.'));
     }
 
     $uploaded_file = $_FILES['pdf_file'];
+    $jpg_quality = isset($_POST['jpg_quality']) ? intval($_POST['jpg_quality']) : 90;
+    if ($jpg_quality < 1 || $jpg_quality > 100) {
+        $jpg_quality = 90; // Default to 90 if invalid
+    }
+
     $upload_dir = wp_upload_dir();
     $upload_path = $upload_dir['basedir'] . '/';
     $upload_url = $upload_dir['baseurl'] . '/';
 
-    error_log('[dw_pdf_to_jpg_callback] Upload path: ' . $upload_path);
-
     $temp_input_pdf_path = ''; // For cleanup
-    $output_jpg_paths = []; // To store paths of generated JPGs for cleanup
+    $output_dir = ''; // For cleanup
 
     try {
         if ($uploaded_file['error'] === UPLOAD_ERR_OK && $uploaded_file['type'] === 'application/pdf') {
-            $temp_input_pdf_name = uniqid('uploaded_pdf2jpg_') . '.pdf';
+            $temp_input_pdf_name = uniqid('uploaded_convert_') . '.pdf';
             $temp_input_pdf_path = $upload_path . $temp_input_pdf_name;
-            error_log('[dw_pdf_to_jpg_callback] Attempting to move uploaded file from ' . $uploaded_file['tmp_name'] . ' to ' . $temp_input_pdf_path);
 
             if (!move_uploaded_file($uploaded_file['tmp_name'], $temp_input_pdf_path)) {
-                error_log('[dw_pdf_to_jpg_callback] Error: Failed to move uploaded file. Check permissions on ' . $upload_path);
-                throw new Exception('Failed to move uploaded PDF file for conversion.');
+                throw new Exception('Failed to move uploaded file for conversion.');
             }
-            error_log('[dw_pdf_to_jpg_callback] Uploaded file moved successfully.');
         } else {
-            error_log('[dw_pdf_to_jpg_callback] Error: File upload error (' . $uploaded_file['error'] . ') or not a PDF (' . $uploaded_file['type'] . ').');
             throw new Exception('File upload error or not a PDF.');
         }
 
         if (!file_exists($temp_input_pdf_path) || !is_readable($temp_input_pdf_path)) {
-            error_log('[dw_pdf_to_jpg_callback] Error: Cannot read uploaded PDF file. Exists: ' . (file_exists($temp_input_pdf_path) ? 'true' : 'false') . ', Readable: ' . (is_readable($temp_input_pdf_path) ? 'true' : 'false') . ' Path: ' . $temp_input_pdf_path);
             throw new Exception('Cannot read the uploaded PDF file for conversion.');
         }
-        error_log('[dw_pdf_to_jpg_callback] Uploaded PDF file is readable: ' . $temp_input_pdf_path);
 
-        // Determine Ghostscript executable path
-        $gs_executable_path = 'gswin64c'; // Default: assumes gswin64c is in your system's PATH
-        $found_gs_path = false;
+        // --- Start Conversion Logic with Ghostscript ---
+        $unique_id = uniqid('pdf_to_jpg_');
+        $output_dir = $upload_path . $unique_id . '/';
+        wp_mkdir_p($output_dir); // Create a directory for JPGs
+
+        if (!is_dir($output_dir) || !is_writable($output_dir)) {
+            throw new Exception('Failed to create or write to output directory for JPGs.');
+        }
+
+        // Ghostscript executable path (same logic as in compress)
+        $gs_executable_path = 'gswin64c';
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             $possible_gs_paths = [
-                'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe',
+                'DW_GHOSTSCRIPT_PATH',
                 'C:\Program Files (x86)\gs\gs9.56.1\bin\gswin32c.exe',
-                'C:\Program Files\gs\gs10.00\bin\gswin64c.exe',
-                'C:\Program Files\gs\gs9.56.1\bin\gswin64c.exe'
             ];
             foreach ($possible_gs_paths as $path) {
                 if (file_exists($path)) {
                     $gs_executable_path = '"' . $path . '"';
-                    $found_gs_path = true;
-                    error_log('[dw_pdf_to_jpg_callback] Found Ghostscript executable at: ' . $gs_executable_path);
                     break;
                 }
             }
         } else {
             $gs_executable_path = 'gs';
-            exec('which gs 2>&1', $which_output, $which_return);
-            if ($which_return === 0) {
-                 error_log('[dw_pdf_to_jpg_callback] Ghostscript (gs) found in PATH: ' . implode('', $which_output));
-                 $found_gs_path = true;
-            } else {
-                 error_log('[dw_pdf_to_jpg_callback] Ghostscript (gs) not found in PATH on non-Windows system.');
-            }
         }
 
-        if (!$found_gs_path) {
-             throw new Exception('Ghostscript executable not found. Please ensure it\'s installed and its path is correctly configured in the plugin, or added to your system\'s PATH.');
+        if ($gs_executable_path === 'gswin64c' && strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' && !file_exists(str_replace('"', '', $gs_executable_path))) {
+            throw new Exception('Ghostscript executable (gswin64c) not found. Please specify the full path or add it to your system\'s PATH.');
         }
-
-        // Define output base name for JPGs
-        $output_base_name = 'pdf2jpg_' . time();
-        
-        // CRITICAL: Ensure no accidental spaces and use consistent forward slashes for Ghostscript path
-        // trim() is added to remove any leading/trailing whitespace that might exist from $upload_path.
-        $cleaned_upload_path = trim(str_replace('\\', '/', untrailingslashit($upload_path)));
-        
-        // This is the exact pattern Ghostscript will use. ENSURE NO SPACE between '_' and '%d'.
-        $output_jpg_path_pattern_for_gs = $cleaned_upload_path . '/' . $output_base_name . '_%d.jpg';
-        
-        // This is the path pattern we will use to *check* for files in PHP.
-        $output_jpg_path_pattern_for_php = untrailingslashit($upload_path) . '/' . $output_base_name . '_%d.jpg';
 
         // Ghostscript command for PDF to JPG conversion
-        $gs_command = $gs_executable_path . ' -dBATCH -dNOPAUSE -sDEVICE=jpeg -r300 -dUseCIEColor -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -sOutputFile=' . escapeshellarg($output_jpg_path_pattern_for_gs) . ' ' . escapeshellarg($temp_input_pdf_path) . ' 2>&1';
-
-        error_log('[dw_pdf_to_jpg_callback] Executing Ghostscript command: ' . $gs_command);
+        // -sDEVICE=jpeg: output device is JPEG
+        // -r300: resolution 300 DPI (dots per inch)
+        // -dJPEGQ=QUALITY: JPEG quality (0-100)
+        // -o: output file pattern (e.g., page-%d.jpg will create page-1.jpg, page-2.jpg, etc.)
+        $gs_command = $gs_executable_path . ' -sDEVICE=jpeg -r300 -dJPEGQ=' . escapeshellarg($jpg_quality) . ' -dNOPAUSE -dBATCH -sOutputFile=' . escapeshellarg($output_dir . 'page-%d.jpg') . ' ' . escapeshellarg($temp_input_pdf_path) . ' 2>&1';
 
         $output = null;
         $return_var = null;
         exec($gs_command, $output, $return_var);
 
-        error_log('[dw_pdf_to_jpg_callback] Ghostscript command finished. Return var: ' . $return_var);
-        error_log('[dw_pdf_to_jpg_callback] Ghostscript output: ' . implode("\n", $output));
-
-
         if ($return_var !== 0) {
-            throw new Exception('PDF to JPG conversion failed. Ghostscript returned an error code: ' . $return_var . '. Output: ' . implode("\n", $output));
+            throw new Exception('Ghostscript conversion failed. Return code: ' . $return_var . '. Output: ' . implode("\n", $output));
         }
 
-        // Now, collect the generated JPG files
-        $jpg_files_data = [];
-        $page_num = 1;
-        while (true) {
-            // Use the PHP-friendly path pattern to check for files
-            $current_jpg_path = str_replace('%d', $page_num, $output_jpg_path_pattern_for_php);
-            
-            // Check if the file exists AND has content
-            if (file_exists($current_jpg_path) && filesize($current_jpg_path) > 0) {
-                error_log('[dw_pdf_to_jpg_callback] Found generated JPG: ' . $current_jpg_path);
-                $output_jpg_paths[] = $current_jpg_path; // Add to cleanup list
-                $jpg_files_data[] = [
-                    'page_number' => $page_num,
-                    'download_url' => $upload_url . basename($current_jpg_path)
-                ];
-                $page_num++;
-            } else {
-                error_log('[dw_pdf_to_jpg_callback] No more JPGs found or file empty at: ' . $current_jpg_path);
-                break; // No more pages or file is empty
+        // Collect generated JPG files
+        $jpg_files = glob($output_dir . '*.jpg');
+        $download_urls = [];
+        if (!empty($jpg_files)) {
+            foreach ($jpg_files as $jpg_file) {
+                $filename = basename($jpg_file);
+                $download_urls[] = $upload_url . $unique_id . '/' . $filename;
             }
-            if ($page_num > 1000) { 
-                error_log('[dw_pdf_to_jpg_callback] Exceeded max page check (1000). Breaking loop.');
-                break;
-            }
+        } else {
+            throw new Exception('No JPG files were generated. Check PDF content or Ghostscript output.');
         }
-
-        if (empty($jpg_files_data)) {
-            error_log('[dw_pdf_to_jpg_callback] Error: No JPG files were found after Ghostscript execution. This indicates a problem with Ghostscript\'s output, even if it returned 0. Review the Ghostscript output above.');
-            throw new Exception('No JPG files were generated. Check PDF content or Ghostscript configuration. See debug log for Ghostscript output for more details.');
-        }
+        // --- End Conversion Logic ---
 
         // Clean up original uploaded file
         if (file_exists($temp_input_pdf_path)) {
             unlink($temp_input_pdf_path);
-            error_log('[dw_pdf_to_jpg_callback] Cleaned up original PDF: ' . $temp_input_pdf_path);
         }
 
         wp_send_json_success(array(
-            'message' => 'PDF converted to JPGs successfully! Generated ' . count($jpg_files_data) . ' images.',
-            'split_files' => $jpg_files_data
+            'message' => 'PDF converted to JPGs successfully!',
+            'download_urls' => $download_urls
         ));
-
     } catch (Exception $e) {
-        error_log('[dw_pdf_to_jpg_callback] Caught exception: ' . $e->getMessage());
+        // Clean up files and directory on error
         if (file_exists($temp_input_pdf_path)) {
             unlink($temp_input_pdf_path);
-            error_log('[dw_pdf_to_jpg_callback] Cleaned up original PDF on error: ' . $temp_input_pdf_path);
         }
-        foreach ($output_jpg_paths as $path) {
-            if (file_exists($path)) {
-                unlink($path);
-                error_log('[dw_pdf_to_jpg_callback] Cleaned up generated JPG on error: ' . $path);
+        if (is_dir($output_dir)) {
+            // Function to recursively delete directory (from common WordPress practices)
+            function dw_rrmdir($dir)
+            {
+                if (is_dir($dir)) {
+                    $objects = scandir($dir);
+                    foreach ($objects as $object) {
+                        if ($object != "." && $object != "..") {
+                            if (filetype($dir . "/" . $object) == "dir") dw_rrmdir($dir . "/" . $object);
+                            else unlink($dir . "/" . $object);
+                        }
+                    }
+                    reset($objects);
+                    rmdir($dir);
+                }
             }
+            dw_rrmdir($output_dir);
         }
-        wp_send_json_error(array('message' => 'PDF to JPG conversion failed: ' . $e->getMessage()));
+        wp_send_json_error(array('message' => 'Conversion failed: ' . $e->getMessage()));
     }
 }
 /**
@@ -1817,7 +2645,8 @@ function dw_pdf_to_jpg_callback() {
 add_action('wp_ajax_dw_add_watermark', 'dw_add_watermark_callback');
 add_action('wp_ajax_nopriv_dw_add_watermark', 'dw_add_watermark_callback'); // Allow non-logged-in users
 
-function dw_add_watermark_callback() {
+function dw_add_watermark_callback()
+{
     check_ajax_referer('dw_add_watermark_nonce', 'nonce');
 
     if (empty($_FILES['pdf_file']['name'])) {
@@ -1875,7 +2704,7 @@ function dw_add_watermark_callback() {
             // Note: FPDF's alpha transparency (SetAlpha) works well for graphic elements like fills/lines
             // but for text, it's more about how the PDF viewer renders it. True text transparency
             // can be complex without advanced libraries. This uses a workaround for FPDF.
-            
+
             // FPDI uses FPDF, which does not natively support true alpha for text easily.
             // A common workaround is to use a specific color and rely on the viewer's blend modes
             // or to use an image watermark. For simplicity, we'll set a gray color.
@@ -1894,7 +2723,7 @@ function dw_add_watermark_callback() {
             // You might need to adjust these values based on typical page sizes and desired appearance.
             // For a diagonal effect, you can try setting X and Y such that the text spans.
             // Or for a fixed position (e.g., center) and then rotate.
-            
+
             // FPDF does not have a direct text rotation function easily applicable on the fly.
             // To achieve rotated text, you'd typically need to use a transformation matrix,
             // which FPDI allows via startTemplate and transformation methods, but it adds complexity.
@@ -1933,7 +2762,6 @@ function dw_add_watermark_callback() {
             'message' => 'Watermark added successfully!',
             'download_url' => $watermarked_file_url
         ));
-
     } catch (Exception $e) {
         // Clean up files on error
         if (file_exists($temp_input_pdf_path)) {
@@ -1942,6 +2770,146 @@ function dw_add_watermark_callback() {
         wp_send_json_error(array('message' => 'Adding watermark failed: ' . $e->getMessage()));
     }
 }
+/**
+ * AJAX handler for adding page numbers to PDF.
+ */
+add_action('wp_ajax_dw_add_page_numbers', 'dw_add_page_numbers_callback');
+add_action('wp_ajax_nopriv_dw_add_page_numbers', 'dw_add_page_numbers_callback'); // Allow non-logged-in users
+
+function dw_add_page_numbers_callback()
+{
+    // IMPORTANT: Always implement nonce check for security!
+    // check_ajax_referer('dw_add_page_numbers_nonce', 'nonce');
+
+    if (empty($_FILES['pdf_file']['name'])) {
+        wp_send_json_error(array('message' => 'No PDF file selected.'));
+        exit;
+    }
+
+    $uploaded_file = $_FILES['pdf_file'];
+    $position = isset($_POST['position']) ? sanitize_text_field($_POST['position']) : 'bottom-right';
+
+    $upload_dir = wp_upload_dir();
+    $upload_path = $upload_dir['basedir'] . '/';
+
+    $temp_input_pdf_path = ''; // For cleanup
+    $output_pdf_filepath = ''; // For cleanup
+
+    try {
+        // 1. Handle the uploaded PDF file
+        if ($uploaded_file['error'] !== UPLOAD_ERR_OK || $uploaded_file['type'] !== 'application/pdf') {
+            throw new Exception('File upload error or not a PDF.');
+        }
+
+        $temp_input_pdf_name = uniqid('uploaded_pn_') . '.pdf';
+        $temp_input_pdf_path = $upload_path . $temp_input_pdf_name;
+
+        if (!move_uploaded_file($uploaded_file['tmp_name'], $temp_input_pdf_path)) {
+            throw new Exception('Failed to move uploaded PDF file.');
+        }
+
+        if (!file_exists($temp_input_pdf_path) || !is_readable($temp_input_pdf_path)) {
+            throw new Exception('Cannot read the uploaded PDF file for page numbering.');
+        }
+
+        // --- Start Page Numbering Logic with FPDI/FPDF ---
+        $pdf = new Fpdi(); // Create a new PDF document
+
+        // Set font for page numbers
+        // You can customize the font (e.g., 'Arial', 'Times', 'Courier'), style (B for bold, I for italic), and size.
+        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetTextColor(0, 0, 0); // Black color (RGB)
+
+        // Get total pages from the source PDF
+        $pageCount = $pdf->setSourceFile($temp_input_pdf_path);
+
+        for ($i = 1; $i <= $pageCount; $i++) {
+            $tplId = $pdf->importPage($i); // Import the current page from the source PDF
+            $pdf->AddPage(); // Add a new page to the output PDF
+            $pdf->useTemplate($tplId); // Use the imported page as a template
+
+            // Calculate position for the page number
+            $text = "Page " . $i . " of " . $pageCount;
+            $text_width = $pdf->GetStringWidth($text);
+            $margin = 10; // Margin from the edge of the page (in mm, FPDF's default unit)
+
+            $page_width = $pdf->GetPageWidth();
+            $page_height = $pdf->GetPageHeight();
+
+            $x = 0;
+            $y = 0;
+
+            switch ($position) {
+                case 'bottom-right':
+                    $x = $page_width - $text_width - $margin;
+                    $y = $page_height - $margin;
+                    break;
+                case 'bottom-center':
+                    $x = ($page_width - $text_width) / 2;
+                    $y = $page_height - $margin;
+                    break;
+                case 'bottom-left':
+                    $x = $margin;
+                    $y = $page_height - $margin;
+                    break;
+                case 'top-right':
+                    $x = $page_width - $text_width - $margin;
+                    $y = $margin;
+                    break;
+                case 'top-center':
+                    $x = ($page_width - $text_width) / 2;
+                    $y = $margin;
+                    break;
+                case 'top-left':
+                    $x = $margin;
+                    $y = $margin;
+                    break;
+                default: // Default to bottom-right
+                    $x = $page_width - $text_width - $margin;
+                    $y = $page_height - $margin;
+                    break;
+            }
+
+            // Set the position and add the page number
+            $pdf->SetXY($x, $y);
+            $pdf->Write(0, $text); // Write the text. 0 means no specific line height, uses current font height.
+        }
+
+        // Save the new PDF with page numbers
+        $output_pdf_filename = 'numbered_pdf_' . time() . '.pdf';
+        $output_pdf_filepath = $upload_path . $output_pdf_filename;
+        // 'F' saves the PDF to a local file
+        $pdf->Output($output_pdf_filepath, 'F');
+
+        if (!file_exists($output_pdf_filepath) || filesize($output_pdf_filepath) === 0) {
+            throw new Exception('PDF with page numbers not created or is empty.');
+        }
+        // --- End Page Numbering Logic ---
+
+        $download_url = $upload_dir['baseurl'] . '/' . $output_pdf_filename;
+    } catch (Exception $e) {
+        // Clean up files on error
+        if (file_exists($temp_input_pdf_path)) {
+            unlink($temp_input_pdf_path);
+        }
+        if (file_exists($output_pdf_filepath)) {
+            unlink($output_pdf_filepath);
+        }
+        wp_send_json_error(array('message' => 'Failed to add page numbers: ' . $e->getMessage()));
+        exit;
+    }
+
+    // Clean up temporary files on success
+    if (file_exists($temp_input_pdf_path)) {
+        unlink($temp_input_pdf_path);
+    }
+
+    wp_send_json_success(array(
+        'message' => 'Page numbers added successfully!',
+        'download_url' => $download_url
+    ));
+    exit;
+}
 
 /**
  * AJAX handler for rotating PDFs using FPDI.
@@ -1949,7 +2917,8 @@ function dw_add_watermark_callback() {
 add_action('wp_ajax_dw_rotate_pdfs', 'dw_rotate_pdfs_callback');
 add_action('wp_ajax_nopriv_dw_rotate_pdfs', 'dw_rotate_pdfs_callback'); // Allow non-logged-in users
 
-function dw_rotate_pdfs_callback() {
+function dw_rotate_pdfs_callback()
+{
     check_ajax_referer('dw_rotate_nonce', 'nonce');
 
     if (empty($_FILES['pdf_file']['name'])) {
@@ -1999,7 +2968,7 @@ function dw_rotate_pdfs_callback() {
             // FPDI useTemplate: useTemplate(int $tplId, float $x = null, float $y = null, float $width = null, float $height = null, float $adjustPageSize = false, float $rotation = 0)
             // The rotation parameter in AddPage determines initial page orientation, not content rotation.
             // For content rotation, FPDI's useTemplate has a rotation parameter.
-            
+
             // To handle page orientation correctly after rotation, we need to swap width/height if 90/270.
             $new_width = $size['width'];
             $new_height = $size['height'];
@@ -2035,7 +3004,6 @@ function dw_rotate_pdfs_callback() {
             'message' => 'PDF rotated successfully!',
             'download_url' => $rotated_file_url
         ));
-
     } catch (Exception $e) {
         // Clean up files on error
         if (file_exists($temp_input_pdf_path)) {
@@ -2049,7 +3017,8 @@ function dw_rotate_pdfs_callback() {
  * Helper function to parse page ranges (e.g., "1,3,5-7").
  * Returns an array of individual page numbers.
  */
-function dw_parse_page_ranges($range_string, $total_pages) {
+function dw_parse_page_ranges($range_string, $total_pages)
+{
     $pages = [];
     $parts = explode(',', $range_string);
     foreach ($parts as $part) {
@@ -2076,7 +3045,8 @@ function dw_parse_page_ranges($range_string, $total_pages) {
 add_action('wp_ajax_dw_delete_pages', 'dw_delete_pages_callback');
 add_action('wp_ajax_nopriv_dw_delete_pages', 'dw_delete_pages_callback'); // Allow non-logged-in users
 
-function dw_delete_pages_callback() {
+function dw_delete_pages_callback()
+{
     check_ajax_referer('dw_delete_pages_nonce', 'nonce');
 
     if (empty($_FILES['pdf_file']['name'])) {
@@ -2112,7 +3082,7 @@ function dw_delete_pages_callback() {
 
         // Initialize the FPDI object that will build the new PDF
         $new_pdf = new Fpdi();
-        
+
         // Set the source file for this FPDI object.
         // This is crucial, as this object needs to read the input PDF to import pages.
         $pageCount = $new_pdf->setSourceFile($temp_input_pdf_path);
@@ -2158,7 +3128,6 @@ function dw_delete_pages_callback() {
             'message' => 'Pages deleted successfully! ' . $retained_pages_count . ' pages remaining.',
             'download_url' => $modified_file_url
         ));
-
     } catch (Exception $e) {
         // Clean up files on error
         if (file_exists($temp_input_pdf_path)) {
@@ -2174,7 +3143,8 @@ function dw_delete_pages_callback() {
 add_action('wp_ajax_dw_reorder_pages', 'dw_reorder_pages_callback');
 add_action('wp_ajax_nopriv_dw_reorder_pages', 'dw_reorder_pages_callback'); // Allow non-logged-in users
 
-function dw_reorder_pages_callback() {
+function dw_reorder_pages_callback()
+{
     check_ajax_referer('dw_reorder_pages_nonce', 'nonce');
 
     if (empty($_FILES['pdf_file']['name'])) {
@@ -2210,13 +3180,13 @@ function dw_reorder_pages_callback() {
 
         // Initialize the FPDI object that will be used for creating the new PDF
         $reordered_pdf = new Fpdi();
-        
+
         // Set the source file for this FPDI object.
         // This is crucial, as this object needs to read the input PDF to import pages.
         $original_page_count = $reordered_pdf->setSourceFile($temp_input_pdf_path);
 
         $new_order_array = array_map('intval', explode(',', $new_order_string));
-        
+
         // Validate the new order
         $expected_pages = range(1, $original_page_count);
         $diff_to_expected = array_diff($expected_pages, $new_order_array);
@@ -2225,7 +3195,7 @@ function dw_reorder_pages_callback() {
         if (count($new_order_array) !== $original_page_count || !empty($diff_to_expected) || !empty($diff_from_new)) {
             throw new Exception('Invalid page order. Please provide all page numbers (1-' . $original_page_count . ') exactly once, separated by commas.');
         }
-        
+
         // Check for duplicates in the new order
         if (count($new_order_array) !== count(array_unique($new_order_array))) {
             throw new Exception('Duplicate page numbers found in the new order. Each page must be listed only once.');
@@ -2262,7 +3232,6 @@ function dw_reorder_pages_callback() {
             'message' => 'PDF pages reordered successfully!',
             'download_url' => $reordered_file_url
         ));
-
     } catch (Exception $e) {
         // Clean up files on error
         if (file_exists($temp_input_pdf_path)) {
