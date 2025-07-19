@@ -1,0 +1,228 @@
+<!-- src/app/chatbot-flow/chatbot-flow.component.html -->
+<div class="chatbot-flow-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h2>Create Story</h2>
+    </div>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" class="save-button" (click)="saveFlow()">
+        Save
+      </button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <!-- Left Sidebar -->
+    <div class="left-sidebar">
+      <div class="sidebar-header">
+        <p class="instruction-text">
+          Drag blocks to the node tree below using the drag handle
+        </p>
+      </div>
+
+      <!-- Search -->
+      <div class="search-container">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Search..." [formControl]="searchControl">
+        </mat-form-field>
+      </div>
+
+      <!-- Block List -->
+      <div class="blocks-list" cdkDropList (cdkDropListDropped)="drop($event)">
+        <div 
+          *ngFor="let block of filteredBlocks$ | async" 
+          class="block-item"
+          cdkDrag
+          (click)="addBlockToCanvas(block)">
+          
+          <div class="block-icon" [style.background-color]="getStatusColor(block.status)">
+            <mat-icon>{{ block.icon }}</mat-icon>
+          </div>
+          
+          <div class="block-content">
+            <div class="block-name">{{ block.name }}</div>
+            <div class="block-description" *ngIf="block.description">
+              {{ block.description }}
+            </div>
+          </div>
+          
+          <div class="drag-handle" cdkDragHandle>
+            <mat-icon>drag_indicator</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Canvas Area -->
+    <div class="canvas-area">
+      <!-- Canvas Controls -->
+      <div class="canvas-controls">
+        <div class="zoom-controls">
+          <button mat-icon-button (click)="zoomIn()" [disabled]="zoomLevel >= maxZoom">
+            <mat-icon>add</mat-icon>
+          </button>
+          <span class="zoom-level">{{ (zoomLevel * 100) | number:'1.0-0' }}%</span>
+          <button mat-icon-button (click)="zoomOut()" [disabled]="zoomLevel <= minZoom">
+            <mat-icon>remove</mat-icon>
+          </button>
+        </div>
+        <button mat-icon-button (click)="resetZoom()" matTooltip="Reset zoom">
+          <mat-icon>center_focus_strong</mat-icon>
+        </button>
+      </div>
+
+      <!-- Canvas Wrapper -->
+      <div 
+        class="canvas-wrapper" 
+        #canvasWrapper
+        [style.cursor]="isPanning ? 'grabbing' : 'default'">
+        
+        <!-- SVG for connections -->
+        <svg class="connections-svg" #svgCanvas>
+          <!-- Existing connections -->
+          <path 
+            *ngFor="let conn of connections"
+            [attr.d]="'M ' + conn.fromPoint.x + ',' + conn.fromPoint.y + ' Q ' + 
+                     ((conn.fromPoint.x + conn.toPoint.x) / 2) + ',' + conn.fromPoint.y + ' ' +
+                     conn.toPoint.x + ',' + conn.toPoint.y"
+            class="connection-line"
+            stroke="#6366f1"
+            stroke-width="2"
+            fill="none">
+          </path>
+          
+          <!-- Temporary connection while drawing -->
+          <path 
+            *ngIf="temporaryConnection"
+            [attr.d]="'M ' + temporaryConnection.x1 + ',' + temporaryConnection.y1 + ' L ' + 
+                     temporaryConnection.x2 + ',' + temporaryConnection.y2"
+            class="temp-connection-line"
+            stroke="#6366f1"
+            stroke-width="2"
+            stroke-dasharray="5,5"
+            fill="none">
+          </path>
+        </svg>
+
+        <!-- Canvas Content -->
+        <div class="canvas-content" #canvasContent>
+          <!-- Flow Start Indicator -->
+          <div class="flow-start-indicator">
+            <div class="flow-start-text">Flow starts here</div>
+            <div class="flow-start-arrow">
+              <mat-icon>arrow_downward</mat-icon>
+            </div>
+          </div>
+
+          <!-- Canvas Blocks -->
+          <div 
+            *ngFor="let block of canvasBlocks" 
+            class="canvas-block"
+            [class]="'canvas-block-' + block.type"
+            [style.left.px]="block.x"
+            [style.top.px]="block.y"
+            [style.border-color]="getStatusColor(block.status)"
+            [style.background-color]="getTypeColor(block.type)"
+            cdkDrag
+            (cdkDragEnded)="onBlockDragEnded($event, block)"
+            (mousedown)="endConnection($event, block)">
+            
+            <!-- Block Header -->
+            <div class="block-header">
+              <div class="block-type-badges">
+                <!-- User Input specific badges -->
+                <span 
+                  *ngIf="block.type === 'userInput' && block.subType === 'keywordGroup'" 
+                  class="badge keyword-group-badge">
+                  Keyword Group
+                </span>
+                <span 
+                  *ngIf="block.type === 'userInput' && block.subType === 'phrase'" 
+                  class="badge phrase-badge">
+                  Phrase
+                </span>
+              </div>
+              
+              <!-- Block Actions Menu -->
+              <div class="block-actions">
+                <button 
+                  mat-icon-button 
+                  [matMenuTriggerFor]="blockMenu"
+                  class="block-menu-trigger">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                
+                <mat-menu #blockMenu="matMenu">
+                  <button mat-menu-item (click)="editCanvasBlock(block)">
+                    <mat-icon>edit</mat-icon>
+                    <span>Edit</span>
+                  </button>
+                  <button mat-menu-item (click)="duplicateCanvasBlock(block)">
+                    <mat-icon>content_copy</mat-icon>
+                    <span>Duplicate</span>
+                  </button>
+                  <button mat-menu-item (click)="removeCanvasBlock(block.id)">
+                    <mat-icon>delete</mat-icon>
+                    <span>Delete</span>
+                  </button>
+                </mat-menu>
+              </div>
+            </div>
+
+            <!-- Block Content -->
+            <div class="block-body">
+              <div class="block-title">
+                <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
+                <span>{{ block.name }}</span>
+              </div>
+              
+              <div class="block-description" *ngIf="block.description">
+                {{ block.description }}
+              </div>
+
+              <!-- User Input Specific Content -->
+              <div *ngIf="block.type === 'userInput' && block.subType === 'keywordGroup'" class="keywords-container">
+                <div class="keywords-list">
+                  <mat-chip-listbox>
+                    <mat-chip-option 
+                      *ngFor="let keyword of block.keywords" 
+                      class="keyword-chip"
+                      (removed)="removeKeyword(block, keyword)">
+                      {{ keyword }}
+                      <button matChipRemove>
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    </mat-chip-option>
+                  </mat-chip-listbox>
+                </div>
+                <input 
+                  type="text" 
+                  class="keyword-input" 
+                  placeholder="Add keyword..."
+                  (keydown)="addKeyword(block, $event)">
+              </div>
+
+              <!-- Other block types content can be added here -->
+              <div *ngIf="block.content && block.type !== 'userInput'" class="block-content-text">
+                {{ block.content }}
+              </div>
+            </div>
+
+            <!-- Connection Points -->
+            <div 
+              class="connection-point connection-output"
+              (mousedown)="startConnection($event, block)">
+              <div class="connection-dot"></div>
+            </div>
+            
+            <div class="connection-point connection-input">
+              <div class="connection-dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
