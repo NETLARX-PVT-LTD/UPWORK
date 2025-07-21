@@ -1,6 +1,4 @@
-<!-- src/app/chatbot-flow/chatbot-flow.component.html -->
 <div class="chatbot-flow-container">
-  <!-- Header -->
   <div class="header">
     <div class="header-left">
       <h2>Create Story</h2>
@@ -13,7 +11,6 @@
   </div>
 
   <div class="main-content">
-    <!-- Left Sidebar -->
     <div class="left-sidebar">
       <div class="sidebar-header">
         <p class="instruction-text">
@@ -21,7 +18,6 @@
         </p>
       </div>
 
-      <!-- Search -->
       <div class="search-container">
         <mat-form-field appearance="outline" class="search-field">
           <mat-icon matPrefix>search</mat-icon>
@@ -29,25 +25,28 @@
         </mat-form-field>
       </div>
 
-      <!-- Block List -->
-      <div class="blocks-list" cdkDropList (cdkDropListDropped)="drop($event)">
-        <div 
-          *ngFor="let block of filteredBlocks$ | async" 
+      <div
+        class="blocks-list"
+        cdkDropList
+        (cdkDropListDropped)="drop($event)">
+
+        <div
+          *ngFor="let block of filteredBlocks$ | async"
           class="block-item"
           cdkDrag
           (click)="addBlockToCanvas(block)">
-          
+
           <div class="block-icon" [style.background-color]="getStatusColor(block.status)">
             <mat-icon>{{ block.icon }}</mat-icon>
           </div>
-          
+
           <div class="block-content">
             <div class="block-name">{{ block.name }}</div>
             <div class="block-description" *ngIf="block.description">
               {{ block.description }}
             </div>
           </div>
-          
+
           <div class="drag-handle" cdkDragHandle>
             <mat-icon>drag_indicator</mat-icon>
           </div>
@@ -55,9 +54,7 @@
       </div>
     </div>
 
-    <!-- Canvas Area -->
-    <div class="canvas-area">
-      <!-- Canvas Controls -->
+    <div class="canvas-area" [class.sidebar-open]="rightSidebarOpen">
       <div class="canvas-controls">
         <div class="zoom-controls">
           <button mat-icon-button (click)="zoomIn()" [disabled]="zoomLevel >= maxZoom">
@@ -73,31 +70,27 @@
         </button>
       </div>
 
-      <!-- Canvas Wrapper -->
-      <div 
-        class="canvas-wrapper" 
+      <div
+        class="canvas-wrapper"
         #canvasWrapper
         [style.cursor]="isPanning ? 'grabbing' : 'default'">
-        
-        <!-- SVG for connections -->
+
         <svg class="connections-svg" #svgCanvas>
-          <!-- Existing connections -->
-          <path 
+          <path
             *ngFor="let conn of connections"
-            [attr.d]="'M ' + conn.fromPoint.x + ',' + conn.fromPoint.y + ' Q ' + 
-                     ((conn.fromPoint.x + conn.toPoint.x) / 2) + ',' + conn.fromPoint.y + ' ' +
-                     conn.toPoint.x + ',' + conn.toPoint.y"
+            [attr.d]="'M ' + conn.fromPoint.x + ',' + conn.fromPoint.y + ' Q ' +
+                      ((conn.fromPoint.x + conn.toPoint.x) / 2) + ',' + conn.fromPoint.y + ' ' +
+                      conn.toPoint.x + ',' + conn.toPoint.y"
             class="connection-line"
             stroke="#6366f1"
             stroke-width="2"
             fill="none">
           </path>
-          
-          <!-- Temporary connection while drawing -->
-          <path 
+
+          <path
             *ngIf="temporaryConnection"
-            [attr.d]="'M ' + temporaryConnection.x1 + ',' + temporaryConnection.y1 + ' L ' + 
-                     temporaryConnection.x2 + ',' + temporaryConnection.y2"
+            [attr.d]="'M ' + temporaryConnection.x1 + ',' + temporaryConnection.y1 + ' L ' +
+                      temporaryConnection.x2 + ',' + temporaryConnection.y2"
             class="temp-connection-line"
             stroke="#6366f1"
             stroke-width="2"
@@ -106,9 +99,7 @@
           </path>
         </svg>
 
-        <!-- Canvas Content -->
         <div class="canvas-content" #canvasContent>
-          <!-- Flow Start Indicator -->
           <div class="flow-start-indicator">
             <div class="flow-start-text">Flow starts here</div>
             <div class="flow-start-arrow">
@@ -116,11 +107,11 @@
             </div>
           </div>
 
-          <!-- Canvas Blocks -->
-          <div 
-            *ngFor="let block of canvasBlocks" 
+          <div
+            *ngFor="let block of canvasBlocks"
             class="canvas-block"
             [class]="'canvas-block-' + block.type"
+            [class.selected]="selectedBlock?.id === block.id"
             [style.left.px]="block.x"
             [style.top.px]="block.y"
             [style.border-color]="getStatusColor(block.status)"
@@ -128,32 +119,34 @@
             cdkDrag
             (cdkDragEnded)="onBlockDragEnded($event, block)"
             (mousedown)="endConnection($event, block)">
-            
-            <!-- Block Header -->
+
             <div class="block-header">
               <div class="block-type-badges">
-                <!-- User Input specific badges -->
-                <span 
-                  *ngIf="block.type === 'userInput' && block.subType === 'keywordGroup'" 
+                <span
+                  *ngIf="block.type === 'userInput' && block.subType === 'keywordGroup'"
                   class="badge keyword-group-badge">
                   Keyword Group
                 </span>
-                <span 
-                  *ngIf="block.type === 'userInput' && block.subType === 'phrase'" 
+                <span
+                  *ngIf="block.type === 'userInput' && block.subType === 'phrase'"
                   class="badge phrase-badge">
                   Phrase
                 </span>
+                <span
+                  *ngIf="block.type === 'userInput' && block.subType === 'anything'"
+                  class="badge anything-badge">
+                  Type Anything
+                </span>
               </div>
-              
-              <!-- Block Actions Menu -->
+
               <div class="block-actions">
-                <button 
-                  mat-icon-button 
+                <button
+                  mat-icon-button
                   [matMenuTriggerFor]="blockMenu"
                   class="block-menu-trigger">
                   <mat-icon>more_vert</mat-icon>
                 </button>
-                
+
                 <mat-menu #blockMenu="matMenu">
                   <button mat-menu-item (click)="editCanvasBlock(block)">
                     <mat-icon>edit</mat-icon>
@@ -171,23 +164,20 @@
               </div>
             </div>
 
-            <!-- Block Content -->
             <div class="block-body">
-              <div class="block-title">
-                <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
+              <div class="block-title" (click)="selectBlock(block)"> <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
                 <span>{{ block.name }}</span>
               </div>
-              
+
               <div class="block-description" *ngIf="block.description">
                 {{ block.description }}
               </div>
 
-              <!-- User Input Specific Content -->
               <div *ngIf="block.type === 'userInput' && block.subType === 'keywordGroup'" class="keywords-container">
                 <div class="keywords-list">
                   <mat-chip-listbox>
-                    <mat-chip-option 
-                      *ngFor="let keyword of block.keywords" 
+                    <mat-chip-option
+                      *ngFor="let keyword of block.keywords"
                       class="keyword-chip"
                       (removed)="removeKeyword(block, keyword)">
                       {{ keyword }}
@@ -197,32 +187,163 @@
                     </mat-chip-option>
                   </mat-chip-listbox>
                 </div>
-                <input 
-                  type="text" 
-                  class="keyword-input" 
+                <input
+                  type="text"
+                  class="keyword-input"
                   placeholder="Add keyword..."
                   (keydown)="addKeyword(block, $event)">
               </div>
 
-              <!-- Other block types content can be added here -->
               <div *ngIf="block.content && block.type !== 'userInput'" class="block-content-text">
                 {{ block.content }}
               </div>
             </div>
 
-            <!-- Connection Points -->
-            <div 
+            <div
               class="connection-point connection-output"
               (mousedown)="startConnection($event, block)">
               <div class="connection-dot"></div>
             </div>
-            
+
             <div class="connection-point connection-input">
               <div class="connection-dot"></div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="right-sidebar" [class.open]="rightSidebarOpen" *ngIf="selectedBlock">
+      <div class="right-sidebar-header">
+        <div class="sidebar-title">
+          <mat-icon>{{ selectedBlock.icon }}</mat-icon>
+          <span>{{ selectedBlock.name }}</span>
+          <span
+            *ngIf="selectedBlock.type === 'userInput' && selectedBlock.subType"
+            class="badge"
+            [class.keyword-group-badge]="selectedBlock.subType === 'keywordGroup'"
+            [class.phrase-badge]="selectedBlock.subType === 'phrase'"
+            [class.anything-badge]="selectedBlock.subType === 'anything'">
+            {{ selectedBlock.subType === 'keywordGroup' ? 'Keyword Group' :
+              selectedBlock.subType === 'phrase' ? 'Phrase' :
+              selectedBlock.subType === 'anything' ? 'Type Anything' : selectedBlock.subType }}
+          </span>
+        </div>
+        <button mat-icon-button (click)="closeSidebar()" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="right-sidebar-content">
+        <div *ngIf="selectedBlock.type === 'userInput'">
+          <p class="config-description">
+            If user query matches a combination of keywords or datastore values
+          </p>
+
+          <div class="toggle-container">
+            <mat-button-toggle-group
+              [(value)]="selectedInputMode"
+              (change)="onInputModeChange($event)">
+              <mat-button-toggle value="keyword" class="toggle-keyword">
+                Keyword
+              </mat-button-toggle>
+              <mat-button-toggle value="variable" class="toggle-variable">
+                Variable
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+
+          <div *ngIf="selectedBlock.subType === 'keywordGroup' && selectedInputMode === 'keyword'">
+            <div class="keywords-section">
+              <div class="keywords-display">
+                <mat-chip-listbox>
+                  <mat-chip-option
+                    *ngFor="let keyword of selectedBlock.keywords"
+                    class="keyword-chip-large"
+                    (removed)="removeKeyword(selectedBlock, keyword)">
+                    {{ keyword }}
+                    <button matChipRemove>
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </mat-chip-option>
+                </mat-chip-listbox>
+              </div>
+
+              <div class="add-keyword-section">
+                <mat-form-field appearance="outline" class="keyword-input-field">
+                  <input
+                    matInput
+                    placeholder="Add keywords"
+                    [(ngModel)]="newKeyword"
+                    (keydown)="addKeywordFromSidebar($event)">
+                </mat-form-field>
+              </div>
+
+              <div class="add-keyword-group">
+                <button mat-stroked-button class="add-group-btn">
+                  <mat-icon>add</mat-icon>
+                  Add Keyword Group
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="selectedBlock.subType === 'phrase'">
+            <mat-form-field appearance="outline" class="phrase-input">
+              <mat-label>Enter phrase</mat-label>
+              <input matInput [(ngModel)]="selectedBlock.phraseText" placeholder="Type the exact phrase...">
+            </mat-form-field>
+          </div>
+
+          <div *ngIf="selectedBlock.subType === 'anything'">
+            <div class="anything-config">
+              <p>This block will match any user input</p>
+              <mat-form-field appearance="outline">
+                <mat-label>Custom message (optional)</mat-label>
+                <textarea matInput [(ngModel)]="selectedBlock.customMessage" placeholder="Add a custom message..."></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="selectedBlock.type === 'textResponse'">
+          <h4 class="section-title">Bot Says</h4>
+          <div class="input-group">
+            <mat-form-field appearance="outline">
+              <mat-label>Type chatbot response</mat-label>
+              <textarea matInput [(ngModel)]="selectedBlock.content" placeholder="Type chatbot response..."></textarea>
+            </mat-form-field>
+          </div>
+          <button mat-flat-button color="primary" class="add-alternate-responses-button" (click)="toggleAlternateResponses()">
+            Add Alternate Responses
+          </button>
+
+          <div *ngIf="showAlternateResponses">
+            <mat-form-field appearance="outline">
+              <mat-label>Type chatbot response</mat-label>
+              <textarea matInput [(ngModel)]="newAlternateResponse" placeholder="Type alternate response..."></textarea>
+            </mat-form-field>
+            <div class="alternate-response-actions">
+              <button mat-flat-button color="primary">Add</button>
+              <button mat-stroked-button>Generate from AI</button>
+              <button mat-stroked-button color="warn" (click)="toggleAlternateResponses()">Hide</button>
+            </div>
+          </div>
+          <div class="quick-replies-section">
+            <h4 class="section-title">Add Quick Replies</h4>
+            <p class="info-message">Quick Replies are buttons that are displayed to the user</p>
+          </div>
+        </div>
+        <div *ngIf="selectedBlock.type !== 'userInput' && selectedBlock.type !== 'textResponse'">
+          <p>Configuration options for {{ selectedBlock.name }} will be displayed here.</p>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="sidebar-overlay"
+      [class.active]="rightSidebarOpen"
+      (click)="closeSidebar()">
     </div>
   </div>
 </div>
