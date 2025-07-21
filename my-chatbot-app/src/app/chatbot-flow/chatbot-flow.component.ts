@@ -1,10 +1,10 @@
 // src/app/chatbot-flow/chatbot-flow.component.ts
 import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, HostListener } from '@angular/core';
-import { CdkDragDrop, moveItemInArray, CdkDragEnd, CdkDrag } from '@angular/cdk/drag-drop'; // Ensure CdkDragDrop is imported
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { CdkDragDrop, moveItemInArray, CdkDragEnd, CdkDrag } from '@angular/cdk/drag-drop';
+import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms'; // Import FormsModule
 import { Observable } from 'rxjs';
 import { map, startWith, debounceTime } from 'rxjs/operators';
-import { ChatbotBlock, Connection } from '../models/chatbot-block.model';
+import { ChatbotBlock, Connection } from '../models/chatbot-block.model'; // Correct: Only import the interfaces
 
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,6 +14,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 
 @Component({
   selector: 'app-chatbot-flow',
@@ -21,13 +24,16 @@ import { MatChipsModule } from '@angular/material/chips';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule, // Add FormsModule here
     DragDropModule,
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
     MatMenuModule,
-    MatChipsModule
+    MatChipsModule,
+    MatButtonToggleModule,
+    MatTooltipModule
   ],
   templateUrl: './chatbot-flow.component.html',
   styleUrls: ['./chatbot-flow.component.scss']
@@ -134,6 +140,8 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
   filteredBlocks$: Observable<ChatbotBlock[]> | undefined;
   searchControl = new FormControl('');
 
+  showAlternateResponses: boolean = false;
+newAlternateResponse: string = ''; // To bind to the new alternate response input
   // Zoom and pan
   zoomLevel: number = 1.0;
   minZoom: number = 0.5;
@@ -151,6 +159,12 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
   isDrawingConnection = false;
   connectionStart: { blockId: string, x: number, y: number } | null = null;
   temporaryConnection: { x1: number, y1: number, x2: number, y2: number } | null = null;
+
+  // Right Sidebar properties
+  selectedBlock: ChatbotBlock | null = null;
+  rightSidebarOpen: boolean = false;
+  selectedInputMode: 'keyword' | 'variable' = 'keyword'; // Default input mode
+  newKeyword: string = ''; // For the new keyword input in the sidebar
 
   constructor() { }
 
@@ -171,7 +185,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       x: 600,
       y: 200,
       subType: 'keywordGroup',
-      content: 'Hello 👋', // This is correctly set for the initial block
+      content: 'Hello 👋',
       keywords: ['Hello', 'Hi'],
       description: 'Define keywords that trigger the conversations',
       width: 0,
@@ -181,6 +195,11 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.updateCanvasTransform();
+    // Set initial dimensions for the starting block (important for connection points)
+    // You might need a slight delay or a way to ensure the block is rendered before querying its dimensions
+    setTimeout(() => {
+        this.updateBlockDimensions(this.canvasBlocks[0]);
+    }, 0);
   }
 
   @HostListener('wheel', ['$event'])
@@ -191,6 +210,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       const newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoomLevel + delta));
       this.zoomLevel = parseFloat(newZoom.toFixed(2));
       this.updateCanvasTransform();
+      this.updateConnections();
     }
   }
 
@@ -201,6 +221,11 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       this.panStartX = event.clientX - this.panOffsetX;
       this.panStartY = event.clientY - this.panOffsetY;
       this.canvasWrapper.nativeElement.style.cursor = 'grabbing';
+      // Deselect block when clicking on empty canvas area
+      if (this.selectedBlock && !this.isDrawingConnection) {
+        this.selectedBlock = null;
+        this.closeSidebar();
+      }
     }
   }
 
@@ -214,11 +239,15 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
 
     if (this.isDrawingConnection && this.connectionStart) {
       const rect = this.canvasWrapper.nativeElement.getBoundingClientRect();
+      // Adjust mouse coordinates to be relative to the scaled and panned canvas content
+      const mouseX = (event.clientX - rect.left - this.panOffsetX) / this.zoomLevel;
+      const mouseY = (event.clientY - rect.top - this.panOffsetY) / this.zoomLevel;
+
       this.temporaryConnection = {
         x1: this.connectionStart.x,
         y1: this.connectionStart.y,
-        x2: (event.clientX - rect.left - this.panOffsetX) / this.zoomLevel,
-        y2: (event.clientY - rect.top - this.panOffsetY) / this.zoomLevel
+        x2: mouseX,
+        y2: mouseY
       };
     }
   }
@@ -243,30 +272,62 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
     );
   }
 
+  toggleAlternateResponses() {
+  this.showAlternateResponses = !this.showAlternateResponses;
+  if (!this.showAlternateResponses) {
+    this.newAlternateResponse = ''; // Clear input when hiding
+  }
+}
+
   // Block management
   addBlockToCanvas(block: ChatbotBlock) {
     const newBlockId = `${block.type}-${Date.now()}`;
     const newBlock: ChatbotBlock = {
       ...block,
       id: newBlockId,
-      x: 300 + (this.canvasBlocks.length * 50),
-      y: 100 + (this.canvasBlocks.length * 200),
-      content: block.subType === 'keywordGroup' ? 'Hello 👋' : undefined,
-      keywords: block.subType === 'keywordGroup' ? ['Hello', 'Hi'] : undefined
+      x: this.calculateNewBlockX(), // Position new blocks near the center of the viewport
+      y: this.calculateNewBlockY(), // Position new blocks near the center of the viewport
+      content: block.subType === 'keywordGroup' ? 'New Keyword Group' : undefined,
+      keywords: block.subType === 'keywordGroup' ? [] : undefined,
+      phraseText: block.subType === 'phrase' ? '' : undefined,
+      customMessage: block.subType === 'anything' ? '' : undefined
     };
     this.canvasBlocks.push(newBlock);
+    // After adding, immediately update its dimensions and select it
+    setTimeout(() => {
+      this.updateBlockDimensions(newBlock);
+      this.selectBlock(newBlock);
+    }, 0); // Use setTimeout to ensure the block is rendered before measuring
+  }
+
+  // Helper to calculate a reasonable position for a new block
+  private calculateNewBlockX(): number {
+    if (this.canvasWrapper) {
+      const wrapperRect = this.canvasWrapper.nativeElement.getBoundingClientRect();
+      // Adjust for current pan and zoom to place it somewhat in the center of the visible area
+      return (wrapperRect.width / 2 - this.panOffsetX) / this.zoomLevel;
+    }
+    return 300 + (this.canvasBlocks.length * 50); // Fallback
+  }
+
+  private calculateNewBlockY(): number {
+    if (this.canvasWrapper) {
+      const wrapperRect = this.canvasWrapper.nativeElement.getBoundingClientRect();
+      return (wrapperRect.height / 2 - this.panOffsetY) / this.zoomLevel;
+    }
+    return 100 + (this.canvasBlocks.length * 200); // Fallback
   }
 
   onBlockDragEnded(event: CdkDragEnd, block: ChatbotBlock) {
     const transform = event.source.getFreeDragPosition();
     block.x = (block.x || 0) + transform.x / this.zoomLevel;
     block.y = (block.y || 0) + transform.y / this.zoomLevel;
-    event.source._dragRef.reset();
+    event.source._dragRef.reset(); // Reset the drag reference to prevent cumulative transforms
     this.updateConnections();
   }
 
   editCanvasBlock(block: ChatbotBlock) {
-    console.log(`Editing block: ${block.name} (ID: ${block.id})`);
+    this.selectBlock(block); // Select the block to open the sidebar for editing
   }
 
   removeCanvasBlock(blockId: string) {
@@ -274,6 +335,10 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
     this.connections = this.connections.filter(c =>
       c.fromBlockId !== blockId && c.toBlockId !== blockId
     );
+    if (this.selectedBlock?.id === blockId) {
+      this.selectedBlock = null;
+      this.closeSidebar();
+    }
   }
 
   duplicateCanvasBlock(block: ChatbotBlock) {
@@ -282,14 +347,19 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       ...block,
       id: newBlockId,
       x: (block.x || 0) + 30,
-      y: (block.y || 0) + 30
+      y: (block.y || 0) + 30,
+      // Deep copy keywords if present
+      keywords: block.keywords ? [...block.keywords] : undefined
     };
     this.canvasBlocks.push(newBlock);
+    setTimeout(() => {
+      this.updateBlockDimensions(newBlock);
+      this.selectBlock(newBlock);
+    }, 0);
   }
 
-  // CONNECTION DRAG & DROP: This is the missing method!
+  // This method is used for reordering items within the `allBlocks` array (left sidebar)
   drop(event: CdkDragDrop<ChatbotBlock[]>) {
-    // This method is used for reordering items within the `allBlocks` array (left sidebar)
     moveItemInArray(this.allBlocks, event.previousIndex, event.currentIndex);
   }
 
@@ -297,57 +367,125 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
   startConnection(event: MouseEvent, block: ChatbotBlock) {
     event.stopPropagation();
     this.isDrawingConnection = true;
+
+    // Get the element of the specific block
+    const blockElement = (event.target as HTMLElement).closest('.canvas-block');
+    if (!blockElement) return;
+
+    // Find the output connection point within the block
+    const outputPointElement = blockElement.querySelector('.connection-output .connection-dot') as HTMLElement;
+    if (!outputPointElement) return;
+
+    const blockRect = blockElement.getBoundingClientRect();
+    const outputPointRect = outputPointElement.getBoundingClientRect();
+    const canvasContentRect = this.canvasContent.nativeElement.getBoundingClientRect();
+
+    // Calculate coordinates relative to the canvasContent (which has the transform)
+    const startX = (outputPointRect.left + outputPointRect.width / 2 - canvasContentRect.left) / this.zoomLevel;
+    const startY = (outputPointRect.top + outputPointRect.height / 2 - canvasContentRect.top) / this.zoomLevel;
+
     this.connectionStart = {
       blockId: block.id,
-      // These coordinates need to be relative to the SVG canvas's top-left corner
-      // considering the block's position and zoom/pan of the parent canvas content.
-      // For now, these are approximate center points of the connection dot at the bottom of the block
-      x: block.x + (block.width || 200) / 2, // Assuming average block width of 200px if not defined
-      y: block.y + (block.height || 120) // Assuming average block height of 120px if not defined
+      x: startX,
+      y: startY
     };
   }
 
   endConnection(event: MouseEvent, block: ChatbotBlock) {
     event.stopPropagation();
     if (this.isDrawingConnection && this.connectionStart && this.connectionStart.blockId !== block.id) {
-      // Calculate target point relative to the SVG canvas's top-left
-      const targetX = block.x + (block.width || 200) / 2;
-      const targetY = block.y; // Top center of the target block
+      // Get the element of the specific block (the target block)
+      const targetBlockElement = (event.target as HTMLElement).closest('.canvas-block');
+      if (!targetBlockElement) {
+        this.isDrawingConnection = false;
+        this.temporaryConnection = null;
+        this.connectionStart = null;
+        return;
+      }
 
-      const newConnection: Connection = {
-        id: `conn-${Date.now()}`,
-        fromBlockId: this.connectionStart.blockId,
-        toBlockId: block.id,
-        fromPoint: { x: this.connectionStart.x, y: this.connectionStart.y },
-        toPoint: { x: targetX, y: targetY }
-      };
-      this.connections.push(newConnection);
+      // Find the input connection point within the target block
+      const inputPointElement = targetBlockElement.querySelector('.connection-input .connection-dot') as HTMLElement;
+      if (!inputPointElement) {
+        this.isDrawingConnection = false;
+        this.temporaryConnection = null;
+        this.connectionStart = null;
+        return;
+      }
+
+      const inputPointRect = inputPointElement.getBoundingClientRect();
+      const canvasContentRect = this.canvasContent.nativeElement.getBoundingClientRect();
+
+      // Calculate coordinates relative to the canvasContent
+      const targetX = (inputPointRect.left + inputPointRect.width / 2 - canvasContentRect.left) / this.zoomLevel;
+      const targetY = (inputPointRect.top + inputPointRect.height / 2 - canvasContentRect.top) / this.zoomLevel;
+
+
+      // Check if a connection already exists between these blocks
+      const existingConnection = this.connections.find(conn =>
+        (conn.fromBlockId === this.connectionStart!.blockId && conn.toBlockId === block.id)
+      );
+
+      if (!existingConnection) {
+        const newConnection: Connection = {
+          id: `conn-${Date.now()}`,
+          fromBlockId: this.connectionStart.blockId,
+          toBlockId: block.id,
+          fromPoint: { x: this.connectionStart.x, y: this.connectionStart.y },
+          toPoint: { x: targetX, y: targetY }
+        };
+        this.connections.push(newConnection);
+      } else {
+        console.warn('Connection already exists between these blocks.');
+      }
     }
     this.isDrawingConnection = false;
     this.temporaryConnection = null;
     this.connectionStart = null;
+    this.updateConnections();
   }
 
   updateConnections() {
-    // This method recalculates connection points based on current block positions.
-    // It's important for the SVG lines to follow the blocks.
     this.connections.forEach(conn => {
       const fromBlock = this.canvasBlocks.find(b => b.id === conn.fromBlockId);
       const toBlock = this.canvasBlocks.find(b => b.id === conn.toBlockId);
 
       if (fromBlock && toBlock) {
-        // Recalculate fromPoint (bottom center of fromBlock)
-        conn.fromPoint = {
-          x: fromBlock.x + (fromBlock.width || 200) / 2,
-          y: fromBlock.y + (fromBlock.height || 120)
-        };
-        // Recalculate toPoint (top center of toBlock)
-        conn.toPoint = {
-          x: toBlock.x + (toBlock.width || 200) / 2,
-          y: toBlock.y
-        };
+        // Find the actual DOM elements for the blocks
+        const fromBlockElement = this.canvasContent.nativeElement.querySelector(`.canvas-block[id="${fromBlock.id}"]`);
+        const toBlockElement = this.canvasContent.nativeElement.querySelector(`.canvas-block[id="${toBlock.id}"]`);
+
+        if (fromBlockElement && toBlockElement) {
+          const fromOutputPoint = fromBlockElement.querySelector('.connection-output .connection-dot') as HTMLElement;
+          const toInputPoint = toBlockElement.querySelector('.connection-input .connection-dot') as HTMLElement;
+
+          if (fromOutputPoint && toInputPoint) {
+            const canvasContentRect = this.canvasContent.nativeElement.getBoundingClientRect();
+
+            const fromRect = fromOutputPoint.getBoundingClientRect();
+            const toRect = toInputPoint.getBoundingClientRect();
+
+            conn.fromPoint = {
+              x: (fromRect.left + fromRect.width / 2 - canvasContentRect.left) / this.zoomLevel,
+              y: (fromRect.top + fromRect.height / 2 - canvasContentRect.top) / this.zoomLevel
+            };
+            conn.toPoint = {
+              x: (toRect.left + toRect.width / 2 - canvasContentRect.left) / this.zoomLevel,
+              y: (toRect.top + toRect.height / 2 - canvasContentRect.top) / this.zoomLevel
+            };
+          }
+        }
       }
     });
+  }
+
+  // Update a block's actual width and height after it's rendered
+  updateBlockDimensions(block: ChatbotBlock) {
+    const blockElement = this.canvasContent.nativeElement.querySelector(`.canvas-block[id="${block.id}"]`);
+    if (blockElement) {
+      block.width = blockElement.offsetWidth;
+      block.height = blockElement.offsetHeight;
+      this.updateConnections(); // Recalculate connections if dimensions change
+    }
   }
 
 
@@ -356,7 +494,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
     if (this.zoomLevel < this.maxZoom) {
       this.zoomLevel = parseFloat((this.zoomLevel + this.zoomStep).toFixed(2));
       this.updateCanvasTransform();
-      this.updateConnections(); // Update connections on zoom
+      this.updateConnections();
     }
   }
 
@@ -364,7 +502,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
     if (this.zoomLevel > this.minZoom) {
       this.zoomLevel = parseFloat((this.zoomLevel - this.zoomStep).toFixed(2));
       this.updateCanvasTransform();
-      this.updateConnections(); // Update connections on zoom
+      this.updateConnections();
     }
   }
 
@@ -373,7 +511,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
     this.panOffsetX = 0;
     this.panOffsetY = 0;
     this.updateCanvasTransform();
-    this.updateConnections(); // Update connections on reset
+    this.updateConnections();
   }
 
   updateCanvasTransform() {
@@ -385,11 +523,50 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
     }
 
     // Also update the SVG position and scale to match the canvas content
-    // The SVG needs to be precisely aligned with the canvas-content for lines to match blocks.
     if (this.svgCanvas) {
       this.svgCanvas.nativeElement.style.transform =
         `translate(${this.panOffsetX}px, ${this.panOffsetY}px) scale(${this.zoomLevel})`;
       this.svgCanvas.nativeElement.style.transformOrigin = '0 0';
+    }
+  }
+
+  // Right Sidebar Block Selection and Management
+  selectBlock(block: ChatbotBlock) {
+    this.selectedBlock = block;
+    this.rightSidebarOpen = true;
+    // Set the input mode based on the selected block's subType
+    if (block.type === 'userInput') {
+      if (block.subType === 'keywordGroup') {
+        this.selectedInputMode = 'keyword';
+      } else {
+        // For 'phrase' or 'anything', 'keyword' or 'variable' toggle doesn't directly apply
+        // You might want to default it or hide it, based on your UX.
+        this.selectedInputMode = 'keyword';
+      }
+    } else {
+      // For non-userInput blocks, reset or hide the toggle
+      this.selectedInputMode = 'keyword';
+    }
+  }
+
+  closeSidebar() {
+    this.rightSidebarOpen = false;
+    this.selectedBlock = null;
+  }
+
+  onInputModeChange(event: any) {
+    this.selectedInputMode = event.value;
+    console.log('Selected Input Mode:', this.selectedInputMode);
+  }
+
+  addKeywordFromSidebar(event: KeyboardEvent) {
+    if (event.key === 'Enter' && this.newKeyword.trim() && this.selectedBlock) { // Check selectedBlock exists
+      if (!this.selectedBlock.keywords) { // Initialize keywords if it doesn't exist
+        this.selectedBlock.keywords = [];
+      }
+      this.selectedBlock.keywords.push(this.newKeyword.trim());
+      this.newKeyword = ''; // Clear input
+      event.preventDefault(); // Prevent default form submission
     }
   }
 
@@ -407,6 +584,11 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       block.keywords.push(input.value.trim());
       input.value = '';
       event.preventDefault();
+      // If the block is currently selected in the sidebar, also update the sidebar's view
+      if (this.selectedBlock?.id === block.id && this.selectedBlock.subType === 'keywordGroup' && this.selectedBlock.keywords) {
+        // A simple re-assignment might be needed to trigger change detection for *ngFor in sidebar
+        this.selectedBlock.keywords = [...this.selectedBlock.keywords];
+      }
     }
   }
 

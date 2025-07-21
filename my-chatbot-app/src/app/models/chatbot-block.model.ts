@@ -1,4 +1,4 @@
-// src/app/models/chatbot-block.model.ts (Example - ensure this matches your actual model)
+// src/app/models/chatbot-block.model.ts
 export interface ChatbotBlock {
   id: string;
   name: string;
@@ -7,18 +7,20 @@ export interface ChatbotBlock {
   status: string;
   x: number;
   y: number;
-  subType?: string; // e.g., 'phrase', 'keywordGroup', 'anything'
+  width?: number; // Optional, will be set after rendering
+  height?: number; // Optional, will be set after rendering
   description?: string;
-  width: number;
-  height: number;
-  content?: string; // This is crucial for storing the message
-  keywords?: string[]; // For 'keywordGroup'
+  subType?: 'phrase' | 'keywordGroup' | 'anything'; // For userInput blocks
+  content?: string; // For textResponse or other simple content blocks
+  keywords?: string[]; // For userInput keywordGroup
+  phraseText?: string; // For userInput phrase
+  customMessage?: string; // For userInput anything
 }
 
 export interface Connection {
   id: string;
   fromBlockId: string;
   toBlockId: string;
-  fromPoint: { x: number; y: number };
-  toPoint: { x: number; y: number };
+  fromPoint: { x: number; y: number; };
+  toPoint: { x: number; y: number; };
 }
