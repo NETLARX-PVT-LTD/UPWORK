@@ -10,8 +10,7 @@ import { ChatbotFlowComponent } from './chatbot-flow/chatbot-flow.component';
   selector: 'app-root',
   standalone: true, // AppComponent is also a standalone component
   imports: [
-    CommonModule,
-    RouterOutlet, // Keep if you use routing, otherwise remove
+    CommonModule, // Keep if you use routing, otherwise remove
     ChatbotFlowComponent // <--- Add ChatbotFlowComponent here
   ],
   templateUrl: './app.component.html',

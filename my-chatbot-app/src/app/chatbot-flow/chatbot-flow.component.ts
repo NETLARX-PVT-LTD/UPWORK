@@ -43,6 +43,8 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
   @ViewChild('canvasContent') canvasContent!: ElementRef;
   @ViewChild('svgCanvas') svgCanvas!: ElementRef;
 
+  typingDelay: number = 10;
+
   allBlocks: ChatbotBlock[] = [
     {
       id: '1',
@@ -84,14 +86,15 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       height: 0
     },
     {
-      id: '4', name: 'Text Response', icon: 'chat_bubble_outline', type: 'textResponse', status: 'active', x: 0, y: 0,
+      id: '4', name: 'Text Response', icon: 'chat_bubble_outline', type: 'textResponse', status: 'active', x: 0, y: 0,description: 'Respond with a text message',
       width: 0,
       height: 0
     },
     {
       id: '5', name: 'Media block', icon: 'image', type: 'mediaBlock', status: 'active', x: 0, y: 0,
       width: 0,
-      height: 0
+      height: 0,
+      description: 'Respond your users with multimedia messages such as Images, Videos etc',
     },
     {
       id: '6', name: 'Link Story', icon: 'link', type: 'linkStory', status: 'active', x: 0, y: 0,
@@ -111,7 +114,9 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
     {
       id: '9', name: 'Typing Delay', icon: 'hourglass_empty', type: 'typingDelay', status: 'active', x: 0, y: 0,
       width: 0,
-      height: 0
+      height: 0,
+      description: 'Add a typing delay between 2 blocks',
+      content : "typingDelay"
     },
     {
       id: '10', name: 'Conditional Redirect', icon: 'call_split', type: 'conditionalRedirect', status: 'active', x: 0, y: 0,
@@ -167,6 +172,10 @@ newAlternateResponse: string = ''; // To bind to the new alternate response inpu
   newKeyword: string = ''; // For the new keyword input in the sidebar
 
   constructor() { }
+
+  // add keyword functionality
+  // newKeyword: string = '';
+
 
   ngOnInit(): void {
     this.filteredBlocks$ = this.searchControl.valueChanges.pipe(
@@ -569,6 +578,7 @@ newAlternateResponse: string = ''; // To bind to the new alternate response inpu
       event.preventDefault(); // Prevent default form submission
     }
   }
+
 
   // Keywords management
   removeKeyword(block: ChatbotBlock, keyword: string) {
