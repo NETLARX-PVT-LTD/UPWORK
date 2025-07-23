@@ -168,3 +168,495 @@
     margin-top: 20px;
   }
 }
+
+/* src/app/chatbot-flow/blocks/text-response-block/text-response-block.component.scss */
+
+// Main Text Response Block Styling
+.text-response-main-block {
+  background: #ffffff;
+  border: 2px solid #e1e5e9;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+
+  .block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+
+    .block-type-badges {
+      .block-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #1f2937;
+
+        .block-icon {
+          color: #3b82f6;
+          font-size: 20px;
+        }
+      }
+    }
+
+    .block-actions {
+      .block-menu-trigger {
+        color: #6b7280;
+      }
+    }
+  }
+
+  .block-body {
+    .block-description {
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+
+    .block-content-text {
+      font-size: 14px;
+      color: #1f2937;
+      padding: 8px 0;
+    }
+  }
+}
+
+// Connection line from main block to quick replies
+.connection-line-to-replies {
+  width: 2px;
+  height: 30px;
+  background: #d1d5db;
+  margin: 0 auto;
+  position: relative;
+}
+
+// Quick Replies Flow Container (No Quick Reply + Quick Replies blocks)
+.quick-replies-flow-container {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 20px;
+  justify-content: center;
+
+  .no-quick-reply-block,
+  .quick-replies-main-block {
+    background: #ffffff;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    padding: 16px;
+    width: 200px;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .flow-block-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+
+      .block-icon {
+        font-size: 18px;
+        color: #3b82f6;
+      }
+
+      .block-title {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 14px;
+      }
+    }
+
+    .flow-block-body {
+      .block-description {
+        font-size: 12px;
+        color: #6b7280;
+        line-height: 1.4;
+      }
+    }
+
+    .connection-point {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .connection-dot {
+        width: 8px;
+        height: 8px;
+        background: #3b82f6;
+        border-radius: 50%;
+        border: 2px solid #ffffff;
+      }
+    }
+  }
+
+  .no-quick-reply-block {
+    background: #fef3e2;
+    border-color: #f59e0b;
+
+    .flow-block-header .block-icon {
+      color: #f59e0b;
+    }
+  }
+
+  .quick-replies-main-block {
+    background: #e0f2fe;
+    border-color: #0ea5e9;
+
+    .flow-block-header .block-icon {
+      color: #0ea5e9;
+    }
+  }
+}
+
+// Connection line to individual quick reply cards
+.connection-line-to-individual-replies {
+  width: 2px;
+  height: 30px;
+  background: #d1d5db;
+  margin: 0 auto;
+  position: relative;
+}
+
+// Individual Quick Reply Cards Row
+.individual-quick-replies {
+  .quick-reply-cards-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    .individual-quick-reply-card {
+      background: #f3e8ff;
+      border: 2px solid #a855f7;
+      border-radius: 12px;
+      padding: 12px 16px;
+      position: relative;
+      min-width: 150px;
+      max-width: 200px;
+      box-shadow: 0 2px 8px rgba(168, 85, 247, 0.1);
+
+      .quick-reply-card-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+
+        .quick-reply-icon {
+          color: #a855f7;
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+
+        .quick-reply-label {
+          font-size: 11px;
+          font-weight: 600;
+          color: #7c3aed;
+          text-transform: uppercase;
+        }
+
+        .quick-reply-status {
+          font-size: 12px;
+          font-weight: 500;
+          color: #1f2937;
+          background: #ffffff;
+          padding: 2px 6px;
+          border-radius: 4px;
+          margin-left: auto;
+          border: 1px solid #e5e7eb;
+        }
+      }
+
+      .connection-point {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .connection-dot {
+          width: 8px;
+          height: 8px;
+          background: #a855f7;
+          border-radius: 50%;
+          border: 2px solid #ffffff;
+        }
+      }
+    }
+  }
+}
+
+// Main connection points (when no quick replies)
+.main-connection {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.connection-output {
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  &.connection-input {
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .connection-dot {
+    width: 8px;
+    height: 8px;
+    background: #3b82f6;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+  }
+}
+
+// Quick Replies Section in Sidebar (Right Panel)
+.quick-replies-section {
+  .section-title {
+    color: #1f2937;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .add-quick-reply-btn {
+    color: #2563eb;
+    
+    &:disabled {
+      color: #9ca3af;
+    }
+  }
+
+  .quick-replies-subtitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 12px;
+  }
+
+  .quick-replies-cards-container {
+    margin-top: 16px;
+  }
+
+  .quick-replies-cards-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .quick-reply-card {
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.15);
+    }
+
+    .quick-reply-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      
+      .quick-reply-card-icon {
+        color: #3b82f6;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+      
+      .quick-reply-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        flex: 1;
+        margin-left: 8px;
+      }
+      
+      .quick-reply-remove-btn {
+        width: 24px;
+        height: 24px;
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+        border-radius: 50%;
+        
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+        
+        &:hover {
+          background: rgba(239, 68, 68, 0.2);
+        }
+      }
+    }
+    
+    .quick-reply-card-content {
+      .quick-reply-text {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1f2937;
+        line-height: 1.4;
+        word-break: break-word;
+      }
+    }
+  }
+
+  // Empty state styling
+  .no-quick-replies {
+    text-align: center;
+    padding: 32px 16px;
+    background: #f9fafb;
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    margin-top: 16px;
+    
+    .empty-state-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: #9ca3af;
+      margin-bottom: 12px;
+    }
+    
+    .empty-state-text {
+      font-size: 14px;
+      color: #6b7280;
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .quick-replies-flow-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .quick-reply-cards-row {
+    flex-direction: column;
+    align-items: center;
+    
+    .individual-quick-reply-card {
+      width: 100%;
+      max-width: 250px;
+    }
+  }
+}
+
+// Animation for new elements
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quick-replies-flow-container,
+.individual-quick-replies {
+  animation: slideInUp 0.3s ease-out;
+}
+
+/* Add or modify this in text-response-block.component.scss */
+
+.info-icon {
+  cursor: pointer;
+  color: #6200EE; /* Example color, adjust as needed */
+  margin-left: 8px; /* Spacing from the input field */
+}
+
+// Styling for the Search Variable Card
+.search-variable-card {
+  position: absolute; // Position absolutely within the right sidebar
+  right: 0; // Align to the right of the sidebar
+  top: 10px; // Adjust vertical position as needed, relative to its parent
+  width: 280px; // Fixed width as per the image
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for depth
+  z-index: 1000; // Ensure it appears above other elements
+  padding: 10px 15px; // Padding inside the card
+  box-sizing: border-box; // Include padding in width/height calculations
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+
+    .search-input {
+      flex-grow: 1; // Allow search input to take available space
+      margin-right: 10px; // Space between input and close icon
+    }
+
+    .close-icon {
+      cursor: pointer;
+      color: #666;
+      font-size: 20px; // Adjust icon size
+    }
+  }
+
+  .card-content {
+    .general-attributes-title {
+      font-size: 0.9rem;
+      color: #777;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .general-attributes-list {
+      .mat-chip-listbox {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px; // Space between chips
+      }
+      .mat-chip-option {
+        background-color: #e0e0e0; // Background color for chips
+        color: #333; // Text color for chips
+        padding: 6px 12px;
+        border-radius: 20px; // Rounded corners for chips
+        font-size: 13px; // Smaller font size for chips
+        cursor: pointer;
+        
+        &.mat-mdc-chip-selected { // Style for selected chips, if needed
+          background-color: #6200EE; // Example selected color
+          color: #fff;
+        }
+      }
+    }
+  }
+}

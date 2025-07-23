@@ -7,3 +7,5 @@ html, body {
   font-family: 'Inter', sans-serif; /* Using Inter as per previous discussions */
   @apply antialiased; /* Apply Tailwind's antialiasing for smoother fonts */
 }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

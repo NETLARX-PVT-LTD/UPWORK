@@ -1,0 +1,203 @@
+<!-- src/app/chatbot-flow/blocks/conversational-form-block/conversational-form-block.component.html -->
+<div class="block-header">
+  <div class="block-type-badges">
+    <div class="block-title" (click)="onSelectBlock()">
+      <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
+      <span>{{ block.name }}</span>
+    </div>
+    <span
+      *ngIf="block.formId"
+      class="badge form-block-badge"
+    >
+      Selected Form: {{ getFormName(block.formId) }}
+    </span>
+  </div>
+
+  <div class="block-actions">
+    <button
+      mat-icon-button
+      [matMenuTriggerFor]="blockMenu"
+      class="block-menu-trigger"
+    >
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #blockMenu="matMenu">
+      <button mat-menu-item (click)="onEditBlock()">
+        <mat-icon>edit</mat-icon>
+        <span>Edit</span>
+      </button>
+      <button mat-menu-item (click)="onDuplicateBlock()">
+        <mat-icon>content_copy</mat-icon>
+        <span>Duplicate</span>
+      </button>
+      <button mat-menu-item (click)="onRemoveBlock()">
+        <mat-icon>delete</mat-icon>
+        <span>Delete</span>
+      </button>
+    </mat-menu>
+  </div>
+</div>
+
+<div class="block-body">
+  <div class="block-description" *ngIf="block.description">
+    {{ block.description }}
+  </div>
+
+  <div class="block-content-text" *ngIf="block.formName">
+    Form: {{ block.formName }}
+  </div>
+  <div class="block-content-text" *ngIf="!block.formName">
+    No form selected.
+  </div>
+
+  <!-- Right sidebar content for selected conversational form block -->
+  <div class="right-sidebar-content" *ngIf="isSidebarOpen && isSelected">
+    <h4 class="section-title">Conversational Form Integration</h4>
+    <p class="config-description">
+      Ask one question at a time & send responses to your desired location or
+      webservice.
+    </p>
+
+    <div *ngIf="!showNewFormForm">
+      <div class="input-group">
+        <mat-form-field appearance="outline" class="full-width-input">
+          <mat-label>Select a Conversational Form</mat-label>
+          <mat-select
+            [(ngModel)]="block.formId"
+            (selectionChange)="onFormSelectionChange()"
+          >
+            <mat-option *ngFor="let form of availableForms" [value]="form.id">
+              {{ form.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-checkbox class="mt-2" [(ngModel)]="block.showAsInlineForm" (ngModelChange)="onContentChange()">
+        Show as inline form
+      </mat-checkbox>
+      <mat-icon
+        matTooltip="When selected, the form will be sent in a full page message in the chat window, otherwise it will display as individual messages."
+        class="info-icon"
+        >info</mat-icon
+      >
+
+      <div class="or-separator">OR</div>
+      <button
+        mat-flat-button
+        color="primary"
+        class="create-new-form-button"
+        (click)="createNewFormBlock()"
+      >
+        Create New Conversational Form
+      </button>
+    </div>
+
+    <div
+      class="d-flex justify-content-between align-items-center mt-3"
+      *ngIf="block.formId && !showNewFormForm"
+    >
+      <div class="selected-form-name">
+        <strong>Selected:</strong> {{ getFormName(block.formId) }}
+      </div>
+      <button
+        mat-flat-button
+        color="primary"
+        class="edit-form-button"
+        (click)="editExistingFormBlock()"
+      >
+        Edit Conversational Form
+      </button>
+    </div>
+
+    <div *ngIf="showNewFormForm">
+      <h5 class="sub-section-title">Define Conversational Form</h5>
+      <mat-form-field appearance="outline" class="full-width-input">
+        <mat-label>Form Name</mat-label>
+        <input
+          matInput
+          [(ngModel)]="block.formName"
+          (ngModelChange)="onContentChange()"
+          placeholder="e.g., Contact Us Form"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width-input mt-3">
+        <mat-label>Webhook URL (optional)</mat-label>
+        <input
+          matInput
+          type="url"
+          [(ngModel)]="block.webhookUrl"
+          (ngModelChange)="onContentChange()"
+          placeholder="e.g., https://your-webhook.com/endpoint"
+        />
+      </mat-form-field>
+
+      <mat-checkbox class="mt-3" [(ngModel)]="block.sendEmailNotification" (ngModelChange)="onContentChange()">
+        Send email notification
+      </mat-checkbox>
+      <mat-form-field
+        appearance="outline"
+        class="full-width-input mt-3"
+        *ngIf="block.sendEmailNotification"
+      >
+        <mat-label>Email Address</mat-label>
+        <input
+          matInput
+          type="email"
+          [(ngModel)]="block.notificationEmail"
+          (ngModelChange)="onContentChange()"
+          placeholder="e.g., recipient@example.com"
+        />
+      </mat-form-field>
+
+      <h6 class="sub-section-title mt-4">Form Fields</h6>
+      <div
+        *ngFor="let field of block.formFields; let i = index"
+        class="form-field-item"
+      >
+        <mat-form-field appearance="outline" class="full-width-input">
+          <mat-label>Field {{ i + 1 }} Name</mat-label>
+          <input
+            matInput
+            [(ngModel)]="field.name"
+            (ngModelChange)="onContentChange()"
+            placeholder="e.g., Name"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width-input mt-2">
+          <mat-label>Field {{ i + 1 }} Type</mat-label>
+          <mat-select [(ngModel)]="field.type" (ngModelChange)="onContentChange()">
+            <mat-option value="text">Text</mat-option>
+            <mat-option value="email">Email</mat-option>
+            <mat-option value="number">Number</mat-option>
+            <mat-option value="date">Date</mat-option>
+            <mat-option value="phone">Phone</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button mat-icon-button color="warn" (click)="removeFormField(i)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+      <button mat-stroked-button class="add-field-button" (click)="addFormField()">
+        <mat-icon>add</mat-icon> Add Field
+      </button>
+
+      <div class="d-flex justify-content-end mt-3">
+        <button mat-button (click)="cancelFormEdit()">Cancel</button>
+        <button mat-flat-button color="primary" class="ml-2">Save Form</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="connection-point connection-output"
+  (mousedown)="onStartConnection($event)"
+>
+  <div class="connection-dot"></div>
+</div>
+
+<div class="connection-point connection-input">
+  <div class="connection-dot"></div>
+</div>
