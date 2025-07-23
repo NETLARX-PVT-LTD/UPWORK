@@ -1,0 +1,186 @@
+<!-- src/app/chatbot-flow/blocks/user-input-block/user-input-block.component.html -->
+<div class="block-header">
+  <div class="block-type-badges">
+    <div class="block-title" (click)="onSelectBlock()">
+      <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
+      <span>{{ block.name }}</span>
+    </div>
+    <span
+      *ngIf="block.type === 'userInput' && block.subType === 'keywordGroup'"
+      class="badge keyword-group-badge"
+    >
+      Keyword Group
+    </span>
+    <span
+      *ngIf="block.type === 'userInput' && block.subType === 'phrase'"
+      class="badge phrase-badge"
+    >
+      Phrase
+    </span>
+    <span
+      *ngIf="block.type === 'userInput' && block.subType === 'anything'"
+      class="badge anything-badge"
+    >
+      Type Anything
+    </span>
+  </div>
+
+  <div class="block-actions">
+    <button
+      mat-icon-button
+      [matMenuTriggerFor]="blockMenu"
+      class="block-menu-trigger"
+    >
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #blockMenu="matMenu">
+      <button mat-menu-item (click)="onEditBlock()">
+        <mat-icon>edit</mat-icon>
+        <span>Edit</span>
+      </button>
+      <button mat-menu-item (click)="onDuplicateBlock()">
+        <mat-icon>content_copy</mat-icon>
+        <span>Duplicate</span>
+      </button>
+      <button mat-menu-item (click)="onRemoveBlock()">
+        <mat-icon>delete</mat-icon>
+        <span>Delete</span>
+      </button>
+    </mat-menu>
+  </div>
+</div>
+
+<div class="block-body">
+  <div class="block-description" *ngIf="block.description">
+    {{ block.description }}
+  </div>
+
+  <div
+    *ngIf="block.type === 'userInput' && block.subType === 'keywordGroup'"
+    class="keywords-container"
+  >
+    <div class="keywords-list">
+      <mat-chip-listbox>
+        <mat-chip-option
+          *ngFor="let keyword of block.keywords"
+          class="keyword-chip"
+          (removed)="removeKeyword(keyword)"
+        >
+          <h5 class="exact-keyword">{{ keyword }}</h5>
+          <button matChipRemove>
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+    <input
+      type="text"
+      class="keyword-input"
+      placeholder="Add keyword..."
+      (keydown)="addKeyword($event)"
+    />
+  </div>
+
+  <!-- Right sidebar content for selected user input block -->
+  <div class="right-sidebar-content" *ngIf="isSidebarOpen && isSelected">
+    <p class="config-description">
+      If user query matches a combination of keywords or datastore values
+    </p>
+
+    <div class="toggle-container">
+      <mat-button-toggle-group
+        [(value)]="selectedInputMode"
+        (change)="onInputModeChange($event)"
+      >
+        <mat-button-toggle value="keyword" class="toggle-keyword">
+          Keyword
+        </mat-button-toggle>
+        <mat-button-toggle value="variable" class="toggle-variable">
+          Variable
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    <div
+      *ngIf="
+        block.subType === 'keywordGroup' && selectedInputMode === 'keyword'
+      "
+    >
+      <div class="keywords-section">
+        <div class="keywords-display">
+          <mat-chip-listbox>
+            <mat-chip-option
+              *ngFor="let keyword of block.keywords"
+              class="keyword-chip-large"
+              (removed)="removeKeyword(keyword)"
+            >
+              <h5 class="exact-keyword">{{ keyword }}</h5>
+              <button matChipRemove>
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-chip-option>
+          </mat-chip-listbox>
+        </div>
+
+        <div class="add-keyword-section">
+          <mat-form-field
+            appearance="outline"
+            class="keyword-input-field"
+          >
+            <input
+              matInput
+              placeholder="Add keywords"
+              [(ngModel)]="newKeyword"
+              (keydown)="addKeyword($event)"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="add-keyword-group">
+          <button mat-stroked-button class="add-group-btn">
+            <mat-icon>add</mat-icon>
+            Add Keyword Group
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="block.subType === 'phrase'">
+      <mat-form-field appearance="outline" class="phrase-input">
+        <mat-label>Enter phrase</mat-label>
+        <input
+          matInput
+          [(ngModel)]="block.phraseText"
+          (ngModelChange)="onContentChange()"
+          placeholder="Type the exact phrase..."
+        />
+      </mat-form-field>
+    </div>
+
+    <div *ngIf="block.subType === 'anything'">
+      <div class="anything-config">
+        <p>This block will match any user input</p>
+        <mat-form-field appearance="outline">
+          <mat-label>Custom message (optional)</mat-label>
+          <textarea
+            matInput
+            [(ngModel)]="block.customMessage"
+            (ngModelChange)="onContentChange()"
+            placeholder="Add a custom message..."
+          ></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="connection-point connection-output"
+  (mousedown)="onStartConnection($event)"
+>
+  <div class="connection-dot"></div>
+</div>
+
+<div class="connection-point connection-input">
+  <div class="connection-dot"></div>
+</div>

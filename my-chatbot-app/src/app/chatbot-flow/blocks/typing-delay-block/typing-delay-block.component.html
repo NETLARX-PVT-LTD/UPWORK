@@ -1,0 +1,72 @@
+<!-- src/app/chatbot-flow/blocks/typing-delay-block/typing-delay-block.component.html -->
+<div class="block-header">
+  <div class="block-type-badges">
+    <div class="block-title" (click)="onSelectBlock()">
+      <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
+      <span>{{ block.name }}</span>
+    </div>
+  </div>
+
+  <div class="block-actions">
+    <button
+      mat-icon-button
+      [matMenuTriggerFor]="blockMenu"
+      class="block-menu-trigger"
+    >
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #blockMenu="matMenu">
+      <button mat-menu-item (click)="onEditBlock()">
+        <mat-icon>edit</mat-icon>
+        <span>Edit</span>
+      </button>
+      <button mat-menu-item (click)="onDuplicateBlock()">
+        <mat-icon>content_copy</mat-icon>
+        <span>Duplicate</span>
+      </button>
+      <button mat-menu-item (click)="onRemoveBlock()">
+        <mat-icon>delete</mat-icon>
+        <span>Delete</span>
+      </button>
+    </mat-menu>
+  </div>
+</div>
+
+<div class="block-body">
+  <div class="block-description" *ngIf="block.description">
+    {{ block.description }}
+  </div>
+
+  <div class="block-content-text">
+    Delay : {{ block.delaySeconds || 0 }}s
+  </div>
+
+  <!-- Right sidebar content for selected typing delay block -->
+  <div class="right-sidebar-content" *ngIf="isSidebarOpen && isSelected">
+    <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
+      Typing Delay (s) : {{ typingDelay }}
+    </h4>
+
+    <input
+      id="typingDelay"
+      type="range"
+      min="0"
+      max="20"
+      step="0.5"
+      [(ngModel)]="typingDelay"
+      (input)="onDelayChange()"
+      class="w-full color-red-900"
+    />
+  </div>
+</div>
+
+<div
+  class="connection-point connection-output"
+  (mousedown)="onStartConnection($event)"
+>
+  <div class="connection-dot"></div>
+</div>
+
+<div class="connection-point connection-input">
+  <div class="connection-dot"></div>
+</div>
