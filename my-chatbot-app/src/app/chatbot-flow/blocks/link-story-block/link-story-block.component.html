@@ -1,0 +1,96 @@
+<!-- src/app/chatbot-flow/blocks/link-story-block/link-story-block.component.html -->
+<ng-container *ngIf="!isSelected">
+  <div class="block-header">
+    <div class="block-type-badges">
+      <div class="block-title" (click)="onSelectBlock()">
+        <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
+        <span>{{ block.name }}</span>
+      </div>
+      <span
+        *ngIf="block.linkStoryId"
+        class="badge link-story-badge"
+      >
+        Selected Story: {{ getStoryName(block.linkStoryId) }}
+      </span>
+    </div>
+
+    <div class="block-actions">
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="blockMenu"
+        class="block-menu-trigger"
+      >
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #blockMenu="matMenu">
+        <button mat-menu-item (click)="onEditBlock()">
+          <mat-icon>edit</mat-icon>
+          <span>Edit</span>
+        </button>
+        <button mat-menu-item (click)="onDuplicateBlock()">
+          <mat-icon>content_copy</mat-icon>
+          <span>Duplicate</span>
+        </button>
+        <button mat-menu-item (click)="onRemoveBlock()">
+          <mat-icon>delete</mat-icon>
+          <span>Delete</span>
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+
+  <div class="block-body">
+    <div class="block-description" *ngIf="block.description">
+      {{ block.description }}
+    </div>
+
+    <div class="block-content-text" *ngIf="block.linkStoryName">
+      Redirect to: {{ block.linkStoryName }}
+    </div>
+    <div class="block-content-text" *ngIf="!block.linkStoryName">
+      No story selected.
+    </div>
+  </div>
+</ng-container>
+
+<div
+  class="connection-point connection-output"
+  (mousedown)="onStartConnection($event)"
+  *ngIf="!isSelected"
+>
+  <div class="connection-dot"></div>
+</div>
+
+<div
+  class="connection-point connection-input"
+  *ngIf="!isSelected"
+>
+  <div class="connection-dot"></div>
+</div>
+
+<!-- Right sidebar content for selected link story block -->
+<div class="right-sidebar-content" *ngIf="isSelected">
+  <div class="sidebar-block-header">
+    <!-- <div class="sidebar-block-title">
+      <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
+      <span>{{ block.name }}</span>
+    </div> -->
+    <span
+      *ngIf="block.linkStoryId"
+      class="badge link-story-badge"
+    >
+      Selected Story: {{ getStoryName(block.linkStoryId) }}
+    </span>
+  </div>
+  <h4 class="section-title">Redirect the flow to another story in your chatbot</h4>
+  <div class="input-group">
+    <mat-form-field appearance="outline" class="full-width-input">
+      <mat-label>Select Story</mat-label>
+      <mat-select [(ngModel)]="block.linkStoryId" (selectionChange)="onStorySelectionChange()">
+        <mat-option *ngFor="let story of availableStories" [value]="story.id">
+          {{ story.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>

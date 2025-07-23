@@ -1,3 +1,4 @@
+<!-- src/app/chatbot-flow/chatbot-flow.component.html -->
 <div class="chatbot-flow-container">
   <div class="header">
     <div class="header-left">
@@ -157,123 +158,110 @@
             (cdkDragEnded)="onBlockDragEnded($event, block)"
             (mousedown)="endConnection($event, block)"
           >
-            <div class="block-header">
-              <!-- Not touching part -->
-              <div class="block-type-badges">
-                <div class="block-title" (click)="selectBlock(block)">
-                  <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
-                  <span>{{ block.name }}</span>
-                </div>
-                <span
-                  *ngIf="
-                    block.type === 'userInput' &&
-                    block.subType === 'keywordGroup'
-                  "
-                  class="badge keyword-group-badge"
-                >
-                  Keyword Group
-                </span>
-                <span
-                  *ngIf="
-                    block.type === 'userInput' && block.subType === 'phrase'
-                  "
-                  class="badge phrase-badge"
-                >
-                  Phrase
-                </span>
-                <span
-                  *ngIf="
-                    block.type === 'userInput' && block.subType === 'anything'
-                  "
-                  class="badge anything-badge"
-                >
-                  Type Anything
-                </span>
-              </div>
+            <!-- Render specific block component based on block.type -->
+            <ng-container [ngSwitch]="block.type">
+              <app-user-input-block
+                *ngSwitchCase="'userInput'"
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+              ></app-user-input-block>
 
-              <div class="block-actions">
-                <button
-                  mat-icon-button
-                  [matMenuTriggerFor]="blockMenu"
-                  class="block-menu-trigger"
-                >
-                  <mat-icon>more_vert</mat-icon>
-                </button>
+              <app-text-response-block
+                *ngSwitchCase="'textResponse'"
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+              ></app-text-response-block>
 
-                <!-- Not touching part -->
-                <mat-menu #blockMenu="matMenu">
-                  <button mat-menu-item (click)="editCanvasBlock(block)">
-                    <mat-icon>edit</mat-icon>
-                    <span>Edit</span>
-                  </button>
-                  <button mat-menu-item (click)="duplicateCanvasBlock(block)">
-                    <mat-icon>content_copy</mat-icon>
-                    <span>Duplicate</span>
-                  </button>
-                  <button mat-menu-item (click)="removeCanvasBlock(block.id)">
-                    <mat-icon>delete</mat-icon>
-                    <span>Delete</span>
-                  </button>
-                </mat-menu>
-              </div>
-            </div>
+              <app-media-block
+                *ngSwitchCase="'mediaBlock'"
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                [availableMedia]="availableMedia"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+              ></app-media-block>
 
-            <div class="block-body">
-              <!-- shift block title from there -->
-              <!-- <div class="block-title" (click)="selectBlock(block)">
-                <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
-                <span>{{ block.name }}</span>
-              </div> -->
-              <div class="block-description" *ngIf="block.description">
-                {{ block.description }}
-              </div>
+              <app-link-story-block
+                *ngSwitchCase="'linkStory'"
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                [availableStories]="availableStories"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+              ></app-link-story-block>
 
-              <div
-                *ngIf="
-                  block.type === 'userInput' && block.subType === 'keywordGroup'
-                "
-                class="keywords-container"
-              >
-                <div class="keywords-list">
-                  <mat-chip-listbox>
-                    <mat-chip-option
-                      *ngFor="let keyword of block.keywords"
-                      class="keyword-chip"
-                      (removed)="removeKeyword(block, keyword)"
-                    >
-                      <h5 class="exact-keyword">{{ keyword }}</h5>
-                      <button matChipRemove>
-                        <mat-icon>cancel</mat-icon>
-                      </button>
-                    </mat-chip-option>
-                  </mat-chip-listbox>
-                </div>
-                <input
-                  type="text"
-                  class="keyword-input"
-                  placeholder="Add keyword..."
-                  (keydown)="addKeyword(block, $event)"
-                />
-              </div>
+              <app-conversational-form-block
+                *ngSwitchCase="'conversationalForm'"
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                [availableForms]="availableForms"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+              ></app-conversational-form-block>
 
-              <div
-                *ngIf="block.content && block.type !== 'userInput'"
-                class="block-content-text"
-              >
-               Delay : {{ block.content }}
-              </div>
-            </div>
+              <app-typing-delay-block
+                *ngSwitchCase="'typingDelay'"
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+              ></app-typing-delay-block>
 
-            <div
-              class="connection-point connection-output"
-              (mousedown)="startConnection($event, block)"
-            >
-              <div class="connection-dot"></div>
-            </div>
-
-            <div class="connection-point connection-input">
-              <div class="connection-dot"></div>
-            </div>
+              <!-- Generic block for all other types -->
+              <app-generic-block
+                *ngSwitchDefault
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+              ></app-generic-block>
+            </ng-container>
           </div>
         </div>
       </div>
@@ -289,7 +277,9 @@
           <mat-icon>{{ selectedBlock.icon }}</mat-icon>
           <span>{{ selectedBlock.name }}</span>
           <span
-            *ngIf="selectedBlock.type === 'userInput' && selectedBlock.subType"
+            *ngIf="
+              selectedBlock.type === 'userInput' && selectedBlock.subType
+            "
             class="badge"
             [class.keyword-group-badge]="
               selectedBlock.subType === 'keywordGroup'
@@ -307,193 +297,92 @@
                 : selectedBlock.subType
             }}
           </span>
+          <span
+            *ngIf="selectedBlock.type === 'linkStory' && selectedBlock.linkStoryId"
+            class="badge link-story-badge"
+          >
+            Selected Story: {{ selectedBlock.linkStoryName }}
+          </span>
+          <span
+            *ngIf="selectedBlock.type === 'mediaBlock' && selectedBlock.mediaId"
+            class="badge media-block-badge"
+          >
+            Selected Media: {{ selectedBlock.mediaName }}
+          </span>
+          <span
+            *ngIf="selectedBlock.type === 'conversationalForm' && selectedBlock.formId"
+            class="badge form-block-badge"
+          >
+            Selected Form: {{ selectedBlock.formName }}
+          </span>
         </div>
         <button mat-icon-button (click)="closeSidebar()" class="close-btn">
           <mat-icon>close</mat-icon>
         </button>
       </div>
 
-      <div class="right-sidebar-content">
-        <div *ngIf="selectedBlock.type === 'userInput'">
-          <p class="config-description">
-            If user query matches a combination of keywords or datastore values
-          </p>
+      <!-- The content of the right sidebar is now rendered directly within the selected block component -->
+      <div class="right-sidebar-content-wrapper">
+        <ng-container [ngSwitch]="selectedBlock.type">
+          <app-user-input-block
+            *ngSwitchCase="'userInput'"
+            [block]="selectedBlock"
+            [isSelected]="true"
+            [isSidebarOpen]="true"
+            (blockUpdated)="onBlockUpdated($event)"
+          ></app-user-input-block>
 
-          <div class="toggle-container">
-            <mat-button-toggle-group
-              [(value)]="selectedInputMode"
-              (change)="onInputModeChange($event)"
-            >
-              <mat-button-toggle value="keyword" class="toggle-keyword">
-                Keyword
-              </mat-button-toggle>
-              <mat-button-toggle value="variable" class="toggle-variable">
-                Variable
-              </mat-button-toggle>
-            </mat-button-toggle-group>
-          </div>
+          <app-text-response-block
+            *ngSwitchCase="'textResponse'"
+            [block]="selectedBlock"
+            [isSelected]="true"
+            [isSidebarOpen]="true"
+            (blockUpdated)="onBlockUpdated($event)"
+          ></app-text-response-block>
 
-          <div
-            *ngIf="
-              selectedBlock.subType === 'keywordGroup' &&
-              selectedInputMode === 'keyword'
-            "
-          >
-            <div class="keywords-section">
-              <div class="keywords-display">
-                <mat-chip-listbox>
-                  <mat-chip-option
-                    *ngFor="let keyword of selectedBlock.keywords"
-                    class="keyword-chip-large"
-                    (removed)="removeKeyword(selectedBlock, keyword)"
-                  >
-                    <h5 class="exact-keyword">{{ keyword }}</h5>
-                    <button matChipRemove>
-                      <mat-icon>close</mat-icon>
-                    </button>
-                  </mat-chip-option>
-                </mat-chip-listbox>
-              </div>
+          <app-media-block
+            *ngSwitchCase="'mediaBlock'"
+            [block]="selectedBlock"
+            [isSelected]="true"
+            [isSidebarOpen]="true"
+            [availableMedia]="availableMedia"
+            (blockUpdated)="onBlockUpdated($event)"
+          ></app-media-block>
 
-              <div class="add-keyword-section">
-                <mat-form-field
-                  appearance="outline"
-                  class="keyword-input-field"
-                >
-                  <input
-                    matInput
-                    placeholder="Add keywords"
-                    [(ngModel)]="newKeyword"
-                    (keydown)="addKeywordFromSidebar($event)"
-                  />
-                </mat-form-field>
-              </div>
+          <app-link-story-block
+            *ngSwitchCase="'linkStory'"
+            [block]="selectedBlock"
+            [isSelected]="true"
+            [isSidebarOpen]="true"
+            [availableStories]="availableStories"
+            (blockUpdated)="onBlockUpdated($event)"
+          ></app-link-story-block>
 
-              <div class="add-keyword-group">
-                <button mat-stroked-button class="add-group-btn">
-                  <mat-icon>add</mat-icon>
-                  Add Keyword Group
-                </button>
-              </div>
-            </div>
-          </div>
+          <app-conversational-form-block
+            *ngSwitchCase="'conversationalForm'"
+            [block]="selectedBlock"
+            [isSelected]="true"
+            [isSidebarOpen]="true"
+            [availableForms]="availableForms"
+            (blockUpdated)="onBlockUpdated($event)"
+          ></app-conversational-form-block>
 
-          <div *ngIf="selectedBlock.subType === 'phrase'">
-            <mat-form-field appearance="outline" class="phrase-input">
-              <mat-label>Enter phrase</mat-label>
-              <input
-                matInput
-                [(ngModel)]="selectedBlock.phraseText"
-                placeholder="Type the exact phrase..."
-              />
-            </mat-form-field>
-          </div>
+          <app-typing-delay-block
+            *ngSwitchCase="'typingDelay'"
+            [block]="selectedBlock"
+            [isSelected]="true"
+            [isSidebarOpen]="true"
+            (blockUpdated)="onBlockUpdated($event)"
+          ></app-typing-delay-block>
 
-          <div *ngIf="selectedBlock.subType === 'anything'">
-            <div class="anything-config">
-              <p>This block will match any user input</p>
-              <mat-form-field appearance="outline">
-                <mat-label>Custom message (optional)</mat-label>
-                <textarea
-                  matInput
-                  [(ngModel)]="selectedBlock.customMessage"
-                  placeholder="Add a custom message..."
-                ></textarea>
-              </mat-form-field>
-            </div>
-          </div>
-        </div>
-
-        <div *ngIf="selectedBlock.type === 'textResponse'">
-          <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
-            Bot Says
-          </h4>
-          <div class="input-group w-full h-full">
-            <mat-form-field appearance="outline" class="w-full h-full">
-              <!-- <mat-label>Type chatbot response</mat-label> -->
-              <textarea
-                matInput
-                [(ngModel)]="selectedBlock.content"
-                placeholder="Type chatbot response..."
-                cdkTextareaAutosize
-                #autosize="cdkTextareaAutosize"
-                cdkAutosizeMinRows="2"
-                cdkAutosizeMaxRows="8"
-                class="w-full max-h-20 overflow-y-auto resize-none"
-              ></textarea>
-            </mat-form-field>
-          </div>
-
-          <button
-            mat-flat-button
-            color="primary"
-            class="add-alternate-responses-button"
-            (click)="toggleAlternateResponses()"
-          >
-            Add Alternate Responses
-          </button>
-
-          <div class="mt-2" *ngIf="showAlternateResponses">
-            <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
-              Bot Says
-            </h4>
-            <mat-form-field appearance="outline" class="w-full h-full">
-              <!-- <mat-label>Type chatbot response</mat-label> -->
-              <textarea
-                matInput
-                [(ngModel)]="selectedBlock.content"
-                placeholder="Type chatbot response..."
-                cdkTextareaAutosize
-                #autosize="cdkTextareaAutosize"
-                cdkAutosizeMinRows="2"
-                cdkAutosizeMaxRows="8"
-                class="w-full max-h-20 overflow-y-auto resize-none"
-              ></textarea>
-            </mat-form-field>
-            <div class="alternate-response-actions">
-              <button mat-flat-button color="primary">Add</button>
-              <button mat-stroked-button>Generate from AI</button>
-              <button
-                mat-stroked-button
-                color="warn"
-                (click)="toggleAlternateResponses()"
-              >
-                Hide
-              </button>
-            </div>
-          </div>
-          <div class="quick-replies-section mt-2">
-            <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
-              Add Quick Replies
-            </h4>
-            <!-- Add keyword input -->
-          </div>
-        </div>
-        <div *ngIf="selectedBlock.type === 'typingDelay'">
-          <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
-            Typing Delay (s) : {{ typingDelay }}
-          </h4>
-
-          <input
-            id="typingDelay"
-            type="range"
-            min="0"
-            max="20"
-            [(ngModel)]="typingDelay"
-            class="w-full color-red-900"
-          />
-        </div>
-        <div
-          *ngIf="
-            selectedBlock.type !== 'userInput' &&
-            selectedBlock.type !== 'textResponse'
-          "
-        >
-          <p>
-            Configuration options for {{ selectedBlock.name }} will be displayed
-            here.
-          </p>
-        </div>
+          <app-generic-block
+            *ngSwitchDefault
+            [block]="selectedBlock"
+            [isSelected]="true"
+            [isSidebarOpen]="true"
+            (blockUpdated)="onBlockUpdated($event)"
+          ></app-generic-block>
+        </ng-container>
       </div>
     </div>
 
@@ -502,5 +391,12 @@
       [class.active]="rightSidebarOpen"
       (click)="closeSidebar()"
     ></div>
+
+    <app-message-box
+      *ngIf="showMessageBox"
+      [message]="messageBoxContent"
+      [type]="messageBoxType"
+      (closed)="onMessageBoxClosed()"
+    ></app-message-box>
   </div>
 </div>

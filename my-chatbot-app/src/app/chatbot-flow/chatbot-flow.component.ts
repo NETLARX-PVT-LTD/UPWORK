@@ -1,10 +1,10 @@
 // src/app/chatbot-flow/chatbot-flow.component.ts
 import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, HostListener } from '@angular/core';
-import { CdkDragDrop, moveItemInArray, CdkDragEnd, CdkDrag } from '@angular/cdk/drag-drop';
-import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms'; // Import FormsModule
+import { CdkDragDrop, moveItemInArray, CdkDragEnd } from '@angular/cdk/drag-drop';
+import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith, debounceTime } from 'rxjs/operators';
-import { ChatbotBlock, Connection } from '../models/chatbot-block.model'; // Correct: Only import the interfaces
+import { ChatbotBlock, Connection, AvailableMedia, AvailableStory, AvailableForm } from '../models/chatbot-block.model';
 
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +16,18 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+
+// Import block components
+import { UserInputBlockComponent } from './blocks/user-input-block/user-input-block.component';
+import { TextResponseBlockComponent } from './blocks/text-response-block/text-response-block.component';
+import { TypingDelayBlockComponent } from './blocks/typing-delay-block/typing-delay-block.component';
+import { MediaBlockComponent } from './blocks/media-block/media-block.component';
+import { LinkStoryBlockComponent } from './blocks/link-story-block/link-story-block.component';
+import { ConversationalFormBlockComponent } from './blocks/conversational-form-block/conversational-form-block.component';
+import { GenericBlockComponent } from './blocks/generic-block/generic-block.component';
+import { MessageBoxComponent } from '../shared/components/message-box/message-box.component';
 
 
 @Component({
@@ -24,7 +36,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    FormsModule, // Add FormsModule here
+    FormsModule,
     DragDropModule,
     MatButtonModule,
     MatFormFieldModule,
@@ -33,7 +45,18 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatMenuModule,
     MatChipsModule,
     MatButtonToggleModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    // Block components
+    UserInputBlockComponent,
+    TextResponseBlockComponent,
+    TypingDelayBlockComponent,
+    MediaBlockComponent,
+    LinkStoryBlockComponent,
+    ConversationalFormBlockComponent,
+    GenericBlockComponent,
+    MessageBoxComponent
   ],
   templateUrl: './chatbot-flow.component.html',
   styleUrls: ['./chatbot-flow.component.scss']
@@ -42,8 +65,6 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
   @ViewChild('canvasWrapper') canvasWrapper!: ElementRef;
   @ViewChild('canvasContent') canvasContent!: ElementRef;
   @ViewChild('svgCanvas') svgCanvas!: ElementRef;
-
-  typingDelay: number = 10;
 
   allBlocks: ChatbotBlock[] = [
     {
@@ -86,20 +107,27 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       height: 0
     },
     {
-      id: '4', name: 'Text Response', icon: 'chat_bubble_outline', type: 'textResponse', status: 'active', x: 0, y: 0,description: 'Respond with a text message',
+      id: '4', name: 'Text Response', icon: 'chat_bubble_outline', type: 'textResponse', status: 'active', x: 0, y: 0, description: 'Respond with a text message',
       width: 0,
-      height: 0
+      height: 0,
+      content: '' // Initialize content for text response
     },
     {
       id: '5', name: 'Media block', icon: 'image', type: 'mediaBlock', status: 'active', x: 0, y: 0,
       width: 0,
       height: 0,
       description: 'Respond your users with multimedia messages such as Images, Videos etc',
+      mediaId: undefined, // Will be selected from availableMedia
+      mediaType: undefined,
+      mediaUrl: undefined,
+      mediaName: undefined
     },
     {
       id: '6', name: 'Link Story', icon: 'link', type: 'linkStory', status: 'active', x: 0, y: 0,
       width: 0,
-      height: 0
+      height: 0,
+      linkStoryId: undefined, // Will be selected from availableStories
+      linkStoryName: undefined
     },
     {
       id: '7', name: 'Notify Human Agent', icon: 'support_agent', type: 'notifyAgent', status: 'error', x: 0, y: 0,
@@ -109,14 +137,21 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
     {
       id: '8', name: 'Conversational Form', icon: 'description', type: 'conversationalForm', status: 'new', x: 0, y: 0,
       width: 0,
-      height: 0
+      height: 0,
+      formId: undefined, // Will be selected from availableForms
+      formName: undefined,
+      webhookUrl: undefined,
+      sendEmailNotification: undefined,
+      notificationEmail: undefined,
+      formFields: undefined,
+      showAsInlineForm: undefined
     },
     {
       id: '9', name: 'Typing Delay', icon: 'hourglass_empty', type: 'typingDelay', status: 'active', x: 0, y: 0,
       width: 0,
       height: 0,
       description: 'Add a typing delay between 2 blocks',
-      content : "typingDelay"
+      delaySeconds: 1 // Initialize delay for typing delay
     },
     {
       id: '10', name: 'Conditional Redirect', icon: 'call_split', type: 'conditionalRedirect', status: 'active', x: 0, y: 0,
@@ -145,8 +180,30 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
   filteredBlocks$: Observable<ChatbotBlock[]> | undefined;
   searchControl = new FormControl('');
 
-  showAlternateResponses: boolean = false;
-newAlternateResponse: string = ''; // To bind to the new alternate response input
+  // Mock data for dropdowns (replace with actual service calls in a real app)
+  availableMedia: AvailableMedia[] = [
+    { id: 'media-1', name: 'Product Image A', type: 'image' },
+    { id: 'media-2', name: 'Intro Video', type: 'video' },
+    { id: 'media-3', name: 'Company Logo', type: 'image' },
+    { id: 'media-4', name: 'FAQ Document', type: 'file' },
+    { id: 'media-5', name: 'Welcome Message', type: 'text' },
+    { id: 'media-6', name: 'Media Block 8854', type: 'image' }
+  ];
+
+  availableForms: AvailableForm[] = [
+    { id: 'form-1', name: 'Contact Us Form' },
+    { id: 'form-2', name: 'Feedback Survey' },
+    { id: 'form-3', name: 'Support Ticket' }
+  ];
+
+  availableStories: AvailableStory[] = [
+    { id: 'story-1', name: 'Welcome Flow' },
+    { id: 'story-2', name: 'Product Info' },
+    { id: 'story-3', name: 'Customer Support' },
+    { id: 'story-4', name: 'FAQ Section' },
+    { id: 'story-5', name: 'Order Status' }
+  ];
+
   // Zoom and pan
   zoomLevel: number = 1.0;
   minZoom: number = 0.5;
@@ -168,14 +225,14 @@ newAlternateResponse: string = ''; // To bind to the new alternate response inpu
   // Right Sidebar properties
   selectedBlock: ChatbotBlock | null = null;
   rightSidebarOpen: boolean = false;
-  selectedInputMode: 'keyword' | 'variable' = 'keyword'; // Default input mode
-  newKeyword: string = ''; // For the new keyword input in the sidebar
+
+  // Message Box properties
+  showMessageBox: boolean = false;
+  messageBoxContent: string = '';
+  messageBoxType: 'info' | 'success' | 'warning' | 'error' = 'info';
+
 
   constructor() { }
-
-  // add keyword functionality
-  // newKeyword: string = '';
-
 
   ngOnInit(): void {
     this.filteredBlocks$ = this.searchControl.valueChanges.pipe(
@@ -205,9 +262,8 @@ newAlternateResponse: string = ''; // To bind to the new alternate response inpu
   ngAfterViewInit(): void {
     this.updateCanvasTransform();
     // Set initial dimensions for the starting block (important for connection points)
-    // You might need a slight delay or a way to ensure the block is rendered before querying its dimensions
     setTimeout(() => {
-        this.updateBlockDimensions(this.canvasBlocks[0]);
+      this.updateBlockDimensions(this.canvasBlocks[0]);
     }, 0);
   }
 
@@ -281,13 +337,6 @@ newAlternateResponse: string = ''; // To bind to the new alternate response inpu
     );
   }
 
-  toggleAlternateResponses() {
-  this.showAlternateResponses = !this.showAlternateResponses;
-  if (!this.showAlternateResponses) {
-    this.newAlternateResponse = ''; // Clear input when hiding
-  }
-}
-
   // Block management
   addBlockToCanvas(block: ChatbotBlock) {
     const newBlockId = `${block.type}-${Date.now()}`;
@@ -296,10 +345,25 @@ newAlternateResponse: string = ''; // To bind to the new alternate response inpu
       id: newBlockId,
       x: this.calculateNewBlockX(), // Position new blocks near the center of the viewport
       y: this.calculateNewBlockY(), // Position new blocks near the center of the viewport
-      content: block.subType === 'keywordGroup' ? 'New Keyword Group' : undefined,
+      // Initialize specific properties based on type/subType
+      content: block.type === 'textResponse' ? '' : undefined,
       keywords: block.subType === 'keywordGroup' ? [] : undefined,
       phraseText: block.subType === 'phrase' ? '' : undefined,
-      customMessage: block.subType === 'anything' ? '' : undefined
+      customMessage: block.subType === 'anything' ? '' : undefined,
+      delaySeconds: block.type === 'typingDelay' ? 1 : undefined,
+      mediaId: block.type === 'mediaBlock' ? undefined : undefined,
+      mediaType: block.type === 'mediaBlock' ? 'text' : undefined, // Default media type for new media block
+      mediaUrl: block.type === 'mediaBlock' ? '' : undefined,
+      mediaName: block.type === 'mediaBlock' ? undefined : undefined,
+      linkStoryId: block.type === 'linkStory' ? undefined : undefined,
+      linkStoryName: block.type === 'linkStory' ? undefined : undefined,
+      formId: block.type === 'conversationalForm' ? undefined : undefined,
+      formName: block.type === 'conversationalForm' ? '' : undefined,
+      webhookUrl: block.type === 'conversationalForm' ? '' : undefined,
+      sendEmailNotification: block.type === 'conversationalForm' ? false : undefined,
+      notificationEmail: block.type === 'conversationalForm' ? '' : undefined,
+      formFields: block.type === 'conversationalForm' ? [{ name: '', type: 'text' }] : undefined,
+      showAsInlineForm: block.type === 'conversationalForm' ? false : undefined
     };
     this.canvasBlocks.push(newBlock);
     // After adding, immediately update its dimensions and select it
@@ -335,6 +399,19 @@ newAlternateResponse: string = ''; // To bind to the new alternate response inpu
     this.updateConnections();
   }
 
+  // Event handler for when a child block component updates its data
+  onBlockUpdated(updatedBlock: ChatbotBlock) {
+    const index = this.canvasBlocks.findIndex(b => b.id === updatedBlock.id);
+    if (index > -1) {
+      this.canvasBlocks[index] = updatedBlock;
+      // If the updated block is the selected one, ensure selectedBlock reference is fresh
+      if (this.selectedBlock?.id === updatedBlock.id) {
+        this.selectedBlock = updatedBlock;
+      }
+      this.updateConnections(); // Update connections if block dimensions might have changed
+    }
+  }
+
   editCanvasBlock(block: ChatbotBlock) {
     this.selectBlock(block); // Select the block to open the sidebar for editing
   }
@@ -348,6 +425,7 @@ newAlternateResponse: string = ''; // To bind to the new alternate response inpu
       this.selectedBlock = null;
       this.closeSidebar();
     }
+    this.updateConnections(); // Update connections after removal
   }
 
   duplicateCanvasBlock(block: ChatbotBlock) {
@@ -357,8 +435,11 @@ newAlternateResponse: string = ''; // To bind to the new alternate response inpu
       id: newBlockId,
       x: (block.x || 0) + 30,
       y: (block.y || 0) + 30,
-      // Deep copy keywords if present
-      keywords: block.keywords ? [...block.keywords] : undefined
+      // Deep copy relevant arrays if present
+      keywords: block.keywords ? [...block.keywords] : undefined,
+      alternateResponses: block.alternateResponses ? [...block.alternateResponses] : undefined,
+      quickReplies: block.quickReplies ? [...block.quickReplies] : undefined,
+      formFields: block.formFields ? block.formFields.map(field => ({ ...field })) : undefined // Deep copy form fields
     };
     this.canvasBlocks.push(newBlock);
     setTimeout(() => {
@@ -444,7 +525,7 @@ newAlternateResponse: string = ''; // To bind to the new alternate response inpu
         };
         this.connections.push(newConnection);
       } else {
-        console.warn('Connection already exists between these blocks.');
+        this.displayMessageBox('Connection already exists between these blocks.', 'warning');
       }
     }
     this.isDrawingConnection = false;
@@ -543,63 +624,11 @@ newAlternateResponse: string = ''; // To bind to the new alternate response inpu
   selectBlock(block: ChatbotBlock) {
     this.selectedBlock = block;
     this.rightSidebarOpen = true;
-    // Set the input mode based on the selected block's subType
-    if (block.type === 'userInput') {
-      if (block.subType === 'keywordGroup') {
-        this.selectedInputMode = 'keyword';
-      } else {
-        // For 'phrase' or 'anything', 'keyword' or 'variable' toggle doesn't directly apply
-        // You might want to default it or hide it, based on your UX.
-        this.selectedInputMode = 'keyword';
-      }
-    } else {
-      // For non-userInput blocks, reset or hide the toggle
-      this.selectedInputMode = 'keyword';
-    }
   }
 
   closeSidebar() {
     this.rightSidebarOpen = false;
     this.selectedBlock = null;
-  }
-
-  onInputModeChange(event: any) {
-    this.selectedInputMode = event.value;
-    console.log('Selected Input Mode:', this.selectedInputMode);
-  }
-
-  addKeywordFromSidebar(event: KeyboardEvent) {
-    if (event.key === 'Enter' && this.newKeyword.trim() && this.selectedBlock) { // Check selectedBlock exists
-      if (!this.selectedBlock.keywords) { // Initialize keywords if it doesn't exist
-        this.selectedBlock.keywords = [];
-      }
-      this.selectedBlock.keywords.push(this.newKeyword.trim());
-      this.newKeyword = ''; // Clear input
-      event.preventDefault(); // Prevent default form submission
-    }
-  }
-
-
-  // Keywords management
-  removeKeyword(block: ChatbotBlock, keyword: string) {
-    if (block.keywords) {
-      block.keywords = block.keywords.filter(k => k !== keyword);
-    }
-  }
-
-  addKeyword(block: ChatbotBlock, event: KeyboardEvent) {
-    const input = event.target as HTMLInputElement;
-    if (event.key === 'Enter' && input.value.trim()) {
-      if (!block.keywords) block.keywords = [];
-      block.keywords.push(input.value.trim());
-      input.value = '';
-      event.preventDefault();
-      // If the block is currently selected in the sidebar, also update the sidebar's view
-      if (this.selectedBlock?.id === block.id && this.selectedBlock.subType === 'keywordGroup' && this.selectedBlock.keywords) {
-        // A simple re-assignment might be needed to trigger change detection for *ngFor in sidebar
-        this.selectedBlock.keywords = [...this.selectedBlock.keywords];
-      }
-    }
   }
 
   // Save functionality
@@ -609,8 +638,21 @@ newAlternateResponse: string = ''; // To bind to the new alternate response inpu
       connections: this.connections
     };
     console.log('Chatbot flow saved!', flowData);
-    alert('Chatbot flow saved! Check console for the current flow data.');
+    this.displayMessageBox('Chatbot flow saved successfully!', 'success');
   }
+
+  // Message Box methods
+  displayMessageBox(message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') {
+    this.messageBoxContent = message;
+    this.messageBoxType = type;
+    this.showMessageBox = true;
+  }
+
+  onMessageBoxClosed() {
+    this.showMessageBox = false;
+    this.messageBoxContent = '';
+  }
+
 
   // Get status color
   getStatusColor(status: string): string {

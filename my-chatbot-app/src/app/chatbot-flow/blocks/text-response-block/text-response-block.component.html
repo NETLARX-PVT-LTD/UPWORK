@@ -1,123 +1,274 @@
-<!-- src/app/chatbot-flow/blocks/text-response-block/text-response-block.component.html -->
-<div class="block-header">
-  <div class="block-type-badges">
-    <div class="block-title" (click)="onSelectBlock()">
-      <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
-      <span>{{ block.name }}</span>
-    </div>
-  </div>
+<ng-container *ngIf="!isSelected">
+  <div class="text-response-main-block">
+    <div class="block-header">
+      <div class="block-type-badges">
+        <div class="block-title" (click)="onSelectBlock()">
+          <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
+          <span>{{ block.name }}</span>
+        </div>
+      </div>
 
-  <div class="block-actions">
-    <button
-      mat-icon-button
-      [matMenuTriggerFor]="blockMenu"
-      class="block-menu-trigger"
-    >
-      <mat-icon>more_vert</mat-icon>
-    </button>
-    <mat-menu #blockMenu="matMenu">
-      <button mat-menu-item (click)="onEditBlock()">
-        <mat-icon>edit</mat-icon>
-        <span>Edit</span>
-      </button>
-      <button mat-menu-item (click)="onDuplicateBlock()">
-        <mat-icon>content_copy</mat-icon>
-        <span>Duplicate</span>
-      </button>
-      <button mat-menu-item (click)="onRemoveBlock()">
-        <mat-icon>delete</mat-icon>
-        <span>Delete</span>
-      </button>
-    </mat-menu>
-  </div>
-</div>
-
-<div class="block-body">
-  <div class="block-description" *ngIf="block.description">
-    {{ block.description }}
-  </div>
-
-  <div
-    *ngIf="block.content && block.type !== 'userInput'"
-    class="block-content-text"
-  >
-    {{ block.content }}
-  </div>
-
-  <!-- Right sidebar content for selected text response block -->
-  <div class="right-sidebar-content" *ngIf="isSidebarOpen && isSelected">
-    <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
-      Bot Says
-    </h4>
-    <div class="input-group w-full h-full">
-      <mat-form-field appearance="outline" class="w-full h-full">
-        <textarea
-          matInput
-          [(ngModel)]="block.content"
-          (ngModelChange)="onContentChange()"
-          placeholder="Type chatbot response..."
-          cdkTextareaAutosize
-          #autosize="cdkTextareaAutosize"
-          cdkAutosizeMinRows="2"
-          cdkAutosizeMaxRows="8"
-          class="w-full max-h-20 overflow-y-auto resize-none"
-        ></textarea>
-      </mat-form-field>
-    </div>
-
-    <button
-      mat-flat-button
-      color="primary"
-      class="add-alternate-responses-button"
-      (click)="toggleAlternateResponses()"
-    >
-      Add Alternate Responses
-    </button>
-
-    <div class="mt-2" *ngIf="showAlternateResponses">
-      <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
-        Alternate Response
-      </h4>
-      <mat-form-field appearance="outline" class="w-full h-full">
-        <textarea
-          matInput
-          [(ngModel)]="newAlternateResponse"
-          placeholder="Type alternate chatbot response..."
-          cdkTextareaAutosize
-          #autosize="cdkTextareaAutosize"
-          cdkAutosizeMinRows="2"
-          cdkAutosizeMaxRows="8"
-          class="w-full max-h-20 overflow-y-auto resize-none"
-        ></textarea>
-      </mat-form-field>
-      <div class="alternate-response-actions">
-        <button mat-flat-button color="primary">Add</button>
-        <button mat-stroked-button>Generate from AI</button>
+      <div class="block-actions">
         <button
-          mat-stroked-button
-          color="warn"
-          (click)="toggleAlternateResponses()"
+          mat-icon-button
+          [matMenuTriggerFor]="blockMenu"
+          class="block-menu-trigger"
         >
-          Hide
+          <mat-icon>more_vert</mat-icon>
         </button>
+        <mat-menu #blockMenu="matMenu">
+          <button mat-menu-item (click)="onEditBlock()">
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+          </button>
+          <button mat-menu-item (click)="onDuplicateBlock()">
+            <mat-icon>content_copy</mat-icon>
+            <span>Duplicate</span>
+          </button>
+          <button mat-menu-item (click)="onRemoveBlock()">
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+          </button>
+        </mat-menu>
       </div>
     </div>
-    <div class="quick-replies-section mt-2">
-      <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
-        Add Quick Replies
-      </h4>
-      <!-- Add keyword input -->
+
+    <div class="block-body">
+      <div class="block-description" *ngIf="block.description">
+        {{ block.description }}
+      </div>
+
+      <div
+        *ngIf="block.content && block.type !== 'userInput'"
+        class="block-content-text"
+      >
+        {{ block.content }}
+      </div>
     </div>
   </div>
-</div>
+
+  <div *ngIf="block.quickReplies && block.quickReplies.length > 0" class="connection-line-to-replies"></div>
+
+  <div *ngIf="block.quickReplies && block.quickReplies.length > 0" class="quick-replies-flow-container">
+    <div class="no-quick-reply-block">
+      <div class="flow-block-header">
+        <mat-icon class="block-icon">block</mat-icon>
+        <span class="block-title">No Quick Reply</span>
+      </div>
+      <div class="flow-block-body">
+        <p class="block-description">Continue without using quick reply modules from the user input</p>
+      </div>
+      <div class="connection-point connection-output">
+        <div class="connection-dot"></div>
+      </div>
+    </div>
+
+    <div class="quick-replies-main-block">
+      <div class="flow-block-header">
+        <mat-icon class="block-icon">forum</mat-icon>
+        <span class="block-title">Quick Replies</span>
+      </div>
+      <div class="flow-block-body">
+        <p class="block-description">Simple buttons to carry forward the user conversation to a desired path</p>
+      </div>
+      <div class="connection-point connection-output">
+        <div class="connection-dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="block.quickReplies && block.quickReplies.length > 0" class="individual-quick-replies">
+    <div class="connection-line-to-individual-replies"></div>
+    <div class="quick-reply-cards-row">
+      <div *ngFor="let reply of block.quickReplies; let i = index" class="individual-quick-reply-card">
+        <div class="quick-reply-card-header">
+          <mat-icon class="quick-reply-icon">chat_bubble</mat-icon>
+          <span class="quick-reply-label">Quick Reply:</span>
+          <span class="quick-reply-status">{{ reply.text }}</span>
+        </div>
+        <div class="connection-point connection-output">
+          <div class="connection-dot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
 
 <div
-  class="connection-point connection-output"
+  class="connection-point connection-output main-connection"
   (mousedown)="onStartConnection($event)"
+  *ngIf="!isSelected && (!block.quickReplies || block.quickReplies.length === 0)"
 >
   <div class="connection-dot"></div>
 </div>
 
-<div class="connection-point connection-input">
+<div
+  class="connection-point connection-input main-connection"
+  *ngIf="!isSelected"
+>
   <div class="connection-dot"></div>
+</div>
+
+<div class="right-sidebar-content" *ngIf="isSelected">
+  <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
+    Bot Says
+  </h4>
+  <div class="input-group w-full h-full">
+    <mat-form-field appearance="outline" class="full-width-input">
+      <textarea
+        matInput
+        [(ngModel)]="block.content"
+        (ngModelChange)="onContentChange()"
+        placeholder="Type chatbot response..."
+        cdkTextareaAutosize
+        #autosize="cdkTextareaAutosize"
+        cdkAutosizeMinRows="2"
+        cdkAutosizeMaxRows="8"
+        class="full-width-input max-h-20 overflow-y-auto resize-none"
+      ></textarea>
+      <mat-icon matSuffix class="info-icon" (click)="toggleSearchVariableCard()">info</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <button
+    mat-flat-button
+    color="primary"
+    class="add-alternate-responses-button"
+    (click)="toggleAlternateResponses()"
+  >
+    Add Alternate Responses
+  </button>
+
+  <div class="mt-2" *ngIf="showAlternateResponses">
+    <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
+      Alternate Response
+    </h4>
+    <mat-form-field appearance="outline" class="full-width-input">
+      <textarea
+        matInput
+        [(ngModel)]="newAlternateResponse"
+        (ngModelChange)="onContentChange()"
+        placeholder="Type alternate chatbot response..."
+        cdkTextareaAutosize
+        #autosize="cdkTextareaAutosize"
+        cdkAutosizeMinRows="2"
+        cdkAutosizeMaxRows="8"
+        class="full-width-input max-h-20 overflow-y-auto resize-none"
+      ></textarea>
+      <mat-icon matSuffix class="info-icon" (click)="toggleSearchVariableCard()">info</mat-icon>
+    </mat-form-field>
+    <div class="alternate-response-actions">
+      <button mat-flat-button color="primary" (click)="addAlternateResponse()">Add</button>
+      <button mat-stroked-button>Generate from AI</button>
+      <button
+        mat-stroked-button
+        color="warn"
+        (click)="toggleAlternateResponses()"
+      >
+        Hide
+      </button>
+    </div>
+    <div class="alternate-responses-list mt-2">
+      <mat-chip-listbox>
+        <mat-chip-option
+          *ngFor="let response of block.alternateResponses; let i = index"
+          (removed)="removeAlternateResponse(i)"
+        >
+          {{ response }}
+          <button matChipRemove>
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+  </div>
+
+  <div class="quick-replies-section mt-4">
+    <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
+      Add Quick Replies
+    </h4>
+    
+    <mat-form-field appearance="outline" class="full-width-input mb-3">
+      <mat-label>New Quick Reply</mat-label>
+      <input
+        matInput
+        [(ngModel)]="newQuickReply"
+        (keydown)="addQuickReply($event)"
+        placeholder="Type quick reply and press Enter"
+      />
+      <button 
+        mat-icon-button 
+        matSuffix 
+        (click)="addQuickReplyToBlock()" 
+        [disabled]="!newQuickReply.trim()"
+        class="add-quick-reply-btn"
+      >
+        <mat-icon>add</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <div *ngIf="block.quickReplies && block.quickReplies.length > 0" class="quick-replies-cards-container">
+      <h5 class="quick-replies-subtitle">Quick Replies:</h5>
+      <div class="quick-replies-cards-grid">
+        <div *ngFor="let reply of block.quickReplies; let i = index" class="quick-reply-card">
+          <div class="quick-reply-card-header">
+            <mat-icon class="quick-reply-card-icon">chat_bubble_outline</mat-icon>
+            <span class="quick-reply-label">Quick Reply:</span>
+            <button 
+              mat-icon-button 
+              class="quick-reply-remove-btn" 
+              (click)="removeQuickReply(reply)"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <div class="quick-reply-card-content">
+            <span class="quick-reply-text">{{ reply.text }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-variable-card" *ngIf="showSearchVariableCard">
+    <div class="card-header">
+      <mat-form-field appearance="outline" class="search-input">
+        <input matInput placeholder="Search Variable" />
+      </mat-form-field>
+      <mat-icon class="close-icon" (click)="toggleSearchVariableCard()">close</mat-icon>
+    </div>
+    <div class="card-content">
+      <p class="general-attributes-title">General Attributes</p>
+      <div class="general-attributes-list">
+        <mat-chip-listbox aria-label="General attributes">
+          <mat-chip-option selected>first_name</mat-chip-option>
+          <mat-chip-option selected>last_name</mat-chip-option>
+          <mat-chip-option selected>timezone</mat-chip-option>
+          <mat-chip-option selected>gender</mat-chip-option>
+          <mat-chip-option selected>last_user_msg</mat-chip-option>
+          <mat-chip-option selected>last_page</mat-chip-option>
+          <mat-chip-option selected>os</mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+      <p class="general-attributes-title">Form Attributes</p>
+      <div class="general-attributes-list">
+        <mat-chip-listbox aria-label="General attributes">
+          <mat-chip-option selected>user/last_user_message</mat-chip-option>
+          <mat-chip-option selected>user/last_bot_message</mat-chip-option>
+          <mat-chip-option selected>user/last_user_button</mat-chip-option>
+          <mat-chip-option selected>user/created_at</mat-chip-option>
+          <mat-chip-option selected>user/men's watch</mat-chip-option>
+          <mat-chip-option selected>user/Range</mat-chip-option>
+          <mat-chip-option selected>user/Price</mat-chip-option>
+          <mat-chip-option selected>user/Name</mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+      <p class="general-attributes-title">User Attributes</p>
+      <div class="general-attributes-list">
+        <mat-chip-listbox aria-label="General attributes">
+          <mat-chip-option selected>user/Gender</mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+    </div>
+  </div>
 </div>
