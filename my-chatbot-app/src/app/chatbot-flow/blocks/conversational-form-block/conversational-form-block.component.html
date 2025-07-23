@@ -1,14 +1,10 @@
-<!-- src/app/chatbot-flow/blocks/conversational-form-block/conversational-form-block.component.html -->
 <div class="block-header">
   <div class="block-type-badges">
     <div class="block-title" (click)="onSelectBlock()">
       <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
       <span>{{ block.name }}</span>
     </div>
-    <span
-      *ngIf="block.formId"
-      class="badge form-block-badge"
-    >
+    <span *ngIf="block.formId" class="badge form-block-badge">
       Selected Form: {{ getFormName(block.formId) }}
     </span>
   </div>
@@ -50,8 +46,7 @@
     No form selected.
   </div>
 
-  <!-- Right sidebar content for selected conversational form block -->
-  <div class="right-sidebar-content" *ngIf="isSidebarOpen && isSelected">
+  <div class="right-sidebar-content">
     <h4 class="section-title">Conversational Form Integration</h4>
     <p class="config-description">
       Ask one question at a time & send responses to your desired location or
@@ -73,14 +68,33 @@
         </mat-form-field>
       </div>
 
-      <mat-checkbox class="mt-2" [(ngModel)]="block.showAsInlineForm" (ngModelChange)="onContentChange()">
-        Show as inline form
-      </mat-checkbox>
-      <mat-icon
-        matTooltip="When selected, the form will be sent in a full page message in the chat window, otherwise it will display as individual messages."
-        class="info-icon"
-        >info</mat-icon
-      >
+      <div class="d-flex align-items-center mt-2">
+        <mat-slide-toggle
+          [(ngModel)]="block.showAsInlineForm"
+          (ngModelChange)="onContentChange()"
+        >
+          Show as inline form
+        </mat-slide-toggle>
+        <mat-icon
+          matTooltip="When selected, the form will be sent in a full page message in the chat window, otherwise it will display as individual messages."
+          class="info-icon ml-1"
+          >info</mat-icon
+        >
+      </div>
+
+      <div class="d-flex align-items-center mt-2">
+        <mat-slide-toggle
+          [(ngModel)]="block.renderFormResponses"
+          (ngModelChange)="onContentChange()"
+        >
+          Render form responses
+        </mat-slide-toggle>
+        <mat-icon
+          matTooltip="When selected, each form response will be sent as a separate message to the user."
+          class="info-icon ml-1"
+          >info</mat-icon
+        >
+      </div>
 
       <div class="or-separator">OR</div>
       <button
@@ -133,7 +147,11 @@
         />
       </mat-form-field>
 
-      <mat-checkbox class="mt-3" [(ngModel)]="block.sendEmailNotification" (ngModelChange)="onContentChange()">
+      <mat-checkbox
+        class="mt-3"
+        [(ngModel)]="block.sendEmailNotification"
+        (ngModelChange)="onContentChange()"
+      >
         Send email notification
       </mat-checkbox>
       <mat-form-field
@@ -156,8 +174,19 @@
         *ngFor="let field of block.formFields; let i = index"
         class="form-field-item"
       >
+        <div class="d-flex justify-content-between align-items-center form-field-header">
+          <strong>Form Field #{{ i + 1 }}</strong>
+          <div>
+            <button mat-icon-button><mat-icon>keyboard_arrow_up</mat-icon></button>
+            <button mat-icon-button><mat-icon>keyboard_arrow_down</mat-icon></button>
+            <button mat-icon-button color="warn" (click)="removeFormField(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+
         <mat-form-field appearance="outline" class="full-width-input">
-          <mat-label>Field {{ i + 1 }} Name</mat-label>
+          <mat-label>Label</mat-label>
           <input
             matInput
             [(ngModel)]="field.name"
@@ -165,19 +194,47 @@
             placeholder="e.g., Name"
           />
         </mat-form-field>
+
         <mat-form-field appearance="outline" class="full-width-input mt-2">
-          <mat-label>Field {{ i + 1 }} Type</mat-label>
-          <mat-select [(ngModel)]="field.type" (ngModelChange)="onContentChange()">
-            <mat-option value="text">Text</mat-option>
-            <mat-option value="email">Email</mat-option>
-            <mat-option value="number">Number</mat-option>
-            <mat-option value="date">Date</mat-option>
-            <mat-option value="phone">Phone</mat-option>
-          </mat-select>
+          <mat-label>Prompt Phrase</mat-label>
+          <input
+            matInput
+            [(ngModel)]="field.promptPhrase"
+            (ngModelChange)="onContentChange()"
+            placeholder="e.g., Enter your name"
+          />
         </mat-form-field>
-        <button mat-icon-button color="warn" (click)="removeFormField(i)">
-          <mat-icon>delete</mat-icon>
-        </button>
+
+        <mat-form-field appearance="outline" class="full-width-input mt-2">
+  <mat-label>Input Type</mat-label>
+  <mat-select
+    [(ngModel)]="field.type"
+    (ngModelChange)="onContentChange()"
+  >
+    <mat-option value="text">Text</mat-option>
+    <mat-option value="email">Email</mat-option>
+    <mat-option value="number">Number</mat-option>
+    <mat-option value="options">Options</mat-option>
+    <mat-option value="phone">Phone</mat-option>
+    <mat-option value="image">Image</mat-option>
+    <mat-option value="datetime">DateTime</mat-option>
+    <mat-option value="currency">Currency</mat-option>
+    <mat-option value="url">URL</mat-option>
+    <mat-option value="geocode">Geocode</mat-option>
+    <mat-option value="file">File</mat-option>
+    <mat-option value="date">Date</mat-option>
+    <mat-option value="multiple-options">Multiple Options</mat-option>
+  </mat-select>
+</mat-form-field>
+
+        <div class="d-flex align-items-center mt-2">
+          <mat-slide-toggle
+            [(ngModel)]="field.required"
+            (ngModelChange)="onContentChange()"
+          >
+            Required
+          </mat-slide-toggle>
+        </div>
       </div>
       <button mat-stroked-button class="add-field-button" (click)="addFormField()">
         <mat-icon>add</mat-icon> Add Field
