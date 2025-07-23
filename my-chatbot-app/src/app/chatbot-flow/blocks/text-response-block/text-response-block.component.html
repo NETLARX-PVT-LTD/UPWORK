@@ -1,0 +1,123 @@
+<!-- src/app/chatbot-flow/blocks/text-response-block/text-response-block.component.html -->
+<div class="block-header">
+  <div class="block-type-badges">
+    <div class="block-title" (click)="onSelectBlock()">
+      <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
+      <span>{{ block.name }}</span>
+    </div>
+  </div>
+
+  <div class="block-actions">
+    <button
+      mat-icon-button
+      [matMenuTriggerFor]="blockMenu"
+      class="block-menu-trigger"
+    >
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #blockMenu="matMenu">
+      <button mat-menu-item (click)="onEditBlock()">
+        <mat-icon>edit</mat-icon>
+        <span>Edit</span>
+      </button>
+      <button mat-menu-item (click)="onDuplicateBlock()">
+        <mat-icon>content_copy</mat-icon>
+        <span>Duplicate</span>
+      </button>
+      <button mat-menu-item (click)="onRemoveBlock()">
+        <mat-icon>delete</mat-icon>
+        <span>Delete</span>
+      </button>
+    </mat-menu>
+  </div>
+</div>
+
+<div class="block-body">
+  <div class="block-description" *ngIf="block.description">
+    {{ block.description }}
+  </div>
+
+  <div
+    *ngIf="block.content && block.type !== 'userInput'"
+    class="block-content-text"
+  >
+    {{ block.content }}
+  </div>
+
+  <!-- Right sidebar content for selected text response block -->
+  <div class="right-sidebar-content" *ngIf="isSidebarOpen && isSelected">
+    <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
+      Bot Says
+    </h4>
+    <div class="input-group w-full h-full">
+      <mat-form-field appearance="outline" class="w-full h-full">
+        <textarea
+          matInput
+          [(ngModel)]="block.content"
+          (ngModelChange)="onContentChange()"
+          placeholder="Type chatbot response..."
+          cdkTextareaAutosize
+          #autosize="cdkTextareaAutosize"
+          cdkAutosizeMinRows="2"
+          cdkAutosizeMaxRows="8"
+          class="w-full max-h-20 overflow-y-auto resize-none"
+        ></textarea>
+      </mat-form-field>
+    </div>
+
+    <button
+      mat-flat-button
+      color="primary"
+      class="add-alternate-responses-button"
+      (click)="toggleAlternateResponses()"
+    >
+      Add Alternate Responses
+    </button>
+
+    <div class="mt-2" *ngIf="showAlternateResponses">
+      <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
+        Alternate Response
+      </h4>
+      <mat-form-field appearance="outline" class="w-full h-full">
+        <textarea
+          matInput
+          [(ngModel)]="newAlternateResponse"
+          placeholder="Type alternate chatbot response..."
+          cdkTextareaAutosize
+          #autosize="cdkTextareaAutosize"
+          cdkAutosizeMinRows="2"
+          cdkAutosizeMaxRows="8"
+          class="w-full max-h-20 overflow-y-auto resize-none"
+        ></textarea>
+      </mat-form-field>
+      <div class="alternate-response-actions">
+        <button mat-flat-button color="primary">Add</button>
+        <button mat-stroked-button>Generate from AI</button>
+        <button
+          mat-stroked-button
+          color="warn"
+          (click)="toggleAlternateResponses()"
+        >
+          Hide
+        </button>
+      </div>
+    </div>
+    <div class="quick-replies-section mt-2">
+      <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
+        Add Quick Replies
+      </h4>
+      <!-- Add keyword input -->
+    </div>
+  </div>
+</div>
+
+<div
+  class="connection-point connection-output"
+  (mousedown)="onStartConnection($event)"
+>
+  <div class="connection-dot"></div>
+</div>
+
+<div class="connection-point connection-input">
+  <div class="connection-dot"></div>
+</div>
