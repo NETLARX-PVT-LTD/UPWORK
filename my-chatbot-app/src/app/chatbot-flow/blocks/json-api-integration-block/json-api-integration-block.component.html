@@ -1,0 +1,109 @@
+<div class="right-panel" *ngIf="block">
+  <div class="panel-header">
+    <div class="panel-title">JSON Plugin Integration</div>
+    <div class="panel-subtitle">
+      Integrate JSON API to fetch or post data to your webservice
+    </div>
+  </div>
+
+  <div class="panel-content">
+    <mat-expansion-panel
+      [expanded]="expandedSection === 'apiConfig'"
+      (opened)="expandedSection = 'apiConfig'"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>api</mat-icon>
+          <span>API Configuration</span>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div class="section-content">
+        <mat-form-field appearance="outline" class="full-width-input">
+          <mat-label>API Endpoint</mat-label>
+          <input
+            matInput
+            type="url"
+            [(ngModel)]="block.apiEndpoint"
+            (ngModelChange)="onContentChange()"
+            placeholder="Enter Your API Endpoint"
+          />
+          <mat-icon
+            matSuffix
+            class="info-icon"
+            matTooltip="Enter the URL of your API endpoint."
+            >info</mat-icon
+          >
+        </mat-form-field>
+
+        <div class="setting-item json-format-link">
+          <a
+            href="https://botify.zendesk.com/hc/en-us/articles/36771596020193-JSON-API-Response-Format"
+            target="_blank"
+            >Check out the JSON format</a
+          >
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width-input">
+          <mat-label>Request Type</mat-label>
+          <mat-select
+            [(ngModel)]="block.requestType"
+            (ngModelChange)="onContentChange()"
+          >
+            <mat-option value="POST">POST</mat-option>
+            <mat-option value="GET">GET</mat-option>
+            <mat-option value="PUT">PUT</mat-option>
+            <mat-option value="DELETE">DELETE</mat-option>
+            <mat-option value="PATCH">PATCH</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="headers-section">
+          <div class="section-header">
+            <h4>Select Headers</h4>
+            <mat-icon
+              matTooltip="Add custom headers for your API request"
+              class="info-icon"
+              >info</mat-icon
+            >
+          </div>
+          <div
+            class="header-item"
+            *ngFor="let header of block.apiHeaders; let i = index"
+          >
+            <mat-form-field appearance="outline" class="header-key-input">
+              <mat-label>Header Key</mat-label>
+              <input
+                matInput
+                [(ngModel)]="header.key"
+                (ngModelChange)="onContentChange()"
+                placeholder="Authorization"
+              />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="header-value-input">
+              <mat-label>Header Value</mat-label>
+              <input
+                matInput
+                [(ngModel)]="header.value"
+                (ngModelChange)="onContentChange()"
+                placeholder="Bearer your_token"
+              />
+            </mat-form-field>
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="removeApiHeader(i)"
+              matTooltip="Remove Header"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <button mat-stroked-button class="add-header-button" (click)="addApiHeader()">
+            <mat-icon>add</mat-icon>
+            Add Header
+          </button>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </div>
+</div>
