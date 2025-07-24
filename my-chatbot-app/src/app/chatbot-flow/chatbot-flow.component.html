@@ -248,7 +248,7 @@
               ></app-typing-delay-block>
 
               <!-- Generic block for all other types -->
-              <app-generic-block
+              <app-json-api-integration-block
                 *ngSwitchDefault
                 [block]="block"
                 [isSelected]="selectedBlock?.id === block.id"
@@ -260,7 +260,7 @@
                 (removeBlock)="removeCanvasBlock($event)"
                 (duplicateBlock)="duplicateCanvasBlock($event)"
                 (editBlock)="editCanvasBlock($event)"
-              ></app-generic-block>
+              ></app-json-api-integration-block>
             </ng-container>
           </div>
         </div>
@@ -375,13 +375,12 @@
             (blockUpdated)="onBlockUpdated($event)"
           ></app-typing-delay-block>
 
-          <app-generic-block
-            *ngSwitchDefault
-            [block]="selectedBlock"
-            [isSelected]="true"
-            [isSidebarOpen]="true"
-            (blockUpdated)="onBlockUpdated($event)"
-          ></app-generic-block>
+          <app-json-api-integration-block
+        *ngIf="selectedBlock.type === 'jsonApi'"
+        [block]="selectedBlock"
+        [isSelected]="true"
+        (blockUpdated)="onBlockUpdated($event)"
+      ></app-json-api-integration-block>
         </ng-container>
       </div>
     </div>

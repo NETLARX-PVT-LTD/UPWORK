@@ -26,9 +26,8 @@ import { TypingDelayBlockComponent } from './blocks/typing-delay-block/typing-de
 import { MediaBlockComponent } from './blocks/media-block/media-block.component';
 import { LinkStoryBlockComponent } from './blocks/link-story-block/link-story-block.component';
 import { ConversationalFormBlockComponent } from './blocks/conversational-form-block/conversational-form-block.component';
-import { GenericBlockComponent } from './blocks/generic-block/generic-block.component';
 import { MessageBoxComponent } from '../shared/components/message-box/message-box.component';
-
+import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-block/json-api-integration-block.component'; // <--- MUST BE PRESENT AND CORRECT PATH
 
 @Component({
   selector: 'app-chatbot-flow',
@@ -55,8 +54,8 @@ import { MessageBoxComponent } from '../shared/components/message-box/message-bo
     MediaBlockComponent,
     LinkStoryBlockComponent,
     ConversationalFormBlockComponent,
-    GenericBlockComponent,
-    MessageBoxComponent
+    MessageBoxComponent,
+     JsonApiIntegrationBlockComponent
   ],
   templateUrl: './chatbot-flow.component.html',
   styleUrls: ['./chatbot-flow.component.scss']
@@ -129,13 +128,13 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       linkStoryId: undefined, // Will be selected from availableStories
       linkStoryName: undefined
     },
+    // {
+    //   id: '7', name: 'Notify Human Agent', icon: 'support_agent', type: 'notifyAgent', status: 'error', x: 0, y: 0,
+    //   width: 0,
+    //   height: 0
+    // },
     {
-      id: '7', name: 'Notify Human Agent', icon: 'support_agent', type: 'notifyAgent', status: 'error', x: 0, y: 0,
-      width: 0,
-      height: 0
-    },
-    {
-      id: '8', name: 'Conversational Form', icon: 'description', type: 'conversationalForm', status: 'new', x: 0, y: 0,
+      id: '7', name: 'Conversational Form', icon: 'description', type: 'conversationalForm', status: 'new', x: 0, y: 0,
       width: 0,
       height: 0,
       formId: undefined, // Will be selected from availableForms
@@ -147,32 +146,32 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       showAsInlineForm: undefined
     },
     {
-      id: '9', name: 'Typing Delay', icon: 'hourglass_empty', type: 'typingDelay', status: 'active', x: 0, y: 0,
+      id: '8', name: 'Typing Delay', icon: 'hourglass_empty', type: 'typingDelay', status: 'active', x: 0, y: 0,
       width: 0,
       height: 0,
-      description: 'Add a typing delay between 2 blocks',
+      description: 'Add a typing delay between two blocks to mimic a real experience',
       delaySeconds: 1 // Initialize delay for typing delay
     },
+    // {
+    //   id: '10', name: 'Conditional Redirect', icon: 'call_split', type: 'conditionalRedirect', status: 'active', x: 0, y: 0,
+    //   width: 0,
+    //   height: 0
+    // },
+    // {
+    //   id: '11', name: 'RSS Feed Integration', icon: 'rss_feed', type: 'rssFeed', status: 'active', x: 0, y: 0,
+    //   width: 0,
+    //   height: 0
+    // },
     {
-      id: '10', name: 'Conditional Redirect', icon: 'call_split', type: 'conditionalRedirect', status: 'active', x: 0, y: 0,
+      id: '9', name: 'JSON API Integration', icon: 'code', type: 'jsonApi', status: 'active', x: 0, y: 0,
       width: 0,
       height: 0
     },
-    {
-      id: '11', name: 'RSS Feed Integration', icon: 'rss_feed', type: 'rssFeed', status: 'active', x: 0, y: 0,
-      width: 0,
-      height: 0
-    },
-    {
-      id: '12', name: 'JSON API Integration', icon: 'code', type: 'jsonApi', status: 'active', x: 0, y: 0,
-      width: 0,
-      height: 0
-    },
-    {
-      id: '13', name: 'Shopify Integration', icon: 'storefront', type: 'shopify', status: 'active', x: 0, y: 0,
-      width: 0,
-      height: 0
-    }
+    // {
+    //   id: '13', name: 'Shopify Integration', icon: 'storefront', type: 'shopify', status: 'active', x: 0, y: 0,
+    //   width: 0,
+    //   height: 0
+    // }
   ];
 
   canvasBlocks: ChatbotBlock[] = [];
@@ -197,11 +196,10 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
   ];
 
   availableStories: AvailableStory[] = [
-    { id: 'story-1', name: 'Welcome Flow' },
-    { id: 'story-2', name: 'Product Info' },
-    { id: 'story-3', name: 'Customer Support' },
-    { id: 'story-4', name: 'FAQ Section' },
-    { id: 'story-5', name: 'Order Status' }
+    { id: 'story-1', name: 'Go back to previous story' },
+    { id: 'story-2', name: '(Hii),' },
+    { id: 'story-3', name: 'Report Incident' },
+    { id: 'story-4', name: 'Process for setting up shop' },
   ];
 
   // Zoom and pan
@@ -362,8 +360,11 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       webhookUrl: block.type === 'conversationalForm' ? '' : undefined,
       sendEmailNotification: block.type === 'conversationalForm' ? false : undefined,
       notificationEmail: block.type === 'conversationalForm' ? '' : undefined,
-      formFields: block.type === 'conversationalForm' ? [{ name: '', type: 'text' }] : undefined,
-      showAsInlineForm: block.type === 'conversationalForm' ? false : undefined
+      formFields: block.type === 'conversationalForm' ? [{ name: 'New Field', type: 'text', required: false, promptPhrase: 'What information do you need?' }] : undefined,
+      showAsInlineForm: block.type === 'conversationalForm' ? false : undefined,
+      apiEndpoint: block.type === 'jsonApi' ? '' : undefined,
+    requestType: block.type === 'jsonApi' ? 'POST' : undefined,
+    apiHeaders: block.type === 'jsonApi' ? [] : undefined
     };
     this.canvasBlocks.push(newBlock);
     // After adding, immediately update its dimensions and select it
