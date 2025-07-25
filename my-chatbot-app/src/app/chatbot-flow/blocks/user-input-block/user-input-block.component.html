@@ -1,8 +1,7 @@
-<!-- src/app/chatbot-flow/blocks/user-input-block/user-input-block.component.html -->
 <ng-container *ngIf="!isSelected">
   <div class="block-header">
     <div class="block-type-badges">
-      <div class="block-title" (click)="onSelectBlock()">
+      <div class="block-title" (click)="onBlockClick()">
         <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
         <span>{{ block.name }}</span>
       </div>
@@ -30,6 +29,7 @@
         mat-icon-button
         [matMenuTriggerFor]="blockMenu"
         class="block-menu-trigger"
+        (click)="$event.stopPropagation()"
       >
         <mat-icon>more_vert</mat-icon>
       </button>
@@ -46,6 +46,10 @@
           <mat-icon>delete</mat-icon>
           <span>Delete</span>
         </button>
+        <button mat-menu-item (click)="onAddKeywordGroupBlockToCanvas()" *ngIf="block.subType === 'keywordGroup'">
+          <mat-icon>add</mat-icon>
+          <span>Add New Keyword Group Block</span>
+        </button>
       </mat-menu>
     </div>
   </div>
@@ -56,30 +60,22 @@
     </div>
 
     <div
-      *ngIf="block.subType === 'keywordGroup'"
+      *ngIf="block.subType === 'keywordGroup' && block.keywordGroups && block.keywordGroups.length > 0"
       class="keywords-container"
     >
-      <div class="keywords-list">
+      <div *ngFor="let group of block.keywordGroups; let i = index" class="keyword-group-summary">
         <mat-chip-listbox>
           <mat-chip-option
-            *ngFor="let keyword of block.keywords"
+            *ngFor="let keyword of group"
             class="keyword-chip"
-            (removed)="removeKeyword(block, keyword)"
+            [matTooltip]="keyword"
+            matTooltipPosition="above"  
           >
-            <h5 class="exact-keyword">{{ keyword }}</h5>
-            <button matChipRemove>
-              <mat-icon>cancel</mat-icon>
-            </button>
+            {{ keyword }}
           </mat-chip-option>
+          <span *ngIf="group.length === 0" class="no-keywords-placeholder">No keywords</span>
         </mat-chip-listbox>
       </div>
-      <input
-        type="text"
-        class="keyword-input"
-        placeholder="Add keyword..."
-        [(ngModel)]="newKeyword"
-        (keydown)="addKeyword(block, $event)"
-      />
     </div>
 
     <div
@@ -114,138 +110,157 @@
   <div class="connection-dot"></div>
 </div>
 
-<!-- Right sidebar content for selected user input block -->
+
 <div class="right-sidebar-content" *ngIf="isSelected">
-  <!-- <div class="sidebar-block-header">
-    <div class="sidebar-block-title">
-      <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
-      <span>{{ block.name }}</span>
-    </div>
-    <span
-      *ngIf="block.subType"
-      class="badge"
-      [class.keyword-group-badge]="block.subType === 'keywordGroup'"
-      [class.phrase-badge]="block.subType === 'phrase'"
-      [class.anything-badge]="block.subType === 'anything'"
-    >
-      {{
-        block.subType === "keywordGroup"
-          ? "Keyword Group"
-          : block.subType === "phrase"
-          ? "Phrase"
-          : block.subType === "anything"
-          ? "Type Anything"
-          : block.subType
-      }}
-    </span>
-  </div> -->
 
-  <p class="config-description">
-    If user query matches a combination of keywords or datastore values
-  </p>
+  <ng-container *ngIf="block.subType === 'phrase'">
+    <h4 class="section-title">User Input <span class="badge phrase-badge">Phrase</span></h4>
+    <p class="config-description">If user query is similar to phrase</p>
 
-  <div class="toggle-container">
-    <mat-button-toggle-group
-      [value]="selectedInputMode"
-      (change)="onInputModeChange($event.value)"
-      name="inputMode"
-    >
-      <mat-button-toggle value="keyword">Keyword</mat-button-toggle>
-      <mat-button-toggle value="variable">Variable</mat-button-toggle>
-    </mat-button-toggle-group>
-  </div>
-
-  <!-- Conditional display for Keyword or Variable input -->
-  <ng-container *ngIf="selectedInputMode === 'keyword'">
-    <!-- <h4 class="section-title">User Input Configuration</h4>
-    <p class="config-description">
-      Define how the chatbot should recognize user input to trigger this block.
-    </p> -->
-
-    <div
-      *ngIf="block.subType === 'keywordGroup'"
-      class="keywords-section mt-4"
-    >
-      <h5 class="sub-section-title">Keywords</h5>
-      <div class="keywords-display">
-        <mat-chip-listbox>
-          <mat-chip-option
-            *ngFor="let keyword of block.keywords"
-            class="keyword-chip-large"
-            (removed)="removeKeyword(block, keyword)"
-          >
-            <h5 class="exact-keyword">{{ keyword }}</h5>
-            <button matChipRemove>
-              <mat-icon>close</mat-icon>
-            </button>
-          </mat-chip-option>
-        </mat-chip-listbox>
-      </div>
-
-      <div class="add-keyword-section">
-        <mat-form-field appearance="outline" class="keyword-input-field">
-          <mat-label>Add keywords</mat-label>
-          <input
-            matInput
-            placeholder="Add keywords (press Enter or comma)"
-            [(ngModel)]="newKeyword"
-            (keydown)="addKeywordFromSidebar($event)"
-          />
-        </mat-form-field>
-      </div>
-
-      <div class="add-keyword-group">
-        <button mat-stroked-button class="add-group-btn">
-          <mat-icon>add</mat-icon>
-          Add Keyword Group
-        </button>
-      </div>
+    <div class="input-group">
+      <!-- <label class="input-label">User Says</label> -->
+      <textarea
+        class="custom-textarea"
+        [(ngModel)]="block.phraseText"
+        (ngModelChange)="onContentChange()"
+        placeholder="User Says"
+        rows="1"
+      ></textarea>
     </div>
 
-    <div *ngIf="block.subType === 'phrase'" class="mt-4">
-      <h5 class="sub-section-title">Exact Phrase</h5>
-      <mat-form-field appearance="outline" class="full-width-input">
-        <mat-label>Enter phrase</mat-label>
-        <input
-          matInput
-          [(ngModel)]="block.phraseText"
-          (ngModelChange)="onContentChange()"
-          placeholder="Type the exact phrase the user might say"
-        />
-      </mat-form-field>
-    </div>
+    <button mat-flat-button color="primary" class="generate-similar-btn align-items-end">
+      <mat-icon>auto_awesome</mat-icon>
+      Generate Similar Phrases
+    </button>
 
-    <div *ngIf="block.subType === 'anything'" class="mt-4">
-      <h5 class="sub-section-title">Match Any Input</h5>
-      <p class="info-text">This block will match any user input that doesn't trigger other blocks.</p>
-      <mat-form-field appearance="outline" class="full-width-input">
-        <mat-label>Custom message (optional)</mat-label>
-        <textarea
-          matInput
-          [(ngModel)]="block.customMessage"
-          (ngModelChange)="onContentChange()"
-          placeholder="Add a custom message to respond when anything is matched"
-          rows="3"
-        ></textarea>
-      </mat-form-field>
+    <div class="input-group">
+      <label class="input-label">Add Similar Phrases</label>
+      <textarea
+        class="custom-textarea large-textarea"
+        [(ngModel)]="block.similarPhrases"
+        (ngModelChange)="onContentChange()"
+        placeholder="Add Similar Phrases"
+        rows="1"
+      ></textarea>
     </div>
   </ng-container>
 
-  <ng-container *ngIf="selectedInputMode === 'variable'">
-    <h4 class="section-title mt-4">Select Datastore Variable</h4>
-    <mat-form-field appearance="outline" class="full-width-input">
-      <mat-label>Select Datastore</mat-label>
-      <mat-select [(ngModel)]="block.datastoreVariable" (ngModelChange)="onContentChange()">
-        <mat-option *ngFor="let variable of availableVariables" [value]="variable">
-          {{ variable }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-    <div class="add-keyword-group">
-        <button mat-stroked-button class="add-group-btn">
+  <ng-container *ngIf="block.subType === 'keywordGroup'">
+    <h4 class="section-title">User Input <span class="badge keyword-group-badge">Keyword Group</span></h4>
+    <p class="config-description">
+      If user query matches a combination of keywords or datastore values
+    </p>
+
+    <div class="toggle-container align-items-end">
+      <mat-button-toggle-group
+        [value]="selectedInputMode"
+        (change)="onInputModeChange($event.value)"
+        name="inputMode"
+      >
+        <mat-button-toggle value="keyword">Keyword</mat-button-toggle>
+        <mat-button-toggle value="variable">Variable</mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    <ng-container *ngIf="selectedInputMode === 'keyword'">
+      <div class="keywords-section mt-4">
+        <div *ngFor="let group of block.keywordGroups; let i = index" class="keyword-input-group">
+          <div class="group-header">
+            <button mat-icon-button (click)="removeKeywordInputGroup(i)" *ngIf="block.keywordGroups && block.keywordGroups.length > 1" class="remove-group-button" matTooltip="Remove this keyword group">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-chip-grid #chipGrid [formControl]="keywordFormControls[i]">
+              <mat-chip-row *ngFor="let keyword of group" (removed)="removeKeyword(keyword, i)">
+                {{ keyword }}
+                <button matChipRemove [attr.aria-label]="'remove ' + keyword">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </mat-chip-row>
+              <input
+                [placeholder]="'Add keywords' "
+                [matChipInputFor]="chipGrid"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                [matChipInputAddOnBlur]="true"
+                (matChipInputTokenEnd)="addKeyword($event, i)"
+              />
+            </mat-chip-grid>
+          </mat-form-field>
+        </div>
+
+        <div class="add-keyword-group-btn-container">
+          <button mat-stroked-button class="add-group-btn" (click)="addKeywordInputGroup()">
+            <mat-icon>add</mat-icon>
+            Add Keyword Group
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="selectedInputMode === 'variable'">
+      <h4 class="section-title mt-4">Select Datastore Variable</h4>
+      <mat-form-field appearance="outline" class="full-width-input simple-input">
+        <mat-label>Select Datastore</mat-label>
+        <mat-select [(ngModel)]="block.datastoreVariable" (ngModelChange)="onContentChange()">
+          <mat-option *ngFor="let variable of availableVariables" [value]="variable">
+            {{ variable }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div *ngIf="block.datastoreVariable || (block.keywordGroups && block.keywordGroups.length > 0)" class="keywords-section mt-4">
+        <h5 class="sub-section-title">Keywords for {{ block.datastoreVariable || 'Selected Variable' }}</h5>
+        <div *ngFor="let group of block.keywordGroups; let i = index" class="keyword-input-group">
+          <div class="group-header">
+            <div class="group-title">Keyword Group {{ i + 1 }}</div>
+            <button mat-icon-button (click)="removeKeywordInputGroup(i)" *ngIf="block.keywordGroups && block.keywordGroups.length > 1" class="remove-group-button" matTooltip="Remove this keyword group">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Add keywords</mat-label>
+            <mat-chip-grid #chipGrid [formControl]="keywordFormControls[i]">
+              <mat-chip-row *ngFor="let keyword of group" (removed)="removeKeyword(keyword, i)">
+                {{ keyword }}
+                <button matChipRemove [attr.aria-label]="'remove ' + keyword">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </mat-chip-row>
+              <input
+                [placeholder]="'Add keywords'"
+                [matChipInputFor]="chipGrid"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                [matChipInputAddOnBlur]="true"
+                (matChipInputTokenEnd)="addKeyword($event, i)"
+              />
+            </mat-chip-grid>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="add-keyword-group-btn-container mt-3">
+        <button mat-stroked-button class="add-group-btn" (click)="addKeywordInputGroup()">
           <mat-icon>add</mat-icon>
           Add Keyword Group
         </button>
       </div>
+    </ng-container>
+  </ng-container>
+
+  <ng-container *ngIf="block.subType === 'anything'">
+    <h4 class="section-title">User Input <span class="badge anything-badge">Type Anything</span></h4>
+    <p class="config-description">This block will match any user input that doesn't trigger other blocks.</p>
+
+    <div class="input-group">
+      <label class="input-label">Custom message (optional)</label>
+      <textarea
+        class="custom-textarea large-textarea"
+        [(ngModel)]="block.customMessage"
+        (ngModelChange)="onContentChange()"
+        placeholder="Add a custom message to respond when anything is matched"
+        rows="4"
+      ></textarea>
+    </div>
   </ng-container>
 </div>

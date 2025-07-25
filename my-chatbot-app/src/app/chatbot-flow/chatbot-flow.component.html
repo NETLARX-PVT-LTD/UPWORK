@@ -1,4 +1,3 @@
-<!-- src/app/chatbot-flow/chatbot-flow.component.html -->
 <div class="chatbot-flow-container">
   <div class="header">
     <div class="header-left">
@@ -158,7 +157,6 @@
             (cdkDragEnded)="onBlockDragEnded($event, block)"
             (mousedown)="endConnection($event, block)"
           >
-            <!-- Render specific block component based on block.type -->
             <ng-container [ngSwitch]="block.type">
               <app-user-input-block
                 *ngSwitchCase="'userInput'"
@@ -172,7 +170,7 @@
                 (removeBlock)="removeCanvasBlock($event)"
                 (duplicateBlock)="duplicateCanvasBlock($event)"
                 (editBlock)="editCanvasBlock($event)"
-              ></app-user-input-block>
+                (addKeywordGroupBlock)="onAddKeywordGroupBlockToCanvas()" ></app-user-input-block>
 
               <app-text-response-block
                 *ngSwitchCase="'textResponse'"
@@ -247,7 +245,6 @@
                 (editBlock)="editCanvasBlock($event)"
               ></app-typing-delay-block>
 
-              <!-- Generic block for all other types -->
               <app-json-api-integration-block
                 *ngSwitchDefault
                 [block]="block"
@@ -321,16 +318,15 @@
         </button>
       </div>
 
-      <!-- The content of the right sidebar is now rendered directly within the selected block component -->
       <div class="right-sidebar-content-wrapper">
         <ng-container [ngSwitch]="selectedBlock.type">
-          <app-user-input-block
-            *ngSwitchCase="'userInput'"
-            [block]="selectedBlock"
-            [isSelected]="true"
-            [isSidebarOpen]="true"
-            (blockUpdated)="onBlockUpdated($event)"
-          ></app-user-input-block>
+           <app-user-input-block
+        *ngSwitchCase="'userInput'"
+        [block]="selectedBlock"
+        [isSelected]="true"
+        [isSidebarOpen]="true"
+        (blockUpdated)="onBlockUpdated($event)"
+        ></app-user-input-block>
 
           <app-text-response-block
             *ngSwitchCase="'textResponse'"
@@ -376,11 +372,11 @@
           ></app-typing-delay-block>
 
           <app-json-api-integration-block
-        *ngIf="selectedBlock.type === 'jsonApi'"
-        [block]="selectedBlock"
-        [isSelected]="true"
-        (blockUpdated)="onBlockUpdated($event)"
-      ></app-json-api-integration-block>
+            *ngIf="selectedBlock.type === 'jsonApi'"
+            [block]="selectedBlock"
+            [isSelected]="true"
+            (blockUpdated)="onBlockUpdated($event)"
+          ></app-json-api-integration-block>
         </ng-container>
       </div>
     </div>
