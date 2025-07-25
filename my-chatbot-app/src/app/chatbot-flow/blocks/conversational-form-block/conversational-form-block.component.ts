@@ -39,7 +39,7 @@ export class ConversationalFormBlockComponent implements OnInit {
   @Input() isSelected: boolean = false;
   @Input() isSidebarOpen: boolean = false;
   @Input() availableForms: AvailableForm[] = [];
- @Input() availableStories: AvailableStory[] = []; // This line is crucial!
+  @Input() availableStories: AvailableStory[] = []; // This line is crucial!
   @Output() blockUpdated = new EventEmitter<ChatbotBlock>();
   @Output() selectBlock = new EventEmitter<ChatbotBlock>();
   @Output() startConnection = new EventEmitter<MouseEvent>();

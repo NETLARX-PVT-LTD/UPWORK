@@ -29,7 +29,7 @@ import { MediaBlockComponent } from './blocks/media-block/media-block.component'
 import { LinkStoryBlockComponent } from './blocks/link-story-block/link-story-block.component';
 import { ConversationalFormBlockComponent } from './blocks/conversational-form-block/conversational-form-block.component';
 import { MessageBoxComponent } from '../shared/components/message-box/message-box.component';
-import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-block/json-api-integration-block.component'; // <--- MUST BE PRESENT AND CORRECT PATH
+import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-block/json-api-integration-block.component';
 
 @Component({
   selector: 'app-chatbot-flow',
@@ -57,7 +57,7 @@ import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-
     LinkStoryBlockComponent,
     ConversationalFormBlockComponent,
     MessageBoxComponent,
-     JsonApiIntegrationBlockComponent
+    JsonApiIntegrationBlockComponent
   ],
   templateUrl: './chatbot-flow.component.html',
   styleUrls: ['./chatbot-flow.component.scss']
@@ -131,11 +131,6 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       linkStoryId: undefined, // Will be selected from availableStories
       linkStoryName: undefined
     },
-    // {
-    //   id: '7', name: 'Notify Human Agent', icon: 'support_agent', type: 'notifyAgent', status: 'error', x: 0, y: 0,
-    //   width: 0,
-    //   height: 0
-    // },
     {
       id: '7', name: 'Conversational Form', icon: 'description', type: 'conversationalForm', status: 'new', x: 0, y: 0,
       width: 0,
@@ -146,7 +141,8 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       sendEmailNotification: undefined,
       notificationEmail: undefined,
       formFields: undefined,
-      showAsInlineForm: undefined
+      showAsInlineForm: undefined,
+      description : "Ask one question at a time & send responses to your desired location or webservice"
     },
     {
       id: '8', name: 'Typing Delay', icon: 'hourglass_empty', type: 'typingDelay', status: 'active', x: 0, y: 0,
@@ -155,26 +151,12 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       description: 'Add a typing delay between two blocks to mimic a real experience',
       delaySeconds: 1 // Initialize delay for typing delay
     },
-    // {
-    //   id: '10', name: 'Conditional Redirect', icon: 'call_split', type: 'conditionalRedirect', status: 'active', x: 0, y: 0,
-    //   width: 0,
-    //   height: 0
-    // },
-    // {
-    //   id: '11', name: 'RSS Feed Integration', icon: 'rss_feed', type: 'rssFeed', status: 'active', x: 0, y: 0,
-    //   width: 0,
-    //   height: 0
-    // },
     {
       id: '9', name: 'JSON API Integration', icon: 'code', type: 'jsonApi', status: 'active', x: 0, y: 0,
       width: 0,
-      height: 0
+      height: 0,
+      description : "Integrate JSON API to fetch or post data to your webservice"
     },
-    // {
-    //   id: '13', name: 'Shopify Integration', icon: 'storefront', type: 'shopify', status: 'active', x: 0, y: 0,
-    //   width: 0,
-    //   height: 0
-    // }
   ];
 
   canvasBlocks: ChatbotBlock[] = [];
@@ -256,7 +238,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       y: 200,
       subType: 'keywordGroup',
       content: 'Hello 👋',
-      keywords: ['Hello', 'Hi'],
+      keywordGroups: [['Hello', 'Hi']], // Initial keyword group (array of arrays)
       description: 'Define keywords that trigger the conversations',
       width: 0,
       height: 0
@@ -400,7 +382,7 @@ this.instance.connect({
       y: this.calculateNewBlockY(), // Position new blocks near the center of the viewport
       // Initialize specific properties based on type/subType
       content: block.type === 'textResponse' ? '' : undefined,
-      keywords: block.subType === 'keywordGroup' ? [] : undefined,
+      keywordGroups: block.subType === 'keywordGroup' ? [[]] : undefined, // Initialize with an empty group for new keywordGroup blocks
       phraseText: block.subType === 'phrase' ? '' : undefined,
       customMessage: block.subType === 'anything' ? '' : undefined,
       delaySeconds: block.type === 'typingDelay' ? 1 : undefined,
@@ -418,8 +400,8 @@ this.instance.connect({
       formFields: block.type === 'conversationalForm' ? [{ name: 'New Field', type: 'text', required: false, promptPhrase: 'What information do you need?' }] : undefined,
       showAsInlineForm: block.type === 'conversationalForm' ? false : undefined,
       apiEndpoint: block.type === 'jsonApi' ? '' : undefined,
-    requestType: block.type === 'jsonApi' ? 'POST' : undefined,
-    apiHeaders: block.type === 'jsonApi' ? [] : undefined
+      requestType: block.type === 'jsonApi' ? 'POST' : undefined,
+      apiHeaders: block.type === 'jsonApi' ? [] : undefined
     };
     this.canvasBlocks.push(newBlock);
     // After adding, immediately update its dimensions and select it
@@ -492,9 +474,8 @@ this.instance.connect({
       x: (block.x || 0) + 30,
       y: (block.y || 0) + 30,
       // Deep copy relevant arrays if present
-      keywords: block.keywords ? [...block.keywords] : undefined,
-      alternateResponses: block.alternateResponses ? [...block.alternateResponses] : undefined,
-      quickReplies: block.quickReplies ? [...block.quickReplies] : undefined,
+      // Ensure keywordGroups are deep copied
+      keywordGroups: block.keywordGroups ? block.keywordGroups.map(group => [...group]) : undefined,
       formFields: block.formFields ? block.formFields.map(field => ({ ...field })) : undefined // Deep copy form fields
     };
     this.canvasBlocks.push(newBlock);
@@ -526,7 +507,7 @@ this.instance.connect({
     const outputPointRect = outputPointElement.getBoundingClientRect();
     const canvasContentRect = this.canvasContent.nativeElement.getBoundingClientRect();
 
-    // Calculate coordinates relative to the canvasContent (which has the transform)
+    // Calculate coordinates relative to the scaled and panned canvas content
     const startX = (outputPointRect.left + outputPointRect.width / 2 - canvasContentRect.left) / this.zoomLevel;
     const startY = (outputPointRect.top + outputPointRect.height / 2 - canvasContentRect.top) / this.zoomLevel;
 
@@ -709,7 +690,6 @@ this.instance.connect({
     this.messageBoxContent = '';
   }
 
-
   // Get status color
   getStatusColor(status: string): string {
     switch (status) {
@@ -736,6 +716,21 @@ this.instance.connect({
       case 'jsonApi': return '#E3F2FD'; // light blue
       case 'shopify': return '#EFEBE9'; // light brown
       default: return '#F5F5F5'; // default light grey
+    }
+  }
+
+  // This method is now specifically for adding a *new canvas block* of type 'Keyword Group'
+  // It is called when `UserInputBlockComponent` on the canvas emits `addKeywordGroupBlock`
+  onAddKeywordGroupBlockToCanvas(): void {
+    const keywordGroupBlueprint = this.allBlocks.find(
+      block => block.type === 'userInput' && block.subType === 'keywordGroup'
+    );
+
+    if (keywordGroupBlueprint) {
+      this.addBlockToCanvas(keywordGroupBlueprint);
+      this.displayMessageBox('New Keyword Group block added to canvas.', 'success');
+    } else {
+      this.displayMessageBox('Could not find a Keyword Group block blueprint to add.', 'error');
     }
   }
 }

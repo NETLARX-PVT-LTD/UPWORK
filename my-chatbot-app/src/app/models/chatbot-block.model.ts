@@ -15,6 +15,7 @@ export interface ChatbotBlock {
   content?: string; // For TextResponse, MediaBlock (text type, and potentially 'mark' type if you add it)
   subType?: UserInputSubType; // For UserInput blocks (phrase, keywordGroup, anything)
   keywords?: string[]; // For UserInput (keywordGroup)
+  keywordGroups?: string[][];
   phraseText?: string; // For UserInput (phrase)
   customMessage?: string; // For UserInput (anything)
   delaySeconds?: number; // For TypingDelay
@@ -63,6 +64,7 @@ export interface ChatbotBlock {
   apiEndpoint?: string;
   requestType?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   apiHeaders?: ApiHeader[]; // Array of API headers
+   similarPhrases?: string;
 }
 
 // Define possible types of chatbot blocks
