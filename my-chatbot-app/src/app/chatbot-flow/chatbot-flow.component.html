@@ -85,7 +85,8 @@
           </button>
         </div>
         <button mat-icon-button (click)="resetZoom()" matTooltip="Reset zoom">
-          <mat-icon>center_focus_strong</mat-icon>
+          <!-- <mat-icon>center_focus_strong</mat-icon> -->
+           <span class="reset-text">Reset</span>
         </button>
       </div>
 
@@ -145,9 +146,12 @@
             </div>
           </div>
 
+          
+
           <div
             *ngFor="let block of canvasBlocks"
             class="canvas-block"
+             
             [class]="'canvas-block-' + block.type"
             [class.selected]="selectedBlock?.id === block.id"
             [style.left.px]="block.x"
@@ -163,6 +167,7 @@
               <app-user-input-block
                 *ngSwitchCase="'userInput'"
                 [block]="block"
+                [attr.id]="'user-input-block-' + block.id"
                 [isSelected]="selectedBlock?.id === block.id"
                 [isSidebarOpen]="rightSidebarOpen"
                 (blockUpdated)="onBlockUpdated($event)"
@@ -190,6 +195,7 @@
 
               <app-media-block
                 *ngSwitchCase="'mediaBlock'"
+                [attr.id]="'media-block-' + block.id"
                 [block]="block"
                 [isSelected]="selectedBlock?.id === block.id"
                 [isSidebarOpen]="rightSidebarOpen"

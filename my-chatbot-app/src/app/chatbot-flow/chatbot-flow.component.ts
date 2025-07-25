@@ -5,6 +5,8 @@ import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith, debounceTime } from 'rxjs/operators';
 import { ChatbotBlock, Connection, AvailableMedia, AvailableStory, AvailableForm } from '../models/chatbot-block.model';
+import { jsPlumb } from 'jsplumb';
+
 
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -61,6 +63,7 @@ import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-
   styleUrls: ['./chatbot-flow.component.scss']
 })
 export class ChatbotFlowComponent implements OnInit, AfterViewInit {
+  instance: any;
   @ViewChild('canvasWrapper') canvasWrapper!: ElementRef;
   @ViewChild('canvasContent') canvasContent!: ElementRef;
   @ViewChild('svgCanvas') svgCanvas!: ElementRef;
@@ -215,6 +218,9 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
   panOffsetX = 0;
   panOffsetY = 0;
 
+  
+  
+
   // Connection drawing
   isDrawingConnection = false;
   connectionStart: { blockId: string, x: number, y: number } | null = null;
@@ -258,6 +264,55 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+
+    // ashutosh
+
+// Create jsPlumb instance
+this.instance = jsPlumb.getInstance({
+  Container: 'canvas'
+});
+
+// ✅ Define common settings before using it
+const commonSettings = {
+  connector: ['Flowchart'],
+  endpoint: ['Dot', { radius: 5 }],
+  paintStyle: { stroke: '#1e88e5', strokeWidth: 2 },
+  endpointStyle: { fill: '#1e88e5' },
+  hoverPaintStyle: { stroke: '#ff4081', strokeWidth: 2 }
+};
+
+// Make components draggable
+this.instance.draggable('user-input-block-123');
+this.instance.draggable('media-block-456');
+
+// Add output endpoint to user-input-block
+this.instance.addEndpoint('user-input-block', {
+  uuid: 'userInputOutput',
+  anchor: 'Right',
+  isSource: true,
+  maxConnections: -1,
+  ...commonSettings 
+});
+
+// Add input endpoint to media-block
+this.instance.addEndpoint('media-block', {
+  uuid: 'mediaInput',
+  anchor: 'Left',
+  isTarget: true,
+  maxConnections: -1,
+  ...commonSettings
+});
+
+// Connect them
+this.instance.connect({
+  uuids: ['userInputOutput', 'mediaInput'],
+  ...commonSettings
+});
+
+
+
+
+
     this.updateCanvasTransform();
     // Set initial dimensions for the starting block (important for connection points)
     setTimeout(() => {
