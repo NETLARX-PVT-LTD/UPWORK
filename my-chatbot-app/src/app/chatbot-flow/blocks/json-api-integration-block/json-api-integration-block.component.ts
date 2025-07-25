@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -39,7 +40,8 @@ interface JsonApiBlock extends ChatbotBlock {
     MatButtonModule,
     MatSelectModule,
     MatTooltipModule,
-    MatExpansionModule
+    MatExpansionModule,
+    MatMenuModule,
   ],
   templateUrl: './json-api-integration-block.component.html',
   styleUrls: ['./json-api-integration-block.component.scss']
@@ -56,6 +58,7 @@ export class JsonApiIntegrationBlockComponent implements OnInit {
   @Output() removeBlock = new EventEmitter<string>();
   @Output() duplicateBlock = new EventEmitter<JsonApiBlock>();
   @Output() editBlock = new EventEmitter<JsonApiBlock>();
+
 
   // State for expansion panel
   expandedSection: string = 'apiConfig'; // Default to API config section

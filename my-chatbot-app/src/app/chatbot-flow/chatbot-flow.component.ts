@@ -138,7 +138,8 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       sendEmailNotification: undefined,
       notificationEmail: undefined,
       formFields: undefined,
-      showAsInlineForm: undefined
+      showAsInlineForm: undefined,
+      description : "Ask one question at a time & send responses to your desired location or webservice"
     },
     {
       id: '8', name: 'Typing Delay', icon: 'hourglass_empty', type: 'typingDelay', status: 'active', x: 0, y: 0,
@@ -150,7 +151,8 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
     {
       id: '9', name: 'JSON API Integration', icon: 'code', type: 'jsonApi', status: 'active', x: 0, y: 0,
       width: 0,
-      height: 0
+      height: 0,
+      description : "Integrate JSON API to fetch or post data to your webservice"
     },
   ];
 

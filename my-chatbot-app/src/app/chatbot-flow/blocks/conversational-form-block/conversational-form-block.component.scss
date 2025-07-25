@@ -4,6 +4,89 @@
 // Duplicated from chatbot-flow.component.scss for self-containment.
 // In a real project, consider shared styles.
 
+// .block-header {
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+//   padding: 0px 8px;
+//   border-bottom: 2px solid rgb(6, 184, 6);
+//   background-color: #CDA5E7; // This color will be overridden by getTypeColor in parent
+//   border-top-left-radius: 10px;
+//   border-top-right-radius: 10px;
+
+//   .block-type-badges {
+//     display: flex;
+//     gap: 6px;
+//     align-items: center;
+
+//     .block-title {
+//       display: flex;
+//       align-items: center;
+//       gap: 8px;
+
+//       .block-icon {
+//         font-size: 18px;
+//         width: 18px;
+//         height: 18px;
+//         color: #6366f1; // This color will be overridden by getTypeColor in parent
+//       }
+
+//       span {
+//         font-weight: 600;
+//         color: #1e293b;
+//         font-size: 14px;
+//       }
+//     }
+
+//     .badge {
+//       padding: 4px 8px;
+//       border-radius: 12px;
+//       font-size: 11px;
+//       font-weight: 500;
+//       text-transform: uppercase;
+//       letter-spacing: 0.5px;
+
+//       &.form-block-badge {
+//         background-color: #10b981; // Example color for form badge
+//         color: white;
+//       }
+//     }
+//   }
+
+//   .block-actions {
+//     .block-menu-trigger {
+//       mat-icon {
+//         font-size: 16px;
+//         color: #fff;
+//       }
+//     }
+//   }
+// }
+
+// .block-body {
+//   padding: 0 16px 16px;
+//   background-color: #fff;
+//   border-bottom-left-radius: 10px;
+//   border-bottom-right-radius: 10px;
+
+//   .block-description {
+//     font-size: 16px;
+//     color: #64748b;
+//     margin-bottom: 12px;
+//     line-height: 1.4;
+//     padding-top: 5px;
+//   }
+
+//   .block-content-text {
+//     font-size: 13px;
+//     color: #374151;
+//     background-color: #f8fafc;
+//     padding: 8px 12px;
+//     border-radius: 6px;
+//     border: 1px solid #e2e8f0;
+//   }
+// }
+
 .block-header {
   display: flex;
   justify-content: space-between;
@@ -38,19 +121,19 @@
       }
     }
 
-    .badge {
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    // .badge {
+    //   padding: 4px 8px;
+    //   border-radius: 12px;
+    //   font-size: 11px;
+    //   font-weight: 500;
+    //   text-transform: uppercase;
+    //   letter-spacing: 0.5px;
 
-      &.form-block-badge {
-        background-color: #10b981; // Example color for form badge
-        color: white;
-      }
-    }
+    //   &.link-story-badge {
+    //     background-color: #f59e0b; // Example color for link story badge
+    //     color: white;
+    //   }
+    // }
   }
 
   .block-actions {
@@ -77,14 +160,14 @@
     padding-top: 5px;
   }
 
-  .block-content-text {
-    font-size: 13px;
-    color: #374151;
-    background-color: #f8fafc;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
-  }
+  // .block-content-text {
+  //   font-size: 13px;
+  //   color: #374151;
+  //   background-color: #f8fafc;
+  //   padding: 8px 12px;
+  //   border-radius: 6px;
+  //   border: 1px solid #e2e8f0;
+  // }
 }
 
 .connection-point {
@@ -122,22 +205,22 @@
 
 /* Right Sidebar Content for Conversational Form Block */
 .right-sidebar-content {
-  padding: 20px;
+  padding: 0px 20px;
   overflow-y: auto;
 
-  .section-title {
-    color: #1e293b;
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
+  // .section-title {
+  //   color: #1e293b;
+  //   font-size: 18px;
+  //   font-weight: 600;
+  //   margin-bottom: 8px;
+  // }
 
-  .config-description {
-    color: #64748b;
-    font-size: 14px;
-    margin-bottom: 20px;
-    line-height: 1.4;
-  }
+  // .config-description {
+  //   color: #64748b;
+  //   font-size: 14px;
+  //   margin-bottom: 20px;
+  //   line-height: 1.4;
+  // }
 
   .input-group {
     margin-bottom: 16px;
