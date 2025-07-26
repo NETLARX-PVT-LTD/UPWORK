@@ -9,14 +9,15 @@
 
 /* Header Styles */
 .header {
-  display: flex;
+ display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
   background-color: white;
   border-bottom: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  z-index: 100;
+  z-index: 1000; /* Increase z-index to be higher than sidebar */
+  position: relative; /* Ensure z-index works */
   
   .header-left {
     h2 {
@@ -709,7 +710,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  // background-color: rgba(0, 0, 0, 0.5);
   z-index: 150;
   opacity: 0;
   visibility: hidden;
