@@ -191,11 +191,23 @@
 /* Clean input styles without vertical lines */
 
 .right-sidebar-content {
+  position: relative;
   padding: 20px;
   overflow-y: auto;
   background-color: #ffffff;
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  .close-btn {
+    position: absolute;
+    top: 10px; // Adjust as needed for vertical positioning
+    right: 10px; // Adjust as needed for horizontal positioning
+    z-index: 10; // Ensure it's above other content if necessary
+    // Add any other styling for the button itself, like background, color, size
+     mat-icon {
+        font-size: 16px;
+      }
+  }
 
   .section-title {
     font-size: 16px;

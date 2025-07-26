@@ -332,6 +332,7 @@
         [isSelected]="true"
         [isSidebarOpen]="true"
         (blockUpdated)="onBlockUpdated($event)"
+       (closeSidebarEvent)="closeSidebar()" (editBlock)="editCanvasBlock($event)"
         ></app-user-input-block>
 
           <app-text-response-block
@@ -340,6 +341,7 @@
             [isSelected]="true"
             [isSidebarOpen]="true"
             (blockUpdated)="onBlockUpdated($event)"
+             (closeSidebarEvent)="closeSidebar()" (editBlock)="editCanvasBlock($event)"
           ></app-text-response-block>
 
           <app-media-block

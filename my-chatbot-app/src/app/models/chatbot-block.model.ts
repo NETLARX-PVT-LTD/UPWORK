@@ -65,6 +65,11 @@ export interface ChatbotBlock {
   requestType?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   apiHeaders?: ApiHeader[]; // Array of API headers
    similarPhrases?: string;
+
+   // Quick Reply related properties - ADD THESE
+  // quickReplies?: QuickReply[];
+  parentId?: string; // For quick reply children blocks to reference their parent
+  quickReplyIndex?: number; // For individual quick reply blocks to know their index
 }
 
 // Define possible types of chatbot blocks
@@ -79,7 +84,11 @@ export type BlockType =
   | 'conditionalRedirect'
   | 'rssFeed'
   | 'jsonApi'
-  | 'shopify';
+  | 'shopify'
+  | 'noQuickReply'        // Add this
+  | 'quickRepliesMain'     // Add this
+  | 'quickReplyItem';      // Add this
+
 
 // Define subtypes for UserInput blocks
 export type UserInputSubType = 'phrase' | 'keywordGroup' | 'anything';
@@ -153,6 +162,7 @@ export interface FormField {
 export interface QuickReply {
   id: string;
   text: string;
+  value?: string; // Optional value different from display text
 }
 
 export interface FormSubmission {
