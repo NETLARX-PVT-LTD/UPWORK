@@ -1,0 +1,16 @@
+<div class="quick-replies-main-block">
+  <div class="flow-block-header">
+    <mat-icon class="block-icon">forum</mat-icon>
+    <span class="block-title">Quick Replies</span>
+  </div>
+  <div class="flow-block-body">
+    <p class="block-description">Simple buttons to carry forward the user conversation to a desired path</p>
+  </div>
+  <div class="connection-point connection-output"
+       (mousedown)="startConnection.emit($event)">
+    <div class="connection-dot"></div>
+  </div>
+  <div class="connection-point connection-input"
+       (mousedown)="endConnection.emit($event, block)"> <div class="connection-dot"></div>
+  </div>
+  </div>

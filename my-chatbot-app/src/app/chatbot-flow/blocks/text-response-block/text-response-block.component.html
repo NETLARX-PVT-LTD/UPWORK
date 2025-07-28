@@ -121,7 +121,7 @@
         <mat-icon matSuffix class="info-icon" (click)="openInfoModal('alternateResponse')">info</mat-icon>
       </mat-form-field>
       <div class="alternate-response-actions">
-        <button mat-flat-button color="primary" (click)="addAlternateResponse()">Add</button>
+        <button mat-flat-button class="addbtn" (click)="addAlternateResponse()">Add</button>
         <button mat-stroked-button class="generateFromAI" (click)="generateFromAI()">Generate from AI</button>
         <button class="hidebtn"
           mat-stroked-button
@@ -254,58 +254,6 @@
               {{ variable }}
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Quick Reply Section - Completely separate from main block -->
-<div class="quick-replies-external-container" *ngIf="!isSelected && block.quickReplies && block.quickReplies.length > 0">
-  <!-- Connection line from main block to quick replies -->
-  <div class="connection-line-to-replies"></div>
-
-  <!-- Quick Replies Flow Container -->
-  <div class="quick-replies-flow-container">
-    <div class="no-quick-reply-block">
-      <div class="flow-block-header">
-        <mat-icon class="block-icon">block</mat-icon>
-        <span class="block-title">No Quick Reply</span>
-      </div>
-      <div class="flow-block-body">
-        <p class="block-description">Drag modules from the user input tab</p>
-      </div>
-      <div class="connection-point connection-output">
-        <div class="connection-dot"></div>
-      </div>
-    </div>
-
-    <div class="quick-replies-main-block">
-      <div class="flow-block-header">
-        <mat-icon class="block-icon">forum</mat-icon>
-        <span class="block-title">Quick Replies</span>
-      </div>
-      <div class="flow-block-body">
-        <p class="block-description">Simple buttons to carry forward the user conversation to a desired path</p>
-      </div>
-      <div class="connection-point connection-output">
-        <div class="connection-dot"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Individual Quick Reply Cards -->
-  <div class="individual-quick-replies">
-    <div class="connection-line-to-individual-replies"></div>
-    <div class="quick-reply-cards-row">
-      <div *ngFor="let reply of block.quickReplies; let i = index" class="individual-quick-reply-card">
-        <div class="quick-reply-card-header">
-          <mat-icon class="quick-reply-icon">chat_bubble</mat-icon>
-          <span class="quick-reply-label">Quick Reply:</span>
-          <span class="quick-reply-status">{{ reply.text }}</span>
-        </div>
-        <div class="connection-point connection-output">
-          <div class="connection-dot"></div>
         </div>
       </div>
     </div>
