@@ -70,6 +70,9 @@ export interface ChatbotBlock {
   // quickReplies?: QuickReply[];
   parentId?: string; // For quick reply children blocks to reference their parent
   quickReplyIndex?: number; // For individual quick reply blocks to know their index
+  text?: string; // <--- ADD THIS LINE for quick reply blocks if they are ChatbotBlock type
+  value?: string; // <--- ADD THIS LINE if needed for quick reply blocks
+  
 }
 
 // Define possible types of chatbot blocks

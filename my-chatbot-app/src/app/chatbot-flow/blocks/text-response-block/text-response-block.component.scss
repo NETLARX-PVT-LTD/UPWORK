@@ -1185,7 +1185,8 @@
   //  font-weight: 100;
    font-size: small;
  color: #FFFFFF;
-    background-color: rgb(6, 196, 6);
+    background-color: #22c55e;
+    border-color: #22c55e;
    
   }
   button.hidebtn{
@@ -1193,6 +1194,14 @@
   //  font-weight: 100;
  color: #FFFFFF;
     background-color: rgb(253, 10, 50);
+    border-color: rgb(253, 10, 50);
+   
+  }
+  button.addbtn{
+    font-size: small;
+  //  font-weight: 100;
+ color: #FFFFFF;
+    background-color: #3b82f6;
    
   }
 }
