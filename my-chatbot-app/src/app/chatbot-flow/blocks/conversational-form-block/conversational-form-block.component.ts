@@ -12,7 +12,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatExpansionModule } from '@angular/material/expansion';
 
-import { ChatbotBlock, AvailableForm, FormField, AvailableStory  } from '../../../models/chatbot-block.model';
+import { ChatbotBlock, AvailableForm, FormField, AvailableStory } from '../../../models/chatbot-block.model';
 
 @Component({
   selector: 'app-conversational-form-block',
@@ -40,6 +40,7 @@ export class ConversationalFormBlockComponent implements OnInit {
   @Input() isSidebarOpen: boolean = false;
   @Input() availableForms: AvailableForm[] = [];
   @Input() availableStories: AvailableStory[] = []; // This line is crucial!
+  
   @Output() blockUpdated = new EventEmitter<ChatbotBlock>();
   @Output() selectBlock = new EventEmitter<ChatbotBlock>();
   @Output() startConnection = new EventEmitter<MouseEvent>();
@@ -395,6 +396,11 @@ private loadAvailableForms(): void {
   /**
    * Save the current form configuration
    */
+
+  getFieldNames(): string {
+    return this.block.formFields?.map(f => f.name).join(', ') || '';
+  }
+
   saveForm(): void {
     if (!this.block.formName || !this.block.formName.trim()) {
       alert('Please enter a form name');
@@ -443,7 +449,7 @@ private loadAvailableForms(): void {
    */
   goToNextSection(): void {
     if (!this.block.formName || !this.block.formName.trim()) {
-      alert('Please enter a form name');
+      // alert('Please enter a form name');
       return;
     }
 

@@ -205,6 +205,8 @@
 
 /* Right Sidebar Content for Conversational Form Block */
 .right-sidebar-content {
+  min-height: 100vh;
+  // background-color: #27C93F;
   padding: 0px 20px;
   overflow-y: auto;
 
@@ -253,8 +255,11 @@
   }
 
   .create-new-form-button {
-    width: 100%;
+    // width: 100%;
+    background-color: #27C93F;
     height: 40px;
+    color: #fff;
+    border-radius: 10px;
   }
 
   .selected-form-name {
@@ -263,7 +268,11 @@
   }
 
   .edit-form-button {
-    height: 36px;
+    color : #fff;
+    border-radius: 10px;
+    background-color: #2E66F4;
+    height: 40px;
+    // width : 50%;
   }
 
   .sub-section-title {
@@ -316,18 +325,21 @@
 .section-content {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  max-height: 70vh; // Limit the height to ensure buttons are visible
-  overflow: hidden;
+  // height: 100vh;
+  max-height: 83vh; // Limit the height to ensure buttons are visible
+  // overflow-y: auto;
+  // background-color: #007bff;
 }
 
 .form-fields-section {
   flex: 1;
   overflow-y: auto;
   margin-bottom: 16px;
+  // background-color: red;
+  // max-height: 600px;
   
   .form-fields-container {
-    max-height: 400px; // Limit container height
+    // max-height: 500px; // Limit container height
     overflow-y: auto;
     padding-right: 8px;
     
@@ -384,13 +396,26 @@
   }
 }
 
+.panel-content {
+  max-height: 83vh;
+  // background-color: #007bff;
+  // overflow-y: auto;
+
+  // .form-configuration{
+  //   height: 100%;
+  // }
+}
+
+
 // Ensure the expansion panel content has proper height
 mat-expansion-panel {
+  // overflow-y: auto;
+  // max-height: 10vh;
   .mat-expansion-panel-content {
     .mat-expansion-panel-body {
       padding: 16px !important;
       max-height: 70vh;
-      overflow: hidden;
+      overflow-y: hidden;
     }
   }
 }
