@@ -16,7 +16,7 @@
   background-color: white;
   border-bottom: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  z-index: 1000; /* Increase z-index to be higher than sidebar */
+  z-index: 100; /* Increase z-index to be higher than sidebar */
   position: relative; /* Ensure z-index works */
   
   .header-left {
