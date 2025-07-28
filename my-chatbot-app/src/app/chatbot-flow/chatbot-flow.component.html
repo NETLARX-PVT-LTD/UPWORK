@@ -305,39 +305,39 @@
 
   <!-- No Quick Reply Block -->
   <div 
-    class="no-quick-reply-block-external"
-    [style.left.px]="block.x - 180"
-    [style.top.px]="(block.y || 0) + (block.height || 150) + 60"
-  >
-    <div class="flow-block-header">
-      <mat-icon class="block-icon">block</mat-icon>
-      <span class="block-title">No Quick Reply</span>
-    </div>
-    <div class="flow-block-body">
-      <p class="block-description">Drag modules from the user input tab</p>
-    </div>
-    <div class="connection-point connection-output">
-      <div class="connection-dot"></div>
-    </div>
+  class="no-quick-reply-block-external"
+  [style.left.px]="block.x - 180"
+  [style.top.px]="(block.y || 0) + (block.height || 150) + 60"
+>
+  <div class="flow-block-header">
+    <mat-icon class="block-icon">block</mat-icon>
+    <span class="block-title">No Quick Reply</span>
   </div>
+  <div class="flow-block-body">
+    <p class="block-description">Drag modules from the user input tab</p>
+  </div>
+  <div class="connection-point connection-output">
+    <div class="connection-dot"></div>
+  </div>
+</div>
 
   <!-- Quick Replies Main Block -->
   <div 
-    class="quick-replies-main-block-external"
-    [style.left.px]="block.x + 130"
-    [style.top.px]="(block.y || 0) + (block.height || 150) + 60"
-  >
-    <div class="flow-block-header">
-      <mat-icon class="block-icon">forum</mat-icon>
-      <span class="block-title">Quick Replies</span>
-    </div>
-    <div class="flow-block-body">
-      <p class="block-description">Simple buttons to carry forward the user conversation to a desired path</p>
-    </div>
-    <div class="connection-point connection-output">
-      <div class="connection-dot"></div>
-    </div>
+  class="quick-replies-main-block-external"
+  [style.left.px]="block.x + 130"
+  [style.top.px]="(block.y || 0) + (block.height || 150) + 60"
+>
+  <div class="flow-block-header">
+    <mat-icon class="block-icon">forum</mat-icon>
+    <span class="block-title">Quick Replies</span>
   </div>
+  <div class="flow-block-body">
+    <p class="block-description">Simple buttons to carry forward the user conversation to a desired path</p>
+  </div>
+  <div class="connection-point connection-output">
+    <div class="connection-dot"></div>
+  </div>
+</div>
 
   <!-- Individual Quick Reply Cards -->
   <div 
@@ -414,6 +414,7 @@
             [isSelected]="true"
             [isSidebarOpen]="true"
             [availableMedia]="availableMedia"
+             (closeSidebarEvent)="closeSidebar()" 
             (blockUpdated)="onBlockUpdated($event)"
           ></app-media-block>
 

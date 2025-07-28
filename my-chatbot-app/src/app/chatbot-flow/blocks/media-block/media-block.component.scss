@@ -122,9 +122,20 @@
 
 /* Right Sidebar Content for Media Block */
 .right-sidebar-content {
+  position: relative;
   padding: 20px;
   overflow-y: auto;
 
+  .close-btn {
+    position: absolute;
+    top: 10px; // Adjust as needed for vertical positioning
+    right: 10px; // Adjust as needed for horizontal positioning
+    z-index: 10; // Ensure it's above other content if necessary
+    // Add any other styling for the button itself, like background, color, size
+     mat-icon {
+        font-size: 16px;
+      }
+  }
   .section-title {
     color: #1e293b;
     font-size: 18px;
