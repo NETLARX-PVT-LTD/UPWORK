@@ -28,12 +28,12 @@
         font-size: 18px;
         width: 18px;
         height: 18px;
-        color: #FFFFFF; /* White icon color */
+        color: #1a4d8c; /* White icon color */
       }
 
       span {
         font-weight: 600;
-        color: #FFFFFF; /* White text color */
+        color: #1a4d8c; /* White text color */
         font-size: 14px;
       }
     }
@@ -87,14 +87,14 @@
     padding-top: 5px;
   }
 
-  .block-content-text {
-    font-size: 13px;
-    color: #374151;
-    background-color: #f8fafc;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
-  }
+  // .block-content-text {
+  //   font-size: 13px;
+  //   color: #374151;
+  //   background-color: #f8fafc;
+  //   padding: 8px 12px;
+  //   border-radius: 6px;
+  //   border: 1px solid #e2e8f0;
+  // }
 }
 
 .connection-point {
@@ -520,56 +520,125 @@
 /* src/app/chatbot-flow/blocks/text-response-block/text-response-block.component.scss */
 
 // Main Text Response Block Styling
+/* src/app/chatbot-flow/blocks/text-response-block/text-response-block.component.scss */
+
+// Main Text Response Block Styling
 .text-response-main-block {
-  background: #ffffff;
-  border: 2px solid #e1e5e9;
+  background: #ffffff; /* White background for the entire block */
+  // border: 2px solid #1a4d8c; /* Lighter blue border from image */
   border-radius: 12px;
-  padding: 0; /* Remove padding here, it's in header and body */
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  // margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Slight shadow to lift it */
   position: relative;
 
   .block-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    // Padding and background are defined in the common block-header styles above
-    margin-bottom: 0; /* No bottom margin, as body follows immediately */
+    padding: 8px 16px;
+    border-bottom: 2px solid rgb(9, 161, 9); /* Existing darker purple border, keeping as it looks good */
+    background-color: #dbeaff; /* Lighter blue header background from image */
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    margin-bottom: 0;
 
     .block-type-badges {
       .block-title {
+        color: #1a4d8c; /* Darker blue text color for title from image */
         display: flex;
         align-items: center;
         gap: 8px;
         cursor: pointer;
         font-weight: 600;
-        // Color is defined in the common block-header styles above
 
         .block-icon {
-          // Color and font-size defined in common block-header styles above
+          color: #1a4d8c; /* Blue icon color from image */
         }
       }
     }
 
     .block-actions {
       .block-menu-trigger {
-        color: #FFFFFF; /* White for the vertical dots icon */
+        mat-icon {
+          font-size: 16px;
+          color: #1a4d8c; /* Darker blue for vertical dots icon */
+        }
       }
     }
   }
 
   .block-body {
-    // Padding and background are defined in the common block-body styles above
+    padding: 16px;
+    background-color: #ffffff; /* White body background from image */
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+
     .block-description {
       font-size: 14px;
-      color: #6b7280;
+      color: #9aa2b1; /* Lighter grey for "Respond with a text message" */
       margin-bottom: 8px;
+      line-height: 1.4;
+      border-bottom: 1px dashed #dbeaff; /* Dashed line below "Respond with a text message" */
+      padding-bottom: 8px; /* Padding for the dashed line */
     }
 
     .block-content-text {
-      font-size: 14px;
-      color: #1f2937;
-      padding: 8px 0;
+      font-size: 14px; /* Matches the text size in the image */
+      color: #374151; /* Darker grey for actual message "hello! how are you?" */
+      padding: 8px 0; /* Adjust padding if needed */
+      font-weight: 500; /* Slightly bolder for content */
+    }
+  }
+
+  // Close Button directly on the block (if applicable, based on image)
+  .close-block-btn { /* New class for the close button on the block */
+    position: absolute;
+    top: 50%; /* Center vertically with the header */
+    right: -20px; /* Position outside the block, adjust as needed */
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #aebce3; /* Blue-gray background from image */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Slight shadow for depth */
+    border: 2px solid #ffffff; /* White border as seen in image */
+
+    mat-icon {
+      font-size: 18px;
+      color: #1a4d8c; /* Darker blue color for the 'X' icon */
+    }
+
+    &:hover {
+      background-color: #92a4d0; /* Darker shade on hover */
+    }
+  }
+}
+
+// Ensure connection points are correctly layered
+.connection-point {
+  z-index: 2; /* Ensure connection points are above other elements */
+}
+
+// Adjust existing common styles if they conflict with the image's visual
+.block-header {
+  // Overrides for colors that were previously white but are now darker blue
+  .block-icon {
+    color: #2563eb; // Keep it blue as per image
+  }
+  span {
+    color: #1a4d8c; // Changed to dark blue as per image
+  }
+}
+
+.block-actions {
+  .block-menu-trigger {
+    mat-icon {
+      color: #1a4d8c; // Changed to dark blue as per image
     }
   }
 }

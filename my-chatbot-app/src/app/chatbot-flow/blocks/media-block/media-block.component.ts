@@ -25,8 +25,7 @@ import { ChatbotBlock, AvailableMedia } from '../../../models/chatbot-block.mode
     MatSelectModule,
     MatButtonToggleModule
   ],
-  templateUrl: './media-block.component.html',
-  styleUrls: ['./media-block.component.scss']
+  templateUrl: './media-block.component.html'
 })
 export class MediaBlockComponent implements OnInit {
   @Input() block!: ChatbotBlock;
@@ -41,6 +40,7 @@ export class MediaBlockComponent implements OnInit {
   @Output() removeBlock = new EventEmitter<string>();
   @Output() duplicateBlock = new EventEmitter<ChatbotBlock>();
   @Output() editBlock = new EventEmitter<ChatbotBlock>();
+ @Output() closeSidebarEvent = new EventEmitter<void>();
 
   showNewMediaForm: boolean = false;
 
@@ -144,5 +144,8 @@ export class MediaBlockComponent implements OnInit {
 
   onContentChange() {
     this.blockUpdated.emit(this.block);
+  }
+   closeSidebar(): void {
+    this.closeSidebarEvent.emit();
   }
 }
