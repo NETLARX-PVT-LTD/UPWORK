@@ -70,7 +70,7 @@
             (click)="zoomIn()"
             [disabled]="zoomLevel >= maxZoom"
           >
-            <mat-icon>add</mat-icon>
+            <mat-icon class="mt-2 mr-0.9">add</mat-icon>
           </button>
           <span class="zoom-level"
             >{{ zoomLevel * 100 | number : "1.0-0" }}%</span
@@ -80,12 +80,12 @@
             (click)="zoomOut()"
             [disabled]="zoomLevel <= minZoom"
           >
-            <mat-icon>remove</mat-icon>
+            <mat-icon class="mt-2 mr-0.9">remove</mat-icon>
           </button>
         </div>
         <button mat-icon-button (click)="resetZoom()" matTooltip="Reset zoom">
           <!-- <mat-icon>center_focus_strong</mat-icon> -->
-           <span class="reset-text">Reset</span>
+           <span class="reset-text ">Reset</span>
         </button>
       </div>
 
