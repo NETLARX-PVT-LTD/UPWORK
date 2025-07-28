@@ -1,5 +1,4 @@
-// src/app/chatbot-flow/blocks/text-response-block/text-response-block.component.ts
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -40,11 +39,58 @@ export class TextResponseBlockComponent implements OnInit {
   @Output() removeBlock = new EventEmitter<string>();
   @Output() duplicateBlock = new EventEmitter<ChatbotBlock>();
   @Output() editBlock = new EventEmitter<ChatbotBlock>();
+  @Output() closeSidebarEvent = new EventEmitter<void>();
 
+  // Existing properties
   showAlternateResponses: boolean = false;
-  showSearchVariableCard: boolean = false; // New property for Search Variable card visibility
+  showSearchVariableCard: boolean = false;
   newAlternateResponse: string = '';
   newQuickReply: string = '';
+
+  // Info Modal Properties
+  showInfoModal: boolean = false;
+  // infoModalContent: string = ''; // No longer needed directly for insertion
+  infoModalAlternateResponse: string = ''; // Used for highlighting selected variable in modal
+  // infoModalQuickReplies: string = ''; // Not used for this logic
+  searchTerm: string = '';
+
+  // Property to track which input opened the modal
+  private activeInputElementType: 'content' | 'alternateResponse' | null = null;
+
+  // ViewChild to get direct reference to the textarea elements
+  @ViewChild('contentAutosize', { read: ElementRef }) contentAutosizeElement!: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('newAlternateResponseAutosize', { read: ElementRef }) newAlternateResponseAutosizeElement!: ElementRef<HTMLTextAreaElement>;
+
+  // Variables for the modal
+  generalAttributes: string[] = [
+    '{first_name}',
+    '{last_name}',
+    '{timezone}',
+    '{gender}',
+    '{last_user_msg}',
+    '{last_page}',
+    '{os}'
+  ];
+
+  formAttributes: string[] = [
+    '{user/last_user_message}',
+    '{user/last_bot_message}',
+    '{user/last_user_button}',
+    '{user/created_at}',
+    '{user/mens_watch}',
+    '{user/Range}',
+    '{user/Price}',
+    '{user/Name}'
+  ];
+
+  userAttributes: string[] = [
+    '{user/Gender}'
+  ];
+
+  // Filtered attributes for search
+  filteredGeneralAttributes: string[] = [];
+  filteredFormAttributes: string[] = [];
+  filteredUserAttributes: string[] = [];
 
   ngOnInit(): void {
     // Initialize alternateResponses and quickReplies arrays if undefined
@@ -54,21 +100,128 @@ export class TextResponseBlockComponent implements OnInit {
     if (!this.block.quickReplies) {
       this.block.quickReplies = [];
     }
+
+    // Initialize filtered attributes
+    this.resetFilteredAttributes();
   }
 
+  // Info Modal Methods
+  /**
+   * Opens the info modal and sets which input field triggered it.
+   * @param inputType 'content' for main bot response, 'alternateResponse' for alternate response input.
+   */
+  openInfoModal(inputType: 'content' | 'alternateResponse'): void {
+    this.showInfoModal = true;
+    this.activeInputElementType = inputType; // Store the type of input that opened the modal
+    this.searchTerm = '';
+    this.resetFilteredAttributes();
+  }
+
+  closeInfoModal(): void {
+    this.showInfoModal = false;
+    this.searchTerm = '';
+    this.resetFilteredAttributes();
+    this.activeInputElementType = null; // Clear the active input type
+  }
+
+  /**
+   * Inserts the selected variable into the currently active textarea.
+   * @param variable The variable string to insert (e.g., '{first_name}').
+   */
+  selectVariable(variable: string): void {
+    // This is for visual selection in the modal, not direct input binding.
+    this.infoModalAlternateResponse = variable;
+
+    let targetTextarea: HTMLTextAreaElement | null = null;
+    let targetModel: 'block.content' | 'newAlternateResponse' | null = null;
+
+    // Determine which textarea to target based on what opened the modal
+    if (this.activeInputElementType === 'content' && this.contentAutosizeElement) {
+      targetTextarea = this.contentAutosizeElement.nativeElement;
+      targetModel = 'block.content';
+    } else if (this.activeInputElementType === 'alternateResponse' && this.newAlternateResponseAutosizeElement) {
+      targetTextarea = this.newAlternateResponseAutosizeElement.nativeElement;
+      targetModel = 'newAlternateResponse';
+    }
+
+    if (targetTextarea && targetModel) {
+      const start = targetTextarea.selectionStart;
+      const end = targetTextarea.selectionEnd;
+      const currentValue = targetTextarea.value;
+
+      const newValue = currentValue.substring(0, start) + variable + currentValue.substring(end);
+
+      // Update the correct model property
+      if (targetModel === 'block.content') {
+        this.block.content = newValue;
+      } else if (targetModel === 'newAlternateResponse') {
+        this.newAlternateResponse = newValue;
+      }
+
+      // Manually update the textarea's value and cursor position for immediate UI reflection
+      // This is crucial because ngModel might not update immediately after direct DOM manipulation
+      targetTextarea.value = newValue;
+      targetTextarea.selectionStart = targetTextarea.selectionEnd = start + variable.length;
+
+      // Ensure the model change is propagated and component state is consistent
+      this.onContentChange();
+    }
+
+    this.closeInfoModal();
+  }
+
+  filterVariables(): void {
+    const searchLower = this.searchTerm.toLowerCase();
+
+    this.filteredGeneralAttributes = this.generalAttributes.filter(attr =>
+      attr.toLowerCase().includes(searchLower)
+    );
+
+    this.filteredFormAttributes = this.formAttributes.filter(attr =>
+      attr.toLowerCase().includes(searchLower)
+    );
+
+    this.filteredUserAttributes = this.userAttributes.filter(attr =>
+      attr.toLowerCase().includes(searchLower)
+    );
+  }
+
+  resetFilteredAttributes(): void {
+    this.filteredGeneralAttributes = [...this.generalAttributes];
+    this.filteredFormAttributes = [...this.formAttributes];
+    this.filteredUserAttributes = [...this.userAttributes];
+  }
+
+  // Removed addAlternateResponseFromModal and hideAlternateResponsesFromModal
+  // as their functionality is now integrated into selectVariable and addAlternateResponse
+
+  generateFromAI(): void {
+    // TODO: Implement AI generation logic
+    console.log('Generate from AI clicked');
+  }
+
+
+  // Existing Methods (modified for clarity or consistency)
   toggleAlternateResponses() {
     this.showAlternateResponses = !this.showAlternateResponses;
+    // When toggling open, ensure the input is clear and focused if possible
+    if (this.showAlternateResponses) {
+      this.newAlternateResponse = ''; // Clear previous input
+    }
   }
 
-  // New method to toggle Search Variable card visibility
   toggleSearchVariableCard() {
     this.showSearchVariableCard = !this.showSearchVariableCard;
   }
 
   addAlternateResponse() {
     if (this.newAlternateResponse.trim()) {
-      this.block.alternateResponses?.push(this.newAlternateResponse.trim());
-      this.newAlternateResponse = '';
+      // Ensure the array exists before pushing
+      if (!this.block.alternateResponses) {
+        this.block.alternateResponses = [];
+      }
+      this.block.alternateResponses.push(this.newAlternateResponse.trim());
+      this.newAlternateResponse = ''; // Clear the input after adding
       this.onContentChange();
     }
   }
@@ -78,42 +231,46 @@ export class TextResponseBlockComponent implements OnInit {
     this.onContentChange();
   }
 
-  addQuickReply(event: KeyboardEvent) {
-    if (event.key === 'Enter' && this.newQuickReply.trim()) {
+  // Add quick reply to the block
+  addQuickReplyToBlock(): void {
+    if (this.newQuickReply.trim()) {
+      if (!this.block.quickReplies) {
+        this.block.quickReplies = [];
+      }
+      
+      this.block.quickReplies.push({
+        text: this.newQuickReply.trim(),
+        value: this.newQuickReply.trim(),
+        id: ''
+      });
+      
+      this.newQuickReply = '';
+      this.onContentChange(); // This will emit the blockUpdated event
+    }
+  }
+
+  // Add quick reply on Enter key
+  addQuickReply(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
       event.preventDefault();
       this.addQuickReplyToBlock();
     }
   }
 
-  // Separate method to add quick reply (can be called from Enter key or button click)
-  addQuickReplyToBlock() {
-    const replyText = this.newQuickReply.trim();
-    if (replyText && this.block.quickReplies) {
-      // Check if quick reply already exists
-      const exists = this.block.quickReplies.some(qr => qr.text.toLowerCase() === replyText.toLowerCase());
-      if (!exists) {
-        this.block.quickReplies.push({ 
-          id: `qr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, 
-          text: replyText 
-        });
-        this.newQuickReply = '';
-        this.onContentChange();
-      }
-    }
-  }
-
-  removeQuickReply(quickReply: QuickReply) {
+  // Remove quick reply
+  removeQuickReply(replyToRemove: any): void {
     if (this.block.quickReplies) {
-      this.block.quickReplies = this.block.quickReplies.filter(qr => qr.id !== quickReply.id);
-      this.onContentChange();
+      this.block.quickReplies = this.block.quickReplies.filter(reply => reply !== replyToRemove);
+      this.onContentChange(); // This will emit the blockUpdated event
     }
   }
 
   onContentChange() {
+    // This method is called whenever block.content, newAlternateResponse,
+    // or block.alternateResponses/quickReplies are modified via ngModel or direct manipulation.
     this.blockUpdated.emit(this.block);
   }
 
-  // Emit events to parent for actions
   onSelectBlock() {
     this.selectBlock.emit(this.block);
   }
@@ -136,5 +293,9 @@ export class TextResponseBlockComponent implements OnInit {
 
   onEditBlock() {
     this.editBlock.emit(this.block);
+  }
+
+  closeSidebar(): void {
+    this.closeSidebarEvent.emit();
   }
 }

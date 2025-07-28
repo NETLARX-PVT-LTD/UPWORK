@@ -112,7 +112,9 @@
 
 
 <div class="right-sidebar-content" *ngIf="isSelected">
-
+<button mat-icon-button (click)="closeSidebar()" class="close-btn">
+    <mat-icon>close</mat-icon>
+  </button>
   <ng-container *ngIf="block.subType === 'phrase'">
     <h4 class="section-title ">User Input <span class="badge phrase-badge">Phrase</span></h4>
     <p class="config-description text-[#506690]">If user query is similar to phrase</p>

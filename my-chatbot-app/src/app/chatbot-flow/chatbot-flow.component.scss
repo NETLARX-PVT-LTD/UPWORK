@@ -9,14 +9,15 @@
 
 /* Header Styles */
 .header {
-  display: flex;
+ display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
   background-color: white;
   border-bottom: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  z-index: 100;
+  z-index: 1000; /* Increase z-index to be higher than sidebar */
+  position: relative; /* Ensure z-index works */
   
   .header-left {
     h2 {
@@ -294,7 +295,7 @@
 .canvas-block {
   position: absolute;
   width: 300px;
-  background-color: white;
+  background-color: rgb(245, 244, 244);
   border: 2px solid #e2e8f0;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
@@ -709,7 +710,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  // background-color: rgba(0, 0, 0, 0.5);
   z-index: 150;
   opacity: 0;
   visibility: hidden;
@@ -865,4 +866,243 @@
   button {
     // Add any specific button styles here if needed
   }
+}
+
+// ********************************************
+.quick-reply-cards-wrapper {
+  position: absolute;
+  pointer-events: none; // Allow interaction with underlying elements
+
+  &.hidden {
+    display: none;
+  }
+
+  .no-quick-reply-block-external,
+  .quick-replies-main-block-external {
+    position: absolute;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    min-width: 280px;
+    max-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    pointer-events: auto; // Re-enable interaction for these blocks
+
+    .flow-block-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+
+      .block-icon {
+        font-size: 18px;
+        color: #6366f1;
+      }
+
+      .block-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #374151;
+      }
+    }
+
+    .flow-block-body {
+      .block-description {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 0;
+        line-height: 1.5;
+      }
+    }
+
+    .connection-point {
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+
+      .connection-dot {
+        width: 12px;
+        height: 12px;
+        background-color: #6366f1;
+        border-radius: 50%;
+        border: 2px solid white;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        &:hover {
+          background-color: #4f46e5;
+          transform: scale(1.1);
+        }
+      }
+    }
+
+    &:hover {
+      border-color: #6366f1;
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.15);
+    }
+  }
+
+  // Specific styling for No Quick Reply block
+  .no-quick-reply-block-external {
+    border-color: #f59e0b;
+    background-color: #fef3c7;
+
+    .flow-block-header .block-icon {
+      color: #f59e0b;
+    }
+
+    .connection-point .connection-dot {
+      background-color: #f59e0b;
+    }
+
+    &:hover {
+      border-color: #d97706;
+    }
+  }
+
+  // Specific styling for Quick Replies main block
+  .quick-replies-main-block-external {
+    border-color: #3b82f6;
+    background-color: #dbeafe;
+
+    .flow-block-header .block-icon {
+      color: #3b82f6;
+    }
+
+    .connection-point .connection-dot {
+      background-color: #3b82f6;
+    }
+
+    &:hover {
+      border-color: #2563eb;
+    }
+  }
+
+  .individual-quick-replies-external {
+    position: absolute;
+    pointer-events: auto;
+
+    .quick-reply-cards-row {
+      display: flex;
+      gap: 20px;
+      position: relative;
+
+      .individual-quick-reply-card {
+        position: absolute;
+        background: #f3e8ff;
+        border: 2px solid #a855f7;
+        border-radius: 12px;
+        padding: 12px 16px;
+        min-width: 200px;
+        max-width: 220px;
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.15);
+
+        .quick-reply-card-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+
+          .quick-reply-icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background-color: #a855f7;
+            border-radius: 4px;
+
+            .quick-reply-icon {
+              font-size: 14px;
+              color: white;
+            }
+          }
+
+          .quick-reply-title {
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 500;
+          }
+
+          .quick-reply-badge {
+            background-color: #10b981;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: auto;
+          }
+        }
+
+        .connection-point {
+          position: absolute;
+          right: -8px;
+          top: 50%;
+          transform: translateY(-50%);
+
+          .connection-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #a855f7;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+            &:hover {
+              background-color: #9333ea;
+              transform: scale(1.1);
+            }
+          }
+        }
+
+        &:hover {
+          border-color: #9333ea;
+          box-shadow: 0 6px 20px rgba(168, 85, 247, 0.25);
+          transform: translateY(-2px);
+          transition: all 0.2s ease;
+        }
+      }
+    }
+  }
+
+  // Connection lines SVG
+  .quick-reply-connections-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+
+    .connection-line {
+      stroke: #6366f1;
+      stroke-width: 2;
+      fill: none;
+      opacity: 0.8;
+    }
+
+    .no-quick-reply-connection {
+      stroke: #f59e0b;
+    }
+
+    .quick-replies-connection {
+      stroke: #3b82f6;
+    }
+
+    .individual-quick-reply-connection {
+      stroke: #a855f7;
+    }
+  }
+}
+
+// Ensure the blocks container has proper positioning
+.blocks-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }

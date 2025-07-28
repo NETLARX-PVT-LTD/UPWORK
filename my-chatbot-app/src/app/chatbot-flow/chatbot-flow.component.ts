@@ -24,6 +24,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 // Import block components
 import { UserInputBlockComponent } from './blocks/user-input-block/user-input-block.component';
 import { TextResponseBlockComponent } from './blocks/text-response-block/text-response-block.component';
+import { QuickReplyBranchBlockComponent } from './blocks/quick-reply-branch-block/quick-reply-branch-block.component';
+import { NoQuickReplyBlockComponent } from './blocks/no-quick-reply-block/no-quick-reply-block.component';
+import { IndividualQuickReplyCardComponent } from './blocks/individual-quick-reply-card/individual-quick-reply-card.component';
 import { TypingDelayBlockComponent } from './blocks/typing-delay-block/typing-delay-block.component';
 import { MediaBlockComponent } from './blocks/media-block/media-block.component';
 import { LinkStoryBlockComponent } from './blocks/link-story-block/link-story-block.component';
@@ -52,6 +55,9 @@ import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-
     // Block components
     UserInputBlockComponent,
     TextResponseBlockComponent,
+     QuickReplyBranchBlockComponent, // NEW
+    NoQuickReplyBlockComponent,   // NEW
+    IndividualQuickReplyCardComponent, // NEW
     TypingDelayBlockComponent,
     MediaBlockComponent,
     LinkStoryBlockComponent,
@@ -733,4 +739,5 @@ this.instance.connect({
       this.displayMessageBox('Could not find a Keyword Group block blueprint to add.', 'error');
     }
   }
+  
 }
