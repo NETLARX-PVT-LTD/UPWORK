@@ -232,63 +232,118 @@
     position: relative;
     overflow: hidden;
   }
+}
+
+/* Canvas Content Styles */
+.canvas-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 600px;
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(circle at 25px 25px, #e2e8f0 2px, transparent 2px),
+    radial-gradient(circle at 75px 75px, #e2e8f0 2px, transparent 2px);
+  background-size: 100px 100px;
+  background-position: 0 0, 50px 50px;
+}
+
+/* Connections SVG Styles */
+.connections-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
   
-  .connections-svg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
-    
+  .connections-group {
     .connection-line {
-      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+      stroke: #6366f1;
+      stroke-width: 2;
+      fill: none;
+      
+      &:hover {
+        stroke: #4f46e5;
+        stroke-width: 3;
+      }
     }
-    
-    .temp-connection-line {
-      opacity: 0.7;
-    }
-  }
-  
-  .canvas-content {
-    position: relative;
-    width: 2000px;
-    height: 2000px;
-    transform-origin: 0 0;
-    z-index: 2;
   }
 }
 
-/* Flow Start Indicator */
-.flow-start-indicator {
-  position: absolute;
-  top: 50px;
-  left: 450px;
-  text-align: center;
-  z-index: 5;
+/* ngx-graph Styles */
+.graph-container {
+  width: 100%;
+  height: 100%;
   
-  .flow-start-text {
-    background-color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid #e2e8f0;
-    font-size: 14px;
-    color: #64748b;
-    font-weight: 500;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-  
-  .flow-start-arrow {
-    margin-top: 8px;
-    color: #64748b;
-    
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+  ::ng-deep {
+    .ngx-graph {
+      width: 100%;
+      height: 100%;
+      
+      .graph-container {
+        width: 100%;
+        height: 100%;
+      }
+      
+      .edge {
+        stroke: #6366f1;
+        stroke-width: 2;
+        fill: none;
+        
+        &:hover {
+          stroke: #4f46e5;
+          stroke-width: 3;
+        }
+      }
+      
+      .edge-label {
+        font-size: 12px;
+        fill: #64748b;
+      }
+      
+      .node {
+        cursor: pointer;
+        
+        &:hover {
+          opacity: 0.8;
+        }
+      }
     }
   }
+}
+
+/* Graph Node Styles */
+.graph-node {
+  width: 300px;
+  background-color: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  cursor: move;
+  
+  &:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+  
+  &.selected {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  &.connection-mode {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  }
+}
+
+/* Connection Mode Styles */
+.connection-mode {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
 }
 
 /* Canvas Block Styles */
@@ -319,137 +374,9 @@
     z-index: 100;
   }
   
-  .block-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0px 8px;
-    border-bottom : 2px solid rgb(6, 184, 6);
-    background-color: #CDA5E7;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    
-    .block-type-badges {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      // background-color: #059669;
-
-      .block-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      // background-color: red;
-      
-      .block-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        color: #6366f1;
-      }
-      
-      span {
-        font-weight: 600;
-        color: #1e293b;
-        font-size: 14px;
-      }
-    }
-      
-      .badge {
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        
-        &.keyword-group-badge {
-          background-color: #22c55e;
-          color: white;
-        }
-        
-        &.phrase-badge {
-          background-color: #22c55e;
-          color: white;
-        }
-        
-        &.anything-badge {
-          background-color: #22c55e;
-          color: white;
-        }
-      }
-    }
-    
-    .block-actions {
-      
-      .block-menu-trigger {
-        // width: 26px;
-        // height: 26px;
-        mat-icon {
-          font-size: 16px;
-          // width: ;
-          color: #fff;
-        }
-      }
-    }
-  }
-  
-  .block-body {
-    padding: 0 16px 16px;
-    background-color: #fff;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    
-    .block-description {
-      font-size: 16px;
-      color: #64748b;
-      margin-bottom: 12px;
-      line-height: 1.4;
-      padding-top: 5px;
-    }
-    
-    .block-content-text {
-      font-size: 13px;
-      color: #374151;
-      background-color: #f8fafc;
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: 1px solid #e2e8f0;
-    }
-  }
-  
-  // Connection Points
-  .connection-point {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    
-    .connection-dot {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background-color: #6366f1;
-      border: 2px solid white;
-      cursor: crosshair;
-      transition: all 0.2s ease;
-      
-      &:hover {
-        transform: scale(1.3);
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
-      }
-    }
-    
-    &.connection-output {
-      right: -6px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-    
-    &.connection-input {
-      left: -6px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
+  &.connection-mode {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
   }
 }
 

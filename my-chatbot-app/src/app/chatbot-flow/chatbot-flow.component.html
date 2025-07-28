@@ -84,9 +84,11 @@
           </button>
         </div>
         <button mat-icon-button (click)="resetZoom()" matTooltip="Reset zoom">
-          <!-- <mat-icon>center_focus_strong</mat-icon> -->
-           <span class="reset-text">Reset</span>
+          <span class="reset-text">Reset</span>
         </button>
+        <!-- <button mat-icon-button (click)="testConnection()" matTooltip="Test Connection">
+          <span class="reset-text">Test</span>
+        </button> -->
       </div>
 
       <div
@@ -94,64 +96,18 @@
         #canvasWrapper
         [style.cursor]="isPanning ? 'grabbing' : 'default'"
       >
-        <svg class="connections-svg" #svgCanvas>
-          <path
-            *ngFor="let conn of connections"
-            [attr.d]="
-              'M ' +
-              conn.fromPoint.x +
-              ',' +
-              conn.fromPoint.y +
-              ' Q ' +
-              (conn.fromPoint.x + conn.toPoint.x) / 2 +
-              ',' +
-              conn.fromPoint.y +
-              ' ' +
-              conn.toPoint.x +
-              ',' +
-              conn.toPoint.y
-            "
-            class="connection-line"
-            stroke="#6366f1"
-            stroke-width="2"
-            fill="none"
-          ></path>
-
-          <path
-            *ngIf="temporaryConnection"
-            [attr.d]="
-              'M ' +
-              temporaryConnection.x1 +
-              ',' +
-              temporaryConnection.y1 +
-              ' L ' +
-              temporaryConnection.x2 +
-              ',' +
-              temporaryConnection.y2
-            "
-            class="temp-connection-line"
-            stroke="#6366f1"
-            stroke-width="2"
-            stroke-dasharray="5,5"
-            fill="none"
-          ></path>
-        </svg>
-
-        <div class="canvas-content" #canvasContent>
-          <div class="flow-start-indicator">
-            <div class="flow-start-text">Flow starts here</div>
-            <div class="flow-start-arrow">
-              <mat-icon>arrow_downward</mat-icon>
-            </div>
-          </div>
-
-          
-
+        <!-- Temporary canvas structure to debug -->
+        <div 
+          class="canvas-content" 
+          #canvasContent
+          [style.transform]="'translate(' + panOffsetX + 'px, ' + panOffsetY + 'px) scale(' + zoomLevel + ')'"
+          [style.transform-origin]="'0 0'"
+        >
+          <!-- Render blocks directly -->
           <div
             *ngFor="let block of canvasBlocks"
+            [id]="block.id"
             class="canvas-block"
-             
-            [class]="'canvas-block-' + block.type"
             [class.selected]="selectedBlock?.id === block.id"
             [style.left.px]="block.x"
             [style.top.px]="block.y"
@@ -159,13 +115,11 @@
             [style.background-color]="getTypeColor(block.type)"
             cdkDrag
             (cdkDragEnded)="onBlockDragEnded($event, block)"
-            (mousedown)="endConnection($event, block)"
           >
             <ng-container [ngSwitch]="block.type">
               <app-user-input-block
                 *ngSwitchCase="'userInput'"
                 [block]="block"
-                [attr.id]="'user-input-block-' + block.id"
                 [isSelected]="selectedBlock?.id === block.id"
                 [isSidebarOpen]="rightSidebarOpen"
                 (blockUpdated)="onBlockUpdated($event)"
@@ -175,7 +129,8 @@
                 (removeBlock)="removeCanvasBlock($event)"
                 (duplicateBlock)="duplicateCanvasBlock($event)"
                 (editBlock)="editCanvasBlock($event)"
-                (addKeywordGroupBlock)="onAddKeywordGroupBlockToCanvas()" ></app-user-input-block>
+                (addKeywordGroupBlock)="onAddKeywordGroupBlockToCanvas()"
+              ></app-user-input-block>
 
               <app-text-response-block
                 *ngSwitchCase="'textResponse'"
@@ -193,7 +148,6 @@
 
               <app-media-block
                 *ngSwitchCase="'mediaBlock'"
-                [attr.id]="'media-block-' + block.id"
                 [block]="block"
                 [isSelected]="selectedBlock?.id === block.id"
                 [isSidebarOpen]="rightSidebarOpen"
@@ -266,6 +220,29 @@
               ></app-json-api-integration-block>
             </ng-container>
           </div>
+
+          <!-- SVG for connections -->
+          <svg class="connections-svg" width="100%" height="100%">
+            <defs>
+              <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#6366f1" />
+              </marker>
+            </defs>
+            <g class="connections-group">
+              <line
+                *ngFor="let connection of connections"
+                [attr.x1]="connection.fromPoint.x"
+                [attr.y1]="connection.fromPoint.y"
+                [attr.x2]="connection.toPoint.x"
+                [attr.y2]="connection.toPoint.y"
+                stroke="#6366f1"
+                stroke-width="2"
+                marker-end="url(#arrowhead)"
+                class="connection-line"
+              />
+            </g>
+          </svg>
         </div>
       </div>
     </div>
