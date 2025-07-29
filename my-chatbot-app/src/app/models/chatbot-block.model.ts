@@ -72,6 +72,8 @@ export interface ChatbotBlock {
   quickReplyIndex?: number; // For individual quick reply blocks to know their index
   text?: string; // <--- ADD THIS LINE for quick reply blocks if they are ChatbotBlock type
   value?: string; // <--- ADD THIS LINE if needed for quick reply blocks
+
+  buttonTextMessage?: string;
   
 }
 

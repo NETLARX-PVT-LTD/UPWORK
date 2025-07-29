@@ -1,373 +1,340 @@
 <ng-container *ngIf="!isSelected">
-    <div
-        class="block-header flex justify-between items-center px-2 py-0 border-b-2 border-emerald-500 rounded-t-lg"
-        style="background-color: #CDA5E7;"
-    >
-        <div class="block-type-badges flex gap-1.5 items-center">
-            <div class="block-title flex items-center gap-2 cursor-pointer" (click)="onSelectBlock()">
-                <mat-icon class="block-icon text-base w-4 h-4" style="color: #6366f1;">{{ block.icon }}</mat-icon>
-                <span class="font-semibold text-sm text-slate-800">{{ block.name }}</span>
-            </div>
-            <span
-                *ngIf="block.mediaId"
-                class="badge media-block-badge px-2 py-1 rounded-full text-xs font-medium uppercase tracking-wider bg-emerald-600 text-white"
-            >
-                Selected Media: {{ getMediaName(block.mediaId) }}
-            </span>
-        </div>
-
-        <div class="block-actions">
-            <button mat-icon-button [matMenuTriggerFor]="blockMenu" class="block-menu-trigger">
-                <mat-icon class="text-base text-white">more_vert</mat-icon>
-            </button>
-            <mat-menu #blockMenu="matMenu">
-                <button mat-menu-item (click)="onEditBlock()">
-                    <mat-icon>edit</mat-icon>
-                    <span>Edit</span>
-                </button>
-                <button mat-menu-item (click)="onDuplicateBlock()">
-                    <mat-icon>content_copy</mat-icon>
-                    <span>Duplicate</span>
-                </button>
-                <button mat-menu-item (click)="onRemoveBlock()">
-                    <mat-icon>delete</mat-icon>
-                    <span>Delete</span>
-                </button>
-            </mat-menu>
-        </div>
+  <div class="block-header flex justify-between items-center px-2 py-0 border-b-2 border-emerald-500 rounded-t-lg"
+    style="background-color: #CDA5E7;">
+    <div class="block-type-badges flex gap-1.5 items-center">
+      <div class="block-title flex items-center gap-2 cursor-pointer" (click)="onSelectBlock()">
+        <mat-icon class="block-icon text-base w-4 h-4" style="color: #6366f1;">{{ block.icon }}</mat-icon>
+        <span class="font-semibold text-sm text-slate-800">{{ block.name }}</span>
+      </div>
+      <span *ngIf="block.mediaId"
+        class="badge media-block-badge px-2 py-1 rounded-full text-xs font-medium uppercase tracking-wider bg-emerald-600 text-white">
+        Selected Media: {{ getMediaName(block.mediaId) }}
+      </span>
     </div>
 
-    <div class="block-body px-4 pb-4 bg-white rounded-b-lg">
-        <div class="block-description text-base text-slate-600 mb-3 leading-snug pt-1" *ngIf="block.description">
-            {{ block.description }}
-        </div>
-
-        <div class="block-content-preview">
-            <ng-container [ngSwitch]="block.mediaType">
-                <p *ngSwitchCase="'text'" class="preview-text text-sm text-gray-700 bg-slate-50 px-3 py-2 rounded-md border border-slate-200">
-                    {{ block.content || "No text content" }}
-                </p>
-                <ng-container *ngSwitchCase="'image'">
-                    <img
-                        [src]="block.mediaUrl"
-                        alt="Image Preview"
-                        class="preview-media-thumbnail max-w-full h-auto rounded-md"
-                        *ngIf="block.mediaUrl"
-                    />
-                    <div *ngIf="!block.mediaUrl" class="no-media-content text-sm text-gray-500 italic">
-                        No image URL provided.
-                    </div>
-                </ng-container>
-
-                <ng-container *ngSwitchCase="'video'">
-                    <video
-                        [src]="block.mediaUrl"
-                        controls
-                        class="preview-media-thumbnail max-w-full h-auto rounded-md"
-                        *ngIf="block.mediaUrl"
-                    ></video>
-                    <div *ngIf="!block.mediaUrl" class="no-media-content text-sm text-gray-500 italic">
-                        No video URL provided.
-                    </div>
-                </ng-container>
-
-                <div *ngSwitchCase="'file'" class="preview-file-display flex items-center gap-2 text-blue-600">
-                    <mat-icon>attachment</mat-icon>
-                    <span>{{ block.mediaUrl ? 'File Attached' : 'No file' }}</span>
-                </div>
-                <div *ngSwitchDefault class="no-media-content text-sm text-gray-500 italic">
-                    No media selected or defined.
-                </div>
-            </ng-container>
-        </div>
+    <div class="block-actions">
+      <button mat-icon-button [matMenuTriggerFor]="blockMenu" class="block-menu-trigger">
+        <mat-icon class="text-base text-white">more_vert</mat-icon>
+      </button>
+      <mat-menu #blockMenu="matMenu">
+        <button mat-menu-item (click)="onEditBlock()">
+          <mat-icon>edit</mat-icon>
+          <span>Edit</span>
+        </button>
+        <button mat-menu-item (click)="onDuplicateBlock()">
+          <mat-icon>content_copy</mat-icon>
+          <span>Duplicate</span>
+        </button>
+        <button mat-menu-item (click)="onRemoveBlock()">
+          <mat-icon>delete</mat-icon>
+          <span>Delete</span>
+        </button>
+      </mat-menu>
     </div>
+  </div>
+
+  <div class="block-body px-4 pb-4 bg-white rounded-b-lg">
+    <div class="block-description text-base text-slate-600 mb-3 leading-snug pt-1" *ngIf="block.description">
+      {{ block.description }}
+    </div>
+
+    <div class="block-content-preview">
+      <ng-container [ngSwitch]="block.mediaType">
+        <p *ngSwitchCase="'text'"
+          class="preview-text text-sm text-gray-700 bg-slate-50 px-3 py-2 rounded-md border border-slate-200">
+          {{ block.content || "No text content" }}
+        </p>
+        <ng-container *ngSwitchCase="'image'">
+          <img [src]="block.mediaUrl" alt="Image Preview" class="preview-media-thumbnail max-w-full h-auto rounded-md"
+            *ngIf="block.mediaUrl" />
+          <div *ngIf="!block.mediaUrl" class="no-media-content text-sm text-gray-500 italic">
+            No image URL provided.
+          </div>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'video'">
+          <video [src]="block.mediaUrl" controls class="preview-media-thumbnail max-w-full h-auto rounded-md"
+            *ngIf="block.mediaUrl"></video>
+          <div *ngIf="!block.mediaUrl" class="no-media-content text-sm text-gray-500 italic">
+            No video URL provided.
+          </div>
+        </ng-container>
+
+        <div *ngSwitchCase="'file'" class="preview-file-display flex items-center gap-2 text-blue-600">
+          <mat-icon>attachment</mat-icon>
+          <span>{{ block.mediaUrl ? 'File Attached' : 'No file' }}</span>
+        </div>
+        <div *ngSwitchDefault class="no-media-content text-sm text-gray-500 italic">
+          No media selected or defined.
+        </div>
+      </ng-container>
+    </div>
+  </div>
 </ng-container>
 
-<div
-    class="connection-point connection-output absolute w-3 h-3 right-[-6px] top-1/2 -translate-y-1/2"
-    (mousedown)="onStartConnection($event)"
-    *ngIf="!isSelected"
->
-    <div class="connection-dot w-full h-full rounded-full bg-indigo-500 border-2 border-white cursor-crosshair transition-all duration-200 hover:scale-130 hover:shadow-lg hover:shadow-indigo-500/20"></div>
+<div class="connection-point connection-output absolute w-3 h-3 right-[-6px] top-1/2 -translate-y-1/2"
+  (mousedown)="onStartConnection($event)" *ngIf="!isSelected">
+  <div
+    class="connection-dot w-full h-full rounded-full bg-indigo-500 border-2 border-white cursor-crosshair transition-all duration-200 hover:scale-130 hover:shadow-lg hover:shadow-indigo-500/20">
+  </div>
 </div>
 
-<div
-    class="connection-point connection-input absolute w-3 h-3 left-[-6px] top-1/2 -translate-y-1/2"
-    *ngIf="!isSelected"
->
-    <div class="connection-dot w-full h-full rounded-full bg-indigo-500 border-2 border-white cursor-crosshair transition-all duration-200 hover:scale-130 hover:shadow-lg hover:shadow-indigo-500/20"></div>
+<div class="connection-point connection-input absolute w-3 h-3 left-[-6px] top-1/2 -translate-y-1/2"
+  *ngIf="!isSelected">
+  <div
+    class="connection-dot w-full h-full rounded-full bg-indigo-500 border-2 border-white cursor-crosshair transition-all duration-200 hover:scale-130 hover:shadow-lg hover:shadow-indigo-500/20">
+  </div>
 </div>
 
 <div class="right-sidebar-content relative p-5 overflow-y-auto" *ngIf="isSelected">
-  <div class="flex justify-between items-center relative">
-     <h4 class="text-lg font-semibold text-gray-800 mb-2 section-title">
-        Media Block
+  <div class="flex justify-between items-center mb-4" *ngIf="!showNewMediaForm && !showButtonTypeCard && !showTextMessageIntegrationCard">
+    <h4 class="text-lg font-semibold text-gray-800 section-title">
+      Media Block
     </h4>
-    <button mat-icon-button (click)="closeSidebar()" class="close-btn absolute top-10px right-10px z-10">
-        <mat-icon class="text-base">close</mat-icon>
+    <button mat-icon-button (click)="closeSidebar()" class="close-btn">
+      <mat-icon style="font-size: 16px; width: 14px; height: 14px;">close</mat-icon>
     </button>
-   
+  </div>
+  <p class="block-description mb-4 text-gray-600 text-sm leading-relaxed" *ngIf="!showNewMediaForm && !showButtonTypeCard && !showTextMessageIntegrationCard">
+    Define the content that your chatbot will deliver, whether it's a text message, an image, a video, or any other
+    type of media.
+  </p>
+
+  <div *ngIf="!showNewMediaForm && !showButtonTypeCard && !showTextMessageIntegrationCard">
+    <div class="input-group mb-6">
+      <h3 class="mb-3 text-gray-800 font-medium">Select Media Block</h3>
+      <mat-form-field appearance="outline" class="full-width-input w-full">
+        <mat-select [(ngModel)]="block.mediaId" (selectionChange)="onMediaSelectionChange()">
+          <mat-option [value]="undefined">No parent media block</mat-option>
+          <mat-option *ngFor="let media of availableMedia" [value]="media.id">
+            Media Block {{ media.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
-    <p class="block-description mb-3 text-gray-600 text-sm leading-snug">
-        Respond your users with multimedia messages such as images, videos, etc. Select from the list below or create new media block
+
+    <div class="or-separator text-center my-6 font-medium text-gray-600 relative">OR</div>
+
+    <div class="action-buttons-row flex flex-row gap-3">
+      <button mat-flat-button
+        class="create-new-media-button w-full font-medium h-11 !rounded-lg !bg-green-500 hover:!bg-green-600 !text-white transition-colors"
+        (click)="createNewMediaBlock()">
+        Create New Media Block
+      </button>
+
+      <button *ngIf="block.mediaId" mat-flat-button
+        class="edit-media-button w-full !rounded-lg !bg-blue-500 hover:!bg-blue-500 !text-white h-11 transition-colors"
+        (click)="editExistingMediaBlock()">
+        Edit Media Block
+      </button>
+    </div>
+  </div>
+
+  <div class="define-media-config" *ngIf="showNewMediaForm">
+    <div class="flex items-center gap-3 mb-6">
+      <input type="text" [(ngModel)]="block.mediaName" (ngModelChange)="onContentChange()"
+        placeholder="Media Block Name"
+        class="media-name-input-simple px-4 py-2 border rounded-md text-base font-medium text-gray-800 flex-grow"
+        [value]="block.mediaName || 'Media Block 1546'" />
+      <button mat-flat-button
+        class="save-btn !bg-blue-500 hover:!bg-blue-600 !text-white h-11 px-6 !rounded-lg font-medium transition-colors"
+        (click)="saveMedia()">
+        Save
+      </button>
+      <div class="flex justify-end items-center mb-4 ">
+        <button mat-icon-button (click)="closeSidebar()" class="close-btn">
+          <mat-icon style="font-size: 16px; width: 14px; height: 14px;">close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <mat-button-toggle-group name="mediaType" aria-label="Media Type" [(ngModel)]="block.mediaType"
+      (ngModelChange)="onContentChange()" class="media-type-toggle w-full mb-6">
+      <mat-button-toggle value="text" class="media-toggle-button">
+        TEXT MESSAGE
+      </mat-button-toggle>
+      <mat-button-toggle value="Image Slider" class="media-toggle-button">
+        IMAGE SLIDER
+      </mat-button-toggle>
+      <mat-button-toggle value="image" class="media-toggle-button">
+        IMAGE
+      </mat-button-toggle>
+      <mat-button-toggle value="video" class="media-toggle-button">
+        VIDEO
+      </mat-button-toggle>
+      <mat-button-toggle value="audio" class="media-toggle-button">
+        AUDIO
+      </mat-button-toggle>
+      <mat-button-toggle value="file" class="media-toggle-button">
+        FILE
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <div [ngSwitch]="block.mediaType" class="mb-6">
+      <ng-container *ngSwitchCase="'image'">
+        <mat-form-field appearance="outline" class="full-width-input w-full">
+          <mat-label>Image URL</mat-label>
+          <input matInput [(ngModel)]="block.mediaUrl" (ngModelChange)="onContentChange()" placeholder="Enter image URL">
+        </mat-form-field>
+      </ng-container>
+      <ng-container *ngSwitchCase="'video'">
+        <mat-form-field appearance="outline" class="full-width-input w-full">
+          <mat-label>Video URL</mat-label>
+          <input matInput [(ngModel)]="block.mediaUrl" (ngModelChange)="onContentChange()" placeholder="Enter video URL">
+        </mat-form-field>
+      </ng-container>
+      <ng-container *ngSwitchCase="'audio'">
+        <mat-form-field appearance="outline" class="full-width-input w-full">
+          <mat-label>Audio URL</mat-label>
+          <input matInput [(ngModel)]="block.mediaUrl" (ngModelChange)="onContentChange()" placeholder="Enter audio URL">
+        </mat-form-field>
+      </ng-container>
+      <ng-container *ngSwitchCase="'file'">
+        <mat-form-field appearance="outline" class="full-width-input w-full">
+          <mat-label>File URL</mat-label>
+          <input matInput [(ngModel)]="block.mediaUrl" (ngModelChange)="onContentChange()" placeholder="Enter file URL">
+        </mat-form-field>
+      </ng-container>
+      <ng-container *ngSwitchCase="'Image Slider'">
+        <p class="text-sm text-gray-700 mb-3">Image Slider configuration will go here...</p>
+        </ng-container>
+    </div>
+
+
+    <div class="media-preview bg-gray-50 border border-gray-200 rounded-xl p-6 relative"> <h6 class="preview-title text-sm font-semibold text-gray-700 mb-4">Live Preview</h6>
+
+      <div class="phone-frame-container flex justify-center">
+        <div
+          class="relative bg-black rounded-3xl-custom p-phone-bezel shadow-2xl-custom phone-half-frame-height">
+          <div
+            class="absolute top-0 left-1/2 transform -translate-x-1/2 bg-black rounded-b-xl-custom z-10 notch-custom">
+          </div>
+          <div class="bg-white rounded-screen-custom h-full flex flex-col relative overflow-hidden">
+            <div
+              class="flex justify-between items-center px-4 py-2 text-xs font-medium text-black bg-white">
+              <span>9:41</span>
+              <div class="flex items-center gap-1">
+                <div class="w-4 h-2 bg-black rounded-sm"></div>
+                <div class="w-1 h-3 bg-black rounded-sm"></div>
+                <div class="w-6 h-3 border border-black rounded-sm relative">
+                  <div class="absolute right-0 top-0 w-4 h-full bg-black rounded-sm"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex-1 px-4 pb-4 flex flex-col justify-center bg-gray-100">
+
+              <div
+                class="bg-transparent rounded-2xl p-4 justify-center  max-w-[85%] self-center mb-3">
+                <ng-container [ngSwitch]="block.mediaType">
+                  <p *ngSwitchCase="'text'" class="text-sm text-gray-700 mb-3">
+                    <mat-form-field appearance="outline" class="full-width-input mat-input-no-bottom-gap w-full custom-input-rounded-top-right"> <input matInput [(ngModel)]="block.content" (ngModelChange)="onContentChange()"
+                                   placeholder="Type message you want to send..."
+                                   class="text-sm text-gray-700" />
+                      <mat-icon matSuffix class="text-gray-500">emoji_emotions</mat-icon>
+                    </mat-form-field>
+                  </p>
+                  <ng-container *ngSwitchCase="'image'">
+                    <img [src]="block.mediaUrl" alt="Image Preview"
+                      class="w-full h-auto rounded-lg mb-3" *ngIf="block.mediaUrl" />
+                    <div *ngIf="!block.mediaUrl" class="text-sm text-gray-500 italic mb-3">Image
+                      preview here</div>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'video'">
+                    <video [src]="block.mediaUrl" controls
+                      class="w-full h-auto rounded-lg mb-3" *ngIf="block.mediaUrl"></video>
+                    <div *ngIf="!block.mediaUrl" class="text-sm text-gray-500 italic mb-3">Video
+                      preview here</div>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'audio'">
+                    <audio controls [src]="block.mediaUrl" *ngIf="block.mediaUrl"
+                      class="w-full mb-3"></audio>
+                    <div *ngIf="!block.mediaUrl" class="text-sm text-gray-500 italic mb-3">Audio
+                      preview here</div>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'file'">
+                    <a [href]="block.mediaUrl" target="_blank"
+                      class="flex items-center gap-2 text-blue-600 no-underline text-sm mb-3"
+                      *ngIf="block.mediaUrl">
+                      <mat-icon class="text-lg w-4 h-4">attachment</mat-icon>
+                      Download File
+                    </a>
+                    <div *ngIf="!block.mediaUrl" class="text-sm text-gray-500 italic mb-3">File
+                      preview here</div>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'Image Slider'">
+                    <p class="text-sm text-gray-700 mb-3">Image Slider content preview...</p>
+                  </ng-container>
+                  <p *ngSwitchDefault class="text-sm text-gray-500 mb-3">Select a media type above.
+                  </p>
+                </ng-container>
+              </div>
+
+              <div class="mb-4 flex justify-center">
+                <button
+                  class="bg-transparent text-blue-500 px-4 py-1 rounded-none text-xs font-semibold text-xs flex items-center gap-2 hover:bg-blue-200 transition-colors border-2 border-dashed border-blue-300"
+                  (click)="onAddNewButton()">
+                  <span class="text-base font-bold">+</span>
+                  ADD NEW BUTTON
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="button-type-card-container absolute z-50"
+            *ngIf="showButtonTypeCard"
+            style="top: 90px; right: calc(50% - 160px); transform: translateX(-50%);">
+            <div class="button-type-card bg-gray-50 p-6 rounded-lg shadow-xl w-80 max-w-full relative">
+          <div class="flex justify-between bg-gray-100 items-center mb-4">
+            <h4 class="text-lg font-semibold text-gray-800">Button Type</h4>
+            <button mat-icon-button (click)="closeButtonTypeCard()" class="close-btn">
+              <mat-icon style="font-size: 16px; width: 14px; height: 14px;">close</mat-icon>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <button mat-flat-button class="button-option !text-xs py-2 !rounded-lg bg-gray-100 hover:bg-gray-200"
+              (click)="onTextMessageButtonClick()">Text Message</button>
+            <button mat-flat-button class="button-option !text-xs py-2 !rounded-lg bg-gray-100 hover:bg-gray-200">Send Media Block</button>
+            <button mat-flat-button class="button-option !text-xs py-2 !rounded-lg bg-gray-100 hover:bg-gray-200">Website URL</button>
+            <button mat-flat-button class="button-option !text-xs py-2 !rounded-lg bg-gray-100 hover:bg-gray-200">Direct Call</button>
+            <button mat-flat-button class="button-option !text-xs py-2 !rounded-lg bg-gray-100 hover:bg-gray-200">Start Story</button>
+            <button mat-flat-button class="button-option !text-xs py-2 !rounded-lg bg-gray-100 hover:bg-gray-200">RSS Feed</button>
+            <button mat-flat-button class="button-option !text-xs py-2 !rounded-lg bg-gray-100 hover:bg-gray-200">JSON API</button>
+            <button mat-flat-button class="button-option !text-xs py-2 !rounded-lg bg-gray-100 hover:bg-gray-200">Human Help</button>
+            <button mat-flat-button class="button-option !text-xs py-2 !rounded-lg bg-gray-100 hover:bg-gray-200">Conversational Form</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-message-integration-card relative p-6 bg-white rounded-lg shadow-xl" *ngIf="showTextMessageIntegrationCard">
+    <div class="flex justify-between items-center mb-4">
+      <h4 class="text-lg font-semibold text-gray-800">Text Message Integration</h4>
+      <button mat-icon-button (click)="closeTextMessageIntegrationCard()" class="close-btn">
+        <mat-icon style="font-size: 16px; width: 14px; height: 14px;">close</mat-icon>
+      </button>
+    </div>
+    <p class="text-gray-600 text-sm mb-4">
+      Configure the text message that will be sent when this button is triggered.
     </p>
 
-    <div *ngIf="!showNewMediaForm">
-        <div class="input-group mb-4">
-            <mat-form-field appearance="outline" class="full-width-input w-full">
-                <mat-label>Select Media Block</mat-label>
-                <mat-select
-                    [(ngModel)]="block.mediaId"
-                    (selectionChange)="onMediaSelectionChange()"
-                >
-                    <mat-option [value]="null">No parent media block</mat-option>
-                    <mat-option *ngFor="let media of availableMedia" [value]="media.id">
-                        Media Block {{ media.name }}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
-        </div>
-
-        <div class="selected-media-actions flex items-center justify-between gap-4" *ngIf="block.mediaId">
-            <span class="selected-media-name text-sm text-gray-700">Media Block: {{ getMediaName(block.mediaId) }}</span>
-            <button
-                mat-flat-button
-                color="primary"
-                class="edit-media-button h-9"
-                (click)="editExistingMediaBlock()"
-            >
-                Edit Media Block
-            </button>
-        </div>
-
-        <div class="or-separator text-center my-5 font-semibold text-gray-600 relative">OR</div>
-
-        <button
-    mat-flat-button
-    color="primary"
-    class="create-new-media-button w-full font-semibold h-10 !rounded-lg !bg-green-500 hover:!bg-green-600 !text-white"
-    (click)="createNewMediaBlock()"
->
-    Create New Media Block
-</button>
+    <div class="input-group mb-4">
+      <mat-form-field appearance="outline" class="full-width-input w-full">
+        <mat-label>Text Message</mat-label>
+        <textarea matInput placeholder="Enter your text message here..." rows="4" [(ngModel)]="block.buttonTextMessage"></textarea>
+      </mat-form-field>
     </div>
 
-    <div class="define-media-config" *ngIf="showNewMediaForm">
-        <h5 class="sub-section-title text-base font-semibold text-gray-700 mt-6 mb-4">Define Media</h5>
-
-        <mat-form-field appearance="outline" class="full-width-input w-full mb-3">
-            <mat-label>Media Name</mat-label>
-            <input
-                matInput
-                [(ngModel)]="block.mediaName"
-                (ngModelChange)="onContentChange()"
-                placeholder="e.g. Intro Video"
-            />
-        </mat-form-field>
-
-        <mat-button-toggle-group
-            name="mediaType"
-            aria-label="Media Type"
-            [(ngModel)]="block.mediaType"
-            (ngModelChange)="onContentChange()"
-            class="media-type-toggle w-full mb-4"
-        >
-            <mat-button-toggle value="text" class="flex-1 h-10 text-xs">TEXT MESSAGE</mat-button-toggle>
-            <mat-button-toggle value="image" class="flex-1 h-10 text-xs">IMAGE</mat-button-toggle>
-            <mat-button-toggle value="video" class="flex-1 h-10 text-xs">VIDEO</mat-button-toggle>
-            <mat-button-toggle value="file" class="flex-1 h-10 text-xs">FILE</mat-button-toggle>
-            <mat-button-toggle value="Image Slider" class="flex-1 h-10 text-xs">Image Slider</mat-button-toggle>
-            <mat-button-toggle value="audio" class="flex-1 h-10 text-xs">AUDIO</mat-button-toggle>
-        </mat-button-toggle-group>
-
-        <div [ngSwitch]="block.mediaType">
-            <div *ngSwitchCase="'text'">
-                <mat-form-field appearance="outline" class="full-width-input w-full mt-3">
-                    <mat-label>Text Message</mat-label>
-                    <textarea
-                        matInput
-                        [(ngModel)]="block.content"
-                        (ngModelChange)="onContentChange()"
-                        placeholder="Enter text message"
-                    ></textarea>
-                </mat-form-field>
-            </div>
-            <ng-container *ngSwitchCase="'image'">
-                <mat-form-field appearance="outline" class="full-width-input w-full mt-3">
-                    <mat-label>Image URL</mat-label>
-                    <input
-                        matInput
-                        type="url"
-                        [(ngModel)]="block.mediaUrl"
-                        (ngModelChange)="onContentChange()"
-                        placeholder="e.g. https://example.com/image.jpg"
-                    />
-                </mat-form-field>
-                <button mat-raised-button color="accent" class="upload-button w-full mt-2.5">
-                    Upload Image
-                </button>
-            </ng-container>
-            <ng-container *ngSwitchCase="'video'">
-                <mat-form-field appearance="outline" class="full-width-input w-full mt-3">
-                    <mat-label>Video URL</mat-label>
-                    <input
-                        matInput
-                        type="url"
-                        [(ngModel)]="block.mediaUrl"
-                        (ngModelChange)="onContentChange()"
-                        placeholder="e.g. https://example.com/video.mp4"
-                    />
-                </mat-form-field>
-                <button mat-raised-button color="accent" class="upload-button w-full mt-2.5">
-                    Upload Video
-                </button>
-            </ng-container>
-            <ng-container *ngSwitchCase="'file'">
-                <mat-form-field appearance="outline" class="full-width-input w-full mt-3">
-                    <mat-label>File URL</mat-label>
-                    <input
-                        matInput
-                        type="url"
-                        [(ngModel)]="block.mediaUrl"
-                        (ngModelChange)="onContentChange()"
-                        placeholder="e.g. https://example.com/document.pdf"
-                    />
-                </mat-form-field>
-                <button mat-raised-button color="accent" class="upload-button w-full mt-2.5">
-                    Upload File
-                </button>
-            </ng-container>
-            <ng-container *ngSwitchCase="'Image Slider'">
-                <mat-form-field appearance="outline" class="full-width-input w-full mt-3">
-                    <mat-label>Image Slider Name</mat-label>
-                    <input
-                        matInput
-                        [(ngModel)]="block.content" (ngModelChange)="onContentChange()"
-                        placeholder="e.g. Image Slider as read"
-                    />
-                </mat-form-field>
-            </ng-container>
-            <ng-container *ngSwitchCase="'audio'">
-                <mat-form-field appearance="outline" class="full-width-input w-full mt-3">
-                    <mat-label>Audio URL</mat-label>
-                    <input
-                        matInput
-                        type="url"
-                        [(ngModel)]="block.mediaUrl"
-                        (ngModelChange)="onContentChange()"
-                        placeholder="e.g. https://example.com/audio.mp3"
-                    />
-                </mat-form-field>
-                <button mat-raised-button color="accent" class="upload-button w-full mt-2.5">
-                    Upload Audio
-                </button>
-            </ng-container>
-        </div>
-
-        <div class="media-preview mt-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
-            <h6 class="preview-title text-sm font-semibold text-gray-700 mb-3">Live Preview</h6>
-            <div class="phone-frame w-[250px] h-[450px] bg-gray-800 rounded-[25px] p-4 shadow-lg mx-auto flex justify-center items-center">
-                <div class="phone-screen w-full h-full bg-white rounded-xl overflow-y-auto p-2.5 flex flex-col justify-end">
-                    <div class="chat-message-bubble bg-gray-200 rounded-xl p-3.5 mb-2 max-w-[85%] self-start break-words">
-                        <ng-container [ngSwitch]="block.mediaType">
-                            <p *ngSwitchCase="'text'" class="text-sm text-gray-800">
-                                {{ block.content || "Type message here..." }}
-                            </p>
-                            <ng-container *ngSwitchCase="'image'">
-                                <img
-                                    [src]="block.mediaUrl"
-                                    alt="Image Preview"
-                                    class="preview-media max-w-full h-auto rounded-md mt-1"
-                                    *ngIf="block.mediaUrl"
-                                />
-                                <div *ngIf="!block.mediaUrl" class="text-sm text-gray-500 italic">No image preview</div>
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'video'">
-                                <video
-                                    [src]="block.mediaUrl"
-                                    controls
-                                    class="preview-media max-w-full h-auto rounded-md mt-1"
-                                    *ngIf="block.mediaUrl"
-                                ></video>
-                                <div *ngIf="!block.mediaUrl" class="text-sm text-gray-500 italic">No video preview</div>
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'file'">
-                                <a
-                                    [href]="block.mediaUrl"
-                                    target="_blank"
-                                    class="preview-file-link flex items-center gap-2 text-blue-600 no-underline text-sm"
-                                    *ngIf="block.mediaUrl"
-                                >
-                                    <mat-icon class="text-lg w-4 h-4">attachment</mat-icon>
-                                    {{ block.mediaUrl ? "Download File" : "Attach a file..." }}
-                                </a>
-                                <div *ngIf="!block.mediaUrl" class="text-sm text-gray-500 italic">No file preview</div>
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'Image Slider'">
-                                <p class="preview-text text-sm text-gray-800">Image Slider: {{ block.content || "N/A" }}</p>
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'audio'">
-                                <audio controls [src]="block.mediaUrl" *ngIf="block.mediaUrl" class="mt-1"></audio>
-                                <div *ngIf="!block.mediaUrl" class="text-sm text-gray-500 italic">No audio preview</div>
-                            </ng-container>
-                            <p *ngSwitchDefault class="text-sm text-gray-800">Type message here...</p>
-                        </ng-container>
-                        <div class="media-block-buttons flex flex-wrap gap-2 mt-2.5">
-                            <button mat-stroked-button class="media-button flex-grow min-w-[80px] h-9 rounded-lg text-xs font-medium text-blue-600 border border-blue-600">
-                                Another!
-                            </button>
-                            <button mat-stroked-button class="media-button flex-grow min-w-[80px] h-9 rounded-lg text-xs font-medium text-blue-600 border border-blue-600">Call</button>
-                            <button mat-stroked-button class="media-button flex-grow min-w-[80px] h-9 rounded-lg text-xs font-medium text-blue-600 border border-blue-600">Help</button>
-                            <button mat-stroked-button class="add-new-button w-full h-9 flex items-center justify-center gap-1 text-xs font-medium text-blue-600 border border-blue-600 mt-2">
-                                <mat-icon class="text-base w-4 h-4">add</mat-icon> ADD NEW BUTTON
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="flex justify-end mt-3">
-            <button mat-button (click)="cancelMediaEdit()">Cancel</button>
-            <button mat-flat-button color="primary" class="ml-2">Save Media</button>
-        </div>
+    <div class="flex justify-end mt-6">
+      <button mat-flat-button
+        class="save-text-message-button !bg-blue-500 hover:!bg-blue-600 !text-white h-11 px-6 !rounded-lg font-medium transition-colors"
+        (click)="saveTextMessageIntegration()">
+        Save Text Message
+      </button>
     </div>
+  </div>
 </div>
-
-<style>
-/* Custom CSS for elements that are difficult or impossible to achieve with pure Tailwind utilities */
-
-/* OR Separator: Using pseudo-elements for lines */
-.or-separator::before,
-.or-separator::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 40%;
-    height: 1px;
-    background-color: #e0e0e0; /* gray-300 equivalent */
-}
-.or-separator::before {
-    left: 0;
-}
-.or-separator::after {
-    right: 0;
-}
-
-/* Specific Material component overrides if needed,
-   though typically handled by Material's theming or global styles. */
-.mat-button-toggle-group .mat-button-toggle-button {
-    border-radius: 0 !important; /* To remove individual button toggles border radius if it creates gaps */
-}
-
-/* Phone Frame Shadow: Complex shadow that might be easier with custom CSS if precise matching is needed */
-.phone-frame {
-    box-shadow: 0 0 0 2px #ccc, 0 0 0 5px #eee;
-}
-
-/* Connection Dot: Hover effect with specific box-shadow */
-/* This is already handled inline in the HTML with Tailwind's hover variants */
-/* .connection-dot:hover {
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
-} */
-</style>
