@@ -1,0 +1,382 @@
+<div class="chatbot-flow-container">
+  <div class="header">
+    <div class="header-left">
+      <h2>Create Story</h2>
+    </div>
+    <div class="header-actions">
+      <button
+        mat-raised-button
+        color="primary"
+        class="save-button"
+        (click)="saveFlow()"
+      >
+        Save
+      </button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="left-sidebar">
+      <div class="sidebar-header">
+        <p class="instruction-text">
+          Drag blocks to the node tree below using the drag handle
+        </p>
+      </div>
+
+      <div class="search-container">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            placeholder="Search..."
+            [formControl]="searchControl"
+          />
+        </mat-form-field>
+      </div>
+
+      <div class="blocks-list" cdkDropList (cdkDropListDropped)="drop($event)">
+        <div
+          *ngFor="let block of filteredBlocks$ | async"
+          class="block-item"
+          cdkDrag
+          (click)="addBlockToCanvas(block)"
+        >
+          <div
+            class="block-icon"
+            [style.background-color]="getStatusColor(block.status)"
+          >
+            <mat-icon>{{ block.icon }}</mat-icon>
+          </div>
+
+          <div class="block-content">
+            <div class="block-name">{{ block.name }}</div>
+            <div class="block-description" *ngIf="block.description">
+              {{ block.description }}
+            </div>
+          </div>
+
+          <div class="drag-handle" cdkDragHandle>
+            <mat-icon>drag_indicator</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="canvas-area" [class.sidebar-open]="rightSidebarOpen">
+      <div class="canvas-controls">
+        <div class="zoom-controls">
+          <button
+            mat-icon-button
+            (click)="zoomIn()"
+            [disabled]="zoomLevel >= maxZoom"
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+          <span class="zoom-level"
+            >{{ zoomLevel * 100 | number : "1.0-0" }}%</span
+          >
+          <button
+            mat-icon-button
+            (click)="zoomOut()"
+            [disabled]="zoomLevel <= minZoom"
+          >
+            <mat-icon>remove</mat-icon>
+          </button>
+        </div>
+        <button mat-icon-button (click)="resetZoom()" matTooltip="Reset zoom">
+          <span class="reset-text">Reset</span>
+        </button>
+        <!-- <button mat-icon-button (click)="testConnection()" matTooltip="Test Connection">
+          <span class="reset-text">Test</span>
+        </button> -->
+      </div>
+
+      <div
+        class="canvas-wrapper"
+        #canvasWrapper
+        [style.cursor]="isPanning ? 'grabbing' : 'default'"
+      >
+        <!-- Temporary canvas structure to debug -->
+        <div 
+          class="canvas-content" 
+          #canvasContent
+          [style.transform]="'translate(' + panOffsetX + 'px, ' + panOffsetY + 'px) scale(' + zoomLevel + ')'"
+          [style.transform-origin]="'0 0'"
+        >
+          <!-- Render blocks directly -->
+          <div
+            *ngFor="let block of canvasBlocks"
+            [id]="block.id"
+            class="canvas-block"
+            [class.selected]="selectedBlock?.id === block.id"
+            [style.left.px]="block.x"
+            [style.top.px]="block.y"
+            [style.border-color]="getStatusColor(block.status)"
+            [style.background-color]="getTypeColor(block.type)"
+            cdkDrag
+            (cdkDragEnded)="onBlockDragEnded($event, block)"
+          >
+            <ng-container [ngSwitch]="block.type">
+              <app-user-input-block
+                *ngSwitchCase="'userInput'"
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+                (addKeywordGroupBlock)="onAddKeywordGroupBlockToCanvas()"
+              ></app-user-input-block>
+
+              <app-text-response-block
+                *ngSwitchCase="'textResponse'"
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+              ></app-text-response-block>
+
+              <app-media-block
+                *ngSwitchCase="'mediaBlock'"
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                [availableMedia]="availableMedia"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+              ></app-media-block>
+
+              <app-link-story-block
+                *ngSwitchCase="'linkStory'"
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                [availableStories]="availableStories"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+              ></app-link-story-block>
+
+              <app-conversational-form-block
+                *ngSwitchCase="'conversationalForm'"
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                [availableForms]="availableForms"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+              ></app-conversational-form-block>
+
+              <app-typing-delay-block
+                *ngSwitchCase="'typingDelay'"
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+              ></app-typing-delay-block>
+
+              <app-json-api-integration-block
+                *ngSwitchDefault
+                [block]="block"
+                [isSelected]="selectedBlock?.id === block.id"
+                [isSidebarOpen]="rightSidebarOpen"
+                (blockUpdated)="onBlockUpdated($event)"
+                (selectBlock)="selectBlock($event)"
+                (startConnection)="startConnection($event, block)"
+                (endConnection)="endConnection($event, block)"
+                (removeBlock)="removeCanvasBlock($event)"
+                (duplicateBlock)="duplicateCanvasBlock($event)"
+                (editBlock)="editCanvasBlock($event)"
+              ></app-json-api-integration-block>
+            </ng-container>
+          </div>
+
+          <!-- SVG for connections -->
+          <svg class="connections-svg" width="100%" height="100%">
+            <defs>
+              <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#6366f1" />
+              </marker>
+            </defs>
+            <g class="connections-group">
+              <line
+                *ngFor="let connection of connections"
+                [attr.x1]="connection.fromPoint.x"
+                [attr.y1]="connection.fromPoint.y"
+                [attr.x2]="connection.toPoint.x"
+                [attr.y2]="connection.toPoint.y"
+                stroke="#6366f1"
+                stroke-width="2"
+                marker-end="url(#arrowhead)"
+                class="connection-line"
+              />
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="right-sidebar"
+      [class.open]="rightSidebarOpen"
+      *ngIf="selectedBlock"
+    >
+      <div class="right-sidebar-header">
+        <div class="sidebar-title">
+          <mat-icon>{{ selectedBlock.icon }}</mat-icon>
+          <span>{{ selectedBlock.name }}</span>
+          <span
+            *ngIf="
+              selectedBlock.type === 'userInput' && selectedBlock.subType
+            "
+            class="badge"
+            [class.keyword-group-badge]="
+              selectedBlock.subType === 'keywordGroup'
+            "
+            [class.phrase-badge]="selectedBlock.subType === 'phrase'"
+            [class.anything-badge]="selectedBlock.subType === 'anything'"
+          >
+            {{
+              selectedBlock.subType === "keywordGroup"
+                ? "Keyword Group"
+                : selectedBlock.subType === "phrase"
+                ? "Phrase"
+                : selectedBlock.subType === "anything"
+                ? "Type Anything"
+                : selectedBlock.subType
+            }}
+          </span>
+          <span
+            *ngIf="selectedBlock.type === 'linkStory' && selectedBlock.linkStoryId"
+            class="badge link-story-badge"
+          >
+            Selected Story: {{ selectedBlock.linkStoryName }}
+          </span>
+          <span
+            *ngIf="selectedBlock.type === 'mediaBlock' && selectedBlock.mediaId"
+            class="badge media-block-badge"
+          >
+            Selected Media: {{ selectedBlock.mediaName }}
+          </span>
+          <span
+            *ngIf="selectedBlock.type === 'conversationalForm' && selectedBlock.formId"
+            class="badge form-block-badge"
+          >
+            Selected Form: {{ selectedBlock.formName }}
+          </span>
+        </div>
+        <button mat-icon-button (click)="closeSidebar()" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="right-sidebar-content-wrapper">
+        <ng-container [ngSwitch]="selectedBlock.type">
+           <app-user-input-block
+        *ngSwitchCase="'userInput'"
+        [block]="selectedBlock"
+        [isSelected]="true"
+        [isSidebarOpen]="true"
+        (blockUpdated)="onBlockUpdated($event)"
+       (closeSidebarEvent)="closeSidebar()" (editBlock)="editCanvasBlock($event)"
+        ></app-user-input-block>
+
+          <app-text-response-block
+            *ngSwitchCase="'textResponse'"
+            [block]="selectedBlock"
+            [isSelected]="true"
+            [isSidebarOpen]="true"
+            (blockUpdated)="onBlockUpdated($event)"
+             (closeSidebarEvent)="closeSidebar()" (editBlock)="editCanvasBlock($event)"
+          ></app-text-response-block>
+
+          <app-media-block
+            *ngSwitchCase="'mediaBlock'"
+            [block]="selectedBlock"
+            [isSelected]="true"
+            [isSidebarOpen]="true"
+            [availableMedia]="availableMedia"
+            (blockUpdated)="onBlockUpdated($event)"
+          ></app-media-block>
+
+          <app-link-story-block
+            *ngSwitchCase="'linkStory'"
+            [block]="selectedBlock"
+            [isSelected]="true"
+            [isSidebarOpen]="true"
+            [availableStories]="availableStories"
+            (blockUpdated)="onBlockUpdated($event)"
+          ></app-link-story-block>
+
+          <app-conversational-form-block
+            *ngSwitchCase="'conversationalForm'"
+            [block]="selectedBlock"
+            [isSelected]="true"
+            [isSidebarOpen]="true"
+            [availableForms]="availableForms"
+            (blockUpdated)="onBlockUpdated($event)"
+          ></app-conversational-form-block>
+
+          <app-typing-delay-block
+            *ngSwitchCase="'typingDelay'"
+            [block]="selectedBlock"
+            [isSelected]="true"
+            [isSidebarOpen]="true"
+            (blockUpdated)="onBlockUpdated($event)"
+          ></app-typing-delay-block>
+
+          <app-json-api-integration-block
+            *ngIf="selectedBlock.type === 'jsonApi'"
+            [block]="selectedBlock"
+            [isSelected]="true"
+            (blockUpdated)="onBlockUpdated($event)"
+          ></app-json-api-integration-block>
+        </ng-container>
+      </div>
+    </div>
+
+    <div
+      class="sidebar-overlay"
+      [class.active]="rightSidebarOpen"
+      (click)="closeSidebar()"
+    ></div>
+
+    <app-message-box
+      *ngIf="showMessageBox"
+      [message]="messageBoxContent"
+      [type]="messageBoxType"
+      (closed)="onMessageBoxClosed()"
+    ></app-message-box>
+  </div>
+</div>
