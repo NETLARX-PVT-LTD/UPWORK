@@ -1,332 +1,189 @@
-/* src/app/chatbot-flow/blocks/media-block/media-block.component.scss */
 
-// Common styles for block header, body, connection points, etc.
-// Duplicated from chatbot-flow.component.scss for self-containment.
-// In a real project, consider shared styles.
-
-.block-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0px 8px;
-  border-bottom: 2px solid rgb(6, 184, 6);
-  background-color: #CDA5E7; // This color will be overridden by getTypeColor in parent
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-
-  .block-type-badges {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-
-    .block-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-
-      .block-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        color: #6366f1; // This color will be overridden by getTypeColor in parent
-      }
-
-      span {
-        font-weight: 600;
-        color: #1e293b;
-        font-size: 14px;
-      }
-    }
-
-    .badge {
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-
-      &.media-block-badge {
-        background-color: #059669; // Example color for media badge
-        color: white;
-      }
-    }
-  }
-
-  .block-actions {
-    .block-menu-trigger {
-      mat-icon {
-        font-size: 16px;
-        color: #fff;
-      }
-    }
-  }
-}
-
-.block-body {
-  padding: 0 16px 16px;
-  background-color: #fff;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-
-  .block-description {
-    font-size: 16px;
-    color: #64748b;
-    margin-bottom: 12px;
-    line-height: 1.4;
-    padding-top: 5px;
-  }
-
-  .block-content-text {
-    font-size: 13px;
-    color: #374151;
-    background-color: #f8fafc;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
-  }
-}
-
-.connection-point {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-
-  .connection-dot {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background-color: #6366f1;
-    border: 2px solid white;
-    cursor: crosshair;
-    transition: all 0.2s ease;
-
-    &:hover {
-      transform: scale(1.3);
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
-    }
-  }
-
-  &.connection-output {
-    right: -6px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
-  &.connection-input {
-    left: -6px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-}
-
-/* Right Sidebar Content for Media Block */
-.right-sidebar-content {
-  position: relative;
-  padding: 20px;
-  overflow-y: auto;
-
-  .close-btn {
+/* OR Separator styling */
+.or-separator::before,
+.or-separator::after {
+    content: '';
     position: absolute;
-    top: 10px; // Adjust as needed for vertical positioning
-    right: 10px; // Adjust as needed for horizontal positioning
-    z-index: 10; // Ensure it's above other content if necessary
-    // Add any other styling for the button itself, like background, color, size
-     mat-icon {
-        font-size: 16px;
-      }
-  }
-  .section-title {
-    color: #1e293b;
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-
-  .config-description {
-    color: #64748b;
-    font-size: 14px;
-    margin-bottom: 20px;
-    line-height: 1.4;
-  }
-
-  .input-group {
-    margin-bottom: 16px;
-  }
-
-  .full-width-input {
-    width: 100%;
-  }
-
-  .or-separator {
-    text-align: center;
-    margin: 20px 0;
-    color: #9e9e9e;
-    position: relative;
-    &::before,
-    &::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 40%;
-      height: 1px;
-      background-color: #e0e0e0;
-    }
-    &::before {
-      left: 0;
-    }
-    &::after {
-      right: 0;
-    }
-  }
-
-  .create-new-media-button {
-    width: 100%;
-    height: 40px;
-  }
-
-  .selected-media-name {
-    font-size: 14px;
-    color: #333;
-  }
-
-  .edit-media-button {
-    height: 36px;
-  }
-
-  .sub-section-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #333;
-    margin-top: 24px;
-    margin-bottom: 16px;
-  }
-
-  .media-type-toggle {
-    width: 100%;
-    margin-bottom: 16px;
-    .mat-button-toggle-button {
-      flex: 1;
-      height: 40px;
-      font-size: 12px;
-    }
-  }
-
-  .upload-button {
-    width: 100%;
-    margin-top: 10px;
-  }
-
-  .media-preview {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 16px;
-    background-color: #f9f9f9;
-
-    .preview-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 12px;
-    }
-
-    .phone-frame {
-      width: 250px;
-      height: 450px;
-      background-color: #333;
-      border-radius: 25px;
-      padding: 15px;
-      box-shadow: 0 0 0 2px #ccc, 0 0 0 5px #eee;
-      margin: 0 auto;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .phone-screen {
-      width: 100%;
-      height: 100%;
-      background-color: #fff;
-      border-radius: 15px;
-      overflow-y: auto;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end; // Messages appear at the bottom
-    }
-
-    .chat-message-bubble {
-      background-color: #e0e0e0;
-      border-radius: 12px;
-      padding: 10px 15px;
-      margin-bottom: 8px;
-      max-width: 85%;
-      align-self: flex-start; // Bot message
-      word-wrap: break-word;
-
-      p {
-        margin: 0;
-        font-size: 14px;
-        color: #333;
-      }
-
-      .preview-media {
-        max-width: 100%;
-        height: auto;
-        border-radius: 8px;
-        margin-top: 5px;
-      }
-
-      .preview-file-link {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #3b82f6;
-        text-decoration: none;
-        font-size: 14px;
-        mat-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-        }
-      }
-
-      .media-block-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 10px;
-
-        .media-button {
-          flex-grow: 1;
-          min-width: 80px;
-          height: 36px;
-          border-radius: 8px;
-          font-size: 12px;
-          font-weight: 500;
-          color: #3b82f6;
-          border-color: #3b82f6;
-        }
-
-        .add-new-button {
-          width: 100%;
-          height: 36px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
-          font-size: 12px;
-          font-weight: 500;
-          color: #3b82f6;
-          border-color: #3b82f6;
-          mat-icon {
-            font-size: 16px;
-            width: 16px;
-            height: 16px;
-          }
-        }
-      }
-    }
-  }
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background-color: #d1d5db;
+    transform: translateY(-50%);
 }
+
+.or-separator::before {
+    left: 0;
+}
+
+.or-separator::after {
+    right: 0;
+}
+
+/* Media Name Input Field - Simple version from latest image */
+.media-name-input-simple {
+    border: 1px solid #d1d5db;
+    background-color: white;
+    box-shadow: none;
+    height: 44px; /* Ensure consistent height with save button */
+}
+.media-name-input-simple::placeholder {
+    color: #9ca3af;
+}
+
+/* Media Type Toggle Group - Adjusted to match image colors/borders */
+.media-type-toggle.mat-button-toggle-group {
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    overflow: hidden;
+    height: 40px;
+    display: flex;
+}
+
+.media-type-toggle .mat-button-toggle {
+    flex: 1;
+    border: none !important;
+}
+
+.media-type-toggle .mat-button-toggle-button {
+    height: 38px !important;
+    border: none !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    text-transform: uppercase;
+    color: #6b7280 !important;
+    background-color: white !important;
+    transition: all 0.2s ease;
+    border-radius: 0 !important;
+    width: 100%;
+    padding: 0 10px;
+}
+
+.media-type-toggle .mat-button-toggle-checked .mat-button-toggle-button {
+    background-color: #dbeafe !important;
+    color: #1d4ed8 !important;
+    border-bottom: 2px solid #3b82f6 !important;
+}
+
+.media-type-toggle .mat-button-toggle-checked:not(:last-child) .mat-button-toggle-button {
+    border-right: none !important;
+}
+
+.media-type-toggle .mat-button-toggle:not(:last-child) .mat-button-toggle-button {
+    border-right: 1px solid #e5e7eb !important;
+}
+
+/* Form Fields */
+.full-width-input .mat-form-field-wrapper {
+    padding-bottom: 0;
+}
+
+.full-width-input .mat-form-field-appearance-outline .mat-form-field-flex {
+    min-height: 44px;
+    padding: 0.75em;
+}
+
+/* Buttons */
+.save-btn {
+    box-shadow: none !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.025em;
+    background-color: #3b82f6 !important;
+    color: white !important;
+}
+.save-btn:hover {
+    background-color: #2563eb !important;
+}
+
+.upload-button {
+    box-shadow: none !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.025em;
+    background-color: #3b82f6 !important;
+    color: white !important;
+}
+.upload-button:hover {
+    background-color: #2563eb !important;
+}
+
+.create-new-media-button {
+    box-shadow: none !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.025em;
+    background-color: #22c55e !important;
+    color: white !important;
+}
+.create-new-media-button:hover {
+    background-color: #16a34a !important;
+}
+
+.edit-media-button {
+    box-shadow: none !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.025em;
+    border: 1px solid #d1d5db !important;
+    background-color: white !important;
+    color: #3b82f6 !important;
+}
+.edit-media-button:hover {
+    background-color: #f3f4f6 !important;
+}
+
+/* Phone Frame Enhanced Styling - Precision Adjustments */
+/* Custom classes for specific border-radius, padding, shadow, width, height */
+.rounded-3xl-custom {
+    border-radius: 40px; /* Outer phone frame border-radius */
+}
+
+.p-phone-bezel {
+    padding: 8px; /* Padding for the bezel thickness */
+}
+
+.shadow-2xl-custom {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.notch-custom {
+    width: 100px;
+    height: 20px;
+}
+
+.rounded-b-xl-custom {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.rounded-screen-custom {
+    border-radius: 32px;
+}
+
+.home-indicator-custom {
+    width: 100px;
+    height: 2px;
+}
+
+.bottom-home-indicator-pos {
+    bottom: 8px;
+}
+
+/* Adjustments for the "half phone frame" and increased width */
+.phone-frame-container {
+    height: 380px; /* Fixed height to show only the top part of the phone as per image_473001.jpg */
+    overflow: hidden; /* Hide the overflowing bottom part of the phone */
+    display: flex;
+    justify-content: center;
+}
+
+.phone-half-frame-height {
+    width: 500px; /* Adjusted width to match the second image (e.g., image_46c28d.jpg, image_4732ed.jpg) */
+    height: 420px; /* Maintain full internal height for content positioning, but container crops it */
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .phone-frame-container {
+        transform: scale(0.9);
+    }
+}
+
+

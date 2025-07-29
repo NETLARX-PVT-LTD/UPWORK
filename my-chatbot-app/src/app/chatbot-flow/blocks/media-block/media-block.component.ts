@@ -9,6 +9,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
 import { ChatbotBlock, AvailableMedia } from '../../../models/chatbot-block.model';
 
 @Component({
@@ -23,9 +25,11 @@ import { ChatbotBlock, AvailableMedia } from '../../../models/chatbot-block.mode
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatSnackBarModule
   ],
-  templateUrl: './media-block.component.html'
+  templateUrl: './media-block.component.html',
+  styleUrls: ['./media-block.component.scss']
 })
 export class MediaBlockComponent implements OnInit {
   @Input() block!: ChatbotBlock;
@@ -40,14 +44,46 @@ export class MediaBlockComponent implements OnInit {
   @Output() removeBlock = new EventEmitter<string>();
   @Output() duplicateBlock = new EventEmitter<ChatbotBlock>();
   @Output() editBlock = new EventEmitter<ChatbotBlock>();
- @Output() closeSidebarEvent = new EventEmitter<void>();
+  @Output() closeSidebarEvent = new EventEmitter<void>();
 
   showNewMediaForm: boolean = false;
+  showButtonTypeCard: boolean = false;
+  showTextMessageIntegrationCard: boolean = false; // NEW: Property to control text message integration card visibility
+  // You might want to define a property on your block to store the button's text message content
+  // For example, block.buttonTextMessageContent: string;
+  // If your ChatbotBlock model doesn't have it, add it there, or manage it separately here.
+  // For now, I'll assume `block` can hold a property like `currentButtonTextMessageContent`.
+  // A better long-term solution would be to have a `buttons` array on `ChatbotBlock`
+  // and manage button data within each button object. For this specific request,
+  // I'll add a simple property to the component to simulate button content for the integration card.
+  currentButtonTextMessageContent: string = ''; // NEW: To hold the text message for the integration card
+
+  constructor(private _snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
-    this.showNewMediaForm = false;
+    // Ensure all potentially undefined block properties are initialized with sensible defaults
+    if (!this.block.mediaType) {
+      this.block.mediaType = 'text';
+    }
+    if (this.block.content === undefined) {
+      this.block.content = '';
+    }
+    if (this.block.mediaUrl === undefined) {
+      this.block.mediaUrl = '';
+    }
+    if (this.block.mediaName === undefined) {
+      this.block.mediaName = '';
+    }
+    // Initialize currentButtonTextMessageContent if it's meant to persist with the block
+    // For this example, we'll assume it's transient or handled by a more complex button structure.
+    // If you add `buttonTextMessageContent` to ChatbotBlock, initialize it here.
+    // if (this.block.buttonTextMessageContent === undefined) {
+    //   this.block.buttonTextMessageContent = '';
+    // }
 
-    if (this.block.mediaId) {
+
+    // When the sidebar opens for an existing block, ensure its media details are loaded
+    if (this.isSelected && this.block.mediaId) {
       const selected = this.availableMedia.find(m => m.id === this.block.mediaId);
       if (selected) {
         this.block.mediaName = selected.name;
@@ -55,14 +91,10 @@ export class MediaBlockComponent implements OnInit {
         this.block.content = selected.content;
         this.block.mediaUrl = selected.url;
       }
-    } else {
-      if (!this.block.mediaType) {
-        this.block.mediaType = 'text'; // Default to text for new media
-      }
     }
   }
 
-  onMediaSelectionChange() {
+  onMediaSelectionChange(): void {
     const selected = this.availableMedia.find(m => m.id === this.block.mediaId);
     if (selected) {
       this.block.mediaName = selected.name;
@@ -70,32 +102,106 @@ export class MediaBlockComponent implements OnInit {
       this.block.content = selected.content;
       this.block.mediaUrl = selected.url;
     } else {
-      this.block.mediaName = undefined;
-      this.block.mediaType = undefined;
-      this.block.content = undefined;
-      this.block.mediaUrl = undefined;
+      // If "No parent media block" is selected, clear media-related properties
+      this.block.mediaName = '';
+      this.block.mediaType = 'text';
+      this.block.content = '';
+      this.block.mediaUrl = '';
     }
     this.blockUpdated.emit(this.block);
+    this.showNewMediaForm = false;
+    this.showButtonTypeCard = false;
+    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card on media selection change
   }
 
-  createNewMediaBlock() {
+  createNewMediaBlock(): void {
     this.showNewMediaForm = true;
     this.block.mediaId = undefined;
-    this.block.mediaName = undefined; // Clear for new
-    this.block.mediaType = 'text'; // Default for new
-    this.block.content = ''; // Clear for new
-    this.block.mediaUrl = ''; // Clear for new
+    this.block.mediaName = this.generateDefaultMediaBlockName();
+    this.block.mediaType = 'text';
+    this.block.content = '';
+    this.block.mediaUrl = '';
+    this.blockUpdated.emit(this.block);
+    this.showButtonTypeCard = false;
+    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card when creating new media
+    this._snackBar.open('Ready to create a new media block. Fill in the details.', 'Dismiss', { duration: 3000 });
+  }
+
+  editExistingMediaBlock(): void {
+    if (this.block.mediaId) {
+      this.showNewMediaForm = true;
+      this.onContentChange();
+      this.showButtonTypeCard = false;
+      this.showTextMessageIntegrationCard = false; // NEW: Hide text message card when editing existing media
+      this._snackBar.open(`Editing Media Block: ${this.getMediaName(this.block.mediaId)}`, 'Dismiss', { duration: 3000 });
+    } else {
+      this._snackBar.open('Please select a media block to edit first.', 'Dismiss', { duration: 3000 });
+    }
+  }
+
+  saveMedia(): void {
+    const currentMediaType = this.block.mediaType || 'text';
+
+    if (!this.block.mediaName || this.block.mediaName.trim() === '') {
+      this._snackBar.open('Media Name cannot be empty.', 'Dismiss', { duration: 3000 });
+      return;
+    }
+    if (currentMediaType === 'text' && (!this.block.content || this.block.content.trim() === '')) {
+      this._snackBar.open('Text content cannot be empty for text media type.', 'Dismiss', { duration: 3000 });
+      return;
+    }
+
+    if (['image', 'video', 'file', 'audio'].includes(currentMediaType) && (!this.block.mediaUrl || this.block.mediaUrl.trim() === '')) {
+      this._snackBar.open(`Please provide a URL for ${currentMediaType} media.`, 'Dismiss', { duration: 3000 });
+      return;
+    }
+
+    const isNewMedia = !this.block.mediaId;
+
+    if (isNewMedia) {
+      const newMediaId = 'media-' + Date.now().toString();
+      const newMedia: AvailableMedia = {
+        id: newMediaId,
+        name: this.block.mediaName,
+        type: currentMediaType,
+        content: this.block.content ?? '',
+        url: this.block.mediaUrl ?? ''
+      };
+
+      this.availableMedia.push(newMedia);
+      this.block.mediaId = newMediaId;
+
+      this._snackBar.open('New Media Block content saved and linked!', 'Dismiss', { duration: 3000 });
+    } else {
+      const existingMediaIndex = this.availableMedia.findIndex(m => m.id === this.block.mediaId);
+      if (existingMediaIndex > -1) {
+        this.availableMedia[existingMediaIndex] = {
+          ...this.availableMedia[existingMediaIndex],
+          name: this.block.mediaName,
+          type: currentMediaType,
+          content: this.block.content ?? '',
+          url: this.block.mediaUrl ?? ''
+        };
+        this._snackBar.open('Media Block content updated!', 'Dismiss', { duration: 3000 });
+      } else {
+        this._snackBar.open('Error: Could not find existing media to update.', 'Dismiss', { duration: 3000 });
+      }
+    }
+
+    this.showNewMediaForm = false;
+    this.showButtonTypeCard = false;
+    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card after saving media
     this.blockUpdated.emit(this.block);
   }
 
-  editExistingMediaBlock() {
-    this.showNewMediaForm = true;
-    this.onContentChange();
-  }
-
-  cancelMediaEdit() {
-    if (this.block.mediaId) {
-      this.showNewMediaForm = false;
+  cancelMediaEdit(): void {
+    if (!this.block.mediaId) {
+      this.block.mediaId = undefined;
+      this.block.mediaName = '';
+      this.block.mediaType = 'text';
+      this.block.content = '';
+      this.block.mediaUrl = '';
+    } else {
       const selected = this.availableMedia.find(m => m.id === this.block.mediaId);
       if (selected) {
         this.block.mediaName = selected.name;
@@ -103,14 +209,12 @@ export class MediaBlockComponent implements OnInit {
         this.block.content = selected.content;
         this.block.mediaUrl = selected.url;
       }
-    } else {
-      this.showNewMediaForm = false;
-      this.block.content = undefined;
-      this.block.mediaType = undefined;
-      this.block.mediaUrl = undefined;
-      this.block.mediaName = undefined;
     }
+    this.showNewMediaForm = false;
+    this.showButtonTypeCard = false;
+    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card on cancel
     this.blockUpdated.emit(this.block);
+    this._snackBar.open('Media editing/creation canceled.', 'Dismiss', { duration: 2000 });
   }
 
   getMediaName(mediaId: string | undefined): string {
@@ -118,34 +222,90 @@ export class MediaBlockComponent implements OnInit {
     return media ? media.name : 'No media selected';
   }
 
-  onSelectBlock() {
+  onSelectBlock(): void {
     this.selectBlock.emit(this.block);
+    this.showButtonTypeCard = false;
+    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card if block selection changes
   }
 
-  onStartConnection(event: MouseEvent) {
+  onStartConnection(event: MouseEvent): void {
     this.startConnection.emit(event);
   }
 
-  onEndConnection(event: MouseEvent) {
+  onEndConnection(event: MouseEvent): void {
     this.endConnection.emit(event);
   }
 
-  onRemoveBlock() {
+  onRemoveBlock(): void {
     this.removeBlock.emit(this.block.id);
   }
 
-  onDuplicateBlock() {
+  onDuplicateBlock(): void {
     this.duplicateBlock.emit(this.block);
   }
 
-  onEditBlock() {
+  onEditBlock(): void {
     this.editBlock.emit(this.block);
   }
 
-  onContentChange() {
+  onContentChange(): void {
     this.blockUpdated.emit(this.block);
   }
-   closeSidebar(): void {
+
+  closeSidebar(): void {
     this.closeSidebarEvent.emit();
+    this.showNewMediaForm = false;
+    this.showButtonTypeCard = false;
+    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card when sidebar closes
+  }
+
+  private generateDefaultMediaBlockName(): string {
+    const randomNumber = Math.floor(Math.random() * 9000) + 1000;
+    return `Media Block ${randomNumber}`;
+  }
+
+  // Method to show the button type card
+  onAddNewButton(): void {
+    this.showButtonTypeCard = true;
+    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card when showing button type card
+    this._snackBar.open('Select a button type.', 'Dismiss', { duration: 2000 });
+  }
+
+  // Method to close the button type card
+  closeButtonTypeCard(): void {
+    this.showButtonTypeCard = false;
+  }
+
+  // NEW: Method to handle "Text Message" button click from the button type card
+  onTextMessageButtonClick(): void {
+    this.showButtonTypeCard = false; // Hide the button type card
+    this.showTextMessageIntegrationCard = true; // Show the text message integration card
+    // You might want to initialize `currentButtonTextMessageContent` here if it's per-button
+    // For now, it will use its default empty string or previously saved value.
+    this._snackBar.open('Configure your text message.', 'Dismiss', { duration: 2000 });
+  }
+
+  // NEW: Method to close the text message integration card
+  closeTextMessageIntegrationCard(): void {
+    this.showTextMessageIntegrationCard = false;
+  }
+
+  // NEW: Method to save the text message content from the integration card
+  saveTextMessageIntegration(): void {
+    if (!this.currentButtonTextMessageContent || this.currentButtonTextMessageContent.trim() === '') {
+      this._snackBar.open('Text message cannot be empty.', 'Dismiss', { duration: 3000 });
+      return;
+    }
+    // Here you would typically save `this.currentButtonTextMessageContent`
+    // to your `block` model or a specific button object within the block.
+    // For example, if your `ChatbotBlock` has a `buttons` array and you're editing a specific button:
+    // this.block.buttons[indexOfCurrentButton].textMessage = this.currentButtonTextMessageContent;
+
+    // For this example, we'll just log and provide a success message.
+    console.log('Text Message saved:', this.currentButtonTextMessageContent);
+    this._snackBar.open('Text Message content saved!', 'Dismiss', { duration: 3000 });
+    this.closeTextMessageIntegrationCard(); // Close the card after saving
+    // You'd typically emit an event here to notify parent component about block update
+    this.blockUpdated.emit(this.block);
   }
 }
