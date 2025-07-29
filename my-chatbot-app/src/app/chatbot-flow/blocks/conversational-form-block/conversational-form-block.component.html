@@ -40,12 +40,20 @@
       {{ block.description }}
     </div>
     <div *ngIf="block.formFields?.length">
-      <strong>Fields:</strong> {{ getFieldNames() }}
+      <strong>Fields:</strong>
+      <div class="mt-2 flex flex-wrap gap-2">
+        <button
+          *ngFor="let field of block.formFields"
+          class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600 transition"
+        >
+          {{ field.name }}
+        </button>
+      </div>
     </div>
   </div>
 </ng-container>
 
-<div class="right-sidebar-content" *ngIf="isSelected">
+<div class="right-sidebar-content" *ngIf="isSelected && isSidebarOpen">
   <div class="panel-header">
     <div class="panel-subtitle text-[#888EA8]">
       Ask one question at a time & send responses to your desired location or
@@ -114,8 +122,8 @@
             <span>Selected Form: {{ getFormName(block.formId) }}</span>
           </div>
 
-          <div class="divider text-center mb-2">
-            <span>OR</span>
+          <div class="or-separator text-center my-5 font-semibold text-gray-600 relative">
+            <span class="text-black text-l">OR</span>
           </div>
 
           <!-- Buttons -->

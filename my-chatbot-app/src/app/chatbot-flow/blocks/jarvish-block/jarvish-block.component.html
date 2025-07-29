@@ -1,0 +1,73 @@
+<!-- Jarvis Chat Widget -->
+  <div
+    *ngIf="!isChatStarted"
+    id="jarvis-chat"
+    class="jarvis-chat bottom-25 bg-white right-10 absolute z-[99999] h-[75vh] w-[24rem] rounded-[20px]"
+  >
+    <div
+      class="jarvis-header p-5 h-[40%] bg-gradient-to-b from-[#218DEB] to-[#7DC2FD] rounded-b-[20px] rounded-[20px]"
+    >
+      <div class="p-5 flex gap-2 items-center">
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png"
+          alt="Jarvis"
+          class="jarvis-avatar w-10 h-10"
+        />
+        <div class="jarvis-title flex flex-col text-white">
+          <strong>Jarvis</strong>
+          <small>Reply in 10 seconds.</small>
+        </div>
+      </div>
+      <div>
+        <h1 class="text-white text-2xl">Let's start a conversation</h1>
+        <h2 class="text-white text-xl">Typically replies in 10 seconds.</h2>
+      </div>
+    </div>
+    <div class="jarvis-body p-5 space-y-5">
+      <div class="shadow-xl rounded-lg flex justify-between p-2 items-center tracking-tight cursor-pointer" (click)="startConversation()">
+        <div class="">
+          <h1 class="text-xl font-[500]">Start a Conversation</h1>
+          <p class="text-sm">Send us a message</p>
+        </div>
+        <img src="/rocket.jpeg" class="w-10 rounded-lg object-cover" alt="">
+      </div>
+      <div class="shadow-xl rounded-lg flex justify-between p-2 items-center tracking-tight">
+        <div>
+          <h1 class="text-xl font-[500]">Continue Conversation</h1>
+          <p class="text-sm">Pick up where you left off</p>
+        </div>
+        <img src="/rocket.jpeg" class="w-10 rounded-lg object-cover" alt="">
+      </div>
+    </div>
+  </div>
+
+<!-- Start Conversation Chat UI -->
+<div
+  *ngIf="isChatStarted"
+  class="jarvis-chat-ui absolute bottom-25 right-10 z-[100000] bg-white rounded-[20px] w-[24rem] h-[75vh] flex flex-col overflow-hidden"
+>
+  <div class="bg-gradient-to-b from-[#218DEB] to-[#7DC2FD] text-white p-4 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <img src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png" class="w-10 h-10 rounded-full" alt="Jarvis" />
+      <div>
+        <div class="font-bold">Jarvis</div>
+        <div class="text-sm">Reply in 10 seconds.</div>
+      </div>
+    </div>
+    <div class="text-white text-2xl cursor-pointer" (click)="isChatStarted = false">×</div>
+  </div>
+
+  <div class="flex-1 p-4 overflow-y-auto">
+    <div class="bg-[#218DEB] text-white rounded-full px-4 py-2 w-fit ml-auto">
+      Start Conversation
+    </div>
+  </div>
+
+  <div class="p-4 flex items-center border-t">
+    <span class="text-xl mr-2">😊</span>
+    <input type="text" placeholder="Type your message" class="flex-1 px-3 py-2 border rounded-full outline-none" />
+    <div class="flex items-center gap-2 ml-2 text-[#218DEB] text-xl">
+      📎 🎤 📩
+    </div>
+  </div>
+</div>
