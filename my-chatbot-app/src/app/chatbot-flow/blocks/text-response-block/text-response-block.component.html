@@ -1,0 +1,261 @@
+<!-- Main Text Response Block Container -->
+<div class="text-response-block-wrapper">
+  <!-- Main Text Response Block (only when not selected) -->
+  <ng-container *ngIf="!isSelected">
+    <div class="text-response-main-block">
+      <div class="block-header">
+        <div class="block-type-badges">
+          <div class="block-title" (click)="onSelectBlock()">
+            <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
+            <span>{{ block.name }}</span>
+          </div>
+        </div>
+
+        <div class="block-actions">
+          <button
+            mat-icon-button
+            [matMenuTriggerFor]="blockMenu"
+            class="block-menu-trigger"
+          >
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #blockMenu="matMenu">
+            <button mat-menu-item (click)="onEditBlock()">
+              <mat-icon>edit</mat-icon>
+              <span>Edit</span>
+            </button>
+            <button mat-menu-item (click)="onDuplicateBlock()">
+              <mat-icon>content_copy</mat-icon>
+              <span>Duplicate</span>
+            </button>
+            <button mat-menu-item (click)="onRemoveBlock()">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+
+      <div class="block-body">
+        <div class="block-description" *ngIf="block.description">
+          {{ block.description }}
+        </div>
+
+        <div
+          *ngIf="block.content && block.type !== 'userInput'"
+          class="block-content-text"
+        >
+          {{ block.content }}
+        </div>
+      </div>
+
+      <!-- Main connection point when no quick replies -->
+      <div
+        class="connection-point connection-output main-connection"
+        (mousedown)="onStartConnection($event)"
+        *ngIf="!block.quickReplies || block.quickReplies.length === 0"
+      >
+        <div class="connection-dot"></div>
+      </div>
+
+      <!-- Input connection point -->
+      <div class="connection-point connection-input main-connection">
+        <div class="connection-dot"></div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Right Sidebar (when selected) -->
+  <div class="right-sidebar-content" *ngIf="isSelected">
+    <button mat-icon-button (click)="closeSidebar()" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <h4 class="text-lg font-semibold text-gray-800 section-title">
+      Text Response
+    </h4>
+    <h4 class="text-sm font-semibold text-gray-600 mb-2">Bot Says</h4>
+
+    <div class="input-group w-full h-full">
+      <mat-form-field appearance="outline" class="full-width-input">
+        <textarea
+          matInput
+          [(ngModel)]="block.content"
+          (ngModelChange)="onContentChange()"
+          placeholder="Type chatbot response..."
+          cdkTextareaAutosize
+          #contentAutosize="cdkTextareaAutosize"
+          cdkAutosizeMinRows="2"
+          cdkAutosizeMaxRows="8"
+          class="full-width-input max-h-20 overflow-y-auto resize-none"
+        ></textarea>
+        <mat-icon matSuffix class="info-icon" (click)="openInfoModal('content')">info</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <button
+      mat-flat-button
+      color="primary"
+      class="add-alternate-responses-button"
+      (click)="toggleAlternateResponses()"
+    >
+      Add Alternate Responses
+    </button>
+
+    <div class="mt-2" *ngIf="showAlternateResponses">
+      <h4 class="text-sm font-semibold text-gray-600 mb-2">
+       Add Alternate Response
+      </h4>
+      <mat-form-field appearance="outline" class="full-width-input">
+        <textarea
+          matInput
+          [(ngModel)]="newAlternateResponse"
+          (ngModelChange)="onContentChange()"
+          placeholder="Type alternate chatbot response..."
+          cdkTextareaAutosize
+          #newAlternateResponseAutosize="cdkTextareaAutosize"
+          cdkAutosizeMinRows="2"
+          cdkAutosizeMaxRows="8"
+          class="full-width-input max-h-20 overflow-y-auto resize-none"
+        ></textarea>
+        <mat-icon matSuffix class="info-icon" (click)="openInfoModal('alternateResponse')">info</mat-icon>
+      </mat-form-field>
+      <div class="alternate-response-actions">
+        <button mat-flat-button class="addbtn" (click)="addAlternateResponse()">Add</button>
+        <button mat-stroked-button class="generateFromAI" (click)="generateFromAI()">Generate from AI</button>
+        <button class="hidebtn"
+          mat-stroked-button
+          color="warn"
+          (click)="toggleAlternateResponses()"
+        >
+          Hide
+        </button>
+      </div>
+      <div class="alternate-responses-list mt-2">
+        <mat-chip-listbox>
+          <mat-chip-option
+            *ngFor="let response of block.alternateResponses; let i = index"
+            (removed)="removeAlternateResponse(i)"
+          >
+            {{ response }}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+    </div>
+
+    <div class="quick-replies-section mt-4">
+      <h4 class="text-sm font-semibold text-gray-600 mb-2">
+        Add Quick Replies
+      </h4>
+
+      <div class="quick-reply-input-container">
+        <mat-form-field appearance="outline" class="full-width-input quick-reply-field">
+          <input
+            matInput
+            [(ngModel)]="newQuickReply"
+            (keydown)="addQuickReply($event)"
+            placeholder="Quick Replies"
+            #quickReplyInput
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            (click)="addQuickReplyToBlock()"
+            [disabled]="!newQuickReply.trim()"
+            class="add-quick-reply-btn"
+          >
+            <!-- <mat-icon>add</mat-icon> -->
+          </button>
+        </mat-form-field>
+      </div>
+
+      <div *ngIf="block.quickReplies && block.quickReplies.length > 0" class="quick-replies-cards-container">
+        <h5 class="quick-replies-subtitle">Quick Replies:</h5>
+        <div class="quick-replies-cards-grid">
+          <div *ngFor="let reply of block.quickReplies; let i = index" class="quick-reply-card">
+            <div class="quick-reply-card-header">
+              <mat-icon class="quick-reply-card-icon">chat_bubble_outline</mat-icon>
+              <span class="quick-reply-label">Quick Reply:</span>
+              <button
+                mat-icon-button
+                class="quick-reply-remove-btn"
+                (click)="removeQuickReply(reply)"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <div class="quick-reply-card-content">
+              <span class="quick-reply-text">{{ reply.text }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-modal" *ngIf="showInfoModal">
+      <div class="info-modal-header">
+        <div class="info-modal-search-container">
+          <mat-form-field appearance="outline" class="search-field">
+            <input
+              matInput
+              placeholder="Search variable..."
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="filterVariables()"
+            />
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+        </div>
+        <button mat-icon-button (click)="closeInfoModal()" class="info-modal-close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="info-modal-content">
+        <div class="attributes-section">
+          <h4 class="attributes-title">General Attributes</h4>
+          <div class="attributes-grid">
+            <div
+              *ngFor="let variable of filteredGeneralAttributes"
+              class="attribute-chip"
+              [class.selected]="infoModalAlternateResponse === variable"
+              (click)="selectVariable(variable)"
+            >
+              {{ variable }}
+            </div>
+          </div>
+        </div>
+
+        <div class="attributes-section">
+          <h4 class="attributes-title">Form Attributes</h4>
+          <div class="attributes-grid">
+            <div
+              *ngFor="let variable of filteredFormAttributes"
+              class="attribute-chip"
+              [class.selected]="infoModalAlternateResponse === variable"
+              (click)="selectVariable(variable)"
+            >
+              {{ variable }}
+            </div>
+          </div>
+        </div>
+
+        <div class="attributes-section">
+          <h4 class="attributes-title">User Attributes</h4>
+          <div class="attributes-grid">
+            <div
+              *ngFor="let variable of filteredUserAttributes"
+              class="attribute-chip"
+              [class.selected]="infoModalAlternateResponse === variable"
+              (click)="selectVariable(variable)"
+            >
+              {{ variable }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

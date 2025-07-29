@@ -1,0 +1,727 @@
+<ng-container *ngIf="!isSelected">
+  <div class="block-header">
+    <div class="block-type-badges">
+      <div class="block-title" (click)="onSelectBlock()">
+        <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
+        <span>{{ block.name }}</span>
+      </div>
+    </div>
+
+    <div class="block-actions">
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="blockMenu"
+        class="block-menu-trigger"
+      >
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #blockMenu="matMenu">
+        <button mat-menu-item (click)="onEditBlock()">
+          <mat-icon>edit</mat-icon>
+          <span>Edit</span>
+        </button>
+        <button mat-menu-item (click)="onDuplicateBlock()">
+          <mat-icon>content_copy</mat-icon>
+          <span>Duplicate</span>
+        </button>
+        <button mat-menu-item (click)="onRemoveBlock()">
+          <mat-icon>delete</mat-icon>
+          <span>Delete</span>
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+
+  <div class="block-body">
+    <div
+      class="block-description border-b-2 pb-2 border-[#CECECE]"
+      *ngIf="block.description"
+    >
+      {{ block.description }}
+    </div>
+    <div *ngIf="block.formFields?.length">
+      <strong>Fields:</strong> {{ getFieldNames() }}
+    </div>
+  </div>
+</ng-container>
+
+<div class="right-sidebar-content" *ngIf="isSelected">
+  <div class="panel-header">
+    <div class="panel-subtitle text-[#888EA8]">
+      Ask one question at a time & send responses to your desired location or
+      webservice
+    </div>
+  </div>
+
+  <div class="panel-content mt-5">
+    <div
+      class="section-container"
+      *ngIf="!showNewFormForm && !showFormConfigMode"
+    >
+      <div class="section-content space-y-3">
+        <label class="block text-[14px] font-[600] mb-1 text-[#516790]"
+          >Conversational Form Integration</label
+        >
+        <mat-form-field appearance="outline" class="full-width-input h-[56px]">
+          <!-- <mat-label class="">Select a Conversational Form</mat-label> -->
+          <mat-select
+            [(ngModel)]="block.formId"
+            (selectionChange)="onFormSelectionChange()"
+            placeholder="Choose a form"
+          >
+            <mat-option *ngFor="let form of availableForms" [value]="form.id">
+              {{ form.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="setting-item flex items-center gap-3">
+          <mat-slide-toggle
+            class="small-toggle"
+            [(ngModel)]="block.showAsInlineForm"
+            (ngModelChange)="onContentChange()"
+          ></mat-slide-toggle>
+          <span
+            class="text-lg font-medium text-gray-800 items-center flex gap-2"
+            >Show as inline form
+            <mat-icon
+              matTooltip="Inline form does not work on facebook"
+              class="info-icon cursor-help color-[#9e9e9e]"
+              >info</mat-icon
+            >
+          </span>
+        </div>
+
+        <div class="setting-item flex items-center gap-3">
+          <mat-slide-toggle
+            class="small-toggle"
+            [(ngModel)]="block.renderFormResponses"
+            (ngModelChange)="onContentChange()"
+          >
+          </mat-slide-toggle>
+          <div class="setting-info">
+            <div class="setting-label text-lg font-medium text-gray-800">
+              Render form responses
+            </div>
+          </div>
+        </div>
+        <div
+          class="selected-form-info flex flex-col gap-2"
+          *ngIf="block.formId; else nextTemplate"
+        >
+          <div class="selected-form-badge flex items-center gap-3">
+            <mat-icon>check_circle</mat-icon>
+            <span>Selected Form: {{ getFormName(block.formId) }}</span>
+          </div>
+
+          <div class="divider text-center mb-2">
+            <span>OR</span>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex gap-2">
+            <button
+              mat-flat-button
+              class="create-new-form-button w-1/2"
+              (click)="createNewFormBlock()"
+            >
+              <!-- <mat-icon>add</mat-icon> -->
+              Create New Conversational Form
+            </button>
+            <button
+              *ngIf="block.formId"
+              mat-stroked-button
+              class="edit-form-button w-1/2"
+              (click)="editExistingFormBlock()"
+            >
+              Edit Form
+            </button>
+          </div>
+        </div>
+        <ng-template #nextTemplate>
+          <div class="divider text-center">
+            <span>OR</span>
+          </div>
+
+          <div class="flex gap-2">
+            <button
+              mat-flat-button
+              class="create-new-form-button w-full"
+              (click)="createNewFormBlock()"
+            >
+              <!-- <mat-icon>add</mat-icon> -->
+              Create New Conversational Form
+            </button>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <div class="section-container" *ngIf="showNewFormForm">
+      <div class="section-content">
+        <div class="form-basic-info">
+          <mat-form-field appearance="outline" class="full-width-input">
+            <!-- <mat-label>Form Name</mat-label> -->
+            <input
+              matInput
+              required
+              #formName="ngModel"
+              [(ngModel)]="block.formName"
+              (ngModelChange)="onContentChange()"
+              placeholder="Enter the form name"
+            />
+          </mat-form-field>
+          <div
+            class="error-message text-red-900 text-[13px]"
+            *ngIf="formName.invalid && formName.touched"
+          >
+            Form name is required.
+          </div>
+        </div>
+
+        <!-- one of the things contains here -->
+        <div class="form-fields-section">
+          <div class="section-header flex">
+            <h4>Form Fields</h4>
+            <mat-icon
+              matTooltip="Add fields to collect information from users"
+              class="info-icon"
+              >info</mat-icon
+            >
+          </div>
+          <!-- One of the things contains here -->
+          <!-- <div class="form-fields-container"> -->
+          <div
+            *ngFor="let field of block.formFields; let i = index"
+            class="form-field-card"
+          >
+            <div class="field-header">
+              <div class="field-number">{{ i + 1 }}</div>
+              <div class="field-title">
+                {{ field.name || "Form Field" }}
+              </div>
+              <div class="field-actions">
+                <button
+                  mat-icon-button
+                  [disabled]="i === 0"
+                  (click)="moveFieldUp(i)"
+                  matTooltip="Move up"
+                >
+                  <mat-icon>keyboard_arrow_up</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  [disabled]="i === (block.formFields?.length || 0) - 1"
+                  (click)="moveFieldDown(i)"
+                  matTooltip="Move down"
+                >
+                  <mat-icon>keyboard_arrow_down</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="removeFormField(i)"
+                  matTooltip="Delete field"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <div class="field-content">
+              <mat-form-field appearance="outline" class="full-width-input">
+                <!-- <mat-label>Field Label</mat-label> -->
+                <input
+                  matInput
+                  [(ngModel)]="field.name"
+                  (ngModelChange)="onContentChange()"
+                  placeholder="Field Name e.g., Name"
+                />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width-input">
+                <!-- <mat-label>Prompt Message</mat-label> -->
+                <input
+                  matInput
+                  [(ngModel)]="field.promptPhrase"
+                  (ngModelChange)="onContentChange()"
+                  placeholder="e.g., What's your name?"
+                />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width-input">
+                <!-- <mat-label>Field Type</mat-label> -->
+                <mat-select
+                  [(ngModel)]="field.type"
+                  (ngModelChange)="onContentChange()"
+                >
+                  <mat-option value="text">Text</mat-option>
+                  <mat-option value="email">Email</mat-option>
+                  <mat-option value="number">Number</mat-option>
+                  <mat-option value="phone">Phone</mat-option>
+                  <mat-option value="date">Date</mat-option>
+                  <mat-option value="datetime">Date & Time</mat-option>
+                  <mat-option value="options">Single Choice</mat-option>
+                  <mat-option value="multiple-options"
+                    >Multiple Choice</mat-option
+                  >
+                  <mat-option value="file">File Upload</mat-option>
+                  <mat-option value="image">Image Upload</mat-option>
+                  <mat-option value="url">URL</mat-option>
+                  <mat-option value="currency">Currency</mat-option>
+                  <mat-option value="geocode">Location</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <div
+                *ngIf="
+                  field.type === 'options' || field.type === 'multiple-options'
+                "
+                class="field-options"
+              >
+                <mat-form-field appearance="outline" class="full-width-input">
+                  <mat-label>Options (comma separated)</mat-label>
+                  <textarea
+                    matInput
+                    [(ngModel)]="field.optionsText"
+                    (ngModelChange)="updateFieldOptions(field)"
+                    placeholder="Option 1, Option 2, Option 3"
+                    rows="3"
+                  ></textarea>
+                </mat-form-field>
+              </div>
+
+              <div class="field-settings">
+                <mat-checkbox
+                  [(ngModel)]="field.required"
+                  (ngModelChange)="onContentChange()"
+                >
+                  Required field
+                </mat-checkbox>
+              </div>
+            </div>
+          </div>
+          <!-- </div> -->
+
+          <button
+            mat-stroked-button
+            class="add-field-button"
+            (click)="addFormField()"
+          >
+            <mat-icon>add</mat-icon>
+            Add Field
+          </button>
+        </div>
+
+        <div class="form-actions-container">
+          <div class="form-actions">
+            <button mat-button (click)="cancelFormEdit()">Cancel</button>
+            <button
+              mat-flat-button
+              color="primary"
+              (click)="goToNextSection()"
+              [disabled]="formName.invalid"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="showFormConfigMode" class="form-configuration space-y-5">
+      <div class="form-name-section bg-white shadow-xl h-[90px] p-5 rounded-lg">
+        <mat-form-field appearance="outline" class="full-width-input">
+          <!-- <mat-label>Form Name</mat-label> -->
+          <input
+            matInput
+            [(ngModel)]="block.formName"
+            (ngModelChange)="onContentChange()"
+            readonly
+          />
+        </mat-form-field>
+      </div>
+
+      <div class="bg-white shadow-xl flex flex-col gap-4 px-5 py-8 rounded-lg">
+        <mat-expansion-panel
+          [expanded]="expandedSection === 'onFormSubmit'"
+          (opened)="expandedSection = 'onFormSubmit'"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <!-- <mat-icon>send</mat-icon> -->
+              <span class="text-blue-800">On Form Submit</span>
+            </mat-panel-title>
+            <!-- <mat-panel-description>
+            <mat-icon>keyboard_arrow_down</mat-icon>
+          </mat-panel-description> -->
+          </mat-expansion-panel-header>
+
+          <div class="section-content space-y-2">
+            <div class="setting-item flex items-center gap-2">
+              <mat-slide-toggle
+                [(ngModel)]="block.callApiWithResponseData"
+                (ngModelChange)="onContentChange()"
+              >
+              </mat-slide-toggle>
+              <div class="setting-info">
+                <div class="setting-label text-lg font-[600]">
+                  Call API with response data
+                </div>
+              </div>
+            </div>
+
+            <div class="api-config-form" *ngIf="block.callApiWithResponseData">
+              <mat-form-field appearance="outline" class="full-width-input">
+                <!-- <mat-label>API URL</mat-label> -->
+                <input
+                  matInput
+                  type="url"
+                  [(ngModel)]="block.apiUrl"
+                  (ngModelChange)="onContentChange()"
+                  placeholder="https://your-api.com/endpoint"
+                />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width-input">
+                <mat-label>Method</mat-label>
+                <mat-select
+                  [(ngModel)]="block.apiMethod"
+                  (ngModelChange)="onContentChange()"
+                >
+                  <mat-option value="GET">GET</mat-option>
+                  <mat-option value="POST">POST</mat-option>
+                  <mat-option value="PUT">PUT</mat-option>
+                  <mat-option value="DELETE">DELETE</mat-option>
+                  <mat-option value="PATCH">PATCH</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <div class="headers-section">
+                <div class="section-header flex gap-2">
+                  <h4>Headers</h4>
+                  <mat-icon
+                    matTooltip="Add custom headers for your API request"
+                    class="info-icon"
+                    >info</mat-icon
+                  >
+                </div>
+                <div
+                  class="header-item"
+                  *ngFor="let header of block.apiHeaders; let i = index"
+                >
+                  <mat-form-field
+                    appearance="outline"
+                    class="header-key-input w-full"
+                  >
+                    <!-- <mat-label>Header Key</mat-label> -->
+                    <input
+                      matInput
+                      [(ngModel)]="header.key"
+                      (ngModelChange)="onContentChange()"
+                      placeholder="Header Key : Authorization"
+                    />
+                  </mat-form-field>
+                  <mat-form-field
+                    appearance="outline"
+                    class="header-value-input w-[80%]"
+                  >
+                    <!-- <mat-label>Header Value</mat-label> -->
+                    <input
+                      matInput
+                      [(ngModel)]="header.value"
+                      (ngModelChange)="onContentChange()"
+                      placeholder="Header Value"
+                    />
+                  </mat-form-field>
+                  <button
+                    mat-icon-button
+                    (click)="removeApiHeader(i)"
+                    matTooltip="Remove Header"
+                  >
+                    <mat-icon class="">delete</mat-icon>
+                  </button>
+                </div>
+                <button
+                  mat-stroked-button
+                  class="add-header-button"
+                  (click)="addApiHeader()"
+                >
+                  <mat-icon>add</mat-icon>
+                  Add Header
+                </button>
+              </div>
+            </div>
+            <div class="setting-item flex items-center gap-2">
+              <mat-slide-toggle
+                [(ngModel)]="block.sendEmailNotification"
+                (ngModelChange)="onContentChange()"
+              >
+              </mat-slide-toggle>
+              <div class="setting-info">
+                <div class="setting-label text-lg font-[600]">
+                  Email me responses
+                </div>
+              </div>
+            </div>
+
+            <mat-form-field
+              appearance="outline"
+              class="full-width-input"
+              *ngIf="block.sendEmailNotification"
+            >
+              <mat-label>Notification Email</mat-label>
+              <input
+                matInput
+                type="email"
+                [(ngModel)]="block.notificationEmail"
+                (ngModelChange)="onContentChange()"
+                placeholder="admin@company.com"
+              />
+            </mat-form-field>
+          </div>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel
+          [expanded]="expandedSection === 'basicSettings'"
+          (opened)="expandedSection = 'basicSettings'"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <!-- <mat-icon>settings</mat-icon> -->
+              <span>Basic Settings</span>
+            </mat-panel-title>
+            <mat-panel-description>
+              <!-- <mat-icon>keyboard_arrow_down</mat-icon> -->
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="section-content">
+            <div class="settings-group space-y-2">
+              <div class="setting-item">
+                <div class="setting-info flex items-center gap-4">
+                  <mat-slide-toggle
+                    [(ngModel)]="block.allowMultipleSubmission"
+                    (ngModelChange)="onContentChange()"
+                  >
+                  </mat-slide-toggle>
+                  <div class="setting-label text-lg font-[600]">
+                    Allow Multiple Submission
+                  </div>
+                  <!-- <div class="setting-description">
+                    Message when a user tries to submit the form multiple times.
+                  </div> -->
+                </div>
+              </div>
+
+              <mat-form-field
+                appearance="outline"
+                class="full-width-input mt-3"
+                *ngIf="!block.allowMultipleSubmission"
+              >
+                <mat-label
+                  >Message when a user tries to submit the form multiple
+                  times.</mat-label
+                >
+                <input
+                  matInput
+                  [(ngModel)]="block.multipleSubmissionMessage"
+                  (ngModelChange)="onContentChange()"
+                />
+              </mat-form-field>
+
+              <div class="setting-item">
+                <div class="setting-info flex items-center gap-4">
+                  <mat-slide-toggle
+                    [(ngModel)]="block.allowExitForm"
+                    (ngModelChange)="onContentChange()"
+                  >
+                  </mat-slide-toggle>
+                  <div class="setting-label text-lg font-[600]">
+                    Let the user exit the form?
+                  </div>
+                </div>
+              </div>
+
+              <mat-form-field
+                appearance="outline"
+                class="full-width-input mt-3"
+                *ngIf="block.allowExitForm"
+              >
+                <mat-label
+                  >Message To Send When User Exits Form (optional)</mat-label
+                >
+                <input
+                  matInput
+                  [(ngModel)]="block.exitFormMessage"
+                  (ngModelChange)="onContentChange()"
+                  placeholder="you exit the form"
+                />
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel
+          [expanded]="expandedSection === 'advanceSettings'"
+          (opened)="expandedSection = 'advanceSettings'"
+          class="block-config-panel"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title> Advance Settings </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <p class="section-description text-xs mb-2 text-[#888EAB]">
+            If you have API enabled, bot will instead respond with the API
+            response.
+          </p>
+
+          <div class="button-group-responsive mb-2">
+            <button
+              class="px-4 py-2 bg-[#366CF4] shadow-l rounded"
+              (click)="
+                block.successResponseType = 'textMessage'; onContentChange()
+              "
+              [ngClass]="
+                block.successResponseType === 'textMessage'
+                  ? 'bg-[#366CF4] text-white'
+                  : 'bg-white text-black'
+              "
+            >
+              Text Message
+            </button>
+            <button
+              (click)="block.successResponseType = 'story'; onContentChange()"
+              [ngClass]="
+                block.successResponseType === 'story'
+                  ? 'bg-[#366CF4] text-white'
+                  : 'bg-white text-black'
+              "
+              class="px-4 py-2 rounded shadow-l transition duration-200"
+            >
+              Story
+            </button>
+          </div>
+
+          <mat-form-field
+            appearance="outline"
+            class="full-width-input"
+            *ngIf="block.successResponseType === 'textMessage'"
+          >
+            <!-- <mat-label>Success Message</mat-label> -->
+            <textarea
+              matInput
+              [(ngModel)]="block.successMessage"
+              (ngModelChange)="onContentChange()"
+              placeholder="Thanks for the submission"
+              rows="3"
+            ></textarea>
+            <mat-icon
+              matSuffix
+              class="info-icon"
+              matTooltip="This message will be displayed to the user upon successful form submission."
+              [matMenuTriggerFor]="variableMenu"
+            >
+              info
+            </mat-icon>
+          </mat-form-field>
+
+          <mat-menu #variableMenu="matMenu">
+            <div class="variable-card-content">
+              <div class="search-input-container">
+                <mat-icon>search</mat-icon>
+                <input matInput placeholder="Search variable" />
+              </div>
+              <div class="variable-group">
+                <div class="group-header">General Attributes</div>
+                <button
+                  mat-menu-item
+                  (click)="insertVariableIntoSuccessMessage('[first_name]')"
+                >
+                  [first_name]
+                </button>
+                <button
+                  mat-menu-item
+                  (click)="insertVariableIntoSuccessMessage('[last_name]')"
+                >
+                  [last_name]
+                </button>
+                <button
+                  mat-menu-item
+                  (click)="insertVariableIntoSuccessMessage('[timezone]')"
+                >
+                  [timezone]
+                </button>
+                <button
+                  mat-menu-item
+                  (click)="insertVariableIntoSuccessMessage('[gender]')"
+                >
+                  [gender]
+                </button>
+              </div>
+              <div class="variable-group">
+                <div class="group-header">Form Fields</div>
+                <button
+                  mat-menu-item
+                  *ngFor="let field of block.formFields"
+                  (click)="
+                    insertVariableIntoSuccessMessage(
+                      '{{form.' + field.name + '}}'
+                    )
+                  "
+                >
+                  {{ '{{form.' + field.name + '}}' }}
+                </button>
+              </div>
+            </div>
+          </mat-menu>
+
+          <mat-form-field
+            appearance="outline"
+            class="full-width-input"
+            *ngIf="block.successResponseType === 'story'"
+          >
+            <mat-label>Select Your Story</mat-label>
+            <mat-select
+              [(ngModel)]="block.successRedirectStoryId"
+              (ngModelChange)="onContentChange()"
+            >
+              <mat-option
+                *ngFor="let story of availableStories"
+                [value]="story.id"
+              >
+                {{ story.name }}
+              </mat-option>
+            </mat-select>
+            <mat-icon
+              matSuffix
+              class="info-icon"
+              matTooltip="The bot will redirect to this story after successful form submission."
+              >info</mat-icon
+            >
+          </mat-form-field>
+        </mat-expansion-panel>
+      </div>
+
+      <div
+        class="bottom-actions bg-white shadow-xl flex justify-between px-5 py-4 rounded-lg"
+      >
+        <button
+          class="px-5 py-2 bg-[#2E66F4] text-white rounded cursor-pointer"
+          color="primary"
+          (click)="editExistingFormBlock()"
+        >
+          <!-- <mat-icon>arrow_back</mat-icon> -->
+          Previous
+        </button>
+        <button
+          class="px-5 py-2 bg-[#2E66F4] text-white rounded cursor-pointer"
+          color="primary"
+          (click)="saveForm()"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
