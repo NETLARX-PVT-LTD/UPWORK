@@ -33,6 +33,7 @@ import { LinkStoryBlockComponent } from './blocks/link-story-block/link-story-bl
 import { ConversationalFormBlockComponent } from './blocks/conversational-form-block/conversational-form-block.component';
 import { MessageBoxComponent } from '../shared/components/message-box/message-box.component';
 import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-block/json-api-integration-block.component';
+import { JarvishBlockComponent } from './blocks/jarvish-block/jarvish-block.component';
 
 @Component({
   selector: 'app-chatbot-flow',
@@ -63,7 +64,8 @@ import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-
     LinkStoryBlockComponent,
     ConversationalFormBlockComponent,
     MessageBoxComponent,
-    JsonApiIntegrationBlockComponent
+    JsonApiIntegrationBlockComponent,
+    JarvishBlockComponent
   ],
   templateUrl: './chatbot-flow.component.html',
   styleUrls: ['./chatbot-flow.component.scss']
@@ -164,6 +166,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       description : "Integrate JSON API to fetch or post data to your webservice"
     },
   ];
+
 
   canvasBlocks: ChatbotBlock[] = [];
   connections: Connection[] = [];
@@ -378,7 +381,12 @@ this.instance.connect({
     );
   }
 
-  // Block management
+  isJarvisVisible : boolean = false;
+
+  toggleJarvis(): void {
+    this.isJarvisVisible = !this.isJarvisVisible;
+  }
+
   addBlockToCanvas(block: ChatbotBlock) {
     const newBlockId = `${block.type}-${Date.now()}`;
     const newBlock: ChatbotBlock = {
