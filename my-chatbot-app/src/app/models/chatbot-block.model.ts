@@ -6,7 +6,8 @@ export interface ChatbotBlock {
   name: string;
   icon: string;
   type: BlockType;
-  status: 'active' | 'error' | 'new' | 'disabled';
+  imageUrl?: string;
+  status: 'active' | 'error' | 'new' | 'disabled' | 'normal';
   x: number; // X-coordinate on the canvas
   y: number; // Y-coordinate on the canvas
   width: number; // Actual width of the rendered block
@@ -73,6 +74,8 @@ export interface ChatbotBlock {
   text?: string; // <--- ADD THIS LINE for quick reply blocks if they are ChatbotBlock type
   value?: string; // <--- ADD THIS LINE if needed for quick reply blocks
 
+  // NEW: Properties for the text message button
+  buttonTitle?: string;
   buttonTextMessage?: string;
   
 }

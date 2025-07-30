@@ -1,12 +1,11 @@
-// src/app/chatbot-flow/chatbot-flow.component.ts
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, HostListener } from '@angular/core';
-import { CdkDragDrop, moveItemInArray, CdkDragEnd } from '@angular/cdk/drag-drop';
+// src/app/chatbot-flow/chatbot-flow.component.ts - Enhanced with visual connection system
+import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, HostListener, OnDestroy } from '@angular/core';
+import { CdkDragDrop, moveItemInArray, CdkDragEnd, CdkDragStart } from '@angular/cdk/drag-drop';
 import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith, debounceTime } from 'rxjs/operators';
 import { ChatbotBlock, Connection, AvailableMedia, AvailableStory, AvailableForm, FormField } from '../models/chatbot-block.model';
 import { jsPlumb } from 'jsplumb';
-
 
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -34,6 +33,8 @@ import { ConversationalFormBlockComponent } from './blocks/conversational-form-b
 import { MessageBoxComponent } from '../shared/components/message-box/message-box.component';
 import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-block/json-api-integration-block.component';
 import { JarvishBlockComponent } from './blocks/jarvish-block/jarvish-block.component';
+// Add this type declaration here.
+type NearestConnectionPoint = { blockId: string, x: number, y: number };
 
 @Component({
   selector: 'app-chatbot-flow',
@@ -56,9 +57,9 @@ import { JarvishBlockComponent } from './blocks/jarvish-block/jarvish-block.comp
     // Block components
     UserInputBlockComponent,
     TextResponseBlockComponent,
-     QuickReplyBranchBlockComponent, // NEW
-    NoQuickReplyBlockComponent,   // NEW
-    IndividualQuickReplyCardComponent, // NEW
+    QuickReplyBranchBlockComponent,
+    NoQuickReplyBlockComponent,
+    IndividualQuickReplyCardComponent,
     TypingDelayBlockComponent,
     MediaBlockComponent,
     LinkStoryBlockComponent,
@@ -70,7 +71,7 @@ import { JarvishBlockComponent } from './blocks/jarvish-block/jarvish-block.comp
   templateUrl: './chatbot-flow.component.html',
   styleUrls: ['./chatbot-flow.component.scss']
 })
-export class ChatbotFlowComponent implements OnInit, AfterViewInit {
+export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
   instance: any;
   @ViewChild('canvasWrapper') canvasWrapper!: ElementRef;
   @ViewChild('canvasContent') canvasContent!: ElementRef;
@@ -80,100 +81,140 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
     {
       id: '1',
       name: 'User Input',
-      icon: 'person',
+      imageUrl: 'https://app.botsify.com/theme/images/Story-Icons/user-message.png',
+      icon:'',
       type: 'userInput',
-      status: 'active',
+      status:'normal',
       x: 0,
       y: 0,
       subType: 'phrase',
-      description: 'Phrase',
+      description:'Phrase',
       width: 0,
       height: 0
     },
     {
       id: '2',
       name: 'User Input',
-      icon: 'person',
+      icon: '', 
+      imageUrl: 'https://app.botsify.com/theme/images/Story-Icons/user-message.png',
       type: 'userInput',
-      status: 'active',
+      status: 'normal',
       x: 0,
       y: 0,
+      description:'Keyword Group',
       subType: 'keywordGroup',
-      description: 'Keyword Group',
       width: 0,
       height: 0
     },
     {
       id: '3',
       name: 'User Input',
-      icon: 'person',
+      icon: '', 
+      imageUrl: 'https://app.botsify.com/theme/images/Story-Icons/user-message.png',
       type: 'userInput',
-      status: 'active',
+      status: 'normal',
       x: 0,
       y: 0,
+      description:'Type Anything',
       subType: 'anything',
-      description: 'Type Anything',
       width: 0,
       height: 0
     },
     {
-      id: '4', name: 'Text Response', icon: 'chat_bubble_outline', type: 'textResponse', status: 'active', x: 0, y: 0, description: 'Respond with a text message',
+      id: '4', 
+      name: 'Text Response', 
+      icon: 'text_fields', 
+      imageUrl:'https://app.botsify.com/theme/images/Story-Icons/bot-message.png',
+      type: 'textResponse', 
+      status: 'normal', 
+      x: 0, 
+      y: 0, 
       width: 0,
       height: 0,
-      content: '' // Initialize content for text response
+      content: ''
     },
-    {
-      id: '5', name: 'Media block', icon: 'image', type: 'mediaBlock', status: 'active', x: 0, y: 0,
-      width: 0,
-      height: 0,
-      description: 'Respond your users with multimedia messages such as Images, Videos etc',
-      mediaId: undefined, // Will be selected from availableMedia
-      mediaType: undefined,
-      mediaUrl: undefined,
-      mediaName: undefined
-    },
-    {
-      id: '6', name: 'Link Story', icon: 'link', type: 'linkStory', status: 'active', x: 0, y: 0,
-      width: 0,
-      height: 0,
-      linkStoryId: undefined, // Will be selected from availableStories
-      linkStoryName: undefined
-    },
-    {
-      id: '7', name: 'Conversational Form', icon: 'description', type: 'conversationalForm', status: 'new', x: 0, y: 0,
-      width: 0,
-      height: 0,
-      formId: undefined, // Will be selected from availableForms
-      formName: undefined,
-      webhookUrl: undefined,
-      sendEmailNotification: undefined,
-      notificationEmail: undefined,
-      formFields: undefined,
-      showAsInlineForm: undefined,
-      description : "Ask one question at a time & send responses to your desired location or webservice"
-    },
-    {
-      id: '8', name: 'Typing Delay', icon: 'hourglass_empty', type: 'typingDelay', status: 'active', x: 0, y: 0,
-      width: 0,
-      height: 0,
-      description: 'Add a typing delay between two blocks to mimic a real experience',
-      delaySeconds: 1 // Initialize delay for typing delay
-    },
-    {
-      id: '9', name: 'JSON API Integration', icon: 'code', type: 'jsonApi', status: 'active', x: 0, y: 0,
-      width: 0,
-      height: 0,
-      description : "Integrate JSON API to fetch or post data to your webservice"
-    },
+  {
+    "id": "5",
+    "name": "Media block",
+    "icon": "image",
+    "type": "mediaBlock",
+    "imageUrl": "https://app.botsify.com/theme/images/Story-Icons/media.png",
+    "status": "normal",
+    "x": 0,
+    "y": 0,
+    "width": 0,
+    "height": 0,
+    "mediaId": undefined,
+    "mediaType": undefined,
+    "mediaUrl": undefined,
+    "mediaName": undefined
+  },
+  {
+    "id": "6",
+    "name": "Link Story",
+    "icon": "insert_link",
+    "type": "linkStory",
+    "imageUrl": "https://app.botsify.com/theme/images/Story-Icons/story.png",
+    "status": "normal",
+    "x": 0,
+    "y": 0,
+    "width": 0,
+    "height": 0,
+    "linkStoryId": undefined,
+    "linkStoryName": undefined
+  },
+  {
+    "id": "7",
+    "name": "Conversational Form",
+    "imageUrl": "http://app.botsify.com/theme/images/Story-Icons/form.png",
+    "icon": "list_alt",
+    "type": "conversationalForm",
+    "status": "normal",
+    "x": 0,
+    "y": 0,
+    "width": 0,
+    "height": 0,
+    "formId": undefined,
+    "formName": undefined,
+    "webhookUrl": undefined,
+    "sendEmailNotification": undefined,
+    "notificationEmail": undefined,
+    "formFields": undefined,
+    "showAsInlineForm": undefined
+  },
+  {
+    "id": "8",
+    "name": "Typing Delay",
+    "icon": "hourglass_empty",
+    "type": "typingDelay",
+    "imageUrl": "https://app.botsify.com/theme/images/Story-Icons/typing.png",
+    "status": "normal",
+    "x": 0,
+    "y": 0,
+    "width": 0,
+    "height": 0,
+    "delaySeconds": 1
+  },
+  {
+    "id": "9",
+    "name": "JSON API Integration",
+    "icon": "code",
+    "type": "jsonApi",
+    "imageUrl": "https://app.botsify.com/theme/images/Story-Icons/api.png",
+    "status": "normal",
+    "x": 0,
+    "y": 0,
+    "width": 0,
+    "height": 0
+  }
   ];
-
 
   canvasBlocks: ChatbotBlock[] = [];
   connections: Connection[] = [];
   filteredBlocks$: Observable<ChatbotBlock[]> | undefined;
   searchControl = new FormControl('');
 
-  // Mock data for dropdowns (replace with actual service calls in a real app)
+  // Mock data for dropdowns
   availableMedia: AvailableMedia[] = [
     { id: 'media-1', name: 'Product Image A', type: 'image' },
     { id: 'media-2', name: 'Intro Video', type: 'video' },
@@ -209,10 +250,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
   panOffsetX = 0;
   panOffsetY = 0;
 
-  
-  
-
-  // Connection drawing
+  // Connection drawing - keep existing for manual connections
   isDrawingConnection = false;
   connectionStart: { blockId: string, x: number, y: number } | null = null;
   temporaryConnection: { x1: number, y1: number, x2: number, y2: number } | null = null;
@@ -226,6 +264,15 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
   messageBoxContent: string = '';
   messageBoxType: 'info' | 'success' | 'warning' | 'error' = 'info';
 
+  // jsPlumb connection tracking
+  private jsPlumbConnections: any[] = [];
+
+  // NEW: Visual connection system properties
+  isDraggingBlock = false;
+  draggedBlockId: string | null = null;
+  connectionPoints: Array<{blockId: string, x: number, y: number, element: HTMLElement}> = [];
+  nearestConnectionPoint: {blockId: string, x: number, y: number} | null = null;
+  readonly CONNECTION_SNAP_DISTANCE = 50; // pixels
 
   constructor() { }
 
@@ -236,165 +283,357 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       map(value => this._filter(value || ''))
     );
 
-    // 2. Add original User Input block (second position)
-  this.canvasBlocks.push({
-    id: 'flow-start',
-    name: 'User Input',
-    icon: 'person',
-    type: 'userInput',
-    status: 'active',
-    x: 200,
-    y: 200,
-    subType: 'keywordGroup',
-    content: 'Hello 👋',
-    keywordGroups: [['Hello', 'Hi']],
-    description: 'Define keywords that trigger the conversations',
-    width: 0,
-    height: 0
-  });
-  
-    const formBlockTemplate = this.allBlocks.find(block => block.type === 'conversationalForm');
-      const conversationalFormFields : FormField[] = [
-        {
-          name: 'Your Name',
-          type: 'text',
-          required: true,
-          promptPhrase: 'Enter your name'
-        },
-        {
-          name: 'Email Address',
-          type: 'email',
-          required: true,
-          promptPhrase: 'Enter your email'
-        },
-        {
-          name : 'Image',
-          type : 'image',
-          required : true,
-          promptPhrase : "Put one of your image"
-        }
-    ];
-
     // Initialize with the starter block
-    // this.canvasBlocks.push({
-    //   id: 'flow-start',
-    //   name: 'User Input',
-    //   icon: 'person',
-    //   type: 'userInput',
-    //   status: 'active',
-    //   x: 600,
-    //   y: 200,
-    //   subType: 'keywordGroup',
-    //   content: 'Hello 👋',
-    //   keywordGroups: [['Hello', 'Hi']], // Initial keyword group (array of arrays)
-    //   description: 'Define keywords that trigger the conversations',
-    //   width: 0,
-    //   height: 0
-    // });
     this.canvasBlocks.push({
-    id: 'text-response-1',
-    name: 'Text Response',
-    icon: 'chat_bubble_outline',
-    type: 'textResponse',
-    status: 'active',
-    x: 100,
-    y: 100,
-    content: '🤖 Welcome to Jarvish!',
-    description: 'Respond with welcome message',
-    width: 0,
-    height: 0
-  });
-
-  // 3. Add another textResponse block at THIRD position
-  this.canvasBlocks.push({
-    id: 'text-response-2',
-    name: 'Text Response',
-    icon: 'chat_bubble_outline',
-    type: 'textResponse',
-    status: 'active',
-    x: 300,
-    y: 300,
-    content: 'done implement conversation on that also',
-    description: 'Final message from Jarvish',
-    width: 0,
-    height: 0
-  });
-
-  if (formBlockTemplate) {
-        const conversationalFormBlock : ChatbotBlock = {
-          ...formBlockTemplate,
-          id: 'form-block-1',
-          x: 400,
-          y: 400,
-          status: 'active',
-          formId: 'form-123',
-          formName: 'User Details Form',
-          webhookUrl: 'https://your-webhook-url.com',
-          sendEmailNotification: true,
-          notificationEmail: 'your-email@example.com',
-          showAsInlineForm: true,
-          formFields: conversationalFormFields
-        };
-
-        this.canvasBlocks.push(conversationalFormBlock);
+      id: 'flow-start',
+      name: 'User Input',
+      icon: 'person',
+      type: 'userInput',
+      status: 'active',
+      x: 600,
+      y: 200,
+      subType: 'keywordGroup',
+      content: 'Hello 👋',
+      keywordGroups: [['Hello', 'Hi']],
+      description: 'Define keywords that trigger the conversations',
+      width: 0,
+      height: 0
+    });
   }
-}
 
   ngAfterViewInit(): void {
-
-    // ashutosh
-
-// Create jsPlumb instance
-this.instance = jsPlumb.getInstance({
-  Container: 'canvas'
-});
-
-// ✅ Define common settings before using it
-const commonSettings = {
-  connector: ['Flowchart'],
-  endpoint: ['Dot', { radius: 5 }],
-  paintStyle: { stroke: '#1e88e5', strokeWidth: 2 },
-  endpointStyle: { fill: '#1e88e5' },
-  hoverPaintStyle: { stroke: '#ff4081', strokeWidth: 2 }
-};
-
-// Make components draggable
-this.instance.draggable('user-input-block-123');
-this.instance.draggable('media-block-456');
-
-// Add output endpoint to user-input-block
-this.instance.addEndpoint('user-input-block', {
-  uuid: 'userInputOutput',
-  anchor: 'Right',
-  isSource: true,
-  maxConnections: -1,
-  ...commonSettings 
-});
-
-// Add input endpoint to media-block
-this.instance.addEndpoint('media-block', {
-  uuid: 'mediaInput',
-  anchor: 'Left',
-  isTarget: true,
-  maxConnections: -1,
-  ...commonSettings
-});
-
-// Connect them
-this.instance.connect({
-  uuids: ['userInputOutput', 'mediaInput'],
-  ...commonSettings
-});
-
-
-
-
-
+    this.initializeJsPlumb();
     this.updateCanvasTransform();
-    // Set initial dimensions for the starting block (important for connection points)
+    
+    // Set initial dimensions for the starting block
     setTimeout(() => {
       this.updateBlockDimensions(this.canvasBlocks[0]);
-    }, 0);
+      this.setupJsPlumbForBlock(this.canvasBlocks[0]);
+      this.calculateConnectionPoints();
+    }, 100);
+  }
+
+  ngOnDestroy(): void {
+    if (this.instance) {
+      this.instance.reset();
+    }
+  }
+
+  private initializeJsPlumb(): void {
+    // Initialize jsPlumb instance
+    this.instance = jsPlumb.getInstance({
+      Container: this.canvasContent.nativeElement,
+      ConnectionOverlays: [
+        ['Arrow', {
+          location: 1,
+          id: 'arrow',
+          length: 10,
+          width: 10,
+        }]
+      ],
+      PaintStyle: {
+        stroke: '#4f46e5',
+        strokeWidth: 2
+      },
+      HoverPaintStyle: {
+        stroke: '#7c3aed',
+        strokeWidth: 3
+      },
+      EndpointStyle: {
+        fill: '#4f46e5'
+      },
+      EndpointHoverStyle: {
+        fill: '#7c3aed'
+      },
+      Connector: ['Flowchart', { 
+        stub: [40, 60], 
+        gap: 10, 
+        cornerRadius: 5, 
+        alwaysRespectStubs: true 
+      }]
+    });
+
+    // Enable connection creation by clicking
+    this.instance.bind('connection', (info: any) => {
+      console.log('Connection created:', info);
+      this.jsPlumbConnections.push(info.connection);
+    });
+
+    // Handle connection clicks for deletion
+    this.instance.bind('click', (connection: any) => {
+      if (confirm('Delete this connection?')) {
+        this.instance.deleteConnection(connection);
+        this.jsPlumbConnections = this.jsPlumbConnections.filter(conn => conn !== connection);
+      }
+    });
+  }
+
+  private setupJsPlumbForBlock(block: ChatbotBlock): void {
+    const blockId = `block-${block.id}`;
+    
+    // Wait for DOM element to be available
+    setTimeout(() => {
+      const blockElement = document.getElementById(blockId);
+      if (!blockElement) {
+        console.warn(`Block element not found: ${blockId}`);
+        return;
+      }
+
+      // Make the block draggable
+      this.instance.draggable(blockElement, {
+        grid: [10, 10],
+        containment: 'parent'
+      });
+
+      // Add source endpoint (output) - positioned at bottom center
+      this.instance.addEndpoint(blockElement, {
+        anchor: 'Bottom',
+        isSource: true,
+        maxConnections: -1,
+        endpoint: ['Dot', { radius: 8 }],
+        paintStyle: { fill: '#4f46e5' },
+        connectorStyle: { stroke: '#4f46e5', strokeWidth: 2 },
+        connector: ['Flowchart', { stub: [40, 60], gap: 10, cornerRadius: 5 }],
+        overlays: [
+          ['Arrow', { location: 1, length: 10, width: 10 }]
+        ]
+      });
+
+      // Add target endpoint (input) - positioned at top center
+      this.instance.addEndpoint(blockElement, {
+        anchor: 'Top',
+        isTarget: true,
+        maxConnections: -1,
+        endpoint: ['Dot', { radius: 8 }],
+        paintStyle: { fill: '#10b981' },
+        hoverPaintStyle: { fill: '#059669' }
+      });
+
+      console.log(`jsPlumb setup completed for block: ${blockId}`);
+    }, 50);
+  }
+
+  private removeJsPlumbForBlock(blockId: string): void {
+    const elementId = `block-${blockId}`;
+    const blockElement = document.getElementById(elementId);
+    
+    if (blockElement && this.instance) {
+      // Remove all connections for this block
+      this.instance.removeAllEndpoints(blockElement);
+      
+      // Remove from draggable
+      this.instance.setDraggable(blockElement, false);
+      
+      // Filter out connections involving this block
+      this.jsPlumbConnections = this.jsPlumbConnections.filter(conn => {
+        const sourceId = conn.sourceId;
+        const targetId = conn.targetId;
+        return sourceId !== elementId && targetId !== elementId;
+      });
+    }
+  }
+
+  // NEW: Calculate connection points for all blocks
+  private calculateConnectionPoints(): void {
+    this.connectionPoints = [];
+    
+    this.canvasBlocks.forEach(block => {
+      const blockElement = document.getElementById(`block-${block.id}`);
+      if (blockElement) {
+        const rect = blockElement.getBoundingClientRect();
+        const canvasRect = this.canvasContent.nativeElement.getBoundingClientRect();
+        
+        // Calculate input connection point (top center of block)
+        const inputPoint = {
+          blockId: block.id,
+          x: (rect.left + rect.width / 2 - canvasRect.left) / this.zoomLevel - this.panOffsetX / this.zoomLevel,
+          y: (rect.top - canvasRect.top) / this.zoomLevel - this.panOffsetY / this.zoomLevel,
+          element: blockElement
+        };
+        
+        this.connectionPoints.push(inputPoint);
+      }
+    });
+  }
+
+  /**
+ * Finds the nearest connection point to a dragged block within a certain distance.
+ */
+private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectionPoint | null {
+  if (!draggedBlock) {
+    return null;
+  }
+
+  const draggedBlockElement = document.getElementById(`block-${draggedBlock.id}`);
+  if (!draggedBlockElement) {
+    return null;
+  }
+
+  const draggedBlockRect = draggedBlockElement.getBoundingClientRect();
+  const canvasRect = this.canvasContent.nativeElement.getBoundingClientRect();
+
+  // Calculate the dragged block's output point (bottom center) in canvas coordinates
+  const draggedX = (draggedBlockRect.left + draggedBlockRect.width / 2 - canvasRect.left) / this.zoomLevel - this.panOffsetX / this.zoomLevel;
+  const draggedY = (draggedBlockRect.bottom - canvasRect.top) / this.zoomLevel - this.panOffsetY / this.zoomLevel;
+
+  let nearestPoint: NearestConnectionPoint | null = null;
+  let minDistance = Infinity; // Use Infinity to find the smallest distance
+
+  // Use a standard for-of loop to avoid any potential scope issues with forEach
+  for (const point of this.connectionPoints) {
+    // Do not allow a block to connect to itself
+    if (point.blockId === draggedBlock.id) {
+      continue;
+    }
+
+    const distance = Math.sqrt(
+      Math.pow(point.x - draggedX, 2) + Math.pow(point.y - draggedY, 2)
+    );
+
+    // If a connection point is within the snap distance and is closer than the current nearest point
+    if (distance <= this.CONNECTION_SNAP_DISTANCE && distance < minDistance) {
+      minDistance = distance;
+      nearestPoint = {
+        blockId: point.blockId,
+        x: point.x,
+        y: point.y
+      };
+    }
+  }
+
+  // Return the best-found point, or null if none were found
+  return nearestPoint;
+}
+
+  // NEW: Show/hide connection points
+  private showConnectionPoints(show: boolean): void {
+    if (!this.draggedBlockId) return;
+    
+    this.canvasBlocks.forEach(block => {
+      if (block.id === this.draggedBlockId) return; // Skip dragged block
+      
+      const blockElement = document.getElementById(`block-${block.id}`);
+      if (blockElement) {
+        let connectionPoint = blockElement.querySelector('.visual-connection-point') as HTMLElement;
+        
+        if (show && !connectionPoint) {
+          // Create connection point
+          connectionPoint = document.createElement('div');
+          connectionPoint.className = 'visual-connection-point';
+          connectionPoint.style.cssText = `
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background: #10b981;
+            border: 2px solid white;
+            border-radius: 50%;
+            z-index: 1000;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+          `;
+          blockElement.appendChild(connectionPoint);
+        } else if (!show && connectionPoint) {
+          connectionPoint.remove();
+        }
+      }
+    });
+  }
+
+  // NEW: Highlight nearest connection point
+  private highlightNearestConnectionPoint(): void {
+    // Remove previous highlights
+    document.querySelectorAll('.visual-connection-point').forEach(point => {
+      (point as HTMLElement).style.background = '#10b981';
+      (point as HTMLElement).style.transform = 'translateX(-50%) scale(1)';
+    });
+    
+    // Highlight nearest point
+    if (this.nearestConnectionPoint) {
+      const targetBlock = document.getElementById(`block-${this.nearestConnectionPoint.blockId}`);
+      const connectionPoint = targetBlock?.querySelector('.visual-connection-point') as HTMLElement;
+      
+      if (connectionPoint) {
+        connectionPoint.style.background = '#059669';
+        connectionPoint.style.transform = 'translateX(-50%) scale(1.3)';
+        connectionPoint.style.boxShadow = '0 4px 16px rgba(5, 150, 105, 0.6)';
+      }
+    }
+  }
+
+  // NEW: Create connection between blocks
+  private createConnection(fromBlockId: string, toBlockId: string): void {
+    // Check if connection already exists
+    const existingConnection = this.jsPlumbConnections.find(conn => 
+      conn.sourceId === `block-${fromBlockId}` && conn.targetId === `block-${toBlockId}`
+    );
+    
+    if (existingConnection) {
+      this.displayMessageBox('Connection already exists between these blocks.', 'warning');
+      return;
+    }
+    
+    // Create jsPlumb connection
+    const sourceElement = document.getElementById(`block-${fromBlockId}`);
+    const targetElement = document.getElementById(`block-${toBlockId}`);
+    
+    if (sourceElement && targetElement && this.instance) {
+      const connection = this.instance.connect({
+        source: sourceElement,
+        target: targetElement,
+        anchor: ['Bottom', 'Top'],
+        endpoint: ['Dot', { radius: 8 }],
+        connector: ['Flowchart', { stub: [40, 60], gap: 10, cornerRadius: 5 }],
+        paintStyle: { stroke: '#4f46e5', strokeWidth: 2 },
+        overlays: [
+          ['Arrow', { location: 1, length: 10, width: 10 }]
+        ]
+      });
+      
+      if (connection) {
+        this.jsPlumbConnections.push(connection);
+        this.displayMessageBox('Connection created successfully!', 'success');
+      }
+    }
+  }
+
+  // MODIFIED: Enhanced drag start handler
+  onBlockDragStarted(event: CdkDragStart, block: ChatbotBlock): void {
+    this.isDraggingBlock = true;
+    this.draggedBlockId = block.id;
+    this.calculateConnectionPoints();
+    this.showConnectionPoints(true);
+  }
+
+  // MODIFIED: Enhanced drag end handler
+  onBlockDragEnded(event: CdkDragEnd, block: ChatbotBlock) {
+    const transform = event.source.getFreeDragPosition();
+    block.x = (block.x || 0) + transform.x / this.zoomLevel;
+    block.y = (block.y || 0) + transform.y / this.zoomLevel;
+    event.source._dragRef.reset();
+    
+    // Check for connection creation
+    if (this.nearestConnectionPoint && this.draggedBlockId) {
+      this.createConnection(this.draggedBlockId, this.nearestConnectionPoint.blockId);
+    }
+    
+    // Clean up visual elements
+    this.showConnectionPoints(false);
+    this.isDraggingBlock = false;
+    this.draggedBlockId = null;
+    this.nearestConnectionPoint = null;
+    
+    this.updateConnections();
+    
+    // Repaint jsPlumb connections after drag
+    if (this.instance) {
+      setTimeout(() => {
+        this.instance.repaintEverything();
+        this.calculateConnectionPoints();
+      }, 50);
+    }
   }
 
   @HostListener('wheel', ['$event'])
@@ -406,6 +645,11 @@ this.instance.connect({
       this.zoomLevel = parseFloat(newZoom.toFixed(2));
       this.updateCanvasTransform();
       this.updateConnections();
+      
+      // Repaint jsPlumb connections after zoom
+      if (this.instance) {
+        this.instance.repaintEverything();
+      }
     }
   }
 
@@ -416,7 +660,7 @@ this.instance.connect({
       this.panStartX = event.clientX - this.panOffsetX;
       this.panStartY = event.clientY - this.panOffsetY;
       this.canvasWrapper.nativeElement.style.cursor = 'grabbing';
-      // Deselect block when clicking on empty canvas area
+      
       if (this.selectedBlock && !this.isDrawingConnection) {
         this.selectedBlock = null;
         this.closeSidebar();
@@ -430,11 +674,24 @@ this.instance.connect({
       this.panOffsetX = event.clientX - this.panStartX;
       this.panOffsetY = event.clientY - this.panStartY;
       this.updateCanvasTransform();
+      
+      // Repaint jsPlumb connections during pan
+      if (this.instance) {
+        this.instance.repaintEverything();
+      }
+    }
+
+    // NEW: Handle connection point detection during drag
+    if (this.isDraggingBlock && this.draggedBlockId) {
+      const draggedBlock = this.canvasBlocks.find(b => b.id === this.draggedBlockId);
+      if (draggedBlock) {
+        this.nearestConnectionPoint = this.findNearestConnectionPoint(draggedBlock);
+        this.highlightNearestConnectionPoint();
+      }
     }
 
     if (this.isDrawingConnection && this.connectionStart) {
       const rect = this.canvasWrapper.nativeElement.getBoundingClientRect();
-      // Adjust mouse coordinates to be relative to the scaled and panned canvas content
       const mouseX = (event.clientX - rect.left - this.panOffsetX) / this.zoomLevel;
       const mouseY = (event.clientY - rect.top - this.panOffsetY) / this.zoomLevel;
 
@@ -467,7 +724,7 @@ this.instance.connect({
     );
   }
 
-  isJarvisVisible : boolean = false;
+  isJarvisVisible: boolean = false;
 
   toggleJarvis(): void {
     this.isJarvisVisible = !this.isJarvisVisible;
@@ -478,16 +735,15 @@ this.instance.connect({
     const newBlock: ChatbotBlock = {
       ...block,
       id: newBlockId,
-      x: this.calculateNewBlockX(), // Position new blocks near the center of the viewport
-      y: this.calculateNewBlockY(), // Position new blocks near the center of the viewport
-      // Initialize specific properties based on type/subType
+      x: this.calculateNewBlockX(),
+      y: this.calculateNewBlockY(),
       content: block.type === 'textResponse' ? '' : undefined,
-      keywordGroups: block.subType === 'keywordGroup' ? [[]] : undefined, // Initialize with an empty group for new keywordGroup blocks
+      keywordGroups: block.subType === 'keywordGroup' ? [[]] : undefined,
       phraseText: block.subType === 'phrase' ? '' : undefined,
       customMessage: block.subType === 'anything' ? '' : undefined,
       delaySeconds: block.type === 'typingDelay' ? 1 : undefined,
       mediaId: block.type === 'mediaBlock' ? undefined : undefined,
-      mediaType: block.type === 'mediaBlock' ? 'text' : undefined, // Default media type for new media block
+      mediaType: block.type === 'mediaBlock' ? 'text' : undefined,
       mediaUrl: block.type === 'mediaBlock' ? '' : undefined,
       mediaName: block.type === 'mediaBlock' ? undefined : undefined,
       linkStoryId: block.type === 'linkStory' ? undefined : undefined,
@@ -503,22 +759,23 @@ this.instance.connect({
       requestType: block.type === 'jsonApi' ? 'POST' : undefined,
       apiHeaders: block.type === 'jsonApi' ? [] : undefined
     };
+    
     this.canvasBlocks.push(newBlock);
-    // After adding, immediately update its dimensions and select it
+    
     setTimeout(() => {
       this.updateBlockDimensions(newBlock);
+      this.setupJsPlumbForBlock(newBlock);
+      this.calculateConnectionPoints();
       this.selectBlock(newBlock);
-    }, 0); // Use setTimeout to ensure the block is rendered before measuring
+    }, 100);
   }
 
-  // Helper to calculate a reasonable position for a new block
   private calculateNewBlockX(): number {
     if (this.canvasWrapper) {
       const wrapperRect = this.canvasWrapper.nativeElement.getBoundingClientRect();
-      // Adjust for current pan and zoom to place it somewhat in the center of the visible area
       return (wrapperRect.width / 2 - this.panOffsetX) / this.zoomLevel;
     }
-    return 300 + (this.canvasBlocks.length * 50); // Fallback
+    return 300 + (this.canvasBlocks.length * 50);
   }
 
   private calculateNewBlockY(): number {
@@ -526,44 +783,41 @@ this.instance.connect({
       const wrapperRect = this.canvasWrapper.nativeElement.getBoundingClientRect();
       return (wrapperRect.height / 2 - this.panOffsetY) / this.zoomLevel;
     }
-    return 100 + (this.canvasBlocks.length * 200); // Fallback
+    return 100 + (this.canvasBlocks.length * 200);
   }
 
-  onBlockDragEnded(event: CdkDragEnd, block: ChatbotBlock) {
-    const transform = event.source.getFreeDragPosition();
-    block.x = (block.x || 0) + transform.x / this.zoomLevel;
-    block.y = (block.y || 0) + transform.y / this.zoomLevel;
-    event.source._dragRef.reset(); // Reset the drag reference to prevent cumulative transforms
-    this.updateConnections();
-  }
-
-  // Event handler for when a child block component updates its data
   onBlockUpdated(updatedBlock: ChatbotBlock) {
     const index = this.canvasBlocks.findIndex(b => b.id === updatedBlock.id);
     if (index > -1) {
       this.canvasBlocks[index] = updatedBlock;
-      // If the updated block is the selected one, ensure selectedBlock reference is fresh
       if (this.selectedBlock?.id === updatedBlock.id) {
         this.selectedBlock = updatedBlock;
       }
-      this.updateConnections(); // Update connections if block dimensions might have changed
+      this.updateConnections();
+      this.calculateConnectionPoints();
     }
   }
 
   editCanvasBlock(block: ChatbotBlock) {
-    this.selectBlock(block); // Select the block to open the sidebar for editing
+    this.selectBlock(block);
   }
 
   removeCanvasBlock(blockId: string) {
+    // Remove jsPlumb setup for this block
+    this.removeJsPlumbForBlock(blockId);
+    
     this.canvasBlocks = this.canvasBlocks.filter(b => b.id !== blockId);
     this.connections = this.connections.filter(c =>
       c.fromBlockId !== blockId && c.toBlockId !== blockId
     );
+    
     if (this.selectedBlock?.id === blockId) {
       this.selectedBlock = null;
       this.closeSidebar();
     }
-    this.updateConnections(); // Update connections after removal
+    
+    this.updateConnections();
+    this.calculateConnectionPoints();
   }
 
   duplicateCanvasBlock(block: ChatbotBlock) {
@@ -573,33 +827,32 @@ this.instance.connect({
       id: newBlockId,
       x: (block.x || 0) + 30,
       y: (block.y || 0) + 30,
-      // Deep copy relevant arrays if present
-      // Ensure keywordGroups are deep copied
       keywordGroups: block.keywordGroups ? block.keywordGroups.map(group => [...group]) : undefined,
-      formFields: block.formFields ? block.formFields.map(field => ({ ...field })) : undefined // Deep copy form fields
+      formFields: block.formFields ? block.formFields.map(field => ({ ...field })) : undefined
     };
+    
     this.canvasBlocks.push(newBlock);
+    
     setTimeout(() => {
       this.updateBlockDimensions(newBlock);
+      this.setupJsPlumbForBlock(newBlock);
+      this.calculateConnectionPoints();
       this.selectBlock(newBlock);
-    }, 0);
+    }, 100);
   }
 
-  // This method is used for reordering items within the `allBlocks` array (left sidebar)
   drop(event: CdkDragDrop<ChatbotBlock[]>) {
     moveItemInArray(this.allBlocks, event.previousIndex, event.currentIndex);
   }
 
-  // Connection management
+  // Keep existing connection methods for backward compatibility
   startConnection(event: MouseEvent, block: ChatbotBlock) {
     event.stopPropagation();
     this.isDrawingConnection = true;
 
-    // Get the element of the specific block
     const blockElement = (event.target as HTMLElement).closest('.canvas-block');
     if (!blockElement) return;
 
-    // Find the output connection point within the block
     const outputPointElement = blockElement.querySelector('.connection-output .connection-dot') as HTMLElement;
     if (!outputPointElement) return;
 
@@ -607,7 +860,6 @@ this.instance.connect({
     const outputPointRect = outputPointElement.getBoundingClientRect();
     const canvasContentRect = this.canvasContent.nativeElement.getBoundingClientRect();
 
-    // Calculate coordinates relative to the scaled and panned canvas content
     const startX = (outputPointRect.left + outputPointRect.width / 2 - canvasContentRect.left) / this.zoomLevel;
     const startY = (outputPointRect.top + outputPointRect.height / 2 - canvasContentRect.top) / this.zoomLevel;
 
@@ -621,7 +873,6 @@ this.instance.connect({
   endConnection(event: MouseEvent, block: ChatbotBlock) {
     event.stopPropagation();
     if (this.isDrawingConnection && this.connectionStart && this.connectionStart.blockId !== block.id) {
-      // Get the element of the specific block (the target block)
       const targetBlockElement = (event.target as HTMLElement).closest('.canvas-block');
       if (!targetBlockElement) {
         this.isDrawingConnection = false;
@@ -630,7 +881,6 @@ this.instance.connect({
         return;
       }
 
-      // Find the input connection point within the target block
       const inputPointElement = targetBlockElement.querySelector('.connection-input .connection-dot') as HTMLElement;
       if (!inputPointElement) {
         this.isDrawingConnection = false;
@@ -642,12 +892,9 @@ this.instance.connect({
       const inputPointRect = inputPointElement.getBoundingClientRect();
       const canvasContentRect = this.canvasContent.nativeElement.getBoundingClientRect();
 
-      // Calculate coordinates relative to the canvasContent
       const targetX = (inputPointRect.left + inputPointRect.width / 2 - canvasContentRect.left) / this.zoomLevel;
       const targetY = (inputPointRect.top + inputPointRect.height / 2 - canvasContentRect.top) / this.zoomLevel;
 
-
-      // Check if a connection already exists between these blocks
       const existingConnection = this.connections.find(conn =>
         (conn.fromBlockId === this.connectionStart!.blockId && conn.toBlockId === block.id)
       );
@@ -677,7 +924,6 @@ this.instance.connect({
       const toBlock = this.canvasBlocks.find(b => b.id === conn.toBlockId);
 
       if (fromBlock && toBlock) {
-        // Find the actual DOM elements for the blocks
         const fromBlockElement = this.canvasContent.nativeElement.querySelector(`.canvas-block[id="${fromBlock.id}"]`);
         const toBlockElement = this.canvasContent.nativeElement.querySelector(`.canvas-block[id="${toBlock.id}"]`);
 
@@ -705,16 +951,15 @@ this.instance.connect({
     });
   }
 
-  // Update a block's actual width and height after it's rendered
   updateBlockDimensions(block: ChatbotBlock) {
-    const blockElement = this.canvasContent.nativeElement.querySelector(`.canvas-block[id="${block.id}"]`);
+    const blockElement = this.canvasContent.nativeElement.querySelector(`.canvas-block[id="block-${block.id}"]`);
     if (blockElement) {
       block.width = blockElement.offsetWidth;
       block.height = blockElement.offsetHeight;
-      this.updateConnections(); // Recalculate connections if dimensions change
+      this.updateConnections();
+      this.calculateConnectionPoints();
     }
   }
-
 
   // Zoom controls
   zoomIn() {
@@ -722,6 +967,10 @@ this.instance.connect({
       this.zoomLevel = parseFloat((this.zoomLevel + this.zoomStep).toFixed(2));
       this.updateCanvasTransform();
       this.updateConnections();
+      if (this.instance) {
+        this.instance.repaintEverything();
+      }
+      this.calculateConnectionPoints();
     }
   }
 
@@ -730,6 +979,10 @@ this.instance.connect({
       this.zoomLevel = parseFloat((this.zoomLevel - this.zoomStep).toFixed(2));
       this.updateCanvasTransform();
       this.updateConnections();
+      if (this.instance) {
+        this.instance.repaintEverything();
+      }
+      this.calculateConnectionPoints();
     }
   }
 
@@ -739,17 +992,19 @@ this.instance.connect({
     this.panOffsetY = 0;
     this.updateCanvasTransform();
     this.updateConnections();
+    if (this.instance) {
+      this.instance.repaintEverything();
+    }
+    this.calculateConnectionPoints();
   }
 
   updateCanvasTransform() {
     if (this.canvasContent) {
-      // Apply pan and zoom to the canvas content div
       this.canvasContent.nativeElement.style.transform =
         `translate(${this.panOffsetX}px, ${this.panOffsetY}px) scale(${this.zoomLevel})`;
       this.canvasContent.nativeElement.style.transformOrigin = '0 0';
     }
 
-    // Also update the SVG position and scale to match the canvas content
     if (this.svgCanvas) {
       this.svgCanvas.nativeElement.style.transform =
         `translate(${this.panOffsetX}px, ${this.panOffsetY}px) scale(${this.zoomLevel})`;
@@ -772,7 +1027,12 @@ this.instance.connect({
   saveFlow() {
     const flowData = {
       blocks: this.canvasBlocks,
-      connections: this.connections
+      connections: this.connections,
+      jsPlumbConnections: this.jsPlumbConnections.map(conn => ({
+        sourceId: conn.sourceId,
+        targetId: conn.targetId,
+        id: conn.id
+      }))
     };
     console.log('Chatbot flow saved!', flowData);
     this.displayMessageBox('Chatbot flow saved successfully!', 'success');
@@ -794,6 +1054,7 @@ this.instance.connect({
   getStatusColor(status: string): string {
     switch (status) {
       case 'active': return '#4CAF50';
+      case 'normal': return '##f1f4fc';
       case 'error': return '#F44336';
       case 'new': return '#FF9800';
       case 'disabled': return '#9E9E9E';
@@ -804,23 +1065,21 @@ this.instance.connect({
   // Get type-specific colors
   getTypeColor(type: string): string {
     switch (type) {
-      case 'userInput': return '#E1F5FE'; // light blue for user input
-      case 'textResponse': return '#F3E5F5'; // light purple for text response
-      case 'mediaBlock': return '#E8F5E8'; // very light green
-      case 'linkStory': return '#FFF3E0'; // light orange
-      case 'notifyAgent': return '#FFEBEE'; // very light red
-      case 'conversationalForm': return '#F1F8E9'; // light green-yellow
-      case 'typingDelay': return '#ECEFF1'; // light grey
-      case 'conditionalRedirect': return '#E0F2F1'; // light teal
-      case 'rssFeed': return '#FCE4EC'; // light pink
-      case 'jsonApi': return '#E3F2FD'; // light blue
-      case 'shopify': return '#EFEBE9'; // light brown
-      default: return '#F5F5F5'; // default light grey
+      case 'userInput': return '#E1F5FE';
+      case 'textResponse': return '#F3E5F5';
+      case 'mediaBlock': return '#E8F5E8';
+      case 'linkStory': return '#FFF3E0';
+      case 'notifyAgent': return '#FFEBEE';
+      case 'conversationalForm': return '#F1F8E9';
+      case 'typingDelay': return '#ECEFF1';
+      case 'conditionalRedirect': return '#E0F2F1';
+      case 'rssFeed': return '#FCE4EC';
+      case 'jsonApi': return '#E3F2FD';
+      case 'shopify': return '#EFEBE9';
+      default: return '#F5F5F5';
     }
   }
 
-  // This method is now specifically for adding a *new canvas block* of type 'Keyword Group'
-  // It is called when `UserInputBlockComponent` on the canvas emits `addKeywordGroupBlock`
   onAddKeywordGroupBlockToCanvas(): void {
     const keywordGroupBlueprint = this.allBlocks.find(
       block => block.type === 'userInput' && block.subType === 'keywordGroup'
@@ -833,5 +1092,4 @@ this.instance.connect({
       this.displayMessageBox('Could not find a Keyword Group block blueprint to add.', 'error');
     }
   }
-  
 }
