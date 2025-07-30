@@ -1,3 +1,4 @@
+<!-- chatbot-flow.component.html - Enhanced with visual connection system -->
 <div class="chatbot-flow-container">
   <div class="header">
     <div class="header-left">
@@ -93,6 +94,7 @@
         #canvasWrapper
         [style.cursor]="isPanning ? 'grabbing' : 'default'"
       >
+        <!-- Keep existing SVG for backward compatibility -->
         <svg class="connections-svg" #svgCanvas>
           <path
             *ngFor="let conn of connections"
@@ -136,26 +138,30 @@
           ></path>
         </svg>
 
-        <div class="canvas-content" #canvasContent>
+        <div class="canvas-content" #canvasContent id="canvas">
           <div class="flow-start-indicator">
             <div class="flow-start-text">Flow starts here</div>
             <div class="flow-start-arrow">
               <mat-icon>arrow_downward</mat-icon>
             </div>
           </div>
+          
           <!-- Main blocks container -->
           <div class="blocks-container">
-            <!-- Main Text Response Block -->
+            <!-- Enhanced blocks with drag events -->
             <div
               *ngFor="let block of canvasBlocks"
-              class="canvas-block"
+              class="canvas-block jsplumb-draggable"
+              [id]="'block-' + block.id"
               [class]="'canvas-block-' + block.type"
               [class.selected]="selectedBlock?.id === block.id"
+              [class.dragging]="isDraggingBlock && draggedBlockId === block.id"
               [style.left.px]="block.x"
               [style.top.px]="block.y"
               [style.border-color]="getStatusColor(block.status)"
               [style.background-color]="getTypeColor(block.type)"
               cdkDrag
+              (cdkDragStarted)="onBlockDragStarted($event, block)"
               (cdkDragEnded)="onBlockDragEnded($event, block)"
               (mousedown)="endConnection($event, block)"
             >
@@ -268,7 +274,7 @@
               </ng-container>
             </div>
 
-            <!-- Quick Reply Cards - Rendered outside and below text response blocks -->
+            <!-- Quick Reply Cards - Keep existing functionality -->
             <div
               *ngFor="let block of canvasBlocks"
               class="quick-reply-cards-wrapper"
@@ -278,13 +284,12 @@
                 block.quickReplies.length === 0
               "
             >
-              <!-- Connection Lines SVG -->
+              <!-- Keep existing quick reply connections SVG -->
               <svg
                 class="quick-reply-connections-svg"
                 [attr.width]="1200"
                 [attr.height]="400"
               >
-                <!-- Connection from Text Response block to No Quick Reply block -->
                 <path
                   [attr.d]="
                     'M ' +
@@ -299,7 +304,6 @@
                   class="connection-line no-quick-reply-connection"
                 ></path>
 
-                <!-- Connection from Text Response block to Quick Replies main block -->
                 <path
                   [attr.d]="
                     'M ' +
@@ -314,7 +318,6 @@
                   class="connection-line quick-replies-connection"
                 ></path>
 
-                <!-- Connections from Quick Replies main block to individual quick reply cards -->
                 <g *ngFor="let reply of block.quickReplies; let i = index">
                   <path
                     [attr.d]="
@@ -416,7 +419,6 @@
         <div class="sidebar-title">
           <mat-icon>{{ selectedBlock.icon }}</mat-icon>
           <span>{{ selectedBlock.name }}</span>
-          <!-- Add existing badges code here -->
         </div>
         <button mat-icon-button (click)="closeSidebar()" class="close-btn">
           <mat-icon>close</mat-icon>
@@ -444,6 +446,7 @@
             (closeSidebarEvent)="closeSidebar()"
             (editBlock)="editCanvasBlock($event)"
           ></app-text-response-block>
+          
           <app-media-block
             *ngSwitchCase="'mediaBlock'"
             [block]="selectedBlock"
