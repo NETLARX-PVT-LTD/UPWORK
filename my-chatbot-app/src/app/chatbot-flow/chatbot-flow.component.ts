@@ -78,67 +78,98 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
     {
       id: '1',
       name: 'User Input',
-      icon: 'person',
+      imageUrl: 'https://app.botsify.com/theme/images/Story-Icons/user-message.png',
+      icon:'',
       type: 'userInput',
-      status: 'active',
+      status:'normal',
       x: 0,
       y: 0,
       subType: 'phrase',
-      description: 'Phrase',
+      description:'Phrase',
       width: 0,
       height: 0
     },
     {
       id: '2',
       name: 'User Input',
-      icon: 'person',
+      icon: '', 
+      imageUrl: 'https://app.botsify.com/theme/images/Story-Icons/user-message.png',
       type: 'userInput',
-      status: 'active',
+      status: 'normal',
       x: 0,
       y: 0,
+      description:'Keyword Group',
       subType: 'keywordGroup',
-      description: 'Keyword Group',
       width: 0,
       height: 0
     },
     {
       id: '3',
       name: 'User Input',
-      icon: 'person',
+      icon: '', 
+      imageUrl: 'https://app.botsify.com/theme/images/Story-Icons/user-message.png',
       type: 'userInput',
-      status: 'active',
+      status: 'normal',
       x: 0,
       y: 0,
+      description:'Type Anything',
       subType: 'anything',
-      description: 'Type Anything',
       width: 0,
       height: 0
     },
     {
-      id: '4', name: 'Text Response', icon: 'chat_bubble_outline', type: 'textResponse', status: 'active', x: 0, y: 0, description: 'Respond with a text message',
+      id: '4', 
+      name: 'Text Response', 
+      icon: 'text_fields', 
+      imageUrl:'https://app.botsify.com/theme/images/Story-Icons/bot-message.png',
+      type: 'textResponse', 
+      status: 'normal', 
+      x: 0, 
+      y: 0, 
       width: 0,
       height: 0,
       content: '' // Initialize content for text response
     },
     {
-      id: '5', name: 'Media block', icon: 'image', type: 'mediaBlock', status: 'active', x: 0, y: 0,
+      id: '5', 
+      name: 'Media block', 
+      icon: 'image', // Kept same (matches screenshot)
+      type: 'mediaBlock', 
+      imageUrl:'https://app.botsify.com/theme/images/Story-Icons/media.png',
+      status: 'normal', 
+      x: 0, 
+      y: 0,
       width: 0,
       height: 0,
       description: 'Respond your users with multimedia messages such as Images, Videos etc',
-      mediaId: undefined, // Will be selected from availableMedia
+      mediaId: undefined,
       mediaType: undefined,
       mediaUrl: undefined,
       mediaName: undefined
     },
     {
-      id: '6', name: 'Link Story', icon: 'link', type: 'linkStory', status: 'active', x: 0, y: 0,
+      id: '6', 
+      name: 'Link Story', 
+      icon: 'insert_link', // Changed from 'link'
+      type: 'linkStory', 
+      imageUrl:'https://app.botsify.com/theme/images/Story-Icons/story.png',
+      status: 'normal', 
+      x: 0, 
+      y: 0,
       width: 0,
       height: 0,
       linkStoryId: undefined, // Will be selected from availableStories
       linkStoryName: undefined
     },
     {
-      id: '7', name: 'Conversational Form', icon: 'description', type: 'conversationalForm', status: 'new', x: 0, y: 0,
+      id: '7', 
+      name: 'Conversational Form', 
+      imageUrl:'http://app.botsify.com/theme/images/Story-Icons/form.png',
+      icon: 'list_alt', // Changed from 'description'
+      type: 'conversationalForm', 
+      status: 'normal', 
+      x: 0, 
+      y: 0,
       width: 0,
       height: 0,
       formId: undefined, // Will be selected from availableForms
@@ -148,20 +179,34 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       notificationEmail: undefined,
       formFields: undefined,
       showAsInlineForm: undefined,
-      description : "Ask one question at a time & send responses to your desired location or webservice"
+      description: "Ask one question at a time & send responses to your desired location or webservice"
     },
     {
-      id: '8', name: 'Typing Delay', icon: 'hourglass_empty', type: 'typingDelay', status: 'active', x: 0, y: 0,
+      id: '8', 
+      name: 'Typing Delay', 
+      icon: 'hourglass_empty', // Kept same (matches screenshot)
+      type: 'typingDelay', 
+      imageUrl:'https://app.botsify.com/theme/images/Story-Icons/typing.png',
+      status: 'normal', 
+      x: 0, 
+      y: 0,
       width: 0,
       height: 0,
       description: 'Add a typing delay between two blocks to mimic a real experience',
-      delaySeconds: 1 // Initialize delay for typing delay
+      delaySeconds: 1
     },
     {
-      id: '9', name: 'JSON API Integration', icon: 'code', type: 'jsonApi', status: 'active', x: 0, y: 0,
+      id: '9', 
+      name: 'JSON API Integration', 
+      icon: 'code', // Kept same (matches screenshot)
+      type: 'jsonApi',
+      imageUrl:'https://app.botsify.com/theme/images/Story-Icons/api.png', 
+      status: 'normal', 
+      x: 0, 
+      y: 0,
       width: 0,
       height: 0,
-      description : "Integrate JSON API to fetch or post data to your webservice"
+      description: "Integrate JSON API to fetch or post data to your webservice"
     },
   ];
 
@@ -700,6 +745,7 @@ this.instance.connect({
   getStatusColor(status: string): string {
     switch (status) {
       case 'active': return '#4CAF50';
+      case 'normal': return '##f1f4fc';
       case 'error': return '#F44336';
       case 'new': return '#FF9800';
       case 'disabled': return '#9E9E9E';

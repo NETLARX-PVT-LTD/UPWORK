@@ -24,7 +24,7 @@
       </div>
 
       <div class="search-container">
-        <mat-form-field appearance="outline" class="search-field">
+        <mat-form-field class="search-field"> <!-- Removed appearance="outline" -->
           <mat-icon matPrefix>search</mat-icon>
           <input
             matInput
@@ -45,16 +45,20 @@
             class="block-icon"
             [style.background-color]="getStatusColor(block.status)"
           >
-            <mat-icon>{{ block.icon }}</mat-icon>
+            <img *ngIf="block.imageUrl" [src]="block.imageUrl" alt="block-icon" class="custom-icon">
+            <mat-icon *ngIf="!block.imageUrl">{{ block.icon }}</mat-icon>
           </div>
-
-          <div class="block-content">
+      
+          <div class="block-content flex items-center">
             <div class="block-name">{{ block.name }}</div>
-            <div class="block-description" *ngIf="block.description">
+            <div
+              *ngIf="block.description"
+              class="block-description ml-2 px-1.5 py-1 rounded-md bg-green-500 text-white text-xs font-semibold"
+            >
               {{ block.description }}
             </div>
           </div>
-
+      
           <div class="drag-handle" cdkDragHandle>
             <mat-icon>drag_indicator</mat-icon>
           </div>
