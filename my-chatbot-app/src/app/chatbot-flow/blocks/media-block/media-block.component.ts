@@ -1,5 +1,5 @@
 // src/app/chatbot-flow/blocks/media-block/media-block.component.ts
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 
 import { ChatbotBlock, AvailableMedia } from '../../../models/chatbot-block.model';
 
@@ -26,7 +27,8 @@ import { ChatbotBlock, AvailableMedia } from '../../../models/chatbot-block.mode
     MatButtonModule,
     MatSelectModule,
     MatButtonToggleModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    CdkTextareaAutosize
   ],
   templateUrl: './media-block.component.html',
   styleUrls: ['./media-block.component.scss']
@@ -48,20 +50,50 @@ export class MediaBlockComponent implements OnInit {
 
   showNewMediaForm: boolean = false;
   showButtonTypeCard: boolean = false;
-  showTextMessageIntegrationCard: boolean = false; // NEW: Property to control text message integration card visibility
-  // You might want to define a property on your block to store the button's text message content
-  // For example, block.buttonTextMessageContent: string;
-  // If your ChatbotBlock model doesn't have it, add it there, or manage it separately here.
-  // For now, I'll assume `block` can hold a property like `currentButtonTextMessageContent`.
-  // A better long-term solution would be to have a `buttons` array on `ChatbotBlock`
-  // and manage button data within each button object. For this specific request,
-  // I'll add a simple property to the component to simulate button content for the integration card.
-  currentButtonTextMessageContent: string = ''; // NEW: To hold the text message for the integration card
+  showTextMessageIntegrationCard: boolean = false;
+
+  // --- NEW PROPERTIES FOR INFO MODAL ---
+  showInfoModal: boolean = false;
+  private activeInputElementType: 'buttonTitle' | 'buttonTextMessage' | null = null;
+  searchTerm: string = '';
+
+  @ViewChild('buttonTitleAutosize', { read: ElementRef }) buttonTitleAutosizeElement!: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('buttonTextMessageAutosize', { read: ElementRef }) buttonTextMessageAutosizeElement!: ElementRef<HTMLTextAreaElement>;
+
+  generalAttributes: string[] = [
+    '{first_name}',
+    '{last_name}',
+    '{timezone}',
+    '{gender}',
+    '{last_user_msg}',
+    '{last_page}',
+    '{os}'
+  ];
+
+  formAttributes: string[] = [
+    '{user/last_user_message}',
+    '{user/last_bot_message}',
+    '{user/last_user_button}',
+    '{user/created_at}',
+    '{user/mens_watch}',
+    '{user/Range}',
+    '{user/Price}',
+    '{user/Name}'
+  ];
+
+  userAttributes: string[] = [
+    '{user/Gender}'
+  ];
+
+  // Filtered attributes for search
+  filteredGeneralAttributes: string[] = [];
+  filteredFormAttributes: string[] = [];
+  filteredUserAttributes: string[] = [];
+  // --- END NEW PROPERTIES FOR INFO MODAL ---
 
   constructor(private _snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
-    // Ensure all potentially undefined block properties are initialized with sensible defaults
     if (!this.block.mediaType) {
       this.block.mediaType = 'text';
     }
@@ -74,15 +106,13 @@ export class MediaBlockComponent implements OnInit {
     if (this.block.mediaName === undefined) {
       this.block.mediaName = '';
     }
-    // Initialize currentButtonTextMessageContent if it's meant to persist with the block
-    // For this example, we'll assume it's transient or handled by a more complex button structure.
-    // If you add `buttonTextMessageContent` to ChatbotBlock, initialize it here.
-    // if (this.block.buttonTextMessageContent === undefined) {
-    //   this.block.buttonTextMessageContent = '';
-    // }
+    if (this.block.buttonTitle === undefined) {
+      this.block.buttonTitle = '';
+    }
+    if (this.block.buttonTextMessage === undefined) {
+      this.block.buttonTextMessage = '';
+    }
 
-
-    // When the sidebar opens for an existing block, ensure its media details are loaded
     if (this.isSelected && this.block.mediaId) {
       const selected = this.availableMedia.find(m => m.id === this.block.mediaId);
       if (selected) {
@@ -92,6 +122,9 @@ export class MediaBlockComponent implements OnInit {
         this.block.mediaUrl = selected.url;
       }
     }
+
+    // NEW: Initialize filtered attributes
+    this.resetFilteredAttributes();
   }
 
   onMediaSelectionChange(): void {
@@ -102,7 +135,6 @@ export class MediaBlockComponent implements OnInit {
       this.block.content = selected.content;
       this.block.mediaUrl = selected.url;
     } else {
-      // If "No parent media block" is selected, clear media-related properties
       this.block.mediaName = '';
       this.block.mediaType = 'text';
       this.block.content = '';
@@ -111,7 +143,7 @@ export class MediaBlockComponent implements OnInit {
     this.blockUpdated.emit(this.block);
     this.showNewMediaForm = false;
     this.showButtonTypeCard = false;
-    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card on media selection change
+    this.showTextMessageIntegrationCard = false;
   }
 
   createNewMediaBlock(): void {
@@ -123,7 +155,7 @@ export class MediaBlockComponent implements OnInit {
     this.block.mediaUrl = '';
     this.blockUpdated.emit(this.block);
     this.showButtonTypeCard = false;
-    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card when creating new media
+    this.showTextMessageIntegrationCard = false;
     this._snackBar.open('Ready to create a new media block. Fill in the details.', 'Dismiss', { duration: 3000 });
   }
 
@@ -132,7 +164,7 @@ export class MediaBlockComponent implements OnInit {
       this.showNewMediaForm = true;
       this.onContentChange();
       this.showButtonTypeCard = false;
-      this.showTextMessageIntegrationCard = false; // NEW: Hide text message card when editing existing media
+      this.showTextMessageIntegrationCard = false;
       this._snackBar.open(`Editing Media Block: ${this.getMediaName(this.block.mediaId)}`, 'Dismiss', { duration: 3000 });
     } else {
       this._snackBar.open('Please select a media block to edit first.', 'Dismiss', { duration: 3000 });
@@ -190,7 +222,7 @@ export class MediaBlockComponent implements OnInit {
 
     this.showNewMediaForm = false;
     this.showButtonTypeCard = false;
-    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card after saving media
+    this.showTextMessageIntegrationCard = false;
     this.blockUpdated.emit(this.block);
   }
 
@@ -212,7 +244,7 @@ export class MediaBlockComponent implements OnInit {
     }
     this.showNewMediaForm = false;
     this.showButtonTypeCard = false;
-    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card on cancel
+    this.showTextMessageIntegrationCard = false;
     this.blockUpdated.emit(this.block);
     this._snackBar.open('Media editing/creation canceled.', 'Dismiss', { duration: 2000 });
   }
@@ -225,7 +257,7 @@ export class MediaBlockComponent implements OnInit {
   onSelectBlock(): void {
     this.selectBlock.emit(this.block);
     this.showButtonTypeCard = false;
-    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card if block selection changes
+    this.showTextMessageIntegrationCard = false;
   }
 
   onStartConnection(event: MouseEvent): void {
@@ -256,7 +288,7 @@ export class MediaBlockComponent implements OnInit {
     this.closeSidebarEvent.emit();
     this.showNewMediaForm = false;
     this.showButtonTypeCard = false;
-    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card when sidebar closes
+    this.showTextMessageIntegrationCard = false;
   }
 
   private generateDefaultMediaBlockName(): string {
@@ -264,48 +296,108 @@ export class MediaBlockComponent implements OnInit {
     return `Media Block ${randomNumber}`;
   }
 
-  // Method to show the button type card
   onAddNewButton(): void {
     this.showButtonTypeCard = true;
-    this.showTextMessageIntegrationCard = false; // NEW: Hide text message card when showing button type card
+    this.showTextMessageIntegrationCard = false;
     this._snackBar.open('Select a button type.', 'Dismiss', { duration: 2000 });
   }
 
-  // Method to close the button type card
   closeButtonTypeCard(): void {
     this.showButtonTypeCard = false;
   }
 
-  // NEW: Method to handle "Text Message" button click from the button type card
   onTextMessageButtonClick(): void {
-    this.showButtonTypeCard = false; // Hide the button type card
-    this.showTextMessageIntegrationCard = true; // Show the text message integration card
-    // You might want to initialize `currentButtonTextMessageContent` here if it's per-button
-    // For now, it will use its default empty string or previously saved value.
+    this.showButtonTypeCard = false;
+    this.showTextMessageIntegrationCard = true;
     this._snackBar.open('Configure your text message.', 'Dismiss', { duration: 2000 });
   }
 
-  // NEW: Method to close the text message integration card
   closeTextMessageIntegrationCard(): void {
     this.showTextMessageIntegrationCard = false;
   }
 
-  // NEW: Method to save the text message content from the integration card
   saveTextMessageIntegration(): void {
-    if (!this.currentButtonTextMessageContent || this.currentButtonTextMessageContent.trim() === '') {
-      this._snackBar.open('Text message cannot be empty.', 'Dismiss', { duration: 3000 });
-      return;
+    if (!this.block.buttonTitle || this.block.buttonTitle.trim() === '') {
+        this._snackBar.open('Button Title cannot be empty.', 'Dismiss', { duration: 3000 });
+        return;
     }
-    // Here you would typically save `this.currentButtonTextMessageContent`
-    // to your `block` model or a specific button object within the block.
-    // For example, if your `ChatbotBlock` has a `buttons` array and you're editing a specific button:
-    // this.block.buttons[indexOfCurrentButton].textMessage = this.currentButtonTextMessageContent;
 
-    // For this example, we'll just log and provide a success message.
-    console.log('Text Message saved:', this.currentButtonTextMessageContent);
+    if (!this.block.buttonTextMessage || this.block.buttonTextMessage.trim() === '') {
+        this._snackBar.open('Bot says message cannot be empty.', 'Dismiss', { duration: 3000 });
+        return;
+    }
+
+    console.log('Button Title saved:', this.block.buttonTitle);
+    console.log('Bot says message saved:', this.block.buttonTextMessage);
     this._snackBar.open('Text Message content saved!', 'Dismiss', { duration: 3000 });
-    this.closeTextMessageIntegrationCard(); // Close the card after saving
-    // You'd typically emit an event here to notify parent component about block update
+    this.closeTextMessageIntegrationCard();
     this.blockUpdated.emit(this.block);
+  }
+
+  // --- NEW INFO MODAL METHODS ---
+  openInfoModal(inputType: 'buttonTitle' | 'buttonTextMessage'): void {
+    this.showInfoModal = true;
+    this.activeInputElementType = inputType;
+    this.searchTerm = '';
+    this.resetFilteredAttributes();
+  }
+
+  closeInfoModal(): void {
+    this.showInfoModal = false;
+    this.searchTerm = '';
+    this.resetFilteredAttributes();
+    this.activeInputElementType = null;
+  }
+
+  selectVariable(variable: string): void {
+    let targetTextarea: HTMLTextAreaElement | null = null;
+    let targetModelProperty: 'buttonTitle' | 'buttonTextMessage' | null = null;
+
+    if (this.activeInputElementType === 'buttonTitle' && this.buttonTitleAutosizeElement) {
+      targetTextarea = this.buttonTitleAutosizeElement.nativeElement;
+      targetModelProperty = 'buttonTitle';
+    } else if (this.activeInputElementType === 'buttonTextMessage' && this.buttonTextMessageAutosizeElement) {
+      targetTextarea = this.buttonTextMessageAutosizeElement.nativeElement;
+      targetModelProperty = 'buttonTextMessage';
+    }
+
+    if (targetTextarea && targetModelProperty) {
+      const start = targetTextarea.selectionStart;
+      const end = targetTextarea.selectionEnd;
+      const currentValue = targetTextarea.value;
+
+      const newValue = currentValue.substring(0, start) + variable + currentValue.substring(end);
+
+      this.block[targetModelProperty] = newValue;
+
+      targetTextarea.value = newValue;
+      targetTextarea.selectionStart = targetTextarea.selectionEnd = start + variable.length;
+
+      this.onContentChange();
+    }
+
+    this.closeInfoModal();
+  }
+
+  filterVariables(): void {
+    const searchLower = this.searchTerm.toLowerCase();
+    
+    this.filteredGeneralAttributes = this.generalAttributes.filter(attr =>
+      attr.toLowerCase().includes(searchLower)
+    );
+    
+    this.filteredFormAttributes = this.formAttributes.filter(attr =>
+      attr.toLowerCase().includes(searchLower)
+    );
+    
+    this.filteredUserAttributes = this.userAttributes.filter(attr =>
+      attr.toLowerCase().includes(searchLower)
+    );
+  }
+
+  resetFilteredAttributes(): void {
+    this.filteredGeneralAttributes = [...this.generalAttributes];
+    this.filteredFormAttributes = [...this.formAttributes];
+    this.filteredUserAttributes = [...this.userAttributes];
   }
 }

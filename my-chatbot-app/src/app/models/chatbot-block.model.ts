@@ -73,6 +73,8 @@ export interface ChatbotBlock {
   text?: string; // <--- ADD THIS LINE for quick reply blocks if they are ChatbotBlock type
   value?: string; // <--- ADD THIS LINE if needed for quick reply blocks
 
+  // NEW: Properties for the text message button
+  buttonTitle?: string;
   buttonTextMessage?: string;
   
 }
