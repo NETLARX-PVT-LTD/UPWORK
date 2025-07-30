@@ -141,7 +141,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       y: 0,
       width: 0,
       height: 0,
-      description: 'Respond your users with multimedia messages such as Images, Videos etc',
+  
       mediaId: undefined,
       mediaType: undefined,
       mediaUrl: undefined,
@@ -179,7 +179,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       notificationEmail: undefined,
       formFields: undefined,
       showAsInlineForm: undefined,
-      description: "Ask one question at a time & send responses to your desired location or webservice"
+      
     },
     {
       id: '8', 
@@ -192,7 +192,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       y: 0,
       width: 0,
       height: 0,
-      description: 'Add a typing delay between two blocks to mimic a real experience',
+     
       delaySeconds: 1
     },
     {
@@ -206,7 +206,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       y: 0,
       width: 0,
       height: 0,
-      description: "Integrate JSON API to fetch or post data to your webservice"
+      
     },
   ];
 
