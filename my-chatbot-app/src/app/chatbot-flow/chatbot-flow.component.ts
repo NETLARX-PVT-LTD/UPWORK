@@ -235,6 +235,24 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       debounceTime(300),
       map(value => this._filter(value || ''))
     );
+
+    // 2. Add original User Input block (second position)
+  this.canvasBlocks.push({
+    id: 'flow-start',
+    name: 'User Input',
+    icon: 'person',
+    type: 'userInput',
+    status: 'active',
+    x: 200,
+    y: 200,
+    subType: 'keywordGroup',
+    content: 'Hello 👋',
+    keywordGroups: [['Hello', 'Hi']],
+    description: 'Define keywords that trigger the conversations',
+    width: 0,
+    height: 0
+  });
+  
     const formBlockTemplate = this.allBlocks.find(block => block.type === 'conversationalForm');
       const conversationalFormFields : FormField[] = [
         {
@@ -283,23 +301,6 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
     y: 100,
     content: '🤖 Welcome to Jarvish!',
     description: 'Respond with welcome message',
-    width: 0,
-    height: 0
-  });
-
-  // 2. Add original User Input block (second position)
-  this.canvasBlocks.push({
-    id: 'flow-start',
-    name: 'User Input',
-    icon: 'person',
-    type: 'userInput',
-    status: 'active',
-    x: 200,
-    y: 200,
-    subType: 'keywordGroup',
-    content: 'Hello 👋',
-    keywordGroups: [['Hello', 'Hi']],
-    description: 'Define keywords that trigger the conversations',
     width: 0,
     height: 0
   });
