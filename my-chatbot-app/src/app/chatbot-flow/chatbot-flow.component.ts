@@ -4,7 +4,7 @@ import { CdkDragDrop, moveItemInArray, CdkDragEnd } from '@angular/cdk/drag-drop
 import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith, debounceTime } from 'rxjs/operators';
-import { ChatbotBlock, Connection, AvailableMedia, AvailableStory, AvailableForm } from '../models/chatbot-block.model';
+import { ChatbotBlock, Connection, AvailableMedia, AvailableStory, AvailableForm, FormField } from '../models/chatbot-block.model';
 import { jsPlumb } from 'jsplumb';
 
 
@@ -235,24 +235,109 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit {
       debounceTime(300),
       map(value => this._filter(value || ''))
     );
+    const formBlockTemplate = this.allBlocks.find(block => block.type === 'conversationalForm');
+      const conversationalFormFields : FormField[] = [
+        {
+          name: 'Your Name',
+          type: 'text',
+          required: true,
+          promptPhrase: 'Enter your name'
+        },
+        {
+          name: 'Email Address',
+          type: 'email',
+          required: true,
+          promptPhrase: 'Enter your email'
+        },
+        {
+          name : 'Image',
+          type : 'image',
+          required : true,
+          promptPhrase : "Put one of your image"
+        }
+    ];
 
     // Initialize with the starter block
+    // this.canvasBlocks.push({
+    //   id: 'flow-start',
+    //   name: 'User Input',
+    //   icon: 'person',
+    //   type: 'userInput',
+    //   status: 'active',
+    //   x: 600,
+    //   y: 200,
+    //   subType: 'keywordGroup',
+    //   content: 'Hello 👋',
+    //   keywordGroups: [['Hello', 'Hi']], // Initial keyword group (array of arrays)
+    //   description: 'Define keywords that trigger the conversations',
+    //   width: 0,
+    //   height: 0
+    // });
     this.canvasBlocks.push({
-      id: 'flow-start',
-      name: 'User Input',
-      icon: 'person',
-      type: 'userInput',
-      status: 'active',
-      x: 600,
-      y: 200,
-      subType: 'keywordGroup',
-      content: 'Hello 👋',
-      keywordGroups: [['Hello', 'Hi']], // Initial keyword group (array of arrays)
-      description: 'Define keywords that trigger the conversations',
-      width: 0,
-      height: 0
-    });
+    id: 'text-response-1',
+    name: 'Text Response',
+    icon: 'chat_bubble_outline',
+    type: 'textResponse',
+    status: 'active',
+    x: 100,
+    y: 100,
+    content: '🤖 Welcome to Jarvish!',
+    description: 'Respond with welcome message',
+    width: 0,
+    height: 0
+  });
+
+  // 2. Add original User Input block (second position)
+  this.canvasBlocks.push({
+    id: 'flow-start',
+    name: 'User Input',
+    icon: 'person',
+    type: 'userInput',
+    status: 'active',
+    x: 200,
+    y: 200,
+    subType: 'keywordGroup',
+    content: 'Hello 👋',
+    keywordGroups: [['Hello', 'Hi']],
+    description: 'Define keywords that trigger the conversations',
+    width: 0,
+    height: 0
+  });
+
+  // 3. Add another textResponse block at THIRD position
+  this.canvasBlocks.push({
+    id: 'text-response-2',
+    name: 'Text Response',
+    icon: 'chat_bubble_outline',
+    type: 'textResponse',
+    status: 'active',
+    x: 300,
+    y: 300,
+    content: 'done implement conversation on that also',
+    description: 'Final message from Jarvish',
+    width: 0,
+    height: 0
+  });
+
+  if (formBlockTemplate) {
+        const conversationalFormBlock : ChatbotBlock = {
+          ...formBlockTemplate,
+          id: 'form-block-1',
+          x: 400,
+          y: 400,
+          status: 'active',
+          formId: 'form-123',
+          formName: 'User Details Form',
+          webhookUrl: 'https://your-webhook-url.com',
+          sendEmailNotification: true,
+          notificationEmail: 'your-email@example.com',
+          showAsInlineForm: true,
+          formFields: conversationalFormFields
+        };
+
+        this.canvasBlocks.push(conversationalFormBlock);
   }
+}
 
   ngAfterViewInit(): void {
 

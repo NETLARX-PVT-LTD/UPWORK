@@ -504,7 +504,7 @@
     ></app-message-box>
   </div>
 
-  <app-jarvish-block *ngIf="isJarvisVisible"></app-jarvish-block>
+  <app-jarvish-block *ngIf="isJarvisVisible" [canvasBlocks]="canvasBlocks"></app-jarvish-block>
   
   <button class="absolute right-10 bottom-8 w-14 cursor-pointer z-[100000]" (click)="toggleJarvis()">
     <img src="/msg.png" alt="" class="rounded-full">
