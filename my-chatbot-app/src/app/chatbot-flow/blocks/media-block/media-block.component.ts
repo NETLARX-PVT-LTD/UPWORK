@@ -92,7 +92,37 @@ export class MediaBlockComponent implements OnInit {
   // --- END NEW PROPERTIES FOR INFO MODAL ---
 
   constructor(private _snackBar: MatSnackBar) { }
+  // New getter to check if the block has any content
+  get hasContent(): boolean {
+    // Return true if any content property is not falsy
+    return !!this.block.content || 
+           !!this.block.mediaUrl || 
+           !!this.block.buttonTitle || 
+           !!this.block.buttonTextMessage;
+  }
+// NEW PROPERTY to track if we are in 'edit' mode
+  isEditingButton: boolean = false;
+  // NEW: Methods for the new button icons
+  onEditButtonClick(): void {
+      // Set the state to 'edit'
+    this.isEditingButton = true;
+    // Show the integration card and pre-fill the values
+    this.showTextMessageIntegrationCard = true;
+    this.showButtonTypeCard = false; // Ensure this is hidden
+    this._snackBar.open('Editing Text Message Integration.', 'Dismiss', { duration: 2000 });
+  }
 
+  onDeleteButtonClick(): void {
+    // Clear the button data from the block
+    this.block.buttonTitle = '';
+    this.block.buttonTextMessage = '';
+     // Reset the editing state
+    this.isEditingButton = false;
+    // Notify parent component of the change
+    this.blockUpdated.emit(this.block);
+
+    this._snackBar.open('Button removed.', 'Dismiss', { duration: 2000 });
+  }
   ngOnInit(): void {
     if (!this.block.mediaType) {
       this.block.mediaType = 'text';
@@ -309,11 +339,13 @@ export class MediaBlockComponent implements OnInit {
   onTextMessageButtonClick(): void {
     this.showButtonTypeCard = false;
     this.showTextMessageIntegrationCard = true;
+     this.isEditingButton = false; // Important: reset this to false for a new button
     this._snackBar.open('Configure your text message.', 'Dismiss', { duration: 2000 });
   }
 
   closeTextMessageIntegrationCard(): void {
     this.showTextMessageIntegrationCard = false;
+     this.isEditingButton = false; // Important: reset this to false for a new button
   }
 
   saveTextMessageIntegration(): void {
