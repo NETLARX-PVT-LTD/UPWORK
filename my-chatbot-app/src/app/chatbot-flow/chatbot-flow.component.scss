@@ -67,8 +67,20 @@
   }
   
   .search-container {
-    padding: 16px 20px;
+    padding: 0px 20px;
     border-bottom: 1px solid #f1f5f9;
+    
+   
+    
+.search-field ::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: transparent !important;
+}
+
+
+
+:host ::ng-deep .search-field .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: transparent !important;
+}
     
     .search-field {
       width: 100%;
@@ -104,7 +116,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 12px;
+        margin-right: 5px;
         
         mat-icon {
           color: white;
@@ -112,26 +124,31 @@
           width: 18px;
           height: 18px;
         }
+        .custom-icon {
+          width: 24px; /* Adjust this value as needed for your desired smaller size */
+          height: 24px; /* Adjust this value as needed for your desired smaller size */
+          object-fit: contain; /* Ensures the image scales down without being cropped */
+        }
       }
       
       .block-content {
         flex: 1;
         
         .block-name {
-          font-weight: 500;
+          font-weight: 700;
           color: #1e293b;
-          font-size: 14px;
+          font-size: 12px;
           margin-bottom: 2px;
         }
         
         .block-description {
-          font-size: 12px;
-          color: #64748b;
+          font-size: 11px;
+          color: white;
         }
       }
       
       .drag-handle {
-        color: #94a3b8;
+        color: black;
         cursor: grab;
         
         &:active {
