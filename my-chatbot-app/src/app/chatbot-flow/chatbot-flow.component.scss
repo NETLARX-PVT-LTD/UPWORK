@@ -99,7 +99,7 @@
     .block-item {
       display: flex;
       align-items: center;
-      padding: 3px 30px 3px 10px;
+      padding: 12px 20px;
       cursor: pointer;
       transition: all 0.2s ease;
       border-left: 3px solid transparent;
@@ -307,10 +307,9 @@
     }
   }
 }
-
 /* Canvas Block Styles */
 .canvas-block {
-  position: absolute;
+  position: absolute; // Essential for positioning the block itself
   width: 300px;
   background-color: rgb(245, 244, 244);
   border: 2px solid #e2e8f0;
@@ -318,60 +317,60 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
   z-index: 10;
-  cursor: move;
-  
+  cursor: grab; // Changed from 'move' for better UX indication
+  // Added `overflow: visible;` - important if endpoints extend beyond block bounds
+  overflow: visible;
+
   &:hover {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     transform: translateY(-1px);
   }
-  
+
   &.selected {
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
-  
+
   &.cdk-drag-dragging {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    transform: rotate(2deg);
+    // transform: rotate(2deg); // Consider removing or reducing rotation if it causes issues with connection points
     z-index: 100;
   }
-  
+
   .block-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0px 8px;
-    border-bottom : 2px solid rgb(6, 184, 6);
+    border-bottom: 2px solid rgb(6, 184, 6);
     background-color: #CDA5E7;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    
+
     .block-type-badges {
       display: flex;
       gap: 6px;
       align-items: center;
-      // background-color: #059669;
 
       .block-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      // background-color: red;
-      
-      .block-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        color: #6366f1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .block-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          color: #6366f1;
+        }
+
+        span {
+          font-weight: 600;
+          color: #1e293b;
+          font-size: 14px;
+        }
       }
-      
-      span {
-        font-weight: 600;
-        color: #1e293b;
-        font-size: 14px;
-      }
-    }
-      
+
       .badge {
         padding: 4px 8px;
         border-radius: 12px;
@@ -379,44 +378,40 @@
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        
+
         &.keyword-group-badge {
           background-color: #22c55e;
           color: white;
         }
-        
+
         &.phrase-badge {
           background-color: #22c55e;
           color: white;
         }
-        
+
         &.anything-badge {
           background-color: #22c55e;
           color: white;
         }
       }
     }
-    
+
     .block-actions {
-      
       .block-menu-trigger {
-        // width: 26px;
-        // height: 26px;
         mat-icon {
           font-size: 16px;
-          // width: ;
           color: #fff;
         }
       }
     }
   }
-  
+
   .block-body {
     padding: 0 16px 16px;
     background-color: #fff;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
-    
+
     .block-description {
       font-size: 16px;
       color: #64748b;
@@ -424,7 +419,7 @@
       line-height: 1.4;
       padding-top: 5px;
     }
-    
+
     .block-content-text {
       font-size: 13px;
       color: #374151;
@@ -434,13 +429,19 @@
       border: 1px solid #e2e8f0;
     }
   }
-  
+
   // Connection Points
+  // IMPORTANT: jsPlumb will add inline `left` and `top` (or `transform`) styles to these elements.
+  // Your `position: absolute;` is necessary, but the exact offsets should often be dictated by jsPlumb's anchor.
   .connection-point {
-    position: absolute;
+    position: absolute; // Keeps it relative to the .canvas-block
     width: 12px;
     height: 12px;
-    
+    z-index: 11; // Ensure it's above the block itself, but below jsPlumb overlays if any.
+    // Remove the `top`, `left`, `right`, `transform` properties from here for general .connection-point
+    // jsPlumb will apply its own positioning.
+
+    // Styles for the visual dot within the connection-point container
     .connection-dot {
       width: 100%;
       height: 100%;
@@ -449,27 +450,51 @@
       border: 2px solid white;
       cursor: crosshair;
       transition: all 0.2s ease;
-      
+      // You might need to adjust for the border to center perfectly
+      // For instance, if the endpoint is 12x12 and dot has 2px border,
+      // the actual dot content is 8x8.
+      // If jsPlumb is positioning the 12x12 container, the dot will be fine.
+
       &:hover {
         transform: scale(1.3);
         box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
       }
     }
-    
+
+    // These specific positioning classes should ideally only set offsets if jsPlumb
+    // isn't handling the exact pixel position for some reason.
+    // If jsPlumb's anchor config is 'Top' or 'Bottom', it typically handles this.
+    // However, if your HTML structure for the endpoint is *just* the div that jsPlumb targets,
+    // and you want it to appear *outside* the block, then these offsets are still useful.
+
+    // For top/bottom endpoints on the block, jsPlumb's 'Top' and 'Bottom' anchors
+    // usually position them correctly without needing `top: 50%` or `transform`.
+    // Instead, you'd specify the element ID and the anchor.
+
+    // If these connection points are always at the center of the left/right edges,
+    // and jsPlumb's standard 'Left'/'Right' anchors are used, these might not be strictly necessary
+    // for jsPlumb's internal positioning, but they define *your* visual intention.
+
     &.connection-output {
-      right: -6px;
+      // This positions the *container* of the dot.
+      // jsPlumb will often override `right` or `left` with its calculated pixel value.
+      // If you are using jsPlumb's `anchor: 'Right'`, it will take care of `right` and `top`.
+      // If this `.connection-point` is the element `jsPlumb.addEndpoint()` is targeting:
+      right: -6px; // This ensures the center of the 12px dot is on the edge
       top: 50%;
       transform: translateY(-50%);
+      // jsPlumb's `anchor: 'Right'` effectively does this calculation.
+      // If you're targeting a distinct element for the endpoint, these can serve as fallback.
     }
-    
+
     &.connection-input {
-      left: -6px;
+      left: -6px; // This ensures the center of the 12px dot is on the edge
       top: 50%;
       transform: translateY(-50%);
+      // jsPlumb's `anchor: 'Left'` effectively does this calculation.
     }
   }
 }
-
 /* Keywords Container */
 .keywords-container {
   margin-top: 8px;
