@@ -16,7 +16,7 @@
   background-color: white;
   border-bottom: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  z-index: 1000; /* Increase z-index to be higher than sidebar */
+  z-index: 100; /* Increase z-index to be higher than sidebar */
   position: relative; /* Ensure z-index works */
   
   .header-left {
@@ -749,10 +749,10 @@
 }
 
 .canvas-block-textResponse {
-  border-color: #8b5cf6;
+  border-color: #1a4d8c;
   
   .block-body .block-icon {
-    color: #8b5cf6;
+    // color: #8b5cf6;
   }
 }
 
@@ -888,7 +888,7 @@
 // ********************************************
 .quick-reply-cards-wrapper {
   position: absolute;
-  pointer-events: none; // Allow interaction with underlying elements
+  pointer-events: none;
 
   &.hidden {
     display: none;
@@ -898,23 +898,25 @@
   .quick-replies-main-block-external {
     position: absolute;
     background: white;
-    border: 2px solid #e5e7eb;
+    border: 2px solid #d1d5db;
     border-radius: 12px;
-    padding: 16px;
+    padding: 0;
     min-width: 280px;
     max-width: 300px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    pointer-events: auto; // Re-enable interaction for these blocks
+    pointer-events: auto;
+    overflow: hidden;
 
     .flow-block-header {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 12px;
+      padding: 16px 16px 12px 16px;
+      border-bottom: 1px solid #d1d5db;
 
       .block-icon {
         font-size: 18px;
-        color: #6366f1;
+        color: #6b7280;
       }
 
       .block-title {
@@ -925,6 +927,8 @@
     }
 
     .flow-block-body {
+      padding: 12px 16px 16px 16px;
+
       .block-description {
         font-size: 14px;
         color: #6b7280;
@@ -961,13 +965,22 @@
     }
   }
 
-  // Specific styling for No Quick Reply block
+  // Specific styling for No Quick Reply block - Orange theme
   .no-quick-reply-block-external {
-    border-color: #f59e0b;
-    background-color: #fef3c7;
+    border-color: #fb923c;
 
-    .flow-block-header .block-icon {
-      color: #f59e0b;
+    .flow-block-header {
+      background-color: #fef3c7;
+      border-bottom-color: #fb923c;
+      border-bottom: 2px solid #fb923c;
+
+      .block-icon {
+        color: #f59e0b;
+      }
+    }
+
+    .flow-block-body {
+      background-color: #ffffff;
     }
 
     .connection-point .connection-dot {
@@ -975,17 +988,26 @@
     }
 
     &:hover {
-      border-color: #d97706;
+      border-color: #ea580c;
     }
   }
 
-  // Specific styling for Quick Replies main block
+  // Specific styling for Quick Replies main block - Blue theme
   .quick-replies-main-block-external {
-    border-color: #3b82f6;
-    background-color: #dbeafe;
+    border-color: #60a5fa;
 
-    .flow-block-header .block-icon {
-      color: #3b82f6;
+    .flow-block-header {
+      background-color: #dbeafe;
+      border-bottom-color: #60a5fa;
+      border-bottom: 2px solid #60a5fa;
+
+      .block-icon {
+        color: #3b82f6;
+      }
+    }
+
+    .flow-block-body {
+      background-color: #ffffff;
     }
 
     .connection-point .connection-dot {
@@ -1008,49 +1030,65 @@
 
       .individual-quick-reply-card {
         position: absolute;
-        background: #f3e8ff;
-        border: 2px solid #a855f7;
+        // background: #880fd8;
+        border: 2px solid  #880fd8;
         border-radius: 12px;
-        padding: 12px 16px;
+        padding: 0;
         min-width: 200px;
         max-width: 220px;
         box-shadow: 0 4px 12px rgba(168, 85, 247, 0.15);
+        overflow: hidden;
 
         .quick-reply-card-header {
           display: flex;
           align-items: center;
-          gap: 8px;
-          flex-wrap: wrap;
+          gap: 6px;
+          padding: 12px 16px 8px 16px;
+          border-bottom: 1px solid #c084fc;
+          background-color: #dec1fc;
 
           .quick-reply-icon-wrapper {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 20px;
-            height: 20px;
-            background-color: #a855f7;
-            border-radius: 4px;
+            width: 18px;
+            height: 18px;
+            // background-color: #a855f7;
+            border-radius: 3px;
 
             .quick-reply-icon {
-              font-size: 14px;
-              color: white;
+              font-size: 16px;
+              color: #a855f7;
             }
           }
 
           .quick-reply-title {
-            font-size: 13px;
-            color: #6b7280;
+            font-size: 12px;
+            color: rgb(31, 30, 30);
             font-weight: 500;
+            margin-right: 4px;
           }
 
           .quick-reply-badge {
-            background-color: #10b981;
+            background-color: #13b910;
             color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-size: 10px;
             font-weight: 600;
-            margin-left: auto;
+            white-space: nowrap;
+          }
+        }
+
+        .quick-reply-card-body {
+          padding: 8px 16px 12px 16px;
+          background-color: #f3e8ff;
+
+          .quick-reply-description {
+            font-size: 11px;
+            color: #6b7280;
+            margin: 0;
+            line-height: 1.4;
           }
         }
 
@@ -1122,4 +1160,336 @@
   position: relative;
   width: 100%;
   height: 100%;
+}
+
+// *************************
+
+/* Additional CSS styles for jsPlumb integration - Add to chatbot-flow.component.scss */
+
+/* jsPlumb specific styles */
+.jsplumb-draggable {
+  position: absolute !important;
+  z-index: 10;
+}
+
+/* jsPlumb endpoints styling */
+.jtk-endpoint {
+  z-index: 15;
+  cursor: pointer;
+}
+
+.jtk-endpoint:hover {
+  transform: scale(1.2);
+  transition: transform 0.2s ease;
+}
+
+/* jsPlumb connections styling */
+.jtk-connector {
+  z-index: 5;
+  cursor: pointer;
+}
+
+.jtk-connector:hover {
+  stroke-width: 3px !important;
+}
+
+/* jsPlumb overlay styles (arrows) */
+.jtk-overlay {
+  z-index: 6;
+}
+
+/* Source endpoint (output) styling */
+.jtk-endpoint.jtk-endpoint-anchor-bottom {
+  background-color: #4f46e5;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.jtk-endpoint.jtk-endpoint-anchor-bottom:hover {
+  background-color: #7c3aed;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Target endpoint (input) styling */
+.jtk-endpoint.jtk-endpoint-anchor-top {
+  background-color: #10b981;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.jtk-endpoint.jtk-endpoint-anchor-top:hover {
+  background-color: #059669;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Connection path styling */
+.jtk-connector path {
+  stroke: #4f46e5;
+  stroke-width: 2px;
+  fill: none;
+}
+
+.jtk-connector:hover path {
+  stroke: #7c3aed;
+  stroke-width: 3px;
+}
+
+/* Selected connection styling */
+.jtk-connector.jtk-connector-selected path {
+  stroke: #ef4444;
+  stroke-width: 3px;
+}
+
+/* Arrow overlay styling */
+.jtk-overlay.jtk-arrow {
+  fill: #4f46e5;
+  stroke: #4f46e5;
+}
+
+.jtk-connector:hover .jtk-overlay.jtk-arrow {
+  fill: #7c3aed;
+  stroke: #7c3aed;
+}
+
+/* Canvas block improvements for jsPlumb */
+.canvas-block {
+  position: absolute;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  // padding: 12px;
+  min-width: 200px;
+  min-height: 80px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  cursor: move;
+  background: white;
+}
+
+.canvas-block:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.canvas-block.selected {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Visual indicators for connection points */
+.canvas-block::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  background: #10b981;
+  border: 2px solid white;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 20;
+}
+
+.canvas-block::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  // background: black;
+}
+
+/* Add these styles to your chatbot-flow.component.scss */
+
+/* Visual connection points that appear during drag */
+.visual-connection-point {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px !important;
+  height: 16px !important;
+  background: #10b981 !important;
+  border: 2px solid white !important;
+  border-radius: 50% !important;
+  z-index: 1000 !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4) !important;
+  pointer-events: none;
+}
+
+/* Enhanced styling for dragging blocks */
+.canvas-block.dragging {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Block hover effects */
+.canvas-block:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.canvas-block.selected {
+  border: 2px solid #4f46e5 !important;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+/* Connection animation styles */
+.canvas-block {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+/* Enhanced connection points visibility during drag operations */
+.canvas-block.can-connect::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 998;
+  animation: pulse-connection 1.5s infinite;
+}
+
+@keyframes pulse-connection {
+  0% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Connection line styles for jsPlumb */
+.jtk-connector {
+  z-index: 4;
+}
+
+.jtk-endpoint {
+  z-index: 5;
+}
+
+/* Drag handle enhancement */
+.drag-handle {
+  cursor: grab;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Block container positioning */
+.blocks-container {
+  position: relative;
+  min-height: 100%;
+  min-width: 100%;
+}
+
+/* Canvas block general styling */
+.canvas-block {
+  position: absolute;
+  cursor: move;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  min-width: 200px;
+  max-width: 300px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  user-select: none;
+}
+
+/* Prevent text selection during drag */
+.canvas-block * {
+  user-select: none;
+  pointer-events: auto;
+}
+
+/* Connection success feedback */
+.connection-success {
+  animation: connection-created 0.5s ease-out;
+}
+
+@keyframes connection-created {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0.3);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* Enhanced canvas styling */
+.canvas-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 1000px;
+  min-width: 1000px;
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(0,0,0,0.15) 1px, transparent 0);
+  background-size: 20px 20px;
+  background-position: 0 0;
+}
+
+/* Flow start indicator styling */
+.flow-start-indicator {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  z-index: 1;
+}
+
+.flow-start-text {
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.flow-start-arrow {
+  animation: bounce-arrow 2s infinite;
+}
+
+@keyframes bounce-arrow {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
 }
