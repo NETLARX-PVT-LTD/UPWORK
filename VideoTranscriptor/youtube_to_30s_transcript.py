@@ -12,9 +12,10 @@ VIDEO_ID = VIDEO_URL.split("v=")[-1]
 VIDEO_FILENAME = "video.mp4"
 AUDIO_FILENAME = "audio.mp3"
 CHUNKS_DIR = "chunks"
-FRAMES_DIR = "frames"
-TRANSCRIPT_FILE = "transcript_30s.json"
-MAPPING_FILE = "transcript_to_frames.json"
+OUTPUT_DIR = "youtubeurl"
+FRAMES_DIR = os.path.join("youtubeurl", "VideoFrames")
+TRANSCRIPT_FILE = os.path.join("youtubeurl", "transcript_30s.json")
+MAPPING_FILE = os.path.join("youtubeurl", "transcript_to_frames.json")
 CHUNK_DURATION_MS = 30 * 1000  # 30 seconds
 
 # === STEP 1: Download video and extract audio ===
@@ -29,7 +30,6 @@ def download_video_and_audio():
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([VIDEO_URL])
 
-    # Extract audio using yt_dlp
     ydl_audio_opts = {
         'format': 'bestaudio/best',
         'postprocessors': [{
@@ -119,9 +119,9 @@ def map_transcript_to_frames(transcript, fps):
             "frames": matched_frames
         })
 
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
     with open(MAPPING_FILE, "w", encoding="utf-8") as f:
         json.dump(mapping, f, indent=2)
-
     print(f"✅ Mapping saved to {MAPPING_FILE}")
 
 # === MAIN EXECUTION ===
