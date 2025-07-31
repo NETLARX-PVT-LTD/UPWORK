@@ -95,7 +95,8 @@ export type BlockType =
   | 'shopify'
   | 'noQuickReply'        // Add this
   | 'quickRepliesMain'     // Add this
-  | 'quickReplyItem';      // Add this
+  | 'quickReplyItem'
+  | 'quickReply';      // Add this
 
 
 // Define subtypes for UserInput blocks
