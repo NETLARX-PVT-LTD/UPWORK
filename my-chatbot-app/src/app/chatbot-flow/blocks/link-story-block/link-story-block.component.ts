@@ -7,6 +7,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { ChatbotBlock, AvailableStory } from '../../../models/chatbot-block.model';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-link-story-block',
@@ -17,7 +18,8 @@ import { ChatbotBlock, AvailableStory } from '../../../models/chatbot-block.mode
     MatIconModule,
     MatMenuModule,
     MatFormFieldModule,
-    MatSelectModule
+    MatSelectModule,
+    MatTooltipModule,
   ],
   templateUrl: './link-story-block.component.html',
   styleUrls: ['./link-story-block.component.scss']
