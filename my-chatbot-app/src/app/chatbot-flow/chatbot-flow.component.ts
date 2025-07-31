@@ -1,11 +1,10 @@
-// src/app/chatbot-flow/chatbot-flow.component.ts - Enhanced with visual connection system
 import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, HostListener, OnDestroy } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, CdkDragEnd, CdkDragStart } from '@angular/cdk/drag-drop';
 import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith, debounceTime } from 'rxjs/operators';
 import { ChatbotBlock, Connection, AvailableMedia, AvailableStory, AvailableForm, FormField } from '../models/chatbot-block.model';
-import { jsPlumb } from 'jsplumb';
+// import { jsPlumb } from 'jsplumb'; // REMOVED - jsPlumb is now managed by the service
 
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,7 +32,11 @@ import { ConversationalFormBlockComponent } from './blocks/conversational-form-b
 import { MessageBoxComponent } from '../shared/components/message-box/message-box.component';
 import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-block/json-api-integration-block.component';
 import { JarvishBlockComponent } from './blocks/jarvish-block/jarvish-block.component';
-// Add this type declaration here.
+
+// Import the new JsPlumbFlowService
+import { JsPlumbFlowService } from './services/jsplumb-flow.service';
+
+// Add this type declaration here (or ensure it's in a shared models file)
 type NearestConnectionPoint = { blockId: string, x: number, y: number };
 
 @Component({
@@ -72,36 +75,36 @@ type NearestConnectionPoint = { blockId: string, x: number, y: number };
   styleUrls: ['./chatbot-flow.component.scss']
 })
 export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
-  instance: any;
+  // instance: any; // REMOVED - Managed by JsPlumbFlowService
   @ViewChild('canvasWrapper') canvasWrapper!: ElementRef;
   @ViewChild('canvasContent') canvasContent!: ElementRef;
-  @ViewChild('svgCanvas') svgCanvas!: ElementRef;
+  @ViewChild('svgCanvas') svgCanvas!: ElementRef; // Potentially remove this if not drawing custom SVG connections
 
   allBlocks: ChatbotBlock[] = [
     {
       id: '1',
       name: 'User Input',
       imageUrl: 'https://app.botsify.com/theme/images/Story-Icons/user-message.png',
-      icon:'',
+      icon: '',
       type: 'userInput',
-      status:'normal',
+      status: 'normal',
       x: 0,
       y: 0,
       subType: 'phrase',
-      description:'Phrase',
+      description: 'Phrase',
       width: 0,
       height: 0
     },
     {
       id: '2',
       name: 'User Input',
-      icon: '', 
+      icon: '',
       imageUrl: 'https://app.botsify.com/theme/images/Story-Icons/user-message.png',
       type: 'userInput',
       status: 'normal',
       x: 0,
       y: 0,
-      description:'Keyword Group',
+      description: 'Keyword Group',
       subType: 'keywordGroup',
       width: 0,
       height: 0
@@ -109,108 +112,108 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     {
       id: '3',
       name: 'User Input',
-      icon: '', 
+      icon: '',
       imageUrl: 'https://app.botsify.com/theme/images/Story-Icons/user-message.png',
       type: 'userInput',
       status: 'normal',
       x: 0,
       y: 0,
-      description:'Type Anything',
+      description: 'Type Anything',
       subType: 'anything',
       width: 0,
       height: 0
     },
     {
-      id: '4', 
-      name: 'Text Response', 
-      icon: 'text_fields', 
-      imageUrl:'https://app.botsify.com/theme/images/Story-Icons/bot-message.png',
-      type: 'textResponse', 
-      status: 'normal', 
-      x: 0, 
-      y: 0, 
+      id: '4',
+      name: 'Text Response',
+      icon: 'text_fields',
+      imageUrl: 'https://app.botsify.com/theme/images/Story-Icons/bot-message.png',
+      type: 'textResponse',
+      status: 'normal',
+      x: 0,
+      y: 0,
       width: 0,
       height: 0,
       content: ''
     },
-  {
-    "id": "5",
-    "name": "Media block",
-    "icon": "image",
-    "type": "mediaBlock",
-    "imageUrl": "https://app.botsify.com/theme/images/Story-Icons/media.png",
-    "status": "normal",
-    "x": 0,
-    "y": 0,
-    "width": 0,
-    "height": 0,
-    "mediaId": undefined,
-    "mediaType": undefined,
-    "mediaUrl": undefined,
-    "mediaName": undefined
-  },
-  {
-    "id": "6",
-    "name": "Link Story",
-    "icon": "insert_link",
-    "type": "linkStory",
-    "imageUrl": "https://app.botsify.com/theme/images/Story-Icons/story.png",
-    "status": "normal",
-    "x": 0,
-    "y": 0,
-    "width": 0,
-    "height": 0,
-    "linkStoryId": undefined,
-    "linkStoryName": undefined
-  },
-  {
-    "id": "7",
-    "name": "Conversational Form",
-    "imageUrl": "http://app.botsify.com/theme/images/Story-Icons/form.png",
-    "icon": "list_alt",
-    "type": "conversationalForm",
-    "status": "normal",
-    "x": 0,
-    "y": 0,
-    "width": 0,
-    "height": 0,
-    "formId": undefined,
-    "formName": undefined,
-    "webhookUrl": undefined,
-    "sendEmailNotification": undefined,
-    "notificationEmail": undefined,
-    "formFields": undefined,
-    "showAsInlineForm": undefined
-  },
-  {
-    "id": "8",
-    "name": "Typing Delay",
-    "icon": "hourglass_empty",
-    "type": "typingDelay",
-    "imageUrl": "https://app.botsify.com/theme/images/Story-Icons/typing.png",
-    "status": "normal",
-    "x": 0,
-    "y": 0,
-    "width": 0,
-    "height": 0,
-    "delaySeconds": 1
-  },
-  {
-    "id": "9",
-    "name": "JSON API Integration",
-    "icon": "code",
-    "type": "jsonApi",
-    "imageUrl": "https://app.botsify.com/theme/images/Story-Icons/api.png",
-    "status": "normal",
-    "x": 0,
-    "y": 0,
-    "width": 0,
-    "height": 0
-  }
+    {
+      "id": "5",
+      "name": "Media block",
+      "icon": "image",
+      "type": "mediaBlock",
+      "imageUrl": "https://app.botsify.com/theme/images/Story-Icons/media.png",
+      "status": "normal",
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0,
+      "mediaId": undefined,
+      "mediaType": undefined,
+      "mediaUrl": undefined,
+      "mediaName": undefined
+    },
+    {
+      "id": "6",
+      "name": "Link Story",
+      "icon": "insert_link",
+      "type": "linkStory",
+      "imageUrl": "https://app.botsify.com/theme/images/Story-Icons/story.png",
+      "status": "normal",
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0,
+      "linkStoryId": undefined,
+      "linkStoryName": undefined
+    },
+    {
+      "id": "7",
+      "name": "Conversational Form",
+      "imageUrl": "http://app.botsify.com/theme/images/Story-Icons/form.png",
+      "icon": "list_alt",
+      "type": "conversationalForm",
+      "status": "normal",
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0,
+      "formId": undefined,
+      "formName": undefined,
+      "webhookUrl": undefined,
+      "sendEmailNotification": undefined,
+      "notificationEmail": undefined,
+      "formFields": undefined,
+      "showAsInlineForm": undefined
+    },
+    {
+      "id": "8",
+      "name": "Typing Delay",
+      "icon": "hourglass_empty",
+      "type": "typingDelay",
+      "imageUrl": "https://app.botsify.com/theme/images/Story-Icons/typing.png",
+      "status": "normal",
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0,
+      "delaySeconds": 1
+    },
+    {
+      "id": "9",
+      "name": "JSON API Integration",
+      "icon": "code",
+      "type": "jsonApi",
+      "imageUrl": "https://app.botsify.com/theme/images/Story-Icons/api.png",
+      "status": "normal",
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    }
   ];
 
   canvasBlocks: ChatbotBlock[] = [];
-  connections: Connection[] = [];
+  connections: Connection[] = []; // Keep this if you want to store a simplified connection model
   filteredBlocks$: Observable<ChatbotBlock[]> | undefined;
   searchControl = new FormControl('');
 
@@ -250,7 +253,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
   panOffsetX = 0;
   panOffsetY = 0;
 
-  // Connection drawing - keep existing for manual connections
+  // Connection drawing - keep existing for manual connections (but consider deprecating if jsPlumb handles all)
   isDrawingConnection = false;
   connectionStart: { blockId: string, x: number, y: number } | null = null;
   temporaryConnection: { x1: number, y1: number, x2: number, y2: number } | null = null;
@@ -264,17 +267,17 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
   messageBoxContent: string = '';
   messageBoxType: 'info' | 'success' | 'warning' | 'error' = 'info';
 
-  // jsPlumb connection tracking
-  private jsPlumbConnections: any[] = [];
+  // jsPlumb connection tracking (Simplified - we'll get this from the service)
+  // private jsPlumbConnections: any[] = []; // REMOVED - now in service
 
   // NEW: Visual connection system properties
   isDraggingBlock = false;
   draggedBlockId: string | null = null;
-  connectionPoints: Array<{blockId: string, x: number, y: number, element: HTMLElement}> = [];
-  nearestConnectionPoint: {blockId: string, x: number, y: number} | null = null;
+  connectionPoints: Array<{ blockId: string, x: number, y: number, element: HTMLElement }> = [];
+  nearestConnectionPoint: { blockId: string, x: number, y: number } | null = null;
   readonly CONNECTION_SNAP_DISTANCE = 50; // pixels
 
-  constructor() { }
+  constructor(private jsPlumbFlowService: JsPlumbFlowService) { } // INJECT THE SERVICE
 
   ngOnInit(): void {
     this.filteredBlocks$ = this.searchControl.valueChanges.pipe(
@@ -283,47 +286,31 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       map(value => this._filter(value || ''))
     );
 
-    this.canvasBlocks.push({
-    id: 'flow-start',
-    name: 'User Input',
-    icon: 'person',
-    type: 'userInput',
-    status: 'active',
-    x: 200,
-    y: 200,
-    subType: 'keywordGroup',
-    content: 'Hello 👋',
-    keywordGroups: [['Hello', 'Hi']],
-    description: 'Define keywords that trigger the conversations',
-    width: 0,
-    height: 0
-  });
-
     const formBlockTemplate = this.allBlocks.find(block => block.type === 'conversationalForm');
-      const conversationalFormFields : FormField[] = [
-        {
-          name: 'Your Name',
-          type: 'text',
-          required: true,
-          promptPhrase: 'Enter your name'
-        },
-        {
-          name: 'Email Address',
-          type: 'email',
-          required: true,
-          promptPhrase: 'Enter your email'
-        },
-        {
-          name : 'Image',
-          type : 'image',
-          required : true,
-          promptPhrase : "Put one of your image"
-        }
+    const conversationalFormFields: FormField[] = [
+      {
+        name: 'Your Name',
+        type: 'text',
+        required: true,
+        promptPhrase: 'Enter your name'
+      },
+      {
+        name: 'Email Address',
+        type: 'email',
+        required: true,
+        promptPhrase: 'Enter your email'
+      },
+      {
+        name: 'Image',
+        type: 'image',
+        required: true,
+        promptPhrase: "Put one of your image"
+      }
     ];
 
     // Initialize with the starter block
     this.canvasBlocks.push({
-      id: 'flow-start',
+      id: 'flow-start', // Use a consistent ID prefix for jsPlumb
       name: 'User Input',
       icon: 'person',
       type: 'userInput',
@@ -339,261 +326,188 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.canvasBlocks.push({
-    id: 'text-response-2',
-    name: 'Text Response',
-    icon: 'chat_bubble_outline',
-    type: 'textResponse',
-    status: 'active',
-    x: 300,
-    y: 300,
-    content: 'done implement conversation on that also',
-    description: 'Final message from Jarvish',
-    width: 0,
-    height: 0
-  });
+      id: 'text-response-2', // Use a consistent ID prefix for jsPlumb
+      name: 'Text Response',
+      icon: 'chat_bubble_outline',
+      type: 'textResponse',
+      status: 'active',
+      x: 300,
+      y: 300,
+      content: 'done implement conversation on that also',
+      description: 'Final message from Jarvish',
+      width: 0,
+      height: 0
+    });
 
-  if (formBlockTemplate) {
-        const conversationalFormBlock : ChatbotBlock = {
-          ...formBlockTemplate,
-          id: 'form-block-1',
-          x: 400,
-          y: 400,
-          status: 'active',
-          formId: 'form-123',
-          formName: 'User Details Form',
-          webhookUrl: 'https://your-webhook-url.com',
-          sendEmailNotification: true,
-          notificationEmail: 'your-email@example.com',
-          showAsInlineForm: true,
-          formFields: conversationalFormFields
-        };
-
-        this.canvasBlocks.push(conversationalFormBlock);
-  }
+    if (formBlockTemplate) {
+      const conversationalFormBlock: ChatbotBlock = {
+        ...formBlockTemplate,
+        id: 'form-block-1', // Use a consistent ID prefix for jsPlumb
+        x: 400,
+        y: 400,
+        status: 'active',
+        formId: 'form-123',
+        formName: 'User Details Form',
+        webhookUrl: 'https://your-webhook-url.com',
+        sendEmailNotification: true,
+        notificationEmail: 'your-email@example.com',
+        showAsInlineForm: true,
+        formFields: conversationalFormFields
+      };
+      this.canvasBlocks.push(conversationalFormBlock);
+    }
   }
 
   ngAfterViewInit(): void {
-    this.initializeJsPlumb();
+    // Initialize jsPlumb instance via the service
+    if (this.canvasContent && this.canvasContent.nativeElement) {
+      this.jsPlumbFlowService.initialize(this.canvasContent.nativeElement);
+
+      // Subscribe to service events
+      this.jsPlumbFlowService.connectionCreated.subscribe(connInfo => {
+        console.log('Component received connectionCreated:', connInfo);
+        // Add to your internal connections model if needed for save/load or other logic
+        // For simplicity, we'll let jsPlumb manage the visual connections.
+        // If you need to map this back to your `connections` array:
+        // this.connections.push({ id: connInfo.connectionId, fromBlockId: connInfo.sourceId.replace('block-', ''), toBlockId: connInfo.targetId.replace('block-', ''), fromPoint: { x: 0, y: 0 }, toPoint: { x: 0, y: 0 } });
+        // this.updateConnections(); // This will update connection points but jsPlumb renders the line
+      });
+
+      this.jsPlumbFlowService.connectionDeleted.subscribe(connInfo => {
+        console.log('Component received connectionDeleted:', connInfo);
+        // Remove from your internal connections model if needed
+        this.connections = this.connections.filter(c => c.id !== connInfo.connectionId);
+      });
+
+      this.jsPlumbFlowService.blockMoved.subscribe(blockId => {
+        // Update the block's stored coordinates if needed
+        const block = this.canvasBlocks.find(b => `block-${b.id}` === blockId);
+        if (block) {
+          const blockElement = document.getElementById(blockId);
+          if (blockElement) {
+            // Get position relative to canvasContent, considering zoom and pan
+            const canvasRect = this.canvasContent.nativeElement.getBoundingClientRect();
+            const blockRect = blockElement.getBoundingClientRect();
+
+            block.x = (blockRect.left - canvasRect.left) / this.zoomLevel;
+            block.y = (blockRect.top - canvasRect.top) / this.zoomLevel;
+            // console.log(`Updated block ${block.id} position to X:${block.x}, Y:${block.y}`);
+            this.updateBlockDimensions(block); // Recalculate dimensions after a move
+          }
+        }
+      });
+    }
+
     this.updateCanvasTransform();
-    
-    // Set initial dimensions for the starting block
+
+    // Set up jsPlumb for existing blocks (after DOM is rendered)
     setTimeout(() => {
-      this.updateBlockDimensions(this.canvasBlocks[0]);
-      this.setupJsPlumbForBlock(this.canvasBlocks[0]);
-      this.calculateConnectionPoints();
+      this.canvasBlocks.forEach(block => {
+        this.updateBlockDimensions(block); // Ensure dimensions are set before jsPlumb setup
+        this.jsPlumbFlowService.setupBlock(`block-${block.id}`);
+      });
+      this.calculateConnectionPoints(); // Calculate after all blocks are set up
+      this.jsPlumbFlowService.repaintAllConnections(); // Initial repaint
     }, 100);
   }
 
   ngOnDestroy(): void {
-    if (this.instance) {
-      this.instance.reset();
-    }
+    // Reset jsPlumb instance through the service
+    this.jsPlumbFlowService.reset();
   }
 
-  private initializeJsPlumb(): void {
-    // Initialize jsPlumb instance
-    this.instance = jsPlumb.getInstance({
-      Container: this.canvasContent.nativeElement,
-      ConnectionOverlays: [
-        ['Arrow', {
-          location: 1,
-          id: 'arrow',
-          length: 10,
-          width: 10,
-        }]
-      ],
-      PaintStyle: {
-        stroke: '#4f46e5',
-        strokeWidth: 2
-      },
-      HoverPaintStyle: {
-        stroke: '#7c3aed',
-        strokeWidth: 3
-      },
-      EndpointStyle: {
-        fill: '#4f46e5'
-      },
-      EndpointHoverStyle: {
-        fill: '#7c3aed'
-      },
-      Connector: ['Flowchart', { 
-        stub: [40, 60], 
-        gap: 10, 
-        cornerRadius: 5, 
-        alwaysRespectStubs: true 
-      }]
-    });
+  // private initializeJsPlumb(): void { ... } // REMOVED - moved to service
+  // private setupJsPlumbForBlock(block: ChatbotBlock): void { ... } // REMOVED - moved to service
+  // private removeJsPlumbForBlock(blockId: string): void { ... } // REMOVED - logic moved to service
 
-    // Enable connection creation by clicking
-    this.instance.bind('connection', (info: any) => {
-      console.log('Connection created:', info);
-      this.jsPlumbConnections.push(info.connection);
-    });
-
-    // Handle connection clicks for deletion
-    this.instance.bind('click', (connection: any) => {
-      if (confirm('Delete this connection?')) {
-        this.instance.deleteConnection(connection);
-        this.jsPlumbConnections = this.jsPlumbConnections.filter(conn => conn !== connection);
-      }
-    });
-  }
-
-  private setupJsPlumbForBlock(block: ChatbotBlock): void {
-    const blockId = `block-${block.id}`;
-    
-    // Wait for DOM element to be available
-    setTimeout(() => {
-      const blockElement = document.getElementById(blockId);
-      if (!blockElement) {
-        console.warn(`Block element not found: ${blockId}`);
-        return;
-      }
-
-      // Make the block draggable
-      this.instance.draggable(blockElement, {
-        grid: [10, 10],
-        containment: 'parent'
-      });
-
-      // Add source endpoint (output) - positioned at bottom center
-      this.instance.addEndpoint(blockElement, {
-        anchor: 'Bottom',
-        isSource: true,
-        maxConnections: -1,
-        endpoint: ['Dot', { radius: 8 }],
-        paintStyle: { fill: '#4f46e5' },
-        connectorStyle: { stroke: '#4f46e5', strokeWidth: 2 },
-        connector: ['Flowchart', { stub: [40, 60], gap: 10, cornerRadius: 5 }],
-        overlays: [
-          ['Arrow', { location: 1, length: 10, width: 10 }]
-        ]
-      });
-
-      // Add target endpoint (input) - positioned at top center
-      this.instance.addEndpoint(blockElement, {
-        anchor: 'Top',
-        isTarget: true,
-        maxConnections: -1,
-        endpoint: ['Dot', { radius: 8 }],
-        paintStyle: { fill: '#10b981' },
-        hoverPaintStyle: { fill: '#059669' }
-      });
-
-      console.log(`jsPlumb setup completed for block: ${blockId}`);
-    }, 50);
-  }
-
-  private removeJsPlumbForBlock(blockId: string): void {
-    const elementId = `block-${blockId}`;
-    const blockElement = document.getElementById(elementId);
-    
-    if (blockElement && this.instance) {
-      // Remove all connections for this block
-      this.instance.removeAllEndpoints(blockElement);
-      
-      // Remove from draggable
-      this.instance.setDraggable(blockElement, false);
-      
-      // Filter out connections involving this block
-      this.jsPlumbConnections = this.jsPlumbConnections.filter(conn => {
-        const sourceId = conn.sourceId;
-        const targetId = conn.targetId;
-        return sourceId !== elementId && targetId !== elementId;
-      });
-    }
-  }
-
-  // NEW: Calculate connection points for all blocks
   private calculateConnectionPoints(): void {
     this.connectionPoints = [];
-    
+
     this.canvasBlocks.forEach(block => {
       const blockElement = document.getElementById(`block-${block.id}`);
       if (blockElement) {
         const rect = blockElement.getBoundingClientRect();
         const canvasRect = this.canvasContent.nativeElement.getBoundingClientRect();
-        
+
         // Calculate input connection point (top center of block)
+        // Ensure calculations account for pan and zoom to get actual block position on unscaled canvas
         const inputPoint = {
           blockId: block.id,
-          x: (rect.left + rect.width / 2 - canvasRect.left) / this.zoomLevel - this.panOffsetX / this.zoomLevel,
-          y: (rect.top - canvasRect.top) / this.zoomLevel - this.panOffsetY / this.zoomLevel,
+          x: (block.x || 0) + (rect.width / 2 / this.zoomLevel), // Use block.x and block.y which are "unscaled"
+          y: (block.y || 0),
           element: blockElement
         };
-        
+
         this.connectionPoints.push(inputPoint);
       }
     });
   }
 
   /**
- * Finds the nearest connection point to a dragged block within a certain distance.
- */
-private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectionPoint | null {
-  if (!draggedBlock) {
-    return null;
-  }
-
-  const draggedBlockElement = document.getElementById(`block-${draggedBlock.id}`);
-  if (!draggedBlockElement) {
-    return null;
-  }
-
-  const draggedBlockRect = draggedBlockElement.getBoundingClientRect();
-  const canvasRect = this.canvasContent.nativeElement.getBoundingClientRect();
-
-  // Calculate the dragged block's output point (bottom center) in canvas coordinates
-  const draggedX = (draggedBlockRect.left + draggedBlockRect.width / 2 - canvasRect.left) / this.zoomLevel - this.panOffsetX / this.zoomLevel;
-  const draggedY = (draggedBlockRect.bottom - canvasRect.top) / this.zoomLevel - this.panOffsetY / this.zoomLevel;
-
-  let nearestPoint: NearestConnectionPoint | null = null;
-  let minDistance = Infinity; // Use Infinity to find the smallest distance
-
-  // Use a standard for-of loop to avoid any potential scope issues with forEach
-  for (const point of this.connectionPoints) {
-    // Do not allow a block to connect to itself
-    if (point.blockId === draggedBlock.id) {
-      continue;
+   * Finds the nearest connection point to a dragged block within a certain distance.
+   */
+  private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectionPoint | null {
+    if (!draggedBlock) {
+      return null;
     }
 
-    const distance = Math.sqrt(
-      Math.pow(point.x - draggedX, 2) + Math.pow(point.y - draggedY, 2)
-    );
-
-    // If a connection point is within the snap distance and is closer than the current nearest point
-    if (distance <= this.CONNECTION_SNAP_DISTANCE && distance < minDistance) {
-      minDistance = distance;
-      nearestPoint = {
-        blockId: point.blockId,
-        x: point.x,
-        y: point.y
-      };
+    const draggedBlockElement = document.getElementById(`block-${draggedBlock.id}`);
+    if (!draggedBlockElement) {
+      return null;
     }
+
+    const draggedBlockRect = draggedBlockElement.getBoundingClientRect();
+    const canvasRect = this.canvasContent.nativeElement.getBoundingClientRect();
+
+    // Calculate the dragged block's output point (bottom center) in canvas coordinates
+    // Use the *current* visual position of the dragged block for connection snapping
+    const draggedX = (draggedBlockRect.left + draggedBlockRect.width / 2 - canvasRect.left) / this.zoomLevel;
+    const draggedY = (draggedBlockRect.bottom - canvasRect.top) / this.zoomLevel;
+
+    let nearestPoint: NearestConnectionPoint | null = null;
+    let minDistance = Infinity; // Use Infinity to find the smallest distance
+
+    for (const point of this.connectionPoints) {
+      // Do not allow a block to connect to itself
+      if (point.blockId === draggedBlock.id) {
+        continue;
+      }
+
+      const distance = Math.sqrt(
+        Math.pow(point.x - draggedX, 2) + Math.pow(point.y - draggedY, 2)
+      );
+
+      // If a connection point is within the snap distance and is closer than the current nearest point
+      if (distance <= this.CONNECTION_SNAP_DISTANCE && distance < minDistance) {
+        minDistance = distance;
+        nearestPoint = {
+          blockId: point.blockId,
+          x: point.x,
+          y: point.y
+        };
+      }
+    }
+    return nearestPoint;
   }
 
-  // Return the best-found point, or null if none were found
-  return nearestPoint;
-}
-
-  // NEW: Show/hide connection points
+  // NEW: Show/hide connection points (visual cues, not jsPlumb endpoints)
   private showConnectionPoints(show: boolean): void {
     if (!this.draggedBlockId) return;
-    
+
     this.canvasBlocks.forEach(block => {
       if (block.id === this.draggedBlockId) return; // Skip dragged block
-      
+
       const blockElement = document.getElementById(`block-${block.id}`);
       if (blockElement) {
         let connectionPoint = blockElement.querySelector('.visual-connection-point') as HTMLElement;
-        
+
         if (show && !connectionPoint) {
           // Create connection point
           connectionPoint = document.createElement('div');
           connectionPoint.className = 'visual-connection-point';
           connectionPoint.style.cssText = `
             position: absolute;
-            top: -8px;
+            top: -8px; /* Position it above the block for input */
             left: 50%;
             transform: translateX(-50%);
             width: 16px;
@@ -604,6 +518,7 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
             z-index: 1000;
             transition: all 0.2s ease;
             box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+            pointer-events: none; /* Make sure it doesn't interfere with drag events */
           `;
           blockElement.appendChild(connectionPoint);
         } else if (!show && connectionPoint) {
@@ -620,12 +535,12 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
       (point as HTMLElement).style.background = '#10b981';
       (point as HTMLElement).style.transform = 'translateX(-50%) scale(1)';
     });
-    
+
     // Highlight nearest point
     if (this.nearestConnectionPoint) {
       const targetBlock = document.getElementById(`block-${this.nearestConnectionPoint.blockId}`);
       const connectionPoint = targetBlock?.querySelector('.visual-connection-point') as HTMLElement;
-      
+
       if (connectionPoint) {
         connectionPoint.style.background = '#059669';
         connectionPoint.style.transform = 'translateX(-50%) scale(1.3)';
@@ -634,39 +549,14 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
     }
   }
 
-  // NEW: Create connection between blocks
+  // NEW: Create connection between blocks using jsPlumb service
   private createConnection(fromBlockId: string, toBlockId: string): void {
-    // Check if connection already exists
-    const existingConnection = this.jsPlumbConnections.find(conn => 
-      conn.sourceId === `block-${fromBlockId}` && conn.targetId === `block-${toBlockId}`
-    );
-    
-    if (existingConnection) {
-      this.displayMessageBox('Connection already exists between these blocks.', 'warning');
-      return;
-    }
-    
-    // Create jsPlumb connection
-    const sourceElement = document.getElementById(`block-${fromBlockId}`);
-    const targetElement = document.getElementById(`block-${toBlockId}`);
-    
-    if (sourceElement && targetElement && this.instance) {
-      const connection = this.instance.connect({
-        source: sourceElement,
-        target: targetElement,
-        anchor: ['Bottom', 'Top'],
-        endpoint: ['Dot', { radius: 8 }],
-        connector: ['Flowchart', { stub: [40, 60], gap: 10, cornerRadius: 5 }],
-        paintStyle: { stroke: '#4f46e5', strokeWidth: 2 },
-        overlays: [
-          ['Arrow', { location: 1, length: 10, width: 10 }]
-        ]
-      });
-      
-      if (connection) {
-        this.jsPlumbConnections.push(connection);
-        this.displayMessageBox('Connection created successfully!', 'success');
-      }
+    // jsPlumb handles its own internal checks for existing connections
+    const connection = this.jsPlumbFlowService.connectBlocks(`block-${fromBlockId}`, `block-${toBlockId}`);
+    if (connection) {
+      // The service's connectionCreated event will handle the message box
+    } else {
+      this.displayMessageBox('Could not create connection (might already exist).', 'warning');
     }
   }
 
@@ -674,37 +564,45 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
   onBlockDragStarted(event: CdkDragStart, block: ChatbotBlock): void {
     this.isDraggingBlock = true;
     this.draggedBlockId = block.id;
-    this.calculateConnectionPoints();
+    this.calculateConnectionPoints(); // Recalculate based on current positions
     this.showConnectionPoints(true);
   }
 
   // MODIFIED: Enhanced drag end handler
   onBlockDragEnded(event: CdkDragEnd, block: ChatbotBlock) {
     const transform = event.source.getFreeDragPosition();
+
+    // Update block's stored coordinates relative to the unscaled, unpanned canvas origin
     block.x = (block.x || 0) + transform.x / this.zoomLevel;
     block.y = (block.y || 0) + transform.y / this.zoomLevel;
+
+    // Reset CDK drag position so jsPlumb can take over
     event.source._dragRef.reset();
-    
-    // Check for connection creation
+
+    // The jsPlumb `stop` event handler in the service will update positions and repaint.
+    // We don't need to manually repaintEverything here for the connections themselves.
+
+    // Check for connection creation if snapping was active
     if (this.nearestConnectionPoint && this.draggedBlockId) {
       this.createConnection(this.draggedBlockId, this.nearestConnectionPoint.blockId);
     }
-    
+
     // Clean up visual elements
     this.showConnectionPoints(false);
     this.isDraggingBlock = false;
     this.draggedBlockId = null;
     this.nearestConnectionPoint = null;
-    
+
+    // This is for your custom SVG connections. If jsPlumb handles all, this can be removed.
     this.updateConnections();
-    
-    // Repaint jsPlumb connections after drag
-    if (this.instance) {
-      setTimeout(() => {
-        this.instance.repaintEverything();
-        this.calculateConnectionPoints();
-      }, 50);
-    }
+
+    // Ensure jsPlumb knows the block moved and repaints its attached connections
+    // This is implicitly handled by jsPlumb's draggable, but an explicit repaint
+    // can sometimes be useful if there are complex layout shifts.
+    setTimeout(() => {
+      this.jsPlumbFlowService.repaintAllConnections();
+      this.calculateConnectionPoints(); // Recalculate after repaint to ensure accuracy
+    }, 50);
   }
 
   @HostListener('wheel', ['$event'])
@@ -715,23 +613,22 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
       const newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoomLevel + delta));
       this.zoomLevel = parseFloat(newZoom.toFixed(2));
       this.updateCanvasTransform();
-      this.updateConnections();
-      
-      // Repaint jsPlumb connections after zoom
-      if (this.instance) {
-        this.instance.repaintEverything();
-      }
+      this.updateConnections(); // For custom SVG connections
+      this.jsPlumbFlowService.repaintAllConnections(); // Repaint jsPlumb connections
+      this.calculateConnectionPoints(); // Recalculate after zoom for snap points
     }
   }
 
   @HostListener('mousedown', ['$event'])
   onMouseDown(event: MouseEvent) {
-    if (event.target === this.canvasWrapper.nativeElement) {
+    // Check if the click originated from the canvasWrapper itself, not a block
+    if (event.target === this.canvasWrapper.nativeElement || event.target === this.canvasContent.nativeElement) {
       this.isPanning = true;
+      // Capture the current pan offset to calculate new offset based on mouse movement
       this.panStartX = event.clientX - this.panOffsetX;
       this.panStartY = event.clientY - this.panOffsetY;
       this.canvasWrapper.nativeElement.style.cursor = 'grabbing';
-      
+
       if (this.selectedBlock && !this.isDrawingConnection) {
         this.selectedBlock = null;
         this.closeSidebar();
@@ -745,11 +642,8 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
       this.panOffsetX = event.clientX - this.panStartX;
       this.panOffsetY = event.clientY - this.panStartY;
       this.updateCanvasTransform();
-      
-      // Repaint jsPlumb connections during pan
-      if (this.instance) {
-        this.instance.repaintEverything();
-      }
+      this.updateConnections(); // For custom SVG connections
+      this.jsPlumbFlowService.repaintAllConnections(); // Repaint jsPlumb connections during pan
     }
 
     // NEW: Handle connection point detection during drag
@@ -761,8 +655,10 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
       }
     }
 
+    // This part is for your custom SVG connections. If you only use jsPlumb, remove it.
     if (this.isDrawingConnection && this.connectionStart) {
       const rect = this.canvasWrapper.nativeElement.getBoundingClientRect();
+      // Adjust mouse position for zoom and pan for accurate rendering
       const mouseX = (event.clientX - rect.left - this.panOffsetX) / this.zoomLevel;
       const mouseY = (event.clientY - rect.top - this.panOffsetY) / this.zoomLevel;
 
@@ -780,6 +676,7 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
     this.isPanning = false;
     this.canvasWrapper.nativeElement.style.cursor = 'default';
 
+    // This part is for your custom SVG connections. If you only use jsPlumb, remove it.
     if (this.isDrawingConnection) {
       this.isDrawingConnection = false;
       this.temporaryConnection = null;
@@ -802,10 +699,11 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
   }
 
   addBlockToCanvas(block: ChatbotBlock) {
+    const lastBlock = this.canvasBlocks.length > 0 ? this.canvasBlocks[this.canvasBlocks.length - 1] : null;
     const newBlockId = `${block.type}-${Date.now()}`;
     const newBlock: ChatbotBlock = {
       ...block,
-      id: newBlockId,
+      id: newBlockId, // Ensure unique ID for jsPlumb
       x: this.calculateNewBlockX(),
       y: this.calculateNewBlockY(),
       content: block.type === 'textResponse' ? '' : undefined,
@@ -830,21 +728,33 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
       requestType: block.type === 'jsonApi' ? 'POST' : undefined,
       apiHeaders: block.type === 'jsonApi' ? [] : undefined
     };
-    
+
     this.canvasBlocks.push(newBlock);
-    
+
+    // Set up jsPlumb for the new block after it's rendered in the DOM
     setTimeout(() => {
       this.updateBlockDimensions(newBlock);
-      this.setupJsPlumbForBlock(newBlock);
+      this.jsPlumbFlowService.setupBlock(`block-${newBlock.id}`); // Setup jsPlumb for the new block
       this.calculateConnectionPoints();
       this.selectBlock(newBlock);
+
+      // Auto-connect to the last block, if one exists
+      if (lastBlock) {
+        this.createConnection(lastBlock.id, newBlock.id);
+      }
     }, 100);
   }
 
   private calculateNewBlockX(): number {
     if (this.canvasWrapper) {
+      // Calculate a position relative to the center of the visible canvas area
       const wrapperRect = this.canvasWrapper.nativeElement.getBoundingClientRect();
-      return (wrapperRect.width / 2 - this.panOffsetX) / this.zoomLevel;
+      const canvasScrollLeft = this.canvasWrapper.nativeElement.scrollLeft;
+      const canvasScrollTop = this.canvasWrapper.nativeElement.scrollTop;
+
+      // Position new block roughly in the center of the currently visible viewport
+      const centerX = (canvasScrollLeft + wrapperRect.width / 2 - this.panOffsetX) / this.zoomLevel;
+      return centerX - 100; // Offset by half block width
     }
     return 300 + (this.canvasBlocks.length * 50);
   }
@@ -852,7 +762,11 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
   private calculateNewBlockY(): number {
     if (this.canvasWrapper) {
       const wrapperRect = this.canvasWrapper.nativeElement.getBoundingClientRect();
-      return (wrapperRect.height / 2 - this.panOffsetY) / this.zoomLevel;
+      const canvasScrollLeft = this.canvasWrapper.nativeElement.scrollLeft;
+      const canvasScrollTop = this.canvasWrapper.nativeElement.scrollTop;
+
+      const centerY = (canvasScrollTop + wrapperRect.height / 2 - this.panOffsetY) / this.zoomLevel;
+      return centerY - 50; // Offset by half block height
     }
     return 100 + (this.canvasBlocks.length * 200);
   }
@@ -864,8 +778,9 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
       if (this.selectedBlock?.id === updatedBlock.id) {
         this.selectedBlock = updatedBlock;
       }
-      this.updateConnections();
-      this.calculateConnectionPoints();
+      this.updateConnections(); // For custom SVG connections
+      this.jsPlumbFlowService.repaintAllConnections(); // Repaint jsPlumb connections
+      this.calculateConnectionPoints(); // Recalculate snap points if block size changed
     }
   }
 
@@ -874,51 +789,63 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
   }
 
   removeCanvasBlock(blockId: string) {
-    // Remove jsPlumb setup for this block
-    this.removeJsPlumbForBlock(blockId);
-    
+    // Remove jsPlumb setup for this block via the service
+    this.jsPlumbFlowService.removeBlock(`block-${blockId}`);
+
     this.canvasBlocks = this.canvasBlocks.filter(b => b.id !== blockId);
+    // Remove from your custom connections array (if still using it)
     this.connections = this.connections.filter(c =>
       c.fromBlockId !== blockId && c.toBlockId !== blockId
     );
-    
+
     if (this.selectedBlock?.id === blockId) {
       this.selectedBlock = null;
       this.closeSidebar();
     }
-    
-    this.updateConnections();
+
+    this.updateConnections(); // For custom SVG connections
     this.calculateConnectionPoints();
+    this.jsPlumbFlowService.repaintAllConnections(); // Ensure all remaining connections are valid
   }
 
   duplicateCanvasBlock(block: ChatbotBlock) {
     const newBlockId = `${block.type}-${Date.now()}-dup`;
     const newBlock: ChatbotBlock = {
       ...block,
-      id: newBlockId,
+      id: newBlockId, // Ensure unique ID for jsPlumb
       x: (block.x || 0) + 30,
       y: (block.y || 0) + 30,
       keywordGroups: block.keywordGroups ? block.keywordGroups.map(group => [...group]) : undefined,
       formFields: block.formFields ? block.formFields.map(field => ({ ...field })) : undefined
     };
-    
+
     this.canvasBlocks.push(newBlock);
-    
+
     setTimeout(() => {
       this.updateBlockDimensions(newBlock);
-      this.setupJsPlumbForBlock(newBlock);
+      this.jsPlumbFlowService.setupBlock(`block-${newBlock.id}`); // Setup jsPlumb for duplicated block
       this.calculateConnectionPoints();
       this.selectBlock(newBlock);
     }, 100);
   }
 
   drop(event: CdkDragDrop<ChatbotBlock[]>) {
+    // This seems to be for the palette, not the canvas.
+    // If you intend to drag from the palette *to* the canvas to create a new block,
+    // you'll need to handle that slightly differently than moveItemInArray.
+    // For now, assuming this is just for reordering the palette items.
     moveItemInArray(this.allBlocks, event.previousIndex, event.currentIndex);
   }
 
-  // Keep existing connection methods for backward compatibility
+  // Keep existing connection methods for backward compatibility, but understand their role
+  // These `startConnection` and `endConnection` methods currently draw SVG lines.
+  // If jsPlumb is handling all connections, these should ideally be removed or repurposed
+  // to work with jsPlumb's native connection dragging.
   startConnection(event: MouseEvent, block: ChatbotBlock) {
     event.stopPropagation();
+    // This is for your custom SVG connection drawing, not jsPlumb's.
+    // If you want jsPlumb connections to be draggable from endpoints,
+    // jsPlumb's own 'addEndpoint' configuration handles that.
     this.isDrawingConnection = true;
 
     const blockElement = (event.target as HTMLElement).closest('.canvas-block');
@@ -944,6 +871,11 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
   endConnection(event: MouseEvent, block: ChatbotBlock) {
     event.stopPropagation();
     if (this.isDrawingConnection && this.connectionStart && this.connectionStart.blockId !== block.id) {
+      // This is for your custom SVG connection drawing.
+      // If you want to use jsPlumb for this "drag to connect" behavior,
+      // you would ideally remove this and configure jsPlumb endpoints to allow connection dragging.
+      // However, since you have the snap-to-connect for block dragging, this might be redundant.
+
       const targetBlockElement = (event.target as HTMLElement).closest('.canvas-block');
       if (!targetBlockElement) {
         this.isDrawingConnection = false;
@@ -960,63 +892,43 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
         return;
       }
 
-      const inputPointRect = inputPointElement.getBoundingClientRect();
-      const canvasContentRect = this.canvasContent.nativeElement.getBoundingClientRect();
-
-      const targetX = (inputPointRect.left + inputPointRect.width / 2 - canvasContentRect.left) / this.zoomLevel;
-      const targetY = (inputPointRect.top + inputPointRect.height / 2 - canvasContentRect.top) / this.zoomLevel;
-
-      const existingConnection = this.connections.find(conn =>
-        (conn.fromBlockId === this.connectionStart!.blockId && conn.toBlockId === block.id)
-      );
-
-      if (!existingConnection) {
-        const newConnection: Connection = {
-          id: `conn-${Date.now()}`,
-          fromBlockId: this.connectionStart.blockId,
-          toBlockId: block.id,
-          fromPoint: { x: this.connectionStart.x, y: this.connectionStart.y },
-          toPoint: { x: targetX, y: targetY }
-        };
-        this.connections.push(newConnection);
-      } else {
-        this.displayMessageBox('Connection already exists between these blocks.', 'warning');
-      }
+      // Instead of storing in `this.connections`, call jsPlumb service to create connection
+      this.createConnection(this.connectionStart.blockId, block.id);
     }
     this.isDrawingConnection = false;
     this.temporaryConnection = null;
     this.connectionStart = null;
-    this.updateConnections();
+    this.updateConnections(); // For custom SVG connections (will likely become obsolete)
   }
 
+  // This method primarily updates the coordinates for your *custom SVG connections*.
+  // If jsPlumb handles all connections, this method, `this.connections` array,
+  // and the SVG in your template for drawing lines can be removed.
   updateConnections() {
     this.connections.forEach(conn => {
       const fromBlock = this.canvasBlocks.find(b => b.id === conn.fromBlockId);
       const toBlock = this.canvasBlocks.find(b => b.id === conn.toBlockId);
 
       if (fromBlock && toBlock) {
-        const fromBlockElement = this.canvasContent.nativeElement.querySelector(`.canvas-block[id="${fromBlock.id}"]`);
-        const toBlockElement = this.canvasContent.nativeElement.querySelector(`.canvas-block[id="${toBlock.id}"]`);
+        // Use the actual block elements for more accurate positioning
+        const fromBlockElement = document.getElementById(`block-${fromBlock.id}`);
+        const toBlockElement = document.getElementById(`block-${toBlock.id}`);
 
         if (fromBlockElement && toBlockElement) {
-          const fromOutputPoint = fromBlockElement.querySelector('.connection-output .connection-dot') as HTMLElement;
-          const toInputPoint = toBlockElement.querySelector('.connection-input .connection-dot') as HTMLElement;
+          // Adjust to get the center of the output/input points of the actual blocks
+          // These points are already handled by jsPlumb. For custom SVG, re-calculate.
+          const canvasContentRect = this.canvasContent.nativeElement.getBoundingClientRect();
 
-          if (fromOutputPoint && toInputPoint) {
-            const canvasContentRect = this.canvasContent.nativeElement.getBoundingClientRect();
+          // Calculate center of bottom of fromBlock relative to canvasContent's unscaled origin
+          const fromX = (fromBlockElement.getBoundingClientRect().left + fromBlockElement.offsetWidth / 2 - canvasContentRect.left) / this.zoomLevel;
+          const fromY = (fromBlockElement.getBoundingClientRect().bottom - canvasContentRect.top) / this.zoomLevel;
 
-            const fromRect = fromOutputPoint.getBoundingClientRect();
-            const toRect = toInputPoint.getBoundingClientRect();
+          // Calculate center of top of toBlock relative to canvasContent's unscaled origin
+          const toX = (toBlockElement.getBoundingClientRect().left + toBlockElement.offsetWidth / 2 - canvasContentRect.left) / this.zoomLevel;
+          const toY = (toBlockElement.getBoundingClientRect().top - canvasContentRect.top) / this.zoomLevel;
 
-            conn.fromPoint = {
-              x: (fromRect.left + fromRect.width / 2 - canvasContentRect.left) / this.zoomLevel,
-              y: (fromRect.top + fromRect.height / 2 - canvasContentRect.top) / this.zoomLevel
-            };
-            conn.toPoint = {
-              x: (toRect.left + toRect.width / 2 - canvasContentRect.left) / this.zoomLevel,
-              y: (toRect.top + toRect.height / 2 - canvasContentRect.top) / this.zoomLevel
-            };
-          }
+          conn.fromPoint = { x: fromX, y: fromY };
+          conn.toPoint = { x: toX, y: toY };
         }
       }
     });
@@ -1027,8 +939,9 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
     if (blockElement) {
       block.width = blockElement.offsetWidth;
       block.height = blockElement.offsetHeight;
-      this.updateConnections();
-      this.calculateConnectionPoints();
+      this.updateConnections(); // For custom SVG connections
+      this.jsPlumbFlowService.repaintAllConnections(); // Repaint jsPlumb connections if block dimensions change
+      this.calculateConnectionPoints(); // Recalculate snap points if block size changed
     }
   }
 
@@ -1037,10 +950,8 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
     if (this.zoomLevel < this.maxZoom) {
       this.zoomLevel = parseFloat((this.zoomLevel + this.zoomStep).toFixed(2));
       this.updateCanvasTransform();
-      this.updateConnections();
-      if (this.instance) {
-        this.instance.repaintEverything();
-      }
+      this.updateConnections(); // For custom SVG connections
+      this.jsPlumbFlowService.repaintAllConnections();
       this.calculateConnectionPoints();
     }
   }
@@ -1049,10 +960,8 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
     if (this.zoomLevel > this.minZoom) {
       this.zoomLevel = parseFloat((this.zoomLevel - this.zoomStep).toFixed(2));
       this.updateCanvasTransform();
-      this.updateConnections();
-      if (this.instance) {
-        this.instance.repaintEverything();
-      }
+      this.updateConnections(); // For custom SVG connections
+      this.jsPlumbFlowService.repaintAllConnections();
       this.calculateConnectionPoints();
     }
   }
@@ -1062,10 +971,8 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
     this.panOffsetX = 0;
     this.panOffsetY = 0;
     this.updateCanvasTransform();
-    this.updateConnections();
-    if (this.instance) {
-      this.instance.repaintEverything();
-    }
+    this.updateConnections(); // For custom SVG connections
+    this.jsPlumbFlowService.repaintAllConnections();
     this.calculateConnectionPoints();
   }
 
@@ -1096,14 +1003,17 @@ private findNearestConnectionPoint(draggedBlock: ChatbotBlock): NearestConnectio
 
   // Save functionality
   saveFlow() {
+    const jsPlumbInternalConnections = this.jsPlumbFlowService.getConnections().map(conn => ({
+      sourceId: conn.sourceId.replace('block-', ''), // Store just the block ID
+      targetId: conn.targetId.replace('block-', ''), // Store just the block ID
+      id: conn.id // jsPlumb's internal connection ID
+    }));
+
     const flowData = {
       blocks: this.canvasBlocks,
-      connections: this.connections,
-      jsPlumbConnections: this.jsPlumbConnections.map(conn => ({
-        sourceId: conn.sourceId,
-        targetId: conn.targetId,
-        id: conn.id
-      }))
+      connections: jsPlumbInternalConnections, // Now primarily saving jsPlumb connections
+      // If you still have custom SVG connections for some reason:
+      // customSvgConnections: this.connections
     };
     console.log('Chatbot flow saved!', flowData);
     this.displayMessageBox('Chatbot flow saved successfully!', 'success');

@@ -1,4 +1,3 @@
-<!-- chatbot-flow.component.html - Enhanced with visual connection system -->
 <div class="chatbot-flow-container">
   <div class="header">
     <div class="header-left">
@@ -25,7 +24,7 @@
       </div>
 
       <div class="search-container">
-        <mat-form-field class="search-field"> <!-- Removed appearance="outline" -->
+        <mat-form-field class="search-field">
           <mat-icon matPrefix>search</mat-icon>
           <input
             matInput
@@ -49,7 +48,7 @@
             <img *ngIf="block.imageUrl" [src]="block.imageUrl" alt="block-icon" class="custom-icon shadow-sm border border-gray-200 rounded">
             <mat-icon *ngIf="!block.imageUrl">{{ block.icon }}</mat-icon>
           </div>
-      
+
           <div class="block-content flex items-center">
             <div class="block-name">{{ block.name }}</div>
             <div
@@ -59,7 +58,7 @@
               {{ block.description }}
             </div>
           </div>
-      
+
           <div class="drag-handle" cdkDragHandle>
             <mat-icon>drag_indicator</mat-icon>
           </div>
@@ -98,50 +97,6 @@
         #canvasWrapper
         [style.cursor]="isPanning ? 'grabbing' : 'default'"
       >
-        <!-- Keep existing SVG for backward compatibility -->
-        <svg class="connections-svg" #svgCanvas>
-          <path
-            *ngFor="let conn of connections"
-            [attr.d]="
-              'M ' +
-              conn.fromPoint.x +
-              ',' +
-              conn.fromPoint.y +
-              ' Q ' +
-              (conn.fromPoint.x + conn.toPoint.x) / 2 +
-              ',' +
-              conn.fromPoint.y +
-              ' ' +
-              conn.toPoint.x +
-              ',' +
-              conn.toPoint.y
-            "
-            class="connection-line"
-            stroke="#6366f1"
-            stroke-width="2"
-            fill="none"
-          ></path>
-
-          <path
-            *ngIf="temporaryConnection"
-            [attr.d]="
-              'M ' +
-              temporaryConnection.x1 +
-              ',' +
-              temporaryConnection.y1 +
-              ' L ' +
-              temporaryConnection.x2 +
-              ',' +
-              temporaryConnection.y2
-            "
-            class="temp-connection-line"
-            stroke="#6366f1"
-            stroke-width="2"
-            stroke-dasharray="5,5"
-            fill="none"
-          ></path>
-        </svg>
-
         <div class="canvas-content" #canvasContent id="canvas">
           <div class="flow-start-indicator">
             <div class="flow-start-text">Flow starts here</div>
@@ -149,10 +104,8 @@
               <mat-icon>arrow_downward</mat-icon>
             </div>
           </div>
-          
-          <!-- Main blocks container -->
+
           <div class="blocks-container">
-            <!-- Enhanced blocks with drag events -->
             <div
               *ngFor="let block of canvasBlocks"
               class="canvas-block jsplumb-draggable"
@@ -168,7 +121,7 @@
               (cdkDragStarted)="onBlockDragStarted($event, block)"
               (cdkDragEnded)="onBlockDragEnded($event, block)"
               (mousedown)="endConnection($event, block)"
-            >
+              [cdkDragFreeDragPosition]="{x: 0, y: 0}" >
               <ng-container [ngSwitch]="block.type">
                 <app-user-input-block
                   *ngSwitchCase="'userInput'"
@@ -201,7 +154,6 @@
                   (addKeywordGroupBlock)="onAddKeywordGroupBlockToCanvas()"
                 ></app-text-response-block>
 
-                <!-- Other block types... -->
                 <app-media-block
                   *ngSwitchCase="'mediaBlock'"
                   [attr.id]="'media-block-' + block.id"
@@ -277,8 +229,7 @@
                 ></app-json-api-integration-block>
               </ng-container>
             </div>
-
-            <!-- Quick Reply Cards - Keep existing functionality -->
+            
             <div
               *ngFor="let block of canvasBlocks"
               class="quick-reply-cards-wrapper"
@@ -288,7 +239,6 @@
                 block.quickReplies.length === 0
               "
             >
-              <!-- Keep existing quick reply connections SVG -->
               <svg
                 class="quick-reply-connections-svg"
                 [attr.width]="1200"
@@ -339,7 +289,6 @@
                 </g>
               </svg>
 
-              <!-- No Quick Reply Block -->
               <div
                 class="no-quick-reply-block-external"
                 [style.left.px]="block.x - 180"
@@ -359,7 +308,6 @@
                 </div>
               </div>
 
-              <!-- Quick Replies Main Block -->
               <div
                 class="quick-replies-main-block-external"
                 [style.left.px]="block.x + 130"
@@ -380,7 +328,6 @@
                 </div>
               </div>
 
-              <!-- Individual Quick Reply Cards -->
               <div
                 class="individual-quick-replies-external"
                 [style.left.px]="block.x - 100"
@@ -413,7 +360,6 @@
       </div>
     </div>
 
-    <!-- Right Sidebar (keep existing sidebar code) -->
     <div
       class="right-sidebar"
       [class.open]="rightSidebarOpen"
@@ -450,7 +396,7 @@
             (closeSidebarEvent)="closeSidebar()"
             (editBlock)="editCanvasBlock($event)"
           ></app-text-response-block>
-          
+
           <app-media-block
             *ngSwitchCase="'mediaBlock'"
             [block]="selectedBlock"
@@ -512,7 +458,7 @@
   </div>
 
   <app-jarvish-block *ngIf="isJarvisVisible" [canvasBlocks]="canvasBlocks"></app-jarvish-block>
-  
+
   <button class="absolute right-10 bottom-8 w-14 cursor-pointer z-[100000]" (click)="toggleJarvis()">
     <img src="/msg.png" alt="" class="rounded-full">
   </button>
