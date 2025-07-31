@@ -150,57 +150,69 @@
         </div>
       </div> -->
       <div #messagesContainer class="hide-scrollbar flex flex-col space-y-4 h-[55vh] overflow-y-auto">
-  <div *ngFor="let msg of messages" class="chat-message">
-    <div
-      class="flex items-end overflow-y-auto"
-      [ngClass]="{
-        'justify-end': msg.sender === 'user',
-        'justify-start': msg.sender === 'bot'
-      }"
-    >
-      <div
-        class="flex flex-col space-y-2 text-xs max-w-xs mx-2"
-        [ngClass]="{
-          'order-1 items-end': msg.sender === 'user',
-          'order-2 items-start': msg.sender === 'bot'
-        }"
-      >
-        <div>
-          <ng-container *ngIf="msg.type === 'image'; else textMessage">
-            <img
-              [src]="msg.fileUrl"
-              alt="Image message"
-              class="max-w-[200px] rounded-lg border border-gray-300"
-            />
-          </ng-container>
-
-          <ng-template #textMessage>
-            <span
-              class="px-4 py-2 rounded-lg inline-block"
+        <div *ngFor="let msg of messages" class="chat-message">
+          <div
+            class="flex items-end overflow-y-auto"
+            [ngClass]="{
+              'justify-end': msg.sender === 'user',
+              'justify-start': msg.sender === 'bot'
+            }"
+          >
+            <div
+              class="flex flex-col space-y-2 text-xs max-w-xs mx-2"
               [ngClass]="{
-                'bg-blue-600 text-white rounded-br-none': msg.sender === 'user',
-                'bg-gray-300 text-gray-600 rounded-bl-none': msg.sender === 'bot'
+                'order-1 items-end': msg.sender === 'user',
+                'order-2 items-start': msg.sender === 'bot'
               }"
             >
-              {{ msg.text }}
-            </span>
-          </ng-template>
-        </div>
-      </div>
+              <div>
+                  <ng-container [ngSwitch]="msg.type">
+                    
+                    <!-- 1️⃣ Image -->
+                    <img *ngSwitchCase="'image'"
+                        [src]="msg.fileUrl"
+                        alt="Image message"
+                        class="max-w-[200px] rounded-lg border border-gray-300" />
 
-      <img
-        [src]="msg.sender === 'user'
-          ? 'https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b'
-          : 'https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb'"
-        alt="profile"
-        class="w-6 h-6 rounded-full"
-        [ngClass]="{
-          'order-2': msg.sender === 'user',
-          'order-1': msg.sender === 'bot'
-        }"
-      />
-    </div>
-  </div>
+                    <!-- 2️⃣ Video -->
+                    <video *ngSwitchCase="'video'"
+                          [src]="msg.fileUrl"
+                          controls
+                          class="max-w-[200px] rounded-lg border border-gray-300"></video>
+
+                    <!-- 3️⃣ Audio -->
+                    <audio *ngSwitchCase="'audio'"
+                          [src]="msg.fileUrl"
+                          controls
+                          class="rounded-lg border border-gray-300 w-[200px]"></audio>
+
+                    <!-- 4️⃣ Default: Text -->
+                    <span *ngSwitchDefault
+                          class="px-4 py-2 rounded-lg inline-block"
+                          [ngClass]="{
+                            'bg-blue-600 text-white rounded-br-none': msg.sender === 'user',
+                            'bg-gray-300 text-gray-600 rounded-bl-none': msg.sender === 'bot'
+                          }">
+                      {{ msg.text }}
+                    </span>
+
+                  </ng-container>
+              </div>
+            </div>
+
+            <img
+              [src]="msg.sender === 'user'
+                ? 'https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b'
+                : 'https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb'"
+              alt="profile"
+              class="w-6 h-6 rounded-full"
+              [ngClass]="{
+                'order-2': msg.sender === 'user',
+                'order-1': msg.sender === 'bot'
+              }"
+            />
+          </div>
+        </div>
       </div>
 
     <div class="border-t-2 border-gray-200 pt-2 sm:mb-0">
@@ -214,34 +226,34 @@
           </span>
           <input [(ngModel)]="messageText" (keyup.enter)="sendMessage()" placeholder="Write your message!" class="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-md py-3">
             <div class="absolute right-0 items-center inset-y-0 hidden sm:flex">
-      <!-- Trigger Button -->
-      <button type="button"
-        (click)="fileInput.click()"
-        class="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-          class="h-6 w-6 text-gray-600">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13">
-          </path>
-        </svg>
-      </button>
+              <!-- Trigger Button -->
+              <button type="button"
+                (click)="fileInput.click()"
+                class="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                  class="h-6 w-6 text-gray-600">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13">
+                  </path>
+                </svg>
+              </button>
 
-      <!-- Hidden File Input -->
-      <input #fileInput type="file" multiple hidden
-        (change)="handleFileInput($event)"
-        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.txt,.zip" />
+              <!-- Hidden File Input -->
+              <input #fileInput type="file" multiple hidden
+                (change)="handleFileInput($event)"
+                accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.txt,.zip" />
 
-      <!-- Send Button -->
-      <button type="button" (click)="sendMessage()"
-        class="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
-        <span class="font-bold">Send</span>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-          class="h-6 w-6 ml-2 transform rotate-90">
-          <path
-            d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z">
-          </path>
-        </svg>
-      </button>
+              <!-- Send Button -->
+              <button type="button" (click)="sendMessage()"
+                class="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
+                <span class="font-bold">Send</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                  class="h-6 w-6 ml-2 transform rotate-90">
+                  <path
+                    d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z">
+                  </path>
+                </svg>
+              </button>
             </div>
         </div>
     </div>

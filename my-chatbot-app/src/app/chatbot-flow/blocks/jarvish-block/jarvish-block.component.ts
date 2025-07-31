@@ -1,6 +1,7 @@
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { Component, AfterViewInit, ElementRef, ViewChild, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ApiHeader } from '../../../models/chatbot-block.model';
 
 @Component({
   selector: 'app-jarvish-block',
@@ -75,6 +76,35 @@ export class JarvishBlockComponent {
       this.waitingForUserInput = false;
       this.currentBlockIndex++;
       setTimeout(() => this.processNextBlock(), 800);
+    }else if(this.waitingForUserInput && block.subType === 'keywordGroup'){
+        const userInput = userMsg.trim().toLowerCase();
+
+        // Flatten keyword groups and normalize them
+        const allKeywords = block.keywordGroups?.flat().map((kw:string) => kw.toLowerCase()) || [];
+
+        // Match user input to any keyword
+        const matched = allKeywords.some((keyword : string) => userInput.includes(keyword));
+
+        if (matched) {
+          this.waitingForUserInput = false;
+          this.currentBlockIndex++;
+          setTimeout(() => this.processNextBlock(), 800);
+        } else {
+          // Optional: You can send a retry message or show a hint
+          this.messages.push({
+            sender: 'bot',
+            text: 'Sorry, I didn’t understand. Please try using a keyword like "Hi" or "Hello".'
+          });
+          
+          setTimeout(()=>{
+            const visibleKeywords = block.keywordGroups?.flat().join(', ') || '';
+            this.messages.push({
+              sender: 'bot',
+              text: `Say something like: ${visibleKeywords}`
+            });
+          },2000);
+          // Still waiting for user input, do not proceed
+      }
     } else {
       this.waitingForUserInput = false;
       this.currentBlockIndex++;
@@ -91,10 +121,10 @@ export class JarvishBlockComponent {
     } catch (err) {}
   }
 
-  ngAfterViewInit() {
-    const el = this.messagesContainer.nativeElement;
-    el.scrollTop = el.scrollHeight;
-  }
+  // ngAfterViewInit() {
+  //   const el = this.messagesContainer.nativeElement;
+  //   el.scrollTop = el.scrollHeight;
+  // }
 
   // startConversation() {
   //   this.isChatStarted = true;
@@ -105,27 +135,99 @@ export class JarvishBlockComponent {
     // this.processNextBlock();
   }
 
-    processNextBlock() {
-    if (this.currentBlockIndex >= this.canvasBlocks.length) return;
+  async processNextBlock() {
+  if (this.currentBlockIndex >= this.canvasBlocks.length) return;
 
-    const block = this.canvasBlocks[this.currentBlockIndex];
+  const block = this.canvasBlocks[this.currentBlockIndex];
 
-    if (block.type === 'textResponse') {
-      this.messages.push({ sender: 'bot', text: block.content });
-      this.scrollToBottom();
-      this.currentBlockIndex++;
-      setTimeout(() => this.processNextBlock(), 1000);
-    
-    } else if (block.type === 'userInput') {
-      this.waitingForUserInput = true;
-
-    } else if (block.type === 'conversationalForm') {
-      this.currentFormFields = block.formFields;
-      this.formFieldIndex = 0;
-      this.currentFormResponses = {};
-      this.askNextFormField();
-    }
+  if (block.type === 'textResponse') {
+    this.messages.push({ sender: 'bot', text: block.content });
+    this.scrollToBottom();
+    this.currentBlockIndex++;
+    setTimeout(() => this.processNextBlock(), 1000);
   }
+
+    else if (block.type === 'jsonApi') {
+    this.messages.push({ text: 'Fetching live data...', sender: 'bot' });
+    this.scrollToBottom();
+
+    try {
+      // 1️⃣ Merge default and block headers
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json', // required for POST/PUT/PATCH
+      };
+      (block.apiHeaders || []).forEach((h: ApiHeader) => {
+        if (h.key && h.value) headers[h.key] = h.value;
+      });
+
+      // 2️⃣ Prepare fetch options
+      const options: RequestInit = {
+        method: block.requestType || 'GET',
+        headers: headers
+      };
+
+      // 3️⃣ Handle request body automatically for POST/PUT/PATCH
+      if (['POST', 'PUT', 'PATCH'].includes((block.requestType || '').toUpperCase())) {
+        options.body = JSON.stringify(
+          block.body || { name: 'Aishwary', job: 'Developer' } // fallback example
+        );
+      }
+
+      console.log('API Request:', options.method, options.headers, options.body);
+
+      // 4️⃣ Make the request
+      const res = await fetch(block.apiEndpoint, options);
+      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+
+      // 5️⃣ Parse and display response
+      const data = await res.json();
+      this.messages.push({ 
+        text: `✅ API Response: ${JSON.stringify(data)}`, 
+        sender: 'bot' 
+      });
+
+    } catch (err) {
+      this.messages.push({ 
+        text: `❌ API request failed: ${err}`, 
+        sender: 'bot' 
+      });
+    }
+
+    this.scrollToBottom();
+    this.currentBlockIndex++;
+    setTimeout(() => this.processNextBlock(), 500);
+  }
+  else if (block.type === 'userInput') {
+    this.waitingForUserInput = true;
+  }
+
+  else if (block.type === 'conversationalForm') {
+    this.currentFormFields = block.formFields;
+    this.formFieldIndex = 0;
+    this.currentFormResponses = {};
+    this.askNextFormField();
+  }
+  /** 5️⃣ Handle Typing Delay */
+  else if (block.type === 'typingDelay') {
+    const delay = (block.delaySeconds || 1) * 1000;
+    this.messages.push({ sender: 'bot', text: '🤖 Typing...' });
+    this.scrollToBottom();
+
+    setTimeout(() => {
+      this.messages.pop(); // remove "typing..." message
+      this.messages.push({ sender: 'bot', text: '🤖 Delay Complete...' });
+      this.currentBlockIndex++;
+      this.processNextBlock();
+    }, delay);
+  }
+  /** 6️⃣ Handle Unknown Block Types */
+  else {
+    this.messages.push({ sender: 'bot', text: `[Unsupported block: ${block.type}]` });
+    this.currentBlockIndex++;
+    this.processNextBlock();
+  }
+}
+
 
   askNextFormField() {
   const field = this.currentFormFields[this.formFieldIndex];

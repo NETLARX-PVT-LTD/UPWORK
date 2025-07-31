@@ -284,17 +284,15 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     );
 
     this.canvasBlocks.push({
-    id: 'flow-start',
-    name: 'User Input',
-    icon: 'person',
-    type: 'userInput',
+    id: 'text-response-1',
+    name: 'Text Response',
+    icon: 'chat_bubble_outline',
+    type: 'textResponse',
     status: 'active',
-    x: 200,
-    y: 200,
-    subType: 'keywordGroup',
-    content: 'Hello 👋',
-    keywordGroups: [['Hello', 'Hi']],
-    description: 'Define keywords that trigger the conversations',
+    x: 300,
+    y: 300,
+    content: 'Welcome to Jarvis',
+    description: 'Starter Block',
     width: 0,
     height: 0
   });
@@ -305,19 +303,19 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
           name: 'Your Name',
           type: 'text',
           required: true,
-          promptPhrase: 'Enter your name'
+          promptPhrase: 'Type your name'
         },
         {
           name: 'Email Address',
           type: 'email',
           required: true,
-          promptPhrase: 'Enter your email'
+          promptPhrase: 'type your email'
         },
         {
-          name : 'Image',
-          type : 'image',
+          name : 'Order Id',
+          type : 'number',
           required : true,
-          promptPhrase : "Put one of your image"
+          promptPhrase : "Enter your Order ID"
         }
     ];
 
@@ -346,10 +344,26 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     status: 'active',
     x: 300,
     y: 300,
-    content: 'done implement conversation on that also',
-    description: 'Final message from Jarvish',
+    content: 'How can i help you with today',
+    description: 'Description',
     width: 0,
     height: 0
+  });
+
+  this.canvasBlocks.push({
+      id: 'flow-start',
+      name: 'User Input',
+      icon: 'person',
+      type: 'userInput',
+      status: 'active',
+      x: 600,
+      y: 200,
+      subType: 'anything',
+      content: 'Hello 👋',
+      keywordGroups: [['Hello', 'Hi']],
+      description: 'Define keywords that trigger the conversations',
+      width: 0,
+      height: 0
   });
 
   if (formBlockTemplate) {
@@ -370,6 +384,22 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.canvasBlocks.push(conversationalFormBlock);
   }
+
+    this.canvasBlocks.push({
+        id: 'json-api-1',
+        name: 'JSON API Integration',
+        icon: 'code',
+        type: 'jsonApi',
+        imageUrl: 'https://app.botsify.com/theme/images/Story-Icons/api.png',
+        status: 'active',
+        x: 400,
+        y: 400,
+        width: 0,
+        height: 0,
+        description: 'Fetches live data from an API',
+        apiEndpoint: 'https://reqres.in/api/users', // Example API
+        requestType: 'POST'
+    });
   }
 
   ngAfterViewInit(): void {
