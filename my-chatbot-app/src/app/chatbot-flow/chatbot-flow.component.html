@@ -46,7 +46,7 @@
             class="block-icon"
             [style.background-color]="getStatusColor(block.status)"
           >
-            <img *ngIf="block.imageUrl" [src]="block.imageUrl" alt="block-icon" class="custom-icon">
+            <img *ngIf="block.imageUrl" [src]="block.imageUrl" alt="block-icon" class="custom-icon shadow-sm border border-gray-200 rounded">
             <mat-icon *ngIf="!block.imageUrl">{{ block.icon }}</mat-icon>
           </div>
       
