@@ -135,9 +135,13 @@ export class JsPlumbFlowService {
       isSource: true,
       maxConnections: -1,
       endpoint: ['Dot', { radius: 8 }],
-      paintStyle: { fill: '#4f46e5' },
+      paintStyle: {
+        stroke: '#F1F2F3',
+        strokeWidth: 5,
+        fill: '#4f46e5'
+      },
       connectorStyle: { stroke: '#4f46e5', strokeWidth: 2 },
-      connector: ['Flowchart', { stub: [40, 60], gap: 10, cornerRadius: 5 }],
+      connector: ['Flowchart', { stub: [20, 30], gap: 5, cornerRadius: 5 }],
       overlays: [
         ['Arrow', { location: 1, length: 10, width: 10 }]
       ],
@@ -149,8 +153,12 @@ export class JsPlumbFlowService {
       anchor: 'Top',
       isTarget: true,
       maxConnections: -1,
-      endpoint: ['Dot', { radius: 8 }],
-      paintStyle: { fill: '#10b981' },
+      endpoint: ['Dot', { radius:  8}],
+      paintStyle: {
+        stroke: '#F1F2F3',
+        strokeWidth: 5,
+        fill: '#10b981'
+      },
       hoverPaintStyle: { fill: '#059669' },
       uuid: `${blockId}-target` // Unique ID for this endpoint
     });
@@ -184,6 +192,57 @@ export class JsPlumbFlowService {
    * @param targetBlockId The ID of the target block (e.g., 'block-targetId').
    * @returns The created connection object, or null if connection fails or already exists.
    */
+  /**
+   * Finds the first jsPlumb connection that is within `tolerance` pixels of
+   * the supplied point (coordinates are relative to the jsPlumb container).
+   */
+  findConnectionNear(x: number, y: number, tolerance = 20): any | null {
+    if (!this.instance) { return null; }
+
+    const containerRect = (this.instance.getContainer() as HTMLElement).getBoundingClientRect();
+
+    const connections = this.instance.getAllConnections();
+    for (const conn of connections) {
+      const ep1 = conn.endpoints[0].canvas.getBoundingClientRect();
+      const ep2 = conn.endpoints[1].canvas.getBoundingClientRect();
+
+      // Mid-points of endpoints relative to container
+      const x1 = ep1.left + ep1.width / 2 - containerRect.left;
+      const y1 = ep1.top + ep1.height / 2 - containerRect.top;
+      const x2 = ep2.left + ep2.width / 2 - containerRect.left;
+      const y2 = ep2.top + ep2.height / 2 - containerRect.top;
+
+      const dist = this.#pointToSegmentDistance(x, y, x1, y1, x2, y2);
+      if (dist <= tolerance) {
+        return conn;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Removes the given connection from the canvas and internal list.
+   */
+  deleteJsPlumbConnection(connection: any): void {
+    if (!this.instance) { return; }
+    this.instance.deleteConnection(connection);
+    this.jsPlumbConnections = this.jsPlumbConnections.filter(c => c.id !== connection.id);
+  }
+
+  // Helper – shortest distance from P to line segment AB
+  #pointToSegmentDistance(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    if (dx === 0 && dy === 0) {
+      return Math.hypot(px - x1, py - y1);
+    }
+    const t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
+    const clampedT = Math.max(0, Math.min(1, t));
+    const cx = x1 + clampedT * dx;
+    const cy = y1 + clampedT * dy;
+    return Math.hypot(px - cx, py - cy);
+  }
+
   connectBlocks(sourceBlockId: string, targetBlockId: string): any | null {
     if (!this.instance) {
       console.error('jsPlumb instance not initialized.');
@@ -205,7 +264,7 @@ export class JsPlumbFlowService {
       source: sourceBlockId,
       target: targetBlockId,
       anchor: ['Bottom', 'Top'], // Source bottom, Target top
-      endpoint: ['Dot', { radius: 8 }],
+      endpoint: ['Dot', { radius: 5 }],
       connector: ['Flowchart', { stub: [40, 60], gap: 10, cornerRadius: 5 }],
       paintStyle: { stroke: '#4f46e5', strokeWidth: 2 },
       overlays: [
