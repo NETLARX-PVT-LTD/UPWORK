@@ -1,4 +1,3 @@
-// src/app/chatbot-flow/blocks/media-block/media-block.component.ts
 import { Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +11,21 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 
-import { ChatbotBlock, AvailableMedia } from '../../../models/chatbot-block.model';
+import { ChatbotBlock, AvailableMedia, Button, AvailableStory } from '../../../models/chatbot-block.model';
+
+type ButtonIntegrationType = 'text_message' | 'media_block' | 'website_url' | 'direct_call' | 'start_story' | 'rss_feed' | 'json_api' | 'human_help' | 'conversational_form' | null;
+
+export interface ApiHeader {
+  key: string;
+  value: string;
+}
+
+export interface ApiBlock {
+  // ... other properties
+  apiEndpoint?: string;
+  requestType?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  apiHeaders?: ApiHeader[];
+}
 
 @Component({
   selector: 'app-media-block',
@@ -50,7 +63,11 @@ export class MediaBlockComponent implements OnInit {
 
   showNewMediaForm: boolean = false;
   showButtonTypeCard: boolean = false;
-  showTextMessageIntegrationCard: boolean = false;
+  showCommonIntegrationCard: boolean = false;
+
+  // NEW: Temporary properties to manage the button being added or edited
+  currentButton: Partial<Button> = {};
+  currentButtonIndex: number = -1; // -1 for a new button, otherwise the index of the button being edited
 
   // --- NEW PROPERTIES FOR INFO MODAL ---
   showInfoModal: boolean = false;
@@ -85,45 +102,53 @@ export class MediaBlockComponent implements OnInit {
     '{user/Gender}'
   ];
 
-  // Filtered attributes for search
   filteredGeneralAttributes: string[] = [];
   filteredFormAttributes: string[] = [];
   filteredUserAttributes: string[] = [];
   // --- END NEW PROPERTIES FOR INFO MODAL ---
 
+  public availableStories: AvailableStory[] = [
+  { id: 'story1', name: '(hello,hi,hey),' },
+  { id: 'story2', name: '(Hii),' },
+  { id: 'story3', name: 'Report Incident' },
+   {id: 'story4', name: 'Process for setting up shop' },
+  // Add more stories as needed
+];
   constructor(private _snackBar: MatSnackBar) { }
-  // New getter to check if the block has any content
+
   get hasContent(): boolean {
-    // Return true if any content property is not falsy
-    return !!this.block.content || 
-           !!this.block.mediaUrl || 
-           !!this.block.buttonTitle || 
-           !!this.block.buttonTextMessage;
-  }
-// NEW PROPERTY to track if we are in 'edit' mode
-  isEditingButton: boolean = false;
-  // NEW: Methods for the new button icons
-  onEditButtonClick(): void {
-      // Set the state to 'edit'
-    this.isEditingButton = true;
-    // Show the integration card and pre-fill the values
-    this.showTextMessageIntegrationCard = true;
-    this.showButtonTypeCard = false; // Ensure this is hidden
-    this._snackBar.open('Editing Text Message Integration.', 'Dismiss', { duration: 2000 });
+    return !!this.block.content ||
+           !!this.block.mediaUrl ||
+           (this.block.buttons?.length ?? 0) > 0;
   }
 
-  onDeleteButtonClick(): void {
-    // Clear the button data from the block
-    this.block.buttonTitle = '';
-    this.block.buttonTextMessage = '';
-     // Reset the editing state
-    this.isEditingButton = false;
-    // Notify parent component of the change
-    this.blockUpdated.emit(this.block);
+  // --- UPDATED BUTTON METHODS ---
 
-    this._snackBar.open('Button removed.', 'Dismiss', { duration: 2000 });
+  // REWRITTEN: This method now opens the card for editing a specific button
+  onEditButtonClick(button: Button, index: number): void {
+    this.showButtonTypeCard = false;
+    this.showCommonIntegrationCard = true;
+    this.currentButtonIndex = index;
+    // Create a deep copy to prevent direct mutation of the original object
+    this.currentButton = JSON.parse(JSON.stringify(button));
+    this._snackBar.open(`Editing ${this.currentButton.type?.replace('_', ' ')}.`, 'Dismiss', { duration: 2000 });
   }
+
+  // REWRITTEN: This method now deletes a specific button by its index
+  onDeleteButtonClick(index: number): void {
+    if (this.block.buttons) {
+      this.block.buttons.splice(index, 1);
+      this.blockUpdated.emit(this.block);
+      this._snackBar.open('Button removed.', 'Dismiss', { duration: 2000 });
+    }
+  }
+
   ngOnInit(): void {
+    // Initialize the buttons array if it doesn't exist
+    if (!this.block.buttons) {
+      this.block.buttons = [];
+    }
+
     if (!this.block.mediaType) {
       this.block.mediaType = 'text';
     }
@@ -136,12 +161,6 @@ export class MediaBlockComponent implements OnInit {
     if (this.block.mediaName === undefined) {
       this.block.mediaName = '';
     }
-    if (this.block.buttonTitle === undefined) {
-      this.block.buttonTitle = '';
-    }
-    if (this.block.buttonTextMessage === undefined) {
-      this.block.buttonTextMessage = '';
-    }
 
     if (this.isSelected && this.block.mediaId) {
       const selected = this.availableMedia.find(m => m.id === this.block.mediaId);
@@ -153,9 +172,25 @@ export class MediaBlockComponent implements OnInit {
       }
     }
 
-    // NEW: Initialize filtered attributes
     this.resetFilteredAttributes();
   }
+
+  
+    // Method to handle content changes and emit the updated block
+ 
+ addApiHeader(): void {
+  if (!this.currentButton.apiHeaders) {
+    this.currentButton.apiHeaders = [];
+  }
+  this.currentButton.apiHeaders.push({ key: '', value: '' });
+}
+
+removeApiHeader(index: number): void {
+  if (this.currentButton.apiHeaders) {
+    this.currentButton.apiHeaders.splice(index, 1);
+  }
+}
+  // --- EXISTING METHODS (no major changes needed) ---
 
   onMediaSelectionChange(): void {
     const selected = this.availableMedia.find(m => m.id === this.block.mediaId);
@@ -173,7 +208,7 @@ export class MediaBlockComponent implements OnInit {
     this.blockUpdated.emit(this.block);
     this.showNewMediaForm = false;
     this.showButtonTypeCard = false;
-    this.showTextMessageIntegrationCard = false;
+    this.closeCommonIntegrationCard();
   }
 
   createNewMediaBlock(): void {
@@ -185,7 +220,7 @@ export class MediaBlockComponent implements OnInit {
     this.block.mediaUrl = '';
     this.blockUpdated.emit(this.block);
     this.showButtonTypeCard = false;
-    this.showTextMessageIntegrationCard = false;
+    this.closeCommonIntegrationCard();
     this._snackBar.open('Ready to create a new media block. Fill in the details.', 'Dismiss', { duration: 3000 });
   }
 
@@ -194,7 +229,7 @@ export class MediaBlockComponent implements OnInit {
       this.showNewMediaForm = true;
       this.onContentChange();
       this.showButtonTypeCard = false;
-      this.showTextMessageIntegrationCard = false;
+      this.closeCommonIntegrationCard();
       this._snackBar.open(`Editing Media Block: ${this.getMediaName(this.block.mediaId)}`, 'Dismiss', { duration: 3000 });
     } else {
       this._snackBar.open('Please select a media block to edit first.', 'Dismiss', { duration: 3000 });
@@ -203,7 +238,6 @@ export class MediaBlockComponent implements OnInit {
 
   saveMedia(): void {
     const currentMediaType = this.block.mediaType || 'text';
-
     if (!this.block.mediaName || this.block.mediaName.trim() === '') {
       this._snackBar.open('Media Name cannot be empty.', 'Dismiss', { duration: 3000 });
       return;
@@ -212,14 +246,11 @@ export class MediaBlockComponent implements OnInit {
       this._snackBar.open('Text content cannot be empty for text media type.', 'Dismiss', { duration: 3000 });
       return;
     }
-
     if (['image', 'video', 'file', 'audio'].includes(currentMediaType) && (!this.block.mediaUrl || this.block.mediaUrl.trim() === '')) {
       this._snackBar.open(`Please provide a URL for ${currentMediaType} media.`, 'Dismiss', { duration: 3000 });
       return;
     }
-
     const isNewMedia = !this.block.mediaId;
-
     if (isNewMedia) {
       const newMediaId = 'media-' + Date.now().toString();
       const newMedia: AvailableMedia = {
@@ -229,10 +260,8 @@ export class MediaBlockComponent implements OnInit {
         content: this.block.content ?? '',
         url: this.block.mediaUrl ?? ''
       };
-
       this.availableMedia.push(newMedia);
       this.block.mediaId = newMediaId;
-
       this._snackBar.open('New Media Block content saved and linked!', 'Dismiss', { duration: 3000 });
     } else {
       const existingMediaIndex = this.availableMedia.findIndex(m => m.id === this.block.mediaId);
@@ -249,10 +278,9 @@ export class MediaBlockComponent implements OnInit {
         this._snackBar.open('Error: Could not find existing media to update.', 'Dismiss', { duration: 3000 });
       }
     }
-
     this.showNewMediaForm = false;
     this.showButtonTypeCard = false;
-    this.showTextMessageIntegrationCard = false;
+    this.closeCommonIntegrationCard();
     this.blockUpdated.emit(this.block);
   }
 
@@ -274,7 +302,7 @@ export class MediaBlockComponent implements OnInit {
     }
     this.showNewMediaForm = false;
     this.showButtonTypeCard = false;
-    this.showTextMessageIntegrationCard = false;
+    this.closeCommonIntegrationCard();
     this.blockUpdated.emit(this.block);
     this._snackBar.open('Media editing/creation canceled.', 'Dismiss', { duration: 2000 });
   }
@@ -287,7 +315,7 @@ export class MediaBlockComponent implements OnInit {
   onSelectBlock(): void {
     this.selectBlock.emit(this.block);
     this.showButtonTypeCard = false;
-    this.showTextMessageIntegrationCard = false;
+    this.closeCommonIntegrationCard();
   }
 
   onStartConnection(event: MouseEvent): void {
@@ -318,7 +346,7 @@ export class MediaBlockComponent implements OnInit {
     this.closeSidebarEvent.emit();
     this.showNewMediaForm = false;
     this.showButtonTypeCard = false;
-    this.showTextMessageIntegrationCard = false;
+    this.closeCommonIntegrationCard();
   }
 
   private generateDefaultMediaBlockName(): string {
@@ -326,47 +354,174 @@ export class MediaBlockComponent implements OnInit {
     return `Media Block ${randomNumber}`;
   }
 
+  // REWRITTEN: This method now just opens the card to select a button type
   onAddNewButton(): void {
     this.showButtonTypeCard = true;
-    this.showTextMessageIntegrationCard = false;
+    this.closeCommonIntegrationCard();
     this._snackBar.open('Select a button type.', 'Dismiss', { duration: 2000 });
   }
 
   closeButtonTypeCard(): void {
     this.showButtonTypeCard = false;
   }
-
-  onTextMessageButtonClick(): void {
+  
+  // NEW: A single method to handle opening the common card for any new button type
+  openCommonCardForNewButton(type: ButtonIntegrationType): void {
     this.showButtonTypeCard = false;
-    this.showTextMessageIntegrationCard = true;
-     this.isEditingButton = false; // Important: reset this to false for a new button
-    this._snackBar.open('Configure your text message.', 'Dismiss', { duration: 2000 });
+    this.showCommonIntegrationCard = true;
+    this.currentButtonIndex = -1; // -1 indicates a new button
+    this.currentButton = {
+      title: '',
+      type: type as any
+    };
+
+    if (type === 'text_message') {
+      this.currentButton.textMessage = '';
+    } else if (type === 'media_block') {
+      this.currentButton.linkedMediaId = undefined;
+    } else if (type === 'website_url') {
+      this.currentButton.url = '';
+    } else if (type === 'direct_call') {
+    this.currentButton.phoneNumber = '';
+  } else if (type === 'start_story') {
+    this.currentButton.storyId = undefined;
+  } else if (type === 'rss_feed') {
+    this.currentButton.rssUrl = '';
+    this.currentButton.rssItemCount = 5; // Set a default value
+    this.currentButton.rssButtonText = '';
+  } else  if (type === 'json_api') {
+   this.currentButton.apiEndpoint = '';
+    this.currentButton.requestType = 'GET';
+    this.currentButton.apiHeaders = [{ key: '', value: '' }];
+  } else if (type === 'human_help') {
+    this.currentButton.messageAfterAction = '';
+    this.currentButton.emailForNotification = '';
+    this.currentButton.stopBotForUser = false;
+  } else  if (type === 'conversational_form') {
+    this.currentButton.formId = ''; // Initialize with an empty string or a default form ID
+    this.currentButton.showInline = false;
+  }
   }
 
-  closeTextMessageIntegrationCard(): void {
-    this.showTextMessageIntegrationCard = false;
-     this.isEditingButton = false; // Important: reset this to false for a new button
-  }
+  // REWRITTEN: Common method to save a new or existing button
+  saveCommonIntegrationCard(): void {
+    if (!this.currentButton.title || this.currentButton.title.trim() === '') {
+      this._snackBar.open('Button Title cannot be empty.', 'Dismiss', { duration: 3000 });
+      return;
+    }
 
-  saveTextMessageIntegration(): void {
-    if (!this.block.buttonTitle || this.block.buttonTitle.trim() === '') {
-        this._snackBar.open('Button Title cannot be empty.', 'Dismiss', { duration: 3000 });
+    switch (this.currentButton.type) {
+      case 'text_message':
+        if (!this.currentButton.textMessage || this.currentButton.textMessage.trim() === '') {
+          this._snackBar.open('Bot says message cannot be empty.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        break;
+
+      case 'media_block':
+        if (!this.currentButton.linkedMediaId) {
+          this._snackBar.open('Please select a media block.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        break;
+
+      case 'website_url':
+        if (!this.currentButton.url || this.currentButton.url.trim() === '') {
+          this._snackBar.open('Website URL cannot be empty.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        if (!this.currentButton.url.startsWith('http://') && !this.currentButton.url.startsWith('https://')) {
+          this._snackBar.open('Please enter a valid URL (e.g., https://example.com).', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        break;
+
+        case 'direct_call':
+      if (!this.currentButton.phoneNumber || this.currentButton.phoneNumber.trim() === '') {
+        this._snackBar.open('Phone number cannot be empty.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      // You may add a more specific phone number validation regex here
+      break;
+
+    // Add validation for Start Story
+    case 'start_story':
+      if (!this.currentButton.storyId) {
+        this._snackBar.open('Please select a story to initiate.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      break;
+
+       case 'rss_feed':
+      if (!this.currentButton.rssUrl || this.currentButton.rssUrl.trim() === '') {
+        this._snackBar.open('RSS Feed URL cannot be empty.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      // You may want to add URL validation here.
+      if (!this.currentButton.rssItemCount || this.currentButton.rssItemCount <= 0) {
+        this._snackBar.open('Number of items must be a positive number.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      if (!this.currentButton.rssButtonText || this.currentButton.rssButtonText.trim() === '') {
+        this._snackBar.open('Button Text cannot be empty.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      break;
+
+      case 'json_api':
+        if (!this.currentButton.apiEndpoint || this.currentButton.apiEndpoint.trim() === '') {
+        this._snackBar.open('API Endpoint cannot be empty.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      if (!this.currentButton.requestType) {
+        this._snackBar.open('Please select an API request type.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      // You may want to add validation for the headers here as well
+      break;
+
+      case 'human_help':
+      if (!this.currentButton.messageAfterAction || this.currentButton.messageAfterAction.trim() === '') {
+        this._snackBar.open('Message After Help Action cannot be empty.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      // You can add an optional email validation if needed
+      break;
+
+      case 'conversational_form':
+      if (!this.currentButton.formId) {
+        this._snackBar.open('Please select a conversational form.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      break;
+
+      default:
+        this._snackBar.open('Unknown button type. Cannot save.', 'Dismiss', { duration: 3000 });
         return;
     }
 
-    if (!this.block.buttonTextMessage || this.block.buttonTextMessage.trim() === '') {
-        this._snackBar.open('Bot says message cannot be empty.', 'Dismiss', { duration: 3000 });
-        return;
+    if (this.currentButtonIndex === -1) {
+      this.block.buttons?.push(this.currentButton as Button);
+      this._snackBar.open('New button added successfully!', 'Dismiss', { duration: 3000 });
+    } else {
+      if (this.block.buttons && this.block.buttons[this.currentButtonIndex]) {
+        this.block.buttons[this.currentButtonIndex] = this.currentButton as Button;
+        this._snackBar.open('Button updated successfully!', 'Dismiss', { duration: 3000 });
+      }
     }
 
-    console.log('Button Title saved:', this.block.buttonTitle);
-    console.log('Bot says message saved:', this.block.buttonTextMessage);
-    this._snackBar.open('Text Message content saved!', 'Dismiss', { duration: 3000 });
-    this.closeTextMessageIntegrationCard();
+    this.closeCommonIntegrationCard();
     this.blockUpdated.emit(this.block);
   }
 
-  // --- NEW INFO MODAL METHODS ---
+  // REWRITTEN: Common method to close any integration card and reset state
+  closeCommonIntegrationCard(): void {
+    this.showCommonIntegrationCard = false;
+    this.currentButtonIndex = -1;
+    this.currentButton = {};
+  }
+
+  // --- UPDATED INFO MODAL METHODS ---
   openInfoModal(inputType: 'buttonTitle' | 'buttonTextMessage'): void {
     this.showInfoModal = true;
     this.activeInputElementType = inputType;
@@ -383,45 +538,43 @@ export class MediaBlockComponent implements OnInit {
 
   selectVariable(variable: string): void {
     let targetTextarea: HTMLTextAreaElement | null = null;
-    let targetModelProperty: 'buttonTitle' | 'buttonTextMessage' | null = null;
+    let targetModelProperty: 'title' | 'textMessage' | null = null;
 
     if (this.activeInputElementType === 'buttonTitle' && this.buttonTitleAutosizeElement) {
       targetTextarea = this.buttonTitleAutosizeElement.nativeElement;
-      targetModelProperty = 'buttonTitle';
+      targetModelProperty = 'title';
     } else if (this.activeInputElementType === 'buttonTextMessage' && this.buttonTextMessageAutosizeElement) {
       targetTextarea = this.buttonTextMessageAutosizeElement.nativeElement;
-      targetModelProperty = 'buttonTextMessage';
+      targetModelProperty = 'textMessage';
     }
 
     if (targetTextarea && targetModelProperty) {
       const start = targetTextarea.selectionStart;
       const end = targetTextarea.selectionEnd;
       const currentValue = targetTextarea.value;
-
       const newValue = currentValue.substring(0, start) + variable + currentValue.substring(end);
 
-      this.block[targetModelProperty] = newValue;
-
+      if (targetModelProperty === 'title') {
+        this.currentButton.title = newValue;
+      } else if (targetModelProperty === 'textMessage') {
+        this.currentButton.textMessage = newValue;
+      }
+      
       targetTextarea.value = newValue;
       targetTextarea.selectionStart = targetTextarea.selectionEnd = start + variable.length;
-
       this.onContentChange();
     }
-
     this.closeInfoModal();
   }
 
   filterVariables(): void {
     const searchLower = this.searchTerm.toLowerCase();
-    
     this.filteredGeneralAttributes = this.generalAttributes.filter(attr =>
       attr.toLowerCase().includes(searchLower)
     );
-    
     this.filteredFormAttributes = this.formAttributes.filter(attr =>
       attr.toLowerCase().includes(searchLower)
     );
-    
     this.filteredUserAttributes = this.userAttributes.filter(attr =>
       attr.toLowerCase().includes(searchLower)
     );

@@ -77,6 +77,11 @@ export interface ChatbotBlock {
   // NEW: Properties for the text message button
   buttonTitle?: string;
   buttonTextMessage?: string;
+  buttonType?: 'text_message' | 'media_block' | 'website_url' | 'direct_call' | 'start_story' | 'rss_feed' | 'json_api' | 'human_help' | 'conversational_form'; // NEW: Type of button action
+  buttonLinkedMediaId?: string; // For 'media_block' button type
+  buttonUrl?: string; // NEW: For 'website_url' button type
+  // NEW: An array to hold multiple buttons
+  buttons?: Button[];
   
 }
 
@@ -321,4 +326,37 @@ export interface FormTheme {
 export interface ApiHeader {
   key: string;
   value: string;
+}
+
+export interface Button {
+  title: string;
+  type: 'text_message' | 'media_block' | 'website_url' | 'direct_call' | 'start_story' | 'rss_feed' | 'json_api' | 'human_help' | 'conversational_form';
+  textMessage?: string; // For 'text_message' type
+  linkedMediaId?: string; // For 'media_block' type
+  url?: string; // For 'website_url' type
+  phoneNumber?: string;
+  storyId?: string;
+  rssUrl?: string; // New property for RSS Feed URL
+  rssItemCount?: number; // New property for number of items
+  rssButtonText?: string; // New property for button text
+   jsonApiUrl?: string; // New property for JSON API URL
+  jsonApiMethod?: 'GET' | 'POST'; // New property for HTTP method
+  jsonApiHeaders?: string; // New property for headers
+  jsonApiBody?: string; // New property for body
+    apiEndpoint?: string; // New property for API Endpoint
+  requestType?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'; // New property for request type
+  apiHeaders?: ApiHeader[]; // New property for API headers
+  // Add the new properties for Human Help Integration
+  messageAfterAction?: string;
+  emailForNotification?: string;
+  stopBotForUser?: boolean;
+  // Add the new properties for Conversational Form Integration
+  formId?: string;
+  showInline?: boolean;
+}
+export interface ApiBlock {
+  // ... other properties of your block (e.g., buttons, etc.)
+  apiEndpoint?: string;
+  requestType?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  apiHeaders?: ApiHeader[];
 }

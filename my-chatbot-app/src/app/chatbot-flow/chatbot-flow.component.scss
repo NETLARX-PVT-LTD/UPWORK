@@ -99,7 +99,1528 @@
     .block-item {
       display: flex;
       align-items: center;
-      padding: 12px 20px;
+      padding: 6px 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      
+      &:hover {
+        background-color: #f8fafc;
+        border-left-color: #3b82f6;
+      }
+      
+      .block-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 5px;
+        
+        mat-icon {
+          color: white;
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+        .custom-icon {
+          width: 24px; /* Adjust this value as needed for your desired smaller size */
+          height: 24px; /* Adjust this value as needed for your desired smaller size */
+          object-fit: contain; /* Ensures the image scales down without being cropped */
+        }
+      }
+      
+      .block-content {
+        flex: 1;
+        
+        .block-name {
+          font-weight: 700;
+          color: #1e293b;
+          font-size: 12px;
+          margin-bottom: 2px;
+        }
+        
+        .block-description {
+          font-size: 11px;
+          color: white;
+        }
+      }
+      
+      .drag-handle {
+        color: black;
+        cursor: grab;
+        
+        &:active {
+          cursor: grabbing;
+        }
+        
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
+}
+
+/* Canvas Area Styles */
+.canvas-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background-color: #f8fafc;
+  transition: margin-right 0.3s ease;
+  
+  &.sidebar-open {
+    margin-right: 350px;
+  }
+  
+  .canvas-controls {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  padding: 4px 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s ease-in-out;
+
+  .zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .zoom-level {
+      min-width: 40px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: #475569;
+      padding: 0 4px;
+    }
+  }
+
+  button {
+    width: 34px;
+    height: 28px;
+    background-color: #f1f5f9;
+    border: none;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+
+    .reset-text {
+  font-size: 10px;
+  font-weight: 500;
+  color: #334155;
+  padding: 0 4px;
+}
+
+
+    &:hover {
+      background-color: #e2e8f0;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    mat-icon {
+      font-size: 16px;
+      color: #334155;
+    }
+  }
+}
+
+  
+  .canvas-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .connections-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    
+    .connection-line {
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    }
+    
+    .temp-connection-line {
+      opacity: 0.7;
+    }
+  }
+  
+  .canvas-content {
+    position: relative;
+    width: 2000px;
+    height: 2000px;
+    transform-origin: 0 0;
+    z-index: 2;
+  }
+}
+
+/* Flow Start Indicator */
+.flow-start-indicator {
+  position: absolute;
+  top: 50px;
+  left: 450px;
+  text-align: center;
+  z-index: 5;
+  
+  .flow-start-text {
+    background-color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .flow-start-arrow {
+    margin-top: 8px;
+    color: #64748b;
+    
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+/* Canvas Block Styles */
+.canvas-block {
+  position: absolute; // Essential for positioning the block itself
+  width: 300px;
+  background-color: rgb(245, 244, 244);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  z-index: 10;
+  cursor: grab; // Changed from 'move' for better UX indication
+  // Added `overflow: visible;` - important if endpoints extend beyond block bounds
+  overflow: visible;
+
+  &:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  &.selected {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  &.cdk-drag-dragging {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    // transform: rotate(2deg); // Consider removing or reducing rotation if it causes issues with connection points
+    z-index: 100;
+  }
+
+  .block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 8px;
+    border-bottom: 2px solid rgb(6, 184, 6);
+    background-color: #CDA5E7;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+
+    .block-type-badges {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+
+      .block-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .block-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          color: #6366f1;
+        }
+
+        span {
+          font-weight: 600;
+          color: #1e293b;
+          font-size: 14px;
+        }
+      }
+
+      .badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        &.keyword-group-badge {
+          background-color: #22c55e;
+          color: white;
+        }
+
+        &.phrase-badge {
+          background-color: #22c55e;
+          color: white;
+        }
+
+        &.anything-badge {
+          background-color: #22c55e;
+          color: white;
+        }
+      }
+    }
+
+    .block-actions {
+      .block-menu-trigger {
+        mat-icon {
+          font-size: 16px;
+          color: #fff;
+        }
+      }
+    }
+  }
+
+  .block-body {
+    padding: 0 16px 16px;
+    background-color: #fff;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+
+    .block-description {
+      font-size: 16px;
+      color: #64748b;
+      margin-bottom: 12px;
+      line-height: 1.4;
+      padding-top: 5px;
+    }
+
+    .block-content-text {
+      font-size: 13px;
+      color: #374151;
+      background-color: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+  }
+
+  // Connection Points
+  // IMPORTANT: jsPlumb will add inline `left` and `top` (or `transform`) styles to these elements.
+  // Your `position: absolute;` is necessary, but the exact offsets should often be dictated by jsPlumb's anchor.
+  .connection-point {
+    position: absolute; // Keeps it relative to the .canvas-block
+    width: 12px;
+    height: 12px;
+    z-index: 11; // Ensure it's above the block itself, but below jsPlumb overlays if any.
+    // Remove the `top`, `left`, `right`, `transform` properties from here for general .connection-point
+    // jsPlumb will apply its own positioning.
+
+    // Styles for the visual dot within the connection-point container
+    .connection-dot {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background-color: #6366f1;
+      border: 2px solid white;
+      cursor: crosshair;
+      transition: all 0.2s ease;
+      // You might need to adjust for the border to center perfectly
+      // For instance, if the endpoint is 12x12 and dot has 2px border,
+      // the actual dot content is 8x8.
+      // If jsPlumb is positioning the 12x12 container, the dot will be fine.
+
+      &:hover {
+        transform: scale(1.3);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+      }
+    }
+
+    // These specific positioning classes should ideally only set offsets if jsPlumb
+    // isn't handling the exact pixel position for some reason.
+    // If jsPlumb's anchor config is 'Top' or 'Bottom', it typically handles this.
+    // However, if your HTML structure for the endpoint is *just* the div that jsPlumb targets,
+    // and you want it to appear *outside* the block, then these offsets are still useful.
+
+    // For top/bottom endpoints on the block, jsPlumb's 'Top' and 'Bottom' anchors
+    // usually position them correctly without needing `top: 50%` or `transform`.
+    // Instead, you'd specify the element ID and the anchor.
+
+    // If these connection points are always at the center of the left/right edges,
+    // and jsPlumb's standard 'Left'/'Right' anchors are used, these might not be strictly necessary
+    // for jsPlumb's internal positioning, but they define *your* visual intention.
+
+    &.connection-output {
+      // This positions the *container* of the dot.
+      // jsPlumb will often override `right` or `left` with its calculated pixel value.
+      // If you are using jsPlumb's `anchor: 'Right'`, it will take care of `right` and `top`.
+      // If this `.connection-point` is the element `jsPlumb.addEndpoint()` is targeting:
+      right: -6px; // This ensures the center of the 12px dot is on the edge
+      top: 50%;
+      transform: translateY(-50%);
+      // jsPlumb's `anchor: 'Right'` effectively does this calculation.
+      // If you're targeting a distinct element for the endpoint, these can serve as fallback.
+    }
+
+    &.connection-input {
+      left: -6px; // This ensures the center of the 12px dot is on the edge
+      top: 50%;
+      transform: translateY(-50%);
+      // jsPlumb's `anchor: 'Left'` effectively does this calculation.
+    }
+  }
+}
+/* Keywords Container */
+.keywords-container {
+  margin-top: 8px;
+  
+  .keywords-list {
+    margin-bottom: 8px;
+    
+    mat-chip-listbox {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      
+      .keyword-chip {
+        background-color: #8b5cf6;
+        font-size: 11px;
+        height: 24px;
+        border-radius: 7px;
+
+        .exact-keyword {
+          color: #fff;
+          font : 900
+        }
+        
+        button[matChipRemove] {
+          color: white;
+          opacity: 0.8;
+          
+          mat-icon {
+            font-size: 14px;
+            width: 14px;
+            height: 14px;
+          }
+        }
+      }
+    }
+  }
+  
+  .keyword-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    
+    &:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+    }
+    
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+}
+
+/* Right Sidebar Styles */
+.right-sidebar {
+  position: fixed;
+  top: 0;
+  right: -350px;
+  width: 650px;
+  height: 100vh;
+  background-color: white;
+  border-left: 1px solid #e2e8f0;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 200;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  
+  &.open {
+    right: 0;
+  }
+  
+  .right-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    // background-color: red;
+    
+    .sidebar-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: #1e293b;
+      
+      mat-icon {
+        color: #6366f1;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+      
+      .badge {
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-left: 8px;
+        
+        &.keyword-group-badge {
+          background-color: #22c55e;
+          color: white;
+
+        }
+        
+        &.phrase-badge {
+          background-color: #22c55e;
+          color: white;
+        }
+
+        &.form-block-badge {
+          background-color: #f59e0b;
+          color: white;
+        }
+        
+        &.anything-badge {
+          background-color: #22c55e;
+          color: white;
+        }
+      }
+    }
+    
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      
+      mat-icon {
+        font-size: 16px;
+      }
+    }
+  }
+  
+  .right-sidebar-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    
+    .config-description {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+    
+    .toggle-container {
+      margin-bottom: 24px;
+      
+      mat-button-toggle-group {
+        width: 100%;
+        
+        .toggle-keyword,
+        .toggle-variable {
+          flex: 1;
+          height: 40px;
+        }
+      }
+    }
+    
+    .keywords-section {
+      .keywords-display {
+        margin-bottom: 16px;
+        
+        mat-chip-listbox {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          
+          .keyword-chip-large {
+            background-color: #2E66F4;
+            color: white;
+            font-size: 12px;
+            height: 28px;
+            border-radius: 10px;
+
+            .exact-keyword {
+              color: #fff;
+              font: 800;
+            }
+            
+            button[matChipRemove] {
+              opacity: 0.8;
+              color: #fff;
+              
+              mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+                color: #ffffff;
+              }
+            }
+          }
+        }
+      }
+      
+      .add-keyword-section {
+        margin-bottom: 16px;
+        
+        .keyword-input-field {
+          width: 100%;
+        }
+      }
+      
+      .add-keyword-group {
+        .add-group-btn {
+          width: 100%;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          color: #6366f1;
+          border-color: #6366f1;
+          
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
+    
+    .phrase-input {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    
+    .anything-config {
+      p {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+      
+      mat-form-field {
+        width: 100%;
+      }
+    }
+  }
+}
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  // background-color: rgba(0, 0, 0, 0.5);
+  z-index: 150;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* Block Type Specific Styles */
+.canvas-block-userInput {
+  border-color: #3b82f6;
+  
+  .block-body .block-icon {
+    color: #3b82f6;
+  }
+}
+
+.canvas-block-textResponse {
+  border-color: #1a4d8c;
+  
+  .block-body .block-icon {
+    // color: #8b5cf6;
+  }
+}
+
+.canvas-block-mediaBlock {
+  border-color: #059669;
+  
+  .block-body .block-icon {
+    color: #059669;
+  }
+}
+
+.canvas-block-linkStory {
+  border-color: #f59e0b;
+  
+  .block-body .block-icon {
+    color: #f59e0b;
+  }
+}
+
+.canvas-block-notifyAgent {
+  border-color: #ef4444;
+  
+  .block-body .block-icon {
+    color: #ef4444;
+  }
+}
+
+.canvas-block-conversationalForm {
+  border-color: #10b981;
+  
+  .block-body .block-icon {
+    color: #10b981;
+  }
+}
+
+/* Drag and Drop Styles */
+.cdk-drop-list {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag-animating {
+  transition: transform 300ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .left-sidebar {
+    width: 280px;
+  }
+  
+  .canvas-block {
+    width: 260px;
+  }
+  
+  .right-sidebar {
+    width: 320px;
+    
+    &.open {
+      right: 0;
+    }
+  }
+  
+  .canvas-area.sidebar-open {
+    margin-right: 320px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+  }
+  
+  .left-sidebar {
+    width: 100%;
+    height: 200px;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+    
+    .blocks-list {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      
+      .block-item {
+        min-width: 200px;
+        flex-shrink: 0;
+      }
+    }
+  }
+  
+  .canvas-area {
+    flex: 1;
+    
+    &.sidebar-open {
+      margin-right: 0;
+    }
+  }
+  
+  .canvas-block {
+    width: 240px;
+  }
+  
+  .right-sidebar {
+    width: 100%;
+    right: -100%;
+    
+    &.open {
+      right: 0;
+    }
+  }
+  
+  .sidebar-overlay.active {
+    display: block;
+  }
+}
+
+/* Inside .right-sidebar-content, within your .right-sidebar styles */
+.alternate-response-actions {
+  display: flex;
+  gap: 8px; // Space between buttons
+  margin-top: 10px; // Space above buttons
+  justify-content: flex-start; // Align buttons to the start
+
+  button {
+    // Add any specific button styles here if needed
+  }
+}
+
+// ********************************************
+.quick-reply-cards-wrapper {
+  position: absolute;
+  pointer-events: none;
+
+  &.hidden {
+    display: none;
+  }
+
+  .no-quick-reply-block-external,
+  .quick-replies-main-block-external {
+    position: absolute;
+    background: white;
+    border: 2px solid #d1d5db;
+    border-radius: 12px;
+    padding: 0;
+    min-width: 280px;
+    max-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    pointer-events: auto;
+    overflow: hidden;
+
+    .flow-block-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 16px 12px 16px;
+      border-bottom: 1px solid #d1d5db;
+
+      .block-icon {
+        font-size: 18px;
+        color: #6b7280;
+      }
+
+      .block-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #374151;
+      }
+    }
+
+    .flow-block-body {
+      padding: 12px 16px 16px 16px;
+
+      .block-description {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 0;
+        line-height: 1.5;
+      }
+    }
+
+    .connection-point {
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+
+      .connection-dot {
+        width: 12px;
+        height: 12px;
+        background-color: #6366f1;
+        border-radius: 50%;
+        border: 2px solid white;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        &:hover {
+          background-color: #4f46e5;
+          transform: scale(1.1);
+        }
+      }
+    }
+
+    &:hover {
+      border-color: #6366f1;
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.15);
+    }
+  }
+
+  // Specific styling for No Quick Reply block - Orange theme
+  .no-quick-reply-block-external {
+    border-color: #fb923c;
+
+    .flow-block-header {
+      background-color: #fef3c7;
+      border-bottom-color: #fb923c;
+      border-bottom: 2px solid #fb923c;
+
+      .block-icon {
+        color: #f59e0b;
+      }
+    }
+
+    .flow-block-body {
+      background-color: #ffffff;
+    }
+
+    .connection-point .connection-dot {
+      background-color: #f59e0b;
+    }
+
+    &:hover {
+      border-color: #ea580c;
+    }
+  }
+
+  // Specific styling for Quick Replies main block - Blue theme
+  .quick-replies-main-block-external {
+    border-color: #60a5fa;
+
+    .flow-block-header {
+      background-color: #dbeafe;
+      border-bottom-color: #60a5fa;
+      border-bottom: 2px solid #60a5fa;
+
+      .block-icon {
+        color: #3b82f6;
+      }
+    }
+
+    .flow-block-body {
+      background-color: #ffffff;
+    }
+
+    .connection-point .connection-dot {
+      background-color: #3b82f6;
+    }
+
+    &:hover {
+      border-color: #2563eb;
+    }
+  }
+
+  .individual-quick-replies-external {
+    position: absolute;
+    pointer-events: auto;
+
+    .quick-reply-cards-row {
+      display: flex;
+      gap: 20px;
+      position: relative;
+
+      .individual-quick-reply-card {
+        position: absolute;
+        // background: #880fd8;
+        border: 2px solid  #880fd8;
+        border-radius: 12px;
+        padding: 0;
+        min-width: 200px;
+        max-width: 220px;
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.15);
+        overflow: hidden;
+
+        .quick-reply-card-header {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 12px 16px 8px 16px;
+          border-bottom: 1px solid #c084fc;
+          background-color: #dec1fc;
+
+          .quick-reply-icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            // background-color: #a855f7;
+            border-radius: 3px;
+
+            .quick-reply-icon {
+              font-size: 16px;
+              color: #a855f7;
+            }
+          }
+
+          .quick-reply-title {
+            font-size: 12px;
+            color: rgb(31, 30, 30);
+            font-weight: 500;
+            margin-right: 4px;
+          }
+
+          .quick-reply-badge {
+            background-color: #13b910;
+            color: white;
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+          }
+        }
+
+        .quick-reply-card-body {
+          padding: 8px 16px 12px 16px;
+          background-color: #f3e8ff;
+
+          .quick-reply-description {
+            font-size: 11px;
+            color: #6b7280;
+            margin: 0;
+            line-height: 1.4;
+          }
+        }
+
+        .connection-point {
+          position: absolute;
+          right: -8px;
+          top: 50%;
+          transform: translateY(-50%);
+
+          .connection-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #a855f7;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+            &:hover {
+              background-color: #9333ea;
+              transform: scale(1.1);
+            }
+          }
+        }
+
+        &:hover {
+          border-color: #9333ea;
+          box-shadow: 0 6px 20px rgba(168, 85, 247, 0.25);
+          transform: translateY(-2px);
+          transition: all 0.2s ease;
+        }
+      }
+    }
+  }
+
+  // Connection lines SVG
+  .quick-reply-connections-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+
+    .connection-line {
+      stroke: #6366f1;
+      stroke-width: 2;
+      fill: none;
+      opacity: 0.8;
+    }
+
+    .no-quick-reply-connection {
+      stroke: #f59e0b;
+    }
+
+    .quick-replies-connection {
+      stroke: #3b82f6;
+    }
+
+    .individual-quick-reply-connection {
+      stroke: #a855f7;
+    }
+  }
+}
+
+// Ensure the blocks container has proper positioning
+.blocks-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+// *************************
+
+/* Additional CSS styles for jsPlumb integration - Add to chatbot-flow.component.scss */
+
+/* jsPlumb specific styles */
+.jsplumb-draggable {
+  position: absolute !important;
+  z-index: 10;
+}
+
+/* jsPlumb endpoints styling */
+.jtk-endpoint {
+  z-index: 15;
+  cursor: pointer;
+}
+
+.jtk-endpoint:hover {
+  transform: scale(1.2);
+  transition: transform 0.2s ease;
+}
+
+/* jsPlumb connections styling */
+.jtk-connector {
+  z-index: 5;
+  cursor: pointer;
+}
+
+.jtk-connector:hover {
+  stroke-width: 3px !important;
+}
+
+/* jsPlumb overlay styles (arrows) */
+.jtk-overlay {
+  z-index: 6;
+}
+
+/* Source endpoint (output) styling */
+.jtk-endpoint.jtk-endpoint-anchor-bottom {
+  background-color: #4f46e5;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.jtk-endpoint.jtk-endpoint-anchor-bottom:hover {
+  background-color: #7c3aed;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Target endpoint (input) styling */
+.jtk-endpoint.jtk-endpoint-anchor-top {
+  background-color: #10b981;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.jtk-endpoint.jtk-endpoint-anchor-top:hover {
+  background-color: #059669;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Connection path styling */
+.jtk-connector path {
+  stroke: #4f46e5;
+  stroke-width: 2px;
+  fill: none;
+}
+
+.jtk-connector:hover path {
+  stroke: #7c3aed;
+  stroke-width: 3px;
+}
+
+/* Selected connection styling */
+.jtk-connector.jtk-connector-selected path {
+  stroke: #ef4444;
+  stroke-width: 3px;
+}
+
+/* Arrow overlay styling */
+.jtk-overlay.jtk-arrow {
+  fill: #4f46e5;
+  stroke: #4f46e5;
+}
+
+.jtk-connector:hover .jtk-overlay.jtk-arrow {
+  fill: #7c3aed;
+  stroke: #7c3aed;
+}
+
+/* Canvas block improvements for jsPlumb */
+.canvas-block {
+  position: absolute;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  // padding: 12px;
+  min-width: 200px;
+  min-height: 80px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  cursor: move;
+  background: white;
+}
+
+.canvas-block:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.canvas-block.selected {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Visual indicators for connection points */
+.canvas-block::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  background: #10b981;
+  border: 2px solid white;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 20;
+}
+
+.canvas-block::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  // background: black;
+}
+
+/* Add these styles to your chatbot-flow.component.scss */
+
+/* Visual connection points that appear during drag */
+.visual-connection-point {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px !important;
+  height: 16px !important;
+  background: #10b981 !important;
+  border: 2px solid white !important;
+  border-radius: 50% !important;
+  z-index: 1000 !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4) !important;
+  pointer-events: none;
+}
+
+/* Enhanced styling for dragging blocks */
+.canvas-block.dragging {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Block hover effects */
+.canvas-block:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.canvas-block.selected {
+  border: 2px solid #4f46e5 !important;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+/* Connection animation styles */
+.canvas-block {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+/* Enhanced connection points visibility during drag operations */
+.canvas-block.can-connect::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 998;
+  animation: pulse-connection 1.5s infinite;
+}
+
+@keyframes pulse-connection {
+  0% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Connection line styles for jsPlumb */
+.jtk-connector {
+  z-index: 4;
+}
+
+.jtk-endpoint {
+  z-index: 5;
+}
+
+/* Drag handle enhancement */
+.drag-handle {
+  cursor: grab;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Block container positioning */
+.blocks-container {
+  position: relative;
+  min-height: 100%;
+  min-width: 100%;
+}
+
+/* Canvas block general styling */
+.canvas-block {
+  position: absolute;
+  cursor: move;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  min-width: 200px;
+  max-width: 300px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  user-select: none;
+}
+
+/* Prevent text selection during drag */
+.canvas-block * {
+  user-select: none;
+  pointer-events: auto;
+}
+
+/* Connection success feedback */
+.connection-success {
+  animation: connection-created 0.5s ease-out;
+}
+
+@keyframes connection-created {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0.3);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* Enhanced canvas styling */
+.canvas-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 1000px;
+  min-width: 1000px;
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(0,0,0,0.15) 1px, transparent 0);
+  background-size: 20px 20px;
+  background-position: 0 0;
+}
+
+/* Flow start indicator styling */
+.flow-start-indicator {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  z-index: 1;
+}
+
+.flow-start-text {
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.flow-start-arrow {
+  animation: bounce-arrow 2s infinite;
+}
+
+@keyframes bounce-arrow {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+/* src/app/chatbot-flow/chatbot-flow.component.scss */
+.chatbot-flow-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+
+/* Header Styles */
+.header {
+ display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: white;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  z-index: 100; /* Increase z-index to be higher than sidebar */
+  position: relative; /* Ensure z-index works */
+  
+  .header-left {
+    h2 {
+      margin: 0;
+      color: #1e293b;
+      font-weight: 600;
+      font-size: 24px;
+    }
+  }
+  
+  .header-actions {
+    .save-button {
+      background-color: #3b82f6;
+      color: white;
+      min-width: 100px;
+      font-weight: 500;
+    }
+  }
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Left Sidebar Styles */
+.left-sidebar {
+  width: 320px;
+  background-color: white;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+  
+  .sidebar-header {
+    padding: 16px 20px 8px;
+    border-bottom: 1px solid #f1f5f9;
+    
+    .instruction-text {
+      margin: 0;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+  }
+  
+  .search-container {
+    padding: 0px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    
+   
+    
+.search-field ::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: transparent !important;
+}
+
+
+
+:host ::ng-deep .search-field .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: transparent !important;
+}
+    
+    .search-field {
+      width: 100%;
+      
+      .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+      }
+    }
+  }
+  
+  .blocks-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+    
+    .block-item {
+      display: flex;
+      align-items: center;
+      padding: 4px 25px 4px 10px ;
       cursor: pointer;
       transition: all 0.2s ease;
       border-left: 3px solid transparent;

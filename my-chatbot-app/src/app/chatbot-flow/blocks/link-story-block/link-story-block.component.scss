@@ -1,142 +1,169 @@
-/* src/app/chatbot-flow/blocks/link-story-block/link-story-block.component.scss */
+.canvas-block.link-story-block {
+  background-color: #e0e7ff;
+  border: 2px solid  #2e66f4;
+  border-radius: 5px;
+  padding: 1px;
+  width: 300px;
+  font-family: 'Ubuntu', sans-serif;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
 
-// Common styles for block header, body, connection points, etc.
-// Duplicated from chatbot-flow.component.scss for self-containment.
-// In a real project, consider shared styles.
+.canvas-block.link-story-block:hover {
+  box-shadow: 0 0 0 2px #cbd5e1;
+}
 
-.block-header {
+.canvas-block.link-story-block .block-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0px 8px;
-  border-bottom: 2px solid rgb(6, 184, 6);
-  background-color: #CDA5E7; // This color will be overridden by getTypeColor in parent
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-
-  .block-type-badges {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-
-    .block-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-
-      .block-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        color: #6366f1; // This color will be overridden by getTypeColor in parent
-      }
-
-      span {
-        font-weight: 600;
-        color: #1e293b;
-        font-size: 14px;
-      }
-    }
-
-    .badge {
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-
-      &.link-story-badge {
-        background-color: #f59e0b; // Example color for link story badge
-        color: white;
-      }
-    }
-  }
-
-  .block-actions {
-    .block-menu-trigger {
-      mat-icon {
-        font-size: 16px;
-        color: #fff;
-      }
-    }
-  }
+  padding: 10px;
+  background-color: #b1c4ff;
 }
 
-.block-body {
-  padding: 0 16px 16px;
-  background-color: #fff;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-
-  .block-description {
-    font-size: 16px;
-    color: #64748b;
-    margin-bottom: 12px;
-    line-height: 1.4;
-    padding-top: 5px;
-  }
-
-  .block-content-text {
-    font-size: 13px;
-    color: #374151;
-    background-color: #f8fafc;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
-  }
+.canvas-block.link-story-block .block-header .block-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.connection-point {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-
-  .connection-dot {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background-color: #6366f1;
-    border: 2px solid white;
-    cursor: crosshair;
-    transition: all 0.2s ease;
-
-    &:hover {
-      transform: scale(1.3);
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
-    }
-  }
-
-  &.connection-output {
-    right: -6px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
-  &.connection-input {
-    left: -6px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
+.canvas-block.link-story-block .block-header .block-title .block-icon {
+  font-size: 20px;
+  color: #3b82f6;
+  margin-top: 2px;
 }
 
-/* Right Sidebar Content for Link Story Block */
-.right-sidebar-content {
-  padding: 20px;
-  overflow-y: auto;
+.canvas-block.link-story-block .block-header .block-title .block-title-text {
+  font-weight: 700;
+  color: #1e293b;
+}
 
-  .section-title {
-    color: #1e293b;
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
+.canvas-block.link-story-block .block-header .block-menu-trigger {
+  padding: 0;
+  width: 32px;
+  height: 32px;
+}
 
-  .input-group {
-    margin-bottom: 16px;
-  }
+.canvas-block.link-story-block .block-header .block-menu-trigger mat-icon {
+  color: white;
+}
 
-  .full-width-input {
-    width: 100%;
-  }
+.canvas-block.link-story-block .block-body .description-box {
+  background: white;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  width: 100%;
+}
+
+.canvas-block.link-story-block .block-body .block-description {
+  font-size: 13px;
+  color: #475569;
+  margin: 0 0 4px;
+}
+
+.canvas-block.link-story-block .block-body .block-instruction {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.canvas-block.link-story-block .block-body .block-instruction mat-icon {
+  font-size: 16px;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+.link-story-container {
+  padding: 24px;
+}
+
+.link-story-container .header {
+  margin-bottom: 16px;
+}
+
+.link-story-container .header .title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #515365;
+  margin: 0;
+  font-family: "Ubuntu";
+}
+
+.link-story-container .header .subtitle {
+  font-size: 14px;
+  color: #888ea8;
+  margin-top: 4px;
+  font-family: sans-serif;
+  font-weight: lighter;
+}
+
+.link-story-container .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.link-story-container .form-group .field-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #506690;
+  margin-bottom: 5px;
+  font-family: sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.link-story-container .form-group .field-label .info-icon {
+  font-size: 16px;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.link-story-container .form-group .field-label .info-icon:hover {
+  background-color: #f3f4f6;
+}
+
+.link-story-container .form-group .custom-select {
+  width: 100%;
+}
+
+.link-story-container .form-group .custom-select ::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 !important;
+}
+
+.link-story-container .form-group .custom-select ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-flex {
+  align-items: center;
+  height: 44px !important;
+}
+
+.link-story-container .form-group .custom-select ::ng-deep .mat-mdc-form-field .mat-mdc-select-trigger {
+  height: 44px !important;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.link-story-container .form-group .custom-select ::ng-deep .mat-mdc-select {
+  height: 44px !important;
+  line-height: 44px !important;
+}
+
+.link-story-container .form-group .custom-select ::ng-deep .mat-mdc-select-arrow {
+  height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.link-story-container .form-group .custom-select ::ng-deep .mat-mdc-form-field-infix {
+  padding: 0 !important;
+  min-height: 44px !important;
+  display: flex;
+  align-items: center;
 }
