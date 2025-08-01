@@ -167,15 +167,15 @@
 
 /* Adjustments for the "half phone frame" and increased width */
 .phone-frame-container {
-    height: 380px; /* Fixed height to show only the top part of the phone as per image_473001.jpg */
-    overflow: hidden; /* Hide the overflowing bottom part of the phone */
+    height: 600px; /* Fixed height to show only the top part of the phone as per image_473001.jpg */
+    overflow: auto; /* Hide the overflowing bottom part of the phone */
     display: flex;
     justify-content: center;
 }
 
 .phone-half-frame-height {
-    width: 500px; /* Adjusted width to match the second image (e.g., image_46c28d.jpg, image_4732ed.jpg) */
-    height: 420px; /* Maintain full internal height for content positioning, but container crops it */
+    width: 550px; /* Adjusted width to match the second image (e.g., image_46c28d.jpg, image_4732ed.jpg) */
+    height: 500px; /* Maintain full internal height for content positioning, but container crops it */
 }
 
 
