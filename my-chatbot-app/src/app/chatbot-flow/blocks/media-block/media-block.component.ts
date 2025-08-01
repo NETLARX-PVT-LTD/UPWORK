@@ -10,8 +10,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-
-import { ChatbotBlock, AvailableMedia, Button, AvailableStory } from '../../../models/chatbot-block.model';
+import { trigger, transition, style, animate } from '@angular/animations'; 
+import { ChatbotBlock, AvailableMedia, Button, AvailableStory,ImageSlide } from '../../../models/chatbot-block.model';
 
 type ButtonIntegrationType = 'text_message' | 'media_block' | 'website_url' | 'direct_call' | 'start_story' | 'rss_feed' | 'json_api' | 'human_help' | 'conversational_form' | null;
 
@@ -44,7 +44,20 @@ export interface ApiBlock {
     CdkTextareaAutosize
   ],
   templateUrl: './media-block.component.html',
-  styleUrls: ['./media-block.component.scss']
+  styleUrls: ['./media-block.component.scss'],
+   // Add the animations metadata property here
+ animations: [
+    trigger('slideAnimation', [
+      transition(':increment', [
+        style({ transform: 'translateX(100%)', opacity: 0 }),
+        animate('300ms ease-in', style({ transform: 'translateX(0%)', opacity: 1 }))
+      ]),
+      transition(':decrement', [
+        style({ transform: 'translateX(-100%)', opacity: 0 }),
+        animate('300ms ease-in', style({ transform: 'translateX(0%)', opacity: 1 }))
+      ]),
+    ])
+  ]
 })
 export class MediaBlockComponent implements OnInit {
   @Input() block!: ChatbotBlock;
@@ -64,7 +77,10 @@ export class MediaBlockComponent implements OnInit {
   showNewMediaForm: boolean = false;
   showButtonTypeCard: boolean = false;
   showCommonIntegrationCard: boolean = false;
-
+ // NEW: Property to control the visibility of the upload modal
+  showUploadModal: boolean = false;
+ uploadedFileName: string = '';
+ imageUrlInput: string = '';
   // NEW: Temporary properties to manage the button being added or edited
   currentButton: Partial<Button> = {};
   currentButtonIndex: number = -1; // -1 for a new button, otherwise the index of the button being edited
@@ -74,6 +90,12 @@ export class MediaBlockComponent implements OnInit {
   private activeInputElementType: 'buttonTitle' | 'buttonTextMessage' | null = null;
   searchTerm: string = '';
 
+  
+  // Add this property for tracking current slide
+currentSlideIndex: number = 0;
+
+// Add ViewChild for file input
+@ViewChild('imageUploadInput') imageUploadInput!: ElementRef<HTMLInputElement>;
   @ViewChild('buttonTitleAutosize', { read: ElementRef }) buttonTitleAutosizeElement!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('buttonTextMessageAutosize', { read: ElementRef }) buttonTextMessageAutosizeElement!: ElementRef<HTMLTextAreaElement>;
 
@@ -108,18 +130,51 @@ export class MediaBlockComponent implements OnInit {
   // --- END NEW PROPERTIES FOR INFO MODAL ---
 
   public availableStories: AvailableStory[] = [
-  { id: 'story1', name: '(hello,hi,hey),' },
-  { id: 'story2', name: '(Hii),' },
-  { id: 'story3', name: 'Report Incident' },
-   {id: 'story4', name: 'Process for setting up shop' },
-  // Add more stories as needed
-];
+    { id: 'story1', name: '(hello,hi,hey),' },
+    { id: 'story2', name: '(Hii),' },
+    { id: 'story3', name: 'Report Incident' },
+    { id: 'story4', name: 'Process for setting up shop' },
+    // Add more stories as needed
+  ];
+// Add this line to declare the activeTab property
+  activeTab: 'upload' | 'url' = 'upload';
+
+
   constructor(private _snackBar: MatSnackBar) { }
 
   get hasContent(): boolean {
     return !!this.block.content ||
            !!this.block.mediaUrl ||
            (this.block.buttons?.length ?? 0) > 0;
+  }
+
+  // Method to open the upload modal
+  openUploadModal(): void {
+    this.showUploadModal = true;
+  }
+
+  // method for image upload
+  openImageUploadModal(): void {
+    this.showUploadModal = true;
+  }
+
+  // Method to close the upload modal
+  closeUploadModal(): void {
+    this.showUploadModal = false;
+  }
+  
+  // --- API HEADER METHODS ---
+  addApiHeader(): void {
+    if (!this.currentButton.apiHeaders) {
+      this.currentButton.apiHeaders = [];
+    }
+    this.currentButton.apiHeaders.push({ key: '', value: '' });
+  }
+
+  removeApiHeader(index: number): void {
+    if (this.currentButton.apiHeaders) {
+      this.currentButton.apiHeaders.splice(index, 1);
+    }
   }
 
   // --- UPDATED BUTTON METHODS ---
@@ -144,6 +199,14 @@ export class MediaBlockComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    
+  // Initialize the 'slides' array if it doesn't exist
+    if (this.block.slides === undefined || this.block.slides.length === 0) {
+      this.block.slides = [{ image: '', title: '', subtitle: '' }]; // Start with one empty slide
+    }
+  
+  // Initialize current slide index
+  this.currentSlideIndex = 0;
     // Initialize the buttons array if it doesn't exist
     if (!this.block.buttons) {
       this.block.buttons = [];
@@ -175,21 +238,126 @@ export class MediaBlockComponent implements OnInit {
     this.resetFilteredAttributes();
   }
 
-  
-    // Method to handle content changes and emit the updated block
- 
- addApiHeader(): void {
-  if (!this.currentButton.apiHeaders) {
-    this.currentButton.apiHeaders = [];
+   // NEW: Method to add a new slide to the carousel
+  addNewSlide(): void {
+    if (!this.block.slides) {
+      this.block.slides = [];
+    }
+    this.block.slides.push({ image: '', title: '', subtitle: '' });
+    this.currentSlideIndex = this.block.slides.length - 1; // Switch to the new slide
+    this.onContentChange();
+    this._snackBar.open('New slide added.', 'Dismiss', { duration: 2000 });
+  }
+
+  // NEW: Method to remove the current slide
+  removeCurrentSlide(): void {
+    if (this.block.slides && this.block.slides.length > 1) {
+      this.block.slides.splice(this.currentSlideIndex, 1);
+      // Adjust current slide index
+      if (this.currentSlideIndex >= this.block.slides.length) {
+        this.currentSlideIndex = this.block.slides.length - 1;
+      }
+      this.onContentChange();
+      this._snackBar.open('Slide removed successfully!', 'Dismiss', { duration: 2000 });
+    } else {
+      // If only one slide is left, just reset its content
+      if (this.block.slides && this.block.slides.length === 1) {
+        this.block.slides[0] = { image: '', title: '', subtitle: '' };
+        this.onContentChange();
+        this._snackBar.open('Slide content reset.', 'Dismiss', { duration: 2000 });
+      }
+    }
+  }
+
+// Add this method to your MediaBlockComponent class
+removeCurrentImage(index: number): void {
+  if (this.block.slides && this.block.slides[index]) {
+    this.block.slides[index].image = ''; // Set the image property to an empty string
+    this.onContentChange(); // Notify that the block has been updated
+    this._snackBar.open('Image removed successfully!', 'Dismiss', { duration: 2000 });
   }
-  this.currentButton.apiHeaders.push({ key: '', value: '' });
+}
+  // Method to trigger the hidden file input
+  triggerImageUpload(): void {
+    this.imageUploadInput.nativeElement.click();
+  }
+
+ onImageUpload(event: any): void {
+  const file = event.target.files[0];
+  if (file) {
+    // Capture the file name
+    this.uploadedFileName = file.name;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (this.block.slides && this.block.slides.length > 0) {
+        this.block.slides[this.currentSlideIndex].image = reader.result as string;
+        this.onContentChange();
+      }
+    };
+    reader.readAsDataURL(file);
+
+    // Close the modal after a successful upload
+    this.closeUploadModal();
+  }
 }
 
-removeApiHeader(index: number): void {
-  if (this.currentButton.apiHeaders) {
-    this.currentButton.apiHeaders.splice(index, 1);
+uploadImageUrl(): void {
+  if (this.imageUrlInput) {
+    if (this.block.slides && this.block.slides.length > 0) {
+      this.block.slides[this.currentSlideIndex].image = this.imageUrlInput;
+      this.onContentChange();
+      this.closeUploadModal();
+      this._snackBar.open('Image from URL added successfully!', 'Dismiss', { duration: 2000 });
+    }
+  } else {
+    this._snackBar.open('Please enter a valid image URL.', 'Dismiss', { duration: 2000 });
   }
 }
+  // Refactor `nextSlide`, `previousSlide`, and `goToSlide` to use the new slides array
+  nextSlide(): void {
+    if (this.block.slides && this.currentSlideIndex < this.block.slides.length - 1) {
+      this.currentSlideIndex++;
+    }
+  }
+
+  previousSlide(): void {
+    if (this.currentSlideIndex > 0) {
+      this.currentSlideIndex--;
+    }
+  }
+
+  goToSlide(index: number): void {
+    if (this.block.slides && index >= 0 && index < this.block.slides.length) {
+      this.currentSlideIndex = index;
+    }
+  }
+
+// Method to remove current image
+// removeCurrentImage(): void {
+//   if (this.block.slideImages && this.block.slideImages.length > 0) {
+//     // Remove the current image
+//     this.block.slideImages.splice(this.currentSlideIndex, 1);
+    
+//     // Adjust current slide index
+//     if (this.currentSlideIndex >= this.block.slideImages.length) {
+//       this.currentSlideIndex = Math.max(0, this.block.slideImages.length - 1);
+//     }
+    
+//     this.onContentChange();
+//     this._snackBar.open('Image removed successfully!', 'Dismiss', { duration: 2000 });
+//   }
+// }
+
+// Method to remove all images
+// removeAllImages(): void {
+//   if (this.block.slideImages) {
+//     this.block.slideImages = [];
+//     this.currentSlideIndex = 0;
+//     this.onContentChange();
+//     this._snackBar.open('All images removed!', 'Dismiss', { duration: 2000 });
+//   }
+// }
   // --- EXISTING METHODS (no major changes needed) ---
 
   onMediaSelectionChange(): void {
@@ -246,6 +414,35 @@ removeApiHeader(index: number): void {
       this._snackBar.open('Text content cannot be empty for text media type.', 'Dismiss', { duration: 3000 });
       return;
     }
+
+     if (this.block.mediaType === 'Image Slider') {
+      if (!this.block.slides || this.block.slides.length === 0) {
+        this._snackBar.open('Please add at least one slide for the Image Slider.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      // Further validation for each slide if needed
+      for (const slide of this.block.slides) {
+        if (!slide.image || slide.image.trim() === '') {
+          this._snackBar.open('Each slide must have an image.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        if (!slide.title || slide.title.trim() === '') {
+          this._snackBar.open('Each slide must have a title.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+      }
+    }
+    // Add Image Slider validation
+  // if (currentMediaType === 'Image Slider') {
+  //   if (!this.block.slideImages || this.block.slideImages.length === 0) {
+  //     this._snackBar.open('Please add at least one image for the Image Slider.', 'Dismiss', { duration: 3000 });
+  //     return;
+  //   }
+  //   if (!this.block.slideTitle || this.block.slideTitle.trim() === '') {
+  //     this._snackBar.open('Slide Title cannot be empty for Image Slider.', 'Dismiss', { duration: 3000 });
+  //     return;
+  //   }
+  // }
     if (['image', 'video', 'file', 'audio'].includes(currentMediaType) && (!this.block.mediaUrl || this.block.mediaUrl.trim() === '')) {
       this._snackBar.open(`Please provide a URL for ${currentMediaType} media.`, 'Dismiss', { duration: 3000 });
       return;
@@ -258,7 +455,11 @@ removeApiHeader(index: number): void {
         name: this.block.mediaName,
         type: currentMediaType,
         content: this.block.content ?? '',
-        url: this.block.mediaUrl ?? ''
+        url: this.block.mediaUrl ?? '',
+         // Add Image Slider specific properties
+      // slideTitle: this.block.slideTitle,
+      // slideSubtitle: this.block.slideSubtitle,
+      // slideImages: this.block.slideImages
       };
       this.availableMedia.push(newMedia);
       this.block.mediaId = newMediaId;
@@ -271,7 +472,11 @@ removeApiHeader(index: number): void {
           name: this.block.mediaName,
           type: currentMediaType,
           content: this.block.content ?? '',
-          url: this.block.mediaUrl ?? ''
+          url: this.block.mediaUrl ?? '',
+          // Add Image Slider specific properties
+        // slideTitle: this.block.slideTitle,
+        // slideSubtitle: this.block.slideSubtitle,
+        // slideImages: this.block.slideImages
         };
         this._snackBar.open('Media Block content updated!', 'Dismiss', { duration: 3000 });
       } else {
@@ -382,25 +587,25 @@ removeApiHeader(index: number): void {
     } else if (type === 'website_url') {
       this.currentButton.url = '';
     } else if (type === 'direct_call') {
-    this.currentButton.phoneNumber = '';
-  } else if (type === 'start_story') {
-    this.currentButton.storyId = undefined;
-  } else if (type === 'rss_feed') {
-    this.currentButton.rssUrl = '';
-    this.currentButton.rssItemCount = 5; // Set a default value
-    this.currentButton.rssButtonText = '';
-  } else  if (type === 'json_api') {
-   this.currentButton.apiEndpoint = '';
-    this.currentButton.requestType = 'GET';
-    this.currentButton.apiHeaders = [{ key: '', value: '' }];
-  } else if (type === 'human_help') {
-    this.currentButton.messageAfterAction = '';
-    this.currentButton.emailForNotification = '';
-    this.currentButton.stopBotForUser = false;
-  } else  if (type === 'conversational_form') {
-    this.currentButton.formId = ''; // Initialize with an empty string or a default form ID
-    this.currentButton.showInline = false;
-  }
+      this.currentButton.phoneNumber = '';
+    } else if (type === 'start_story') {
+      this.currentButton.storyId = undefined;
+    } else if (type === 'rss_feed') {
+      this.currentButton.rssUrl = '';
+      this.currentButton.rssItemCount = 5; // Set a default value
+      this.currentButton.rssButtonText = '';
+    } else if (type === 'json_api') {
+      this.currentButton.apiEndpoint = '';
+      this.currentButton.requestType = 'GET';
+      this.currentButton.apiHeaders = [{ key: '', value: '' }];
+    } else if (type === 'human_help') {
+      this.currentButton.messageAfterAction = '';
+      this.currentButton.emailForNotification = '';
+      this.currentButton.stopBotForUser = false;
+    } else if (type === 'conversational_form') {
+      this.currentButton.formId = ''; // Initialize with an empty string or a default form ID
+      this.currentButton.showInline = false;
+    }
   }
 
   // REWRITTEN: Common method to save a new or existing button
@@ -436,64 +641,64 @@ removeApiHeader(index: number): void {
         }
         break;
 
-        case 'direct_call':
-      if (!this.currentButton.phoneNumber || this.currentButton.phoneNumber.trim() === '') {
-        this._snackBar.open('Phone number cannot be empty.', 'Dismiss', { duration: 3000 });
-        return;
-      }
-      // You may add a more specific phone number validation regex here
-      break;
+      case 'direct_call':
+        if (!this.currentButton.phoneNumber || this.currentButton.phoneNumber.trim() === '') {
+          this._snackBar.open('Phone number cannot be empty.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        // You may add a more specific phone number validation regex here
+        break;
 
-    // Add validation for Start Story
-    case 'start_story':
-      if (!this.currentButton.storyId) {
-        this._snackBar.open('Please select a story to initiate.', 'Dismiss', { duration: 3000 });
-        return;
-      }
-      break;
+      // Add validation for Start Story
+      case 'start_story':
+        if (!this.currentButton.storyId) {
+          this._snackBar.open('Please select a story to initiate.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        break;
 
-       case 'rss_feed':
-      if (!this.currentButton.rssUrl || this.currentButton.rssUrl.trim() === '') {
-        this._snackBar.open('RSS Feed URL cannot be empty.', 'Dismiss', { duration: 3000 });
-        return;
-      }
-      // You may want to add URL validation here.
-      if (!this.currentButton.rssItemCount || this.currentButton.rssItemCount <= 0) {
-        this._snackBar.open('Number of items must be a positive number.', 'Dismiss', { duration: 3000 });
-        return;
-      }
-      if (!this.currentButton.rssButtonText || this.currentButton.rssButtonText.trim() === '') {
-        this._snackBar.open('Button Text cannot be empty.', 'Dismiss', { duration: 3000 });
-        return;
-      }
-      break;
+      case 'rss_feed':
+        if (!this.currentButton.rssUrl || this.currentButton.rssUrl.trim() === '') {
+          this._snackBar.open('RSS Feed URL cannot be empty.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        // You may want to add URL validation here.
+        if (!this.currentButton.rssItemCount || this.currentButton.rssItemCount <= 0) {
+          this._snackBar.open('Number of items must be a positive number.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        if (!this.currentButton.rssButtonText || this.currentButton.rssButtonText.trim() === '') {
+          this._snackBar.open('Button Text cannot be empty.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        break;
 
       case 'json_api':
         if (!this.currentButton.apiEndpoint || this.currentButton.apiEndpoint.trim() === '') {
-        this._snackBar.open('API Endpoint cannot be empty.', 'Dismiss', { duration: 3000 });
-        return;
-      }
-      if (!this.currentButton.requestType) {
-        this._snackBar.open('Please select an API request type.', 'Dismiss', { duration: 3000 });
-        return;
-      }
-      // You may want to add validation for the headers here as well
-      break;
+          this._snackBar.open('API Endpoint cannot be empty.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        if (!this.currentButton.requestType) {
+          this._snackBar.open('Please select an API request type.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        // You may want to add validation for the headers here as well
+        break;
 
       case 'human_help':
-      if (!this.currentButton.messageAfterAction || this.currentButton.messageAfterAction.trim() === '') {
-        this._snackBar.open('Message After Help Action cannot be empty.', 'Dismiss', { duration: 3000 });
-        return;
-      }
-      // You can add an optional email validation if needed
-      break;
+        if (!this.currentButton.messageAfterAction || this.currentButton.messageAfterAction.trim() === '') {
+          this._snackBar.open('Message After Help Action cannot be empty.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        // You can add an optional email validation if needed
+        break;
 
       case 'conversational_form':
-      if (!this.currentButton.formId) {
-        this._snackBar.open('Please select a conversational form.', 'Dismiss', { duration: 3000 });
-        return;
-      }
-      break;
+        if (!this.currentButton.formId) {
+          this._snackBar.open('Please select a conversational form.', 'Dismiss', { duration: 3000 });
+          return;
+        }
+        break;
 
       default:
         this._snackBar.open('Unknown button type. Cannot save.', 'Dismiss', { duration: 3000 });
