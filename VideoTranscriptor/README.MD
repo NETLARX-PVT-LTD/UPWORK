@@ -39,7 +39,13 @@ pip install -r requirements.txt
 
 ---
 
-### 4.  Run the Script
+### 4. Configure AWS Credentials
+*Open the script file (youtube_to_30s_transcript.py) and scroll to the top. Add your AWS credentials here:
+
+*AWS_ACCESS_KEY_ID = "your_aws_access_key_id"
+*AWS_SECRET_ACCESS_KEY = "your_aws_secret_access_key"
+
+### 5.  Run the Script
 
 ```bash
 python youtube_to_30s_transcript.py
@@ -49,9 +55,6 @@ python youtube_to_30s_transcript.py
 
 ##  Output
 
-* `audio.mp3`: Extracted audio from the YouTube video
-* `chunks/`: Folder containing 30-second audio clips
 * `frames/`: All extracted video frames
-* `transcript_30s.json`: Transcripts per 30-second chunk
 * `transcript_to_frames.json`: Mapped transcript with corresponding frames
 
