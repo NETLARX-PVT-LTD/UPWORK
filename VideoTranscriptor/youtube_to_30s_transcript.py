@@ -130,6 +130,7 @@ def process_video_from_youtube(video_url):
         })
 
     with open(mapping_file, "w", encoding="utf-8") as f:
+
         json.dump(mapping, f, indent=2)
     print(f"✅ Mapping saved to {mapping_file}")
 

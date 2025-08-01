@@ -1,6 +1,7 @@
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { Component, AfterViewInit, ElementRef, ViewChild, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ApiHeader } from '../../../models/chatbot-block.model';
 
 @Component({
   selector: 'app-jarvish-block',
@@ -75,6 +76,35 @@ export class JarvishBlockComponent {
       this.waitingForUserInput = false;
       this.currentBlockIndex++;
       setTimeout(() => this.processNextBlock(), 800);
+    }else if(this.waitingForUserInput && block.subType === 'keywordGroup'){
+        const userInput = userMsg.trim().toLowerCase();
+
+        // Flatten keyword groups and normalize them
+        const allKeywords = block.keywordGroups?.flat().map((kw:string) => kw.toLowerCase()) || [];
+
+        // Match user input to any keyword
+        const matched = allKeywords.some((keyword : string) => userInput.includes(keyword));
+
+        if (matched) {
+          this.waitingForUserInput = false;
+          this.currentBlockIndex++;
+          setTimeout(() => this.processNextBlock(), 800);
+        } else {
+          // Optional: You can send a retry message or show a hint
+          this.messages.push({
+            sender: 'bot',
+            text: 'Sorry, I didn’t understand. Please try using a keyword like "Hi" or "Hello".'
+          });
+          
+          setTimeout(()=>{
+            const visibleKeywords = block.keywordGroups?.flat().join(', ') || '';
+            this.messages.push({
+              sender: 'bot',
+              text: `Say something like: ${visibleKeywords}`
+            });
+          },2000);
+          // Still waiting for user input, do not proceed
+      }
     } else {
       this.waitingForUserInput = false;
       this.currentBlockIndex++;
@@ -91,10 +121,10 @@ export class JarvishBlockComponent {
     } catch (err) {}
   }
 
-  ngAfterViewInit() {
-    const el = this.messagesContainer.nativeElement;
-    el.scrollTop = el.scrollHeight;
-  }
+  // ngAfterViewInit() {
+  //   const el = this.messagesContainer.nativeElement;
+  //   el.scrollTop = el.scrollHeight;
+  // }
 
   // startConversation() {
   //   this.isChatStarted = true;
@@ -105,27 +135,29 @@ export class JarvishBlockComponent {
     // this.processNextBlock();
   }
 
-    processNextBlock() {
-    if (this.currentBlockIndex >= this.canvasBlocks.length) return;
+  async processNextBlock() {
+  if (this.currentBlockIndex >= this.canvasBlocks.length) return;
 
-    const block = this.canvasBlocks[this.currentBlockIndex];
+  const block = this.canvasBlocks[this.currentBlockIndex];
 
-    if (block.type === 'textResponse') {
-      this.messages.push({ sender: 'bot', text: block.content });
-      this.scrollToBottom();
-      this.currentBlockIndex++;
-      setTimeout(() => this.processNextBlock(), 1000);
-    
-    } else if (block.type === 'userInput') {
-      this.waitingForUserInput = true;
-
-    } else if (block.type === 'conversationalForm') {
-      this.currentFormFields = block.formFields;
-      this.formFieldIndex = 0;
-      this.currentFormResponses = {};
-      this.askNextFormField();
-    }
+  if (block.type === 'textResponse') {
+    this.messages.push({ sender: 'bot', text: block.content });
+    this.scrollToBottom();
+    this.currentBlockIndex++;
+    setTimeout(() => this.processNextBlock(), 1000);
   }
+  else if (block.type === 'userInput') {
+    this.waitingForUserInput = true;
+  }
+
+  else if (block.type === 'conversationalForm') {
+    this.currentFormFields = block.formFields;
+    this.formFieldIndex = 0;
+    this.currentFormResponses = {};
+    this.askNextFormField();
+  }
+}
+
 
   askNextFormField() {
   const field = this.currentFormFields[this.formFieldIndex];
