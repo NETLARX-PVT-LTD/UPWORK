@@ -82,7 +82,12 @@ export interface ChatbotBlock {
   buttonUrl?: string; // NEW: For 'website_url' button type
   // NEW: An array to hold multiple buttons
   buttons?: Button[];
-  
+
+  // Add Image Slider properties
+  // slideTitle?: string;
+  // slideSubtitle?: string;
+  // slideImages?: string[];
+  slides?: ImageSlide[]; // NEW: Array of slide objects
 }
 
 // Define possible types of chatbot blocks
@@ -124,6 +129,10 @@ export interface AvailableMedia {
   content?: string;
   url?: string;
   imageUrls?: string[];
+  // Add Image Slider properties
+  slideTitle?: string;
+  slideSubtitle?: string;
+  slideImages?: string[];
 }
 
 export interface AvailableStory {
@@ -359,4 +368,10 @@ export interface ApiBlock {
   apiEndpoint?: string;
   requestType?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   apiHeaders?: ApiHeader[];
+}
+// NEW: Interface for a single image slide
+export interface ImageSlide {
+  image?: string; // The base64 or URL of the image
+  title?: string;
+  subtitle?: string;
 }

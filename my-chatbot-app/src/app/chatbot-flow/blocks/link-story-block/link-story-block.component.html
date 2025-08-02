@@ -15,9 +15,13 @@
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #blockMenu="matMenu">
-        <button mat-menu-item (click)="onEditBlock()"> <mat-icon>edit</mat-icon> Edit </button>
-        <button mat-menu-item (click)="onDuplicateBlock()"> <mat-icon>content_copy</mat-icon> Duplicate </button>
-        <button mat-menu-item (click)="onRemoveBlock()"> <mat-icon>delete</mat-icon> Delete </button>
+       
+     <div class="block-close-icon">
+  <button mat-icon-button class="close-btn" (click)="onRemoveBlock()" aria-label="Remove Block">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
       </mat-menu>
     </div>
 

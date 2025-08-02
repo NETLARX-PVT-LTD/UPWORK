@@ -700,12 +700,34 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
 
   addBlockToCanvas(block: ChatbotBlock) {
     const lastBlock = this.canvasBlocks.length > 0 ? this.canvasBlocks[this.canvasBlocks.length - 1] : null;
+    const verticalSpacing = 60; // px between blocks
+
+    // Decide initial coordinates
+    let initialX: number;
+    let initialY: number;
+    if (lastBlock) {
+      // Stack neatly under the previous block without overlap
+      initialX = lastBlock.x;
+      initialY = (lastBlock.y || 0) + (lastBlock.height || 150) + verticalSpacing;
+    } else {
+      // First block – centre of current viewport
+      initialX = this.calculateNewBlockX();
+      initialY = this.calculateNewBlockY();
+    }
+
     const newBlockId = `${block.type}-${Date.now()}`;
+
+    // If user dropped in the middle of an existing connection line, capture that before we create the new block
+    const canvasRect = this.canvasContent.nativeElement.getBoundingClientRect();
+    const dropCanvasX = (initialX + 140) /* approximate centre */;
+    const dropCanvasY = (initialY + 75);
+    const nearConn = this.jsPlumbFlowService.findConnectionNear(dropCanvasX, dropCanvasY, 30);
+
     const newBlock: ChatbotBlock = {
       ...block,
       id: newBlockId, // Ensure unique ID for jsPlumb
-      x: this.calculateNewBlockX(),
-      y: this.calculateNewBlockY(),
+      x: initialX,
+      y: initialY,
       content: block.type === 'textResponse' ? '' : undefined,
       keywordGroups: block.subType === 'keywordGroup' ? [[]] : undefined,
       phraseText: block.subType === 'phrase' ? '' : undefined,
@@ -738,8 +760,17 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       this.calculateConnectionPoints();
       this.selectBlock(newBlock);
 
-      // Auto-connect to the last block, if one exists
-      if (lastBlock) {
+      if (nearConn) {
+        // Insert between existing connection
+        const sourceId = nearConn.sourceId.replace('block-', '');
+        const targetId = nearConn.targetId.replace('block-', '');
+        // Remove old connection
+        this.jsPlumbFlowService.deleteJsPlumbConnection(nearConn);
+        // Connect source -> new -> target
+        this.createConnection(sourceId, newBlock.id);
+        this.createConnection(newBlock.id, targetId);
+      } else if (lastBlock) {
+        // Otherwise just append under last block
         this.createConnection(lastBlock.id, newBlock.id);
       }
     }, 100);
@@ -829,12 +860,23 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 100);
   }
 
+  /**
+   * Called when a palette item is dropped anywhere on the canvas.
+   * We ignore the exact mouse coordinates and instead place the new block
+   * using the same helper used when a user clicks the item in the palette.
+   * This replicates the behaviour shown in the reference video: every newly
+   * added component is positioned neatly beneath the previous one and is
+   * automatically connected with jsPlumb.
+   */
+  onBlockDropped(event: CdkDragDrop<ChatbotBlock[], ChatbotBlock[]>) {
+    const block = event.item.data as ChatbotBlock;
+    this.addBlockToCanvas(block);
+  }
+
   drop(event: CdkDragDrop<ChatbotBlock[]>) {
-    // This seems to be for the palette, not the canvas.
-    // If you intend to drag from the palette *to* the canvas to create a new block,
-    // you'll need to handle that slightly differently than moveItemInArray.
-    // For now, assuming this is just for reordering the palette items.
-    moveItemInArray(this.allBlocks, event.previousIndex, event.currentIndex);
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    }
   }
 
   // Keep existing connection methods for backward compatibility, but understand their role

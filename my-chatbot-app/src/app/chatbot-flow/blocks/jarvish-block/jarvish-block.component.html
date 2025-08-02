@@ -1,60 +1,76 @@
 <!-- Jarvis Chat Widget -->
+<div
+  *ngIf="!isChatStarted"
+  id="jarvis-chat"
+  class="jarvis-chat bottom-25 bg-white right-10 absolute z-[99999] h-[75vh] w-[24rem] rounded-[20px]"
+>
   <div
-    *ngIf="!isChatStarted"
-    id="jarvis-chat"
-    class="jarvis-chat bottom-25 bg-white right-10 absolute z-[99999] h-[75vh] w-[24rem] rounded-[20px]"
+    class="jarvis-header p-5 h-[40%] bg-gradient-to-b from-[#218DEB] to-[#7DC2FD] rounded-b-[20px] rounded-[20px]"
   >
-    <div
-      class="jarvis-header p-5 h-[40%] bg-gradient-to-b from-[#218DEB] to-[#7DC2FD] rounded-b-[20px] rounded-[20px]"
-    >
-      <div class="p-5 flex gap-2 items-center">
-        <img
-          src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png"
-          alt="Jarvis"
-          class="jarvis-avatar w-10 h-10"
-        />
-        <div class="jarvis-title flex flex-col text-white">
-          <strong>Jarvis</strong>
-          <small>Reply in 10 seconds.</small>
-        </div>
-      </div>
-      <div>
-        <h1 class="text-white text-2xl">Let's start a conversation</h1>
-        <h2 class="text-white text-xl">Typically replies in 10 seconds.</h2>
+    <div class="p-5 flex gap-2 items-center">
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png"
+        alt="Jarvis"
+        class="jarvis-avatar w-10 h-10"
+      />
+      <div class="jarvis-title flex flex-col text-white">
+        <strong>Jarvis</strong>
+        <small>Reply in 10 seconds.</small>
       </div>
     </div>
-    <div class="jarvis-body p-5 space-y-5">
-      <div class="shadow-xl rounded-lg flex justify-between p-2 items-center tracking-tight cursor-pointer" (click)="startConversation()">
-        <div class="">
-          <h1 class="text-xl font-[500]">Start a Conversation</h1>
-          <p class="text-sm">Send us a message</p>
-        </div>
-        <img src="/rocket.jpeg" class="w-10 rounded-lg object-cover" alt="">
-      </div>
-      <div class="shadow-xl rounded-lg flex justify-between p-2 items-center tracking-tight">
-        <div>
-          <h1 class="text-xl font-[500]">Continue Conversation</h1>
-          <p class="text-sm">Pick up where you left off</p>
-        </div>
-        <img src="/rocket.jpeg" class="w-10 rounded-lg object-cover" alt="">
-      </div>
+    <div>
+      <h1 class="text-white text-2xl">Let's start a conversation</h1>
+      <h2 class="text-white text-xl">Typically replies in 10 seconds.</h2>
     </div>
   </div>
+  <div class="jarvis-body p-5 space-y-5">
+    <div
+      class="shadow-xl rounded-lg flex justify-between p-2 items-center tracking-tight cursor-pointer"
+      (click)="startConversation()"
+    >
+      <div class="">
+        <h1 class="text-xl font-[500]">Start a Conversation</h1>
+        <p class="text-sm">Send us a message</p>
+      </div>
+      <img src="/rocket.jpeg" class="w-10 rounded-lg object-cover" alt="" />
+    </div>
+    <div
+      class="shadow-xl rounded-lg flex justify-between p-2 items-center tracking-tight"
+    >
+      <div>
+        <h1 class="text-xl font-[500]">Continue Conversation</h1>
+        <p class="text-sm">Pick up where you left off</p>
+      </div>
+      <img src="/rocket.jpeg" class="w-10 rounded-lg object-cover" alt="" />
+    </div>
+  </div>
+</div>
 
 <!-- Start Conversation Chat UI -->
 <div
   *ngIf="isChatStarted"
   class="jarvis-chat-ui absolute bottom-25 right-10 z-[100000] bg-white rounded-[20px] w-[24rem] h-[75vh] flex flex-col overflow-hidden"
 >
-  <div class="bg-gradient-to-b from-[#218DEB] to-[#7DC2FD] text-white p-4 flex items-center justify-between">
+  <div
+    class="bg-gradient-to-b from-[#218DEB] to-[#7DC2FD] text-white p-4 flex items-center justify-between"
+  >
     <div class="flex items-center gap-2">
-      <img src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png" class="w-10 h-10 rounded-full" alt="Jarvis" />
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png"
+        class="w-10 h-10 rounded-full"
+        alt="Jarvis"
+      />
       <div>
         <div class="font-bold">Jarvis</div>
         <div class="text-sm">Reply in 10 seconds.</div>
       </div>
     </div>
-    <div class="text-white text-2xl cursor-pointer" (click)="isChatStarted = false">×</div>
+    <div
+      class="text-white text-2xl cursor-pointer"
+      (click)="isChatStarted = false"
+    >
+      ×
+    </div>
   </div>
 
   <!-- <div class="flex-1 p-4 overflow-y-auto">
@@ -107,7 +123,7 @@
           </button>
         </div>
     </div> -->
-      <!-- <div #messagesContainer class="hide-scrollbar flex flex-col space-y-4 h-[55vh] overflow-y-auto">
+    <!-- <div #messagesContainer class="hide-scrollbar flex flex-col space-y-4 h-[55vh] overflow-y-auto">
         <div *ngFor="let msg of messages" class="chat-message">
           <div
             class="flex items-end overflow-y-auto"
@@ -149,113 +165,179 @@
           </div>
         </div>
       </div> -->
-      <div #messagesContainer class="hide-scrollbar flex flex-col space-y-4 h-[55vh] overflow-y-auto">
-        <div *ngFor="let msg of messages" class="chat-message">
+    <div
+      #messagesContainer
+      class="hide-scrollbar flex flex-col space-y-4 h-[55vh] overflow-y-auto"
+    >
+      <div *ngFor="let msg of messages" class="chat-message">
+        <div
+          class="flex items-end overflow-y-auto"
+          [ngClass]="{
+            'justify-end': msg.sender === 'user',
+            'justify-start': msg.sender === 'bot'
+          }"
+        >
           <div
-            class="flex items-end overflow-y-auto"
+            class="flex flex-col space-y-2 text-xs max-w-xs mx-2"
             [ngClass]="{
-              'justify-end': msg.sender === 'user',
-              'justify-start': msg.sender === 'bot'
+              'order-1 items-end': msg.sender === 'user',
+              'order-2 items-start': msg.sender === 'bot'
             }"
           >
-            <div
-              class="flex flex-col space-y-2 text-xs max-w-xs mx-2"
-              [ngClass]="{
-                'order-1 items-end': msg.sender === 'user',
-                'order-2 items-start': msg.sender === 'bot'
-              }"
-            >
-              <div>
-                  <ng-container [ngSwitch]="msg.type">
-                    
-                    <!-- 1️⃣ Image -->
-                    <img *ngSwitchCase="'image'"
-                        [src]="msg.fileUrl"
-                        alt="Image message"
-                        class="max-w-[200px] rounded-lg border border-gray-300" />
+            <div>
+              <ng-container [ngSwitch]="msg.type">
+                <!-- 1️⃣ Image -->
+                <img
+                  *ngSwitchCase="'image'"
+                  [src]="msg.fileUrl"
+                  alt="Image message"
+                  class="max-w-[200px] rounded-lg border border-gray-300"
+                />
 
-                    <!-- 2️⃣ Video -->
-                    <video *ngSwitchCase="'video'"
-                          [src]="msg.fileUrl"
-                          controls
-                          class="max-w-[200px] rounded-lg border border-gray-300"></video>
+                <!-- 2️⃣ Video -->
+                <video
+                  *ngSwitchCase="'video'"
+                  [src]="msg.fileUrl"
+                  controls
+                  class="max-w-[200px] rounded-lg border border-gray-300"
+                ></video>
 
-                    <!-- 3️⃣ Audio -->
-                    <audio *ngSwitchCase="'audio'"
-                          [src]="msg.fileUrl"
-                          controls
-                          class="rounded-lg border border-gray-300 w-[200px]"></audio>
+                <!-- 3️⃣ Audio -->
+                <audio
+                  *ngSwitchCase="'audio'"
+                  [src]="msg.fileUrl"
+                  controls
+                  class="rounded-lg border border-gray-300 w-[200px]"
+                ></audio>
 
-                    <!-- 4️⃣ Default: Text -->
-                    <span *ngSwitchDefault
-                          class="px-4 py-2 rounded-lg inline-block"
-                          [ngClass]="{
-                            'bg-blue-600 text-white rounded-br-none': msg.sender === 'user',
-                            'bg-gray-300 text-gray-600 rounded-bl-none': msg.sender === 'bot'
-                          }">
-                      {{ msg.text }}
-                    </span>
+                <span
+                  *ngIf="!msg.type && !msg.quickReplies"
+                  class="px-4 py-2 rounded-lg inline-block"
+                  [ngClass]="{
+                    'bg-blue-600 text-white rounded-br-none':
+                      msg.sender === 'user',
+                    'bg-gray-300 text-gray-600 rounded-bl-none':
+                      msg.sender === 'bot'
+                  }"
+                >
+                  {{ msg.text }}
+                </span>
 
-                  </ng-container>
-              </div>
+                <!-- Quick Replies -->
+                <div *ngIf="msg.quickReplies" class="space-y-2 py-2 px-4 bg-gray-300 text-gray-600 rounded-lg inline-block">
+                  <div
+                  >
+                    {{ msg.text }}
+                  </div>
+                  <div class="flex space-x-2 mt-2">
+                    <button class="bg-blue-600 rounded text-white cursor-pointer px-2 py-1" *ngFor="let reply of msg.quickReplies" (click)="handleQuickReply(reply)">
+                      {{ reply }}
+                    </button>
+                  </div>
+                </div>
+              </ng-container>
             </div>
-
-            <img
-              [src]="msg.sender === 'user'
-                ? 'https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b'
-                : 'https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb'"
-              alt="profile"
-              class="w-6 h-6 rounded-full"
-              [ngClass]="{
-                'order-2': msg.sender === 'user',
-                'order-1': msg.sender === 'bot'
-              }"
-            />
           </div>
+
+          <img
+            [src]="
+              msg.sender === 'user'
+                ? 'https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b'
+                : 'https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb'
+            "
+            alt="profile"
+            class="w-6 h-6 rounded-full"
+            [ngClass]="{
+              'order-2': msg.sender === 'user',
+              'order-1': msg.sender === 'bot'
+            }"
+          />
         </div>
       </div>
+    </div>
 
     <div class="border-t-2 border-gray-200 pt-2 sm:mb-0">
-        <div class="relative flex">
-          <span class="absolute inset-y-0 flex items-center">
-              <button type="button" class="inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6 text-gray-600">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
-                </svg>
-              </button>
-          </span>
-          <input [(ngModel)]="messageText" (keyup.enter)="sendMessage()" placeholder="Write your message!" class="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-md py-3">
-            <div class="absolute right-0 items-center inset-y-0 hidden sm:flex">
-              <!-- Trigger Button -->
-              <button type="button"
-                (click)="fileInput.click()"
-                class="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                  class="h-6 w-6 text-gray-600">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13">
-                  </path>
-                </svg>
-              </button>
+      <div class="relative flex">
+        <span class="absolute inset-y-0 flex items-center">
+          <button
+            type="button"
+            class="inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              class="h-6 w-6 text-gray-600"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+              ></path>
+            </svg>
+          </button>
+        </span>
+        <input
+          [(ngModel)]="messageText"
+          (keyup.enter)="sendMessage()"
+          placeholder="Write your message!"
+          class="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-md py-3"
+        />
+        <div class="absolute right-0 items-center inset-y-0 hidden sm:flex">
+          <!-- Trigger Button -->
+          <button
+            type="button"
+            (click)="fileInput.click()"
+            class="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              class="h-6 w-6 text-gray-600"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+              ></path>
+            </svg>
+          </button>
 
-              <!-- Hidden File Input -->
-              <input #fileInput type="file" multiple hidden
-                (change)="handleFileInput($event)"
-                accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.txt,.zip" />
+          <!-- Hidden File Input -->
+          <input
+            #fileInput
+            type="file"
+            multiple
+            hidden
+            (change)="handleFileInput($event)"
+            accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.txt,.zip"
+          />
 
-              <!-- Send Button -->
-              <button type="button" (click)="sendMessage()"
-                class="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
-                <span class="font-bold">Send</span>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                  class="h-6 w-6 ml-2 transform rotate-90">
-                  <path
-                    d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z">
-                  </path>
-                </svg>
-              </button>
-            </div>
+          <!-- Send Button -->
+          <button
+            type="button"
+            (click)="sendMessage()"
+            class="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none"
+          >
+            <span class="font-bold">Send</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              class="h-6 w-6 ml-2 transform rotate-90"
+            >
+              <path
+                d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"
+              ></path>
+            </svg>
+          </button>
         </div>
+      </div>
     </div>
   </div>
 </div>

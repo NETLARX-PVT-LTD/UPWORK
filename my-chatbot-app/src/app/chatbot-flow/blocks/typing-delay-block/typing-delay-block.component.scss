@@ -8,7 +8,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0px 8px;
+  // padding: 0px 8px;
   border-bottom: 2px solid rgb(6, 184, 6);
   background-color: #CDA5E7; // This color will be overridden by getTypeColor in parent
   border-top-left-radius: 10px;
@@ -35,30 +35,6 @@
         font-weight: 600;
         color: #1e293b;
         font-size: 14px;
-      }
-    }
-
-    .badge {
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-
-      &.keyword-group-badge {
-        background-color: #22c55e;
-        color: white;
-      }
-
-      &.phrase-badge {
-        background-color: #3b82f6;
-        color: white;
-      }
-
-      &.anything-badge {
-        background-color: #f59e0b;
-        color: white;
       }
     }
   }
