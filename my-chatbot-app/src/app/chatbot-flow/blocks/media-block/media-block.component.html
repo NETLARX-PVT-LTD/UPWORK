@@ -45,9 +45,11 @@
           {{ block.content || "No text content" }}
         </p>
         <ng-container *ngSwitchCase="'image'">
-          <img [src]="block.mediaUrl" alt="Image Preview" class="preview-media-thumbnail max-w-full h-auto rounded-md"
-            *ngIf="block.mediaUrl" />
-          <div *ngIf="!block.mediaUrl" class="no-media-content text-sm text-gray-500 italic">
+          <img [src]="block.slides[0]?.image" alt="Image Preview"
+            class="preview-media-thumbnail max-w-full h-auto rounded-none pt-2"
+            *ngIf="block.slides && block.slides.length > 0 && block.slides[0].image" />
+          <div *ngIf="!block.slides || block.slides.length === 0 || !block.slides[0].image"
+            class="no-media-content text-sm text-gray-500 italic">
             No image URL provided.
           </div>
         </ng-container>
@@ -59,12 +61,24 @@
             No video URL provided.
           </div>
         </ng-container>
-
-        <div *ngSwitchCase="'file'" class="preview-file-display flex items-center gap-2 text-blue-600">
-          <mat-icon>attachment</mat-icon>
-          <span>{{ block.mediaUrl ? 'File Attached' : 'No file' }}</span>
+<div *ngSwitchCase="'audio'" class="preview-audio-display flex items-center gap-2 text-blue-600">
+            <mat-icon>volume_up</mat-icon>
+            <span>{{ block.mediaUrl ? 'Audio Attached' : 'No audio' }}</span>
         </div>
+        <div *ngSwitchCase="'file'" class="preview-file-display flex flex-col items-center justify-center mt-2">
+            <div *ngIf="block.mediaUrl; else noFile" class="relative w-24 h-32">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/1200px-PDF_file_icon.svg.png" 
+                     alt="PDF Icon" 
+                     class="w-full h-full object-contain">
+            </div>
 
+            <ng-template #noFile>
+                <div class="no-media-content text-sm text-gray-500 italic flex items-center gap-2">
+                    <mat-icon>attachment</mat-icon>
+                    <span>No file</span>
+                </div>
+            </ng-template>
+        </div>
         <ng-container *ngSwitchCase="'Image Slider'">
           <div class="image-slider-preview-card" *ngIf="block.slides && block.slides.length > 0">
             <div class="image-preview relative w-full overflow-hidden  bg-transparent py-2"
@@ -180,7 +194,7 @@
     </div>
 
     <mat-button-toggle-group name="mediaType" aria-label="Media Type" [(ngModel)]="block.mediaType"
-      (ngModelChange)="onContentChange()" class="media-type-toggle w-full mb-6">
+  (ngModelChange)="onMediaTypeChange($event)" class="media-type-toggle w-full mb-6">
       <mat-button-toggle value="text" class="media-toggle-button">
         TEXT MESSAGE
       </mat-button-toggle>
@@ -230,73 +244,170 @@
                   </mat-form-field>
                 </p>
                 <ng-container *ngSwitchCase="'image'">
-                 <div class="absolute top-16 right-30 flex space-x-2 z-10">
-                  </div>
-                  <div class="image-slider-container relative bg-transparent rounded-lg p-3 mb-3">
-                    <div class="whole-slider-component" *ngIf="block.slides && block.slides.length > 0">
-
-                      <div class="current-slide-content" [@slideAnimation]="currentSlideIndex">
-
-                        <div class="relative flex items-center">
-                          <div
-                            class="image-display-area relative bg-gray-200 rounded-lg flex flex-col items-center justify-center h-40 mb-3 border-2 border-dashed border-gray-300 overflow-hidden w-full">
-
-                            <div
-                              class="upload-content text-center cursor-pointer p-4 w-full h-full flex items-center justify-center"
-                              [class.hidden]="block.slides[currentSlideIndex].image" (click)="openImageUploadModal()">
-                              <div class="flex flex-col items-center justify-center">
-                                <div class="upload-icon mb-2">
-                                  <div
-                                    class="w-8 h-8 mx-auto bg-blue-500 rounded-full flex items-center justify-center">
-                                    <mat-icon class="text-white text-lg">image</mat-icon>
-                                  </div>
-                                </div>
-                                <p class="text-gray-600 text-sm font-medium mb-1">Drag your image here or click</p>
-                                <p class="text-gray-600 text-sm font-medium">to upload</p>
-                              </div>
+                  <div class="image-upload-container relative bg-transparent rounded-lg p-3 mb-3">
+                    <div
+                      class="image-display-area relative bg-gray-200 rounded-lg flex flex-col items-center justify-center h-40 mb-3 border-2 border-dashed border-gray-300 overflow-hidden w-full">
+                      <div
+                        class="upload-content text-center cursor-pointer p-4 w-full h-full flex items-center justify-center"
+                        [class.hidden]="block.mediaUrl" (click)="openUploadModal('image')">
+                        <div class="flex flex-col items-center justify-center">
+                          <div class="upload-icon mb-2">
+                            <div class="w-8 h-8 mx-auto bg-blue-500 rounded-full flex items-center justify-center">
+                              <mat-icon class="text-white text-lg">image</mat-icon>
                             </div>
-
-                            <div class="image-slider-display w-full h-full"
-                              *ngIf="block.slides[currentSlideIndex].image">
-                              <img [src]="block.slides[currentSlideIndex].image" alt="Slide Image"
-                                class="w-full h-full object-cover rounded-lg">
-
-                              <button
-                                class="absolute top-2 right-2 w-6 h-6 rounded-lg flex items-center justify-center bg-red-500 bg-opacity-80 text-white hover:bg-opacity-100 transition-colors shadow-md z-20"
-                                (click)="removeCurrentImage(currentSlideIndex)">
-                                <mat-icon class="text-xs">delete</mat-icon>
-                              </button>
-                            </div>
-
-                            <input type="file" #imageUploadInput accept="image/*" (change)="onImageUpload($event)"
-                              class="hidden">
                           </div>
+                          <p class="text-gray-600 text-sm font-medium mb-1">Drag your image here or click</p>
+                          <p class="text-gray-600 text-sm font-medium">to upload</p>
                         </div>
                       </div>
+
+                      <div class="image-display w-full h-full" *ngIf="block.mediaUrl">
+                        <img [src]="block.mediaUrl" alt="Image Preview" class="w-full h-full object-cover rounded-lg">
+                        <button
+                          class="absolute top-2 right-2 w-6 h-6 rounded-lg flex items-center justify-center bg-red-500 bg-opacity-80 text-white hover:bg-opacity-100 transition-colors shadow-md z-20"
+                          (click)="removeMedia()">
+                          <mat-icon class="text-xs">delete</mat-icon>
+                        </button>
+                      </div>
+
+                      <input type="file" #imageUploadInput accept="image/*" (change)="onImageUpload($event)"
+                        class="hidden">
                     </div>
                   </div>
                 </ng-container>
 
-                <ng-container *ngSwitchCase="'video'">
-                  <video [src]="block.mediaUrl" controls class="w-full h-auto rounded-lg mb-3"
-                    *ngIf="block.mediaUrl"></video>
-                  <div *ngIf="!block.mediaUrl" class="text-sm text-gray-500 italic mb-3">Video
-                    preview here</div>
-                </ng-container>
-                <ng-container *ngSwitchCase="'audio'">
-                  <audio controls [src]="block.mediaUrl" *ngIf="block.mediaUrl" class="w-full mb-3"></audio>
-                  <div *ngIf="!block.mediaUrl" class="text-sm text-gray-500 italic mb-3">Audio
-                    preview here</div>
-                </ng-container>
+               <!-- Replace your existing video case in the template with this improved version -->
+<ng-container *ngSwitchCase="'video'">
+  <!-- Video Upload Container -->
+  <div class="relative bg-transparent rounded-lg p-3 mb-3">
+    
+    <!-- Video Display Area -->
+    <div class="relative bg-gray-900 rounded-lg overflow-hidden mb-4" style="height: 200px;">
+      
+      <!-- Default Video Display (placeholder) -->
+      <div 
+        *ngIf="!block.mediaUrl"
+        class="w-80 h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+        
+        <!-- Large Play Button -->
+        <div class="w-16 h-16 bg-white bg-opacity-90 rounded-full flex items-center justify-center">
+          <div class="w-0 h-0 border-l-[20px] border-l-gray-800 border-t-[12px] border-t-transparent border-b-[12px] border-b-transparent ml-1"></div>
+        </div>
+        
+        <!-- Video Controls Bar (Default) -->
+        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
+          <div class="flex items-center gap-3 text-white text-sm">
+            <div class="w-0 h-0 border-l-[12px] border-l-white border-t-[7px] border-t-transparent border-b-[7px] border-b-transparent"></div>
+            <span>0:00</span>
+            <div class="flex-1 h-1 bg-white bg-opacity-30 rounded-full"></div>
+            <div class="w-4 h-4 rounded-full border border-white flex items-center justify-center">
+              <div class="w-2 h-2 bg-white rounded-full"></div>
+            </div>
+            <div class="w-4 h-4 flex items-center justify-center">
+              <svg class="w-3 h-3 fill-white" viewBox="0 0 24 24">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+              </svg>
+            </div>
+            <div class="w-4 h-4 flex items-center justify-center">
+              <svg class="w-3 h-3 fill-white" viewBox="0 0 24 24">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+              </svg>
+            </div>
+            <div class="w-4 h-4 flex items-center justify-center">
+              <svg class="w-2 h-2 fill-white" viewBox="0 0 24 24">
+                <circle cx="5" cy="12" r="2"/>
+                <circle cx="12" cy="12" r="2"/>
+                <circle cx="19" cy="12" r="2"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video Display (when video exists) -->
+      <div *ngIf="block.mediaUrl" class="relative w-full h-full">
+        <video 
+          [src]="block.mediaUrl" 
+          controls 
+          class="w-full h-full object-cover">
+        </video>
+        
+        <!-- Delete Button -->
+        <button
+          class="absolute top-2 right-2 w-6 h-6 rounded-lg flex items-center justify-center bg-red-500 bg-opacity-80 text-white hover:bg-opacity-100 transition-colors shadow-md z-20"
+          (click)="removeVideoMedia()">
+          <mat-icon class="text-xs">delete</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Upload Button -->
+    <button 
+      class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1.5 px-6 rounded-lg flex items-center justify-center gap-3 transition-colors"
+      (click)="openUploadModal('video')">
+      <span class="text-xl">+</span>
+      <span>Upload Video</span>
+    </button>
+
+    <!-- Hidden File Input -->
+    <input 
+      type="file" 
+      #videoUploadInput 
+      accept="video/*" 
+      (change)="onVideoUpload($event)"
+      class="hidden">
+  </div>
+</ng-container>
+               <ng-container *ngSwitchCase="'audio'">
+    <audio controls [src]="block.mediaUrl" *ngIf="block.mediaUrl" class="w-full mb-3"></audio>
+
+    <div *ngIf="!block.mediaUrl" class="w-full h-48 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-4 p-4">
+        <div class="mb-2">
+            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v8"></path>
+            </svg>
+        </div>
+        <span class="text-sm text-gray-500 italic">Please Upload Audio File</span>
+        <button mat-flat-button color="primary" class="mt-4" (click)="triggerAudioUpload()">
+            Upload Audio
+        </button>
+    </div>
+
+    <input type="file" #audioUploadInput style="display: none;" (change)="onAudioUpload($event)" accept="audio/*">
+</ng-container>
                 <ng-container *ngSwitchCase="'file'">
-                  <a [href]="block.mediaUrl" target="_blank"
-                    class="flex items-center gap-2 text-blue-600 no-underline text-sm mb-3" *ngIf="block.mediaUrl">
-                    <mat-icon class="text-lg w-4 h-4">attachment</mat-icon>
-                    Download File
-                  </a>
-                  <div *ngIf="!block.mediaUrl" class="text-sm text-gray-500 italic mb-3">File
-                    preview here</div>
-                </ng-container>
+    <a [href]="block.mediaUrl" target="_blank"
+       class="flex items-center gap-2 text-blue-600 no-underline text-sm mb-3" *ngIf="block.mediaUrl">
+      <mat-icon class="text-lg w-4 h-4">attachment</mat-icon>
+      Download File
+    </a>
+
+    <div *ngIf="!block.mediaUrl" class="w-full h-48 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-4 p-4">
+        <div class="mb-2">
+            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v8"></path>
+            </svg>
+        </div>
+        <span class="text-sm text-gray-500 italic">Please Upload File</span>
+        <button mat-flat-button color="primary" class="mt-4" (click)="triggerFileUpload()">
+            Upload File
+        </button>
+    </div>
+
+    <div *ngIf="block.mediaUrl" class="w-full h-24 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-4 p-4 relative">
+        <div class="flex items-center gap-2">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span class="text-base text-gray-700">{{ uploadedFileName || 'test-file.pdf' }}</span>
+        </div>
+        <button mat-icon-button (click)="removeFile()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-900">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <input type="file" #fileUploadInput style="display: none;" (change)="onFileUpload($event)">
+</ng-container>
                 <!-- Replace the Image Slider case in your template with this code -->
                 <ng-container *ngSwitchCase="'Image Slider'">
                   <div class="absolute top-16 right-30 flex space-x-2 z-10">
@@ -327,7 +438,7 @@
 
                             <div
                               class="upload-content text-center cursor-pointer p-4 w-full h-full flex items-center justify-center"
-                              [class.hidden]="block.slides[currentSlideIndex].image" (click)="openUploadModal()">
+                              [class.hidden]="block.slides[currentSlideIndex].image" (click)="openUploadModal('image')">
                               <div class="flex flex-col items-center justify-center">
                                 <div class="upload-icon mb-2">
                                   <div
@@ -405,69 +516,64 @@
                   </div>
                 </ng-container>
 
-                <div class="fixed inset-0 z-50 flex items-center justify-end top-1 right-26  bg-opacity-50"
-                  *ngIf="showUploadModal">
-                  <div class="relative bg-white w-full max-w-md rounded-lg shadow-lg">
+                <div *ngIf="showUploadModal" class="fixed inset-0 z-50 flex items-center justify-end top-1 right-26  bg-opacity-50">
+  <div class="relative bg-white w-full max-w-md rounded-lg border border-gray-200 shadow-lg">
+    <div class="flex justify-between items-center p-4 border-b border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-800">
+        {{ activeMediaType === 'image' ? 'Upload Image' : 'Upload Video' }}
+      </h3>
+      <button mat-icon-button (click)="closeUploadModal()" class="text-gray-500 hover:text-gray-700">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
 
-                    <!-- Header -->
-                    <div class="flex justify-between items-center p-4 border-b border-gray-200">
-                      <h3 class="text-lg font-semibold text-gray-800">Upload File</h3>
-                      <button (click)="closeUploadModal()" class="text-gray-500 hover:text-gray-700">
-                        <mat-icon>close</mat-icon>
-                      </button>
-                    </div>
+    <mat-tab-group>
+      <mat-tab label="Upload" class="!bg-green-500 text-white">
+        <div class="py-2">
+          <!-- <p class="text-gray-600 mb-2">
+            Upload a {{ activeMediaType }} from your computer.
+          </p> -->
+          <div class="flex gap-2 mb-4 items-center justify-between  p-4 rounded-lg">
+             <button class="w-full py-2 text-sm text-gray-600 border border-gray-300 rounded"
+>{{ uploadedFileName || 'Choose file' }}</button>
 
-                    <!-- Content -->
-                    <div class="p-4">
-                      <!-- Tabs -->
-                      <div class="flex mb-4 gap-1">
-                        <button
-                          class="flex-1 text-center py-2 px-4 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg "
-                          [class.text-white]="activeTab === 'upload'" [class.bg-green-500]="activeTab === 'upload'"
-                          (click)="activeTab = 'upload'">
-                          Upload Image
-                        </button>
-                        <button
-                          class="flex-1 text-center py-2 px-4 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg "
-                          [class.text-white]="activeTab === 'url'" [class.bg-green-500]="activeTab === 'url'"
-                          (click)="activeTab = 'url'">
-                          Image URL
-                        </button>
-                      </div>
+            <ng-container *ngIf="activeMediaType === 'image'">
+              <input #imageUploadInput type="file" accept="image/*" class="hidden" (change)="onImageUpload($event)">
+              <button mat-flat-button class="!bg-green-500 !rounded-lg" (click)="imageUploadInput.click()">Browse</button>
+            </ng-container>
 
+            <ng-container *ngIf="activeMediaType === 'video'">
+              <input #videoUploadInput type="file" accept="video/*" class="hidden" (change)="onVideoUpload($event)">
+              <button mat-flat-button class="!bg-green-500 !rounded-lg" (click)="videoUploadInput.click()">Browse</button>
+            </ng-container>
 
-                      <div *ngIf="activeTab === 'upload'">
-                        <div class="text-sm text-gray-600 mb-2">Upload</div>
-                        <div class="flex gap-2 mb-4">
-                          <button class="w-full py-1 text-sm text-gray-600 border border-gray-300 rounded"
-                            (click)="triggerImageUpload()">
-                            {{ uploadedFileName || 'Choose file' }}
-                          </button>
-                          <button class="px-4 py-1 text-sm text-white bg-gray-400 rounded"
-                            (click)="triggerImageUpload()">Browse</button>
-                        </div>
-                      </div>
+          </div>
+        </div>
+      </mat-tab>
 
-                      <div *ngIf="activeTab === 'url'">
-                        <div class="mb-4">
-                          <label class="block text-gray-700 text-sm font-medium mb-1" for="image-link">Image Link
-                            *</label>
-                          <input type="text" id="image-link" placeholder="Enter image link"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            [(ngModel)]="imageUrlInput">
-                        </div>
-                        <div class="flex justify-end">
-                          <button class="px-4 py-2 text-sm text-white bg-green-500 rounded-lg hover:bg-green-600"
-                            (click)="uploadImageUrl()">Upload</button>
-                        </div>
-                      </div>
-                    </div>
+      <mat-tab label="URL">
+        <div class="py-4 p-2">
+          <h3 class="block text-gray-700 text-sm font-medium mb-1">{{ activeMediaType === 'image' ? 'Image URL' : 'Video URL' }}</h3>
+          <mat-form-field appearance="outline" class="w-full !py-2">
+            <!-- <mat-label>{{ activeMediaType === 'image' ? 'Image URL' : 'Video URL' }}</mat-label> -->
 
-                    <input type="file" #imageUploadInput accept="image/*" (change)="onImageUpload($event)"
-                      class="hidden">
+            <input matInput
+              [placeholder]="activeMediaType === 'image' ? 'https://example.com/image.jpg' : 'https://example.com/video.mp4'"
+              [ngModel]="activeMediaType === 'image' ? imageUrlInput : videoUrlInput"
+              (ngModelChange)="activeMediaType === 'image' ? imageUrlInput = $event : videoUrlInput = $event">
+          </mat-form-field>
+          <div class="flex justify-end mt-2">
+            <button mat-flat-button class="!bg-green-500 !rounded-lg"
+              (click)="activeMediaType === 'image' ? uploadImageUrl() : uploadVideoUrl()">
+              Upload 
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>
 
-                  </div>
-                </div>
                 <!-- end of image slider  -->
                 <p *ngSwitchDefault class="text-sm text-gray-500 mb-3">Select a media type above.
                 </p>
@@ -801,3 +907,70 @@
     </div>
   </div>
 </div>
+<!-- video upload modal -->
+
+<!-- <div *ngIf="showUploadModal" class="fixed inset-0 z-50 flex items-center justify-end top-1 right-26  bg-opacity-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">
+        {{ activeMediaType === 'image' ? 'Upload Image' : 'Upload Video' }}
+      </h2>
+      <button mat-icon-button (click)="closeUploadModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <mat-tab-group>
+      <mat-tab label="Upload">
+        <div class="py-4">
+          <p class="text-gray-600 mb-2">
+            Upload a {{ activeMediaType }} from your computer.
+          </p>
+          <div class="flex items-center justify-between border-2 border-dashed border-gray-300 p-4 rounded-lg">
+            <span class="text-gray-500 truncate">{{ uploadedFileName || 'Choose file' }}</span>
+
+            <ng-container *ngIf="activeMediaType === 'image'">
+              <input #imageUploadInput type="file" accept="image/*" class="hidden" (change)="onImageUpload($event)">
+              <button mat-flat-button color="primary" (click)="imageUploadInput.click()">Browse</button>
+            </ng-container>
+
+            <ng-container *ngIf="activeMediaType === 'video'">
+              <input #videoUploadInput type="file" accept="video/*" class="hidden" (change)="onVideoUpload($event)">
+              <button mat-flat-button color="primary" (click)="videoUploadInput.click()">Browse</button>
+            </ng-container>
+
+          </div>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="URL">
+        <div class="py-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>{{ activeMediaType === 'image' ? 'Image URL' : 'Video URL' }}</mat-label>
+
+            <input matInput
+              [placeholder]="activeMediaType === 'image' ? 'https://example.com/image.jpg' : 'https://example.com/video.mp4'"
+              [ngModel]="activeMediaType === 'image' ? imageUrlInput : videoUrlInput"
+              (ngModelChange)="activeMediaType === 'image' ? imageUrlInput = $event : videoUrlInput = $event">
+          </mat-form-field>
+          <div class="flex justify-end mt-2">
+            <button mat-flat-button color="primary"
+              (click)="activeMediaType === 'image' ? uploadImageUrl() : uploadVideoUrl()">
+              Upload {{ activeMediaType }}
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>
+
+<button mat-button class="bg-gray-200 text-gray-800 w-[80%] mb-2 font-medium" (click)="openUploadModal('video')">
+  <mat-icon>upload</mat-icon>
+  Upload Video
+</button>
+
+<button mat-button class="bg-gray-200 text-gray-800 w-[80%] mb-2 font-medium" (click)="openUploadModal('image')">
+  <mat-icon>upload</mat-icon>
+  Upload Image
+</button> -->

@@ -133,6 +133,7 @@ export interface AvailableMedia {
   slideTitle?: string;
   slideSubtitle?: string;
   slideImages?: string[];
+  slides?: ImageSlide[];
 }
 
 export interface AvailableStory {
