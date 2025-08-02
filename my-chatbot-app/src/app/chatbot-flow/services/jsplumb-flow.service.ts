@@ -134,13 +134,13 @@ export class JsPlumbFlowService {
       anchor: 'Bottom',
       isSource: true,
       maxConnections: -1,
-      endpoint: ['Dot', { radius: 8 }],
+      // endpoint: ['Dot', { radius: 8 }],
       paintStyle: {
-        stroke: '#F1F2F3',
-        strokeWidth: 5,
-        fill: '#4f46e5'
+        // stroke: '#F1F2F3',
+        // strokeWidth: 5,
+        // fill: '#4f46e5'
       },
-      connectorStyle: { stroke: '#4f46e5', strokeWidth: 2 },
+      // connectorStyle: { stroke: '#4f46e5', strokeWidth: 2 },
       connector: ['Flowchart', { stub: [20, 30], gap: 5, cornerRadius: 5 }],
       overlays: [
         ['Arrow', { location: 1, length: 10, width: 10 }]
@@ -153,13 +153,13 @@ export class JsPlumbFlowService {
       anchor: 'Top',
       isTarget: true,
       maxConnections: -1,
-      endpoint: ['Dot', { radius:  8}],
+      // endpoint: ['Dot', { radius:  8}],
       paintStyle: {
-        stroke: '#F1F2F3',
-        strokeWidth: 5,
-        fill: '#10b981'
+        // stroke: '#F1F2F3',
+        // strokeWidth: 5,
+        // fill: '#10b981'
       },
-      hoverPaintStyle: { fill: '#059669' },
+      // hoverPaintStyle: { fill: '#059669' },
       uuid: `${blockId}-target` // Unique ID for this endpoint
     });
 

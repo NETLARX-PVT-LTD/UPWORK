@@ -1519,3 +1519,25 @@
 mat-form-field.full-width-input {
     width: 100%;
 }
+
+.close-btn {
+  background-color: #747d8c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin-left: auto;  /* pushes it to the right within flex */
+  transition: background-color 0.2s ease;
+  /* ❌ Do NOT use position: absolute */
+}
+
+.close-btn:hover {
+  background-color: #1f2130;
+}
