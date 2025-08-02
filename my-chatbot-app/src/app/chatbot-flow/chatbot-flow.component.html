@@ -34,12 +34,12 @@
         </mat-form-field>
       </div>
 
-      <div class="blocks-list" cdkDropList [cdkDropListConnectedTo]="[canvasDropList]" (cdkDropListDropped)="drop($event)">
+      <div class="blocks-list" cdkDropList (cdkDropListDropped)="drop($event)">
         <div
           *ngFor="let block of filteredBlocks$ | async"
           class="block-item"
           cdkDrag
-          [cdkDragData]="block"
+          (click)="addBlockToCanvas(block)"
         >
           <div
             class="block-icon"
@@ -48,7 +48,7 @@
             <img *ngIf="block.imageUrl" [src]="block.imageUrl" alt="block-icon" class="custom-icon shadow-sm border border-gray-200 rounded">
             <mat-icon *ngIf="!block.imageUrl">{{ block.icon }}</mat-icon>
           </div>
-
+      
           <div class="block-content flex items-center">
             <div class="block-name">{{ block.name }}</div>
             <div
@@ -58,20 +58,14 @@
               {{ block.description }}
             </div>
           </div>
-
-          <div class="drag-handle">
+      
+          <div class="drag-handle" cdkDragHandle>
             <mat-icon>drag_indicator</mat-icon>
           </div>
-
-          <!-- Ghost preview while dragging -->
-          <ng-template cdkDragPreview>
-            <div class="drag-preview px-4 py-2 rounded-md shadow-lg border bg-white opacity-90 text-sm font-medium">
-              {{ block.name }}
-            </div>
-          </ng-template>
         </div>
       </div>
     </div>
+
     <div class="canvas-area" [class.sidebar-open]="rightSidebarOpen">
       <div class="canvas-controls">
         <div class="zoom-controls">
@@ -101,10 +95,7 @@
       <div
         class="canvas-wrapper bg-[#F1F2F3]"
         #canvasWrapper
-        cdkDropList
-        #canvasDropList="cdkDropList" cdkDropListSortingDisabled="true"
         [style.cursor]="isPanning ? 'grabbing' : 'default'"
-        (cdkDropListDropped)="onBlockDropped($event)"
       >
         <div class="canvas-content" #canvasContent id="canvas">
           <div class="flow-start-indicator">
@@ -471,4 +462,5 @@
   <button class="absolute right-10 bottom-8 w-14 cursor-pointer z-[100000]" (click)="toggleJarvis()">
     <img src="/msg.png" alt="" class="rounded-full">
   </button>
+
 </div>
