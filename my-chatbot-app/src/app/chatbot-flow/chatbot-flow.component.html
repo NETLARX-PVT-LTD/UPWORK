@@ -48,7 +48,7 @@
             <img *ngIf="block.imageUrl" [src]="block.imageUrl" alt="block-icon" class="custom-icon shadow-sm border border-gray-200 rounded">
             <mat-icon *ngIf="!block.imageUrl">{{ block.icon }}</mat-icon>
           </div>
-
+      
           <div class="block-content flex items-center">
             <div class="block-name">{{ block.name }}</div>
             <div
@@ -58,7 +58,7 @@
               {{ block.description }}
             </div>
           </div>
-
+      
           <div class="drag-handle" cdkDragHandle>
             <mat-icon>drag_indicator</mat-icon>
           </div>

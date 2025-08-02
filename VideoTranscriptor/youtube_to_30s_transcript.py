@@ -9,15 +9,15 @@ from pydub import AudioSegment
 from math import ceil
 
 # AWS S3 Config
-AWS_ACCESS_KEY_ID = ""       # add your aws_access_key_id here
-AWS_SECRET_ACCESS_KEY = ""   # add your aws_secret_access_key here
+AWS_ACCESS_KEY_ID = "YOUR_AWS_ACCESS_KEY_ID"
+AWS_SECRET_ACCESS_KEY = "YOUR_AWS_SECRET_ACCESS_KEY"
 BUCKET_NAME = "afterlife-test"
 
 CHUNK_DURATION_MS = 30 * 1000  # 30 seconds
 
 
 def process_video_from_youtube(video_url):
-    # === Setup paths based on input URL ===
+    # === Setup paths ===
     video_id = video_url.split("v=")[-1]
     safe_url = video_url.replace("://", "__").replace("/", "_").replace("?", "_").replace("=", "_")
 
@@ -30,13 +30,12 @@ def process_video_from_youtube(video_url):
     transcript_file = os.path.join(base_dir, "transcript_30s.json")
     mapping_file = os.path.join(base_dir, "transcript_to_frames.json")
 
-    # === Directory Setup ===
     os.makedirs(base_dir, exist_ok=True)
     os.makedirs(chunks_dir, exist_ok=True)
     os.makedirs(frames_dir, exist_ok=True)
 
-    # === Download Video and Audio ===
-    print("⬇️ Downloading video and audio...")
+    # === Download Video ===
+    print("⬇️ Downloading video...")
     ydl_opts = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
         'outtmpl': video_filename,
@@ -46,6 +45,8 @@ def process_video_from_youtube(video_url):
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([video_url])
 
+    # === Download Audio ===
+    print("⬇️ Downloading audio...")
     ydl_audio_opts = {
         'format': 'bestaudio/best',
         'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3'}],
@@ -56,7 +57,7 @@ def process_video_from_youtube(video_url):
         ydl.download([video_url])
 
     # === Split Audio ===
-    print("🔪 Splitting audio into chunks...")
+    print("🔪 Splitting audio into 30-second chunks...")
     audio = AudioSegment.from_mp3(audio_filename)
     duration_ms = len(audio)
     num_chunks = ceil(duration_ms / CHUNK_DURATION_MS)
@@ -71,7 +72,7 @@ def process_video_from_youtube(video_url):
         chunk_paths.append((chunk_name, start // 1000, end // 1000))
 
     # === Transcribe Chunks ===
-    print("🧠 Transcribing each chunk...")
+    print("🧠 Transcribing chunks with Whisper...")
     model = whisper.load_model("base")
     results = []
     for path, start, end in chunk_paths:
@@ -86,7 +87,7 @@ def process_video_from_youtube(video_url):
         json.dump(results, f, indent=2)
 
     # === Extract Frames ===
-    print("🎞 Extracting video frames...")
+    print("🎞 Extracting frames from video...")
     cap = cv2.VideoCapture(video_filename)
     fps = cap.get(cv2.CAP_PROP_FPS)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -107,7 +108,7 @@ def process_video_from_youtube(video_url):
 
     # === Map Transcript to Frames ===
     print("🗺 Mapping transcript to frames...")
-    total_frames = len(os.listdir(frames_dir))
+    total_frame_files = len(os.listdir(frames_dir))
     mapping = []
     for entry in results:
         start_sec = entry['start_time']
@@ -116,7 +117,7 @@ def process_video_from_youtube(video_url):
         end_frame = int(end_sec * fps)
 
         matched_frames = []
-        for i in range(start_frame, min(end_frame + 1, total_frames)):
+        for i in range(start_frame, min(end_frame + 1, frame_index)):
             time_sec = int(i / fps)
             slot_start = (time_sec // 30) * 30
             slot_end = slot_start + 30
@@ -130,12 +131,11 @@ def process_video_from_youtube(video_url):
         })
 
     with open(mapping_file, "w", encoding="utf-8") as f:
-
         json.dump(mapping, f, indent=2)
     print(f"✅ Mapping saved to {mapping_file}")
 
-    # === Cleanup ===
-    print("🧹 Cleaning up video/audio/chunks...")
+    # === Cleanup local audio/video/chunks ===
+    print("🧹 Cleaning up...")
     try:
         os.remove(video_filename)
         os.remove(audio_filename)
@@ -144,24 +144,35 @@ def process_video_from_youtube(video_url):
         print(f"⚠️ Cleanup warning: {e}")
 
     # === Upload to S3 ===
-    print("☁️ Uploading selected files to S3...")
+    print("☁️ Uploading transcript and frames to S3...")
     s3 = boto3.client(
         "s3",
         aws_access_key_id=AWS_ACCESS_KEY_ID,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY
     )
 
-    allowed_files = {"transcript_to_frames.json"}
-    for root, dirs, files in os.walk(base_dir):
+    # Upload transcript_to_frames.json
+    if os.path.exists(mapping_file):
+        s3_key = f"{safe_url}/transcript_to_frames.json"
+        try:
+            s3.upload_file(mapping_file, BUCKET_NAME, s3_key)
+            print(f"✅ Uploaded: s3://{BUCKET_NAME}/{s3_key}")
+        except Exception as e:
+            print(f"❌ Failed to upload {s3_key}: {e}")
+    else:
+        print("❌ transcript_to_frames.json not found.")
+
+    # Upload all frames inside VideoFrames/
+    for root, dirs, files in os.walk(frames_dir):
         for file in files:
-            rel_path = os.path.relpath(os.path.join(root, file), base_dir)
-            if rel_path.startswith("VideoFrames/") or file in allowed_files:
-                s3_key = os.path.join(safe_url, rel_path).replace("\\", "/")
-                try:
-                    s3.upload_file(os.path.join(root, file), BUCKET_NAME, s3_key)
-                    print(f"✅ Uploaded: s3://{BUCKET_NAME}/{s3_key}")
-                except Exception as e:
-                    print(f"❌ Failed to upload {s3_key}: {e}")
+            local_path = os.path.join(root, file)
+            relative_path = os.path.relpath(local_path, base_dir).replace("\\", "/")
+            s3_key = f"{safe_url}/{relative_path}"
+            try:
+                s3.upload_file(local_path, BUCKET_NAME, s3_key)
+                print(f"✅ Uploaded: s3://{BUCKET_NAME}/{s3_key}")
+            except Exception as e:
+                print(f"❌ Failed to upload {s3_key}: {e}")
 
 
 def main():

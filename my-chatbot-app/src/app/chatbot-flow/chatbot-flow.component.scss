@@ -67,26 +67,45 @@
   }
   
   .search-container {
-    padding: 0px 20px;
-    border-bottom: 1px solid #f1f5f9;
-    
-   
-    
-.search-field ::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-  background-color: transparent !important;
-}
-
-
-
-:host ::ng-deep .search-field .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-  background-color: transparent !important;
-}
-    
+    padding: 0px 15px;
+  
+    /* NEW: Add background-color on hover */
+    &:hover {
+      background-color: white;
+    }
+  
     .search-field {
       width: 100%;
-      
-      .mat-mdc-form-field-subscript-wrapper {
+  
+      /* Consolidated rules for hiding the subscript wrapper */
+      ::ng-deep .mat-mdc-form-field-subscript-wrapper {
         display: none;
+      }
+  
+      /* Overrides for the form field's internal elements */
+      ::ng-deep .mdc-text-field--no-label .mat-mdc-form-field-infix {
+        padding-top: 13px;
+        padding-bottom: 13px;
+      }
+  
+      ::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+        background-color: transparent !important;
+      }
+      
+      ::ng-deep input::placeholder {
+        font-size: 14px;
+      }
+  
+      ::ng-deep input {
+        margin-top: 5px;
+      }
+  
+      /* Style for the mat-icon itself */
+      mat-icon {
+        height: 18px;
+        width: 18px;
+        font-size: 18px;
+        margin-top: 6px;
       }
     }
   }
@@ -103,10 +122,16 @@
       cursor: pointer;
       transition: all 0.2s ease;
       border-left: 3px solid transparent;
+      border-top: 1px solid #e0e0e0;
+      
       
       &:hover {
         background-color: #f8fafc;
         border-left-color: #3b82f6;
+      }
+
+      .blocks-list .block-item:first-child {
+        border-top: none;
       }
       
       .block-icon {
