@@ -171,7 +171,7 @@
     >
       <div *ngFor="let msg of messages" class="chat-message">
         <div
-          class="flex items-end overflow-y-auto"
+          class="flex items-end"
           [ngClass]="{
             'justify-end': msg.sender === 'user',
             'justify-start': msg.sender === 'bot'
@@ -185,33 +185,57 @@
             }"
           >
             <div>
-              <ng-container [ngSwitch]="msg.type">
-                <!-- 1️⃣ Image -->
+              <ng-container>
+                <!-- 1️⃣ Media Block Slides (Image Carousel Only) -->
+                <div
+                  *ngIf="msg.slides && msg.slides.length > 0"
+                  class="flex space-x-2 overflow-x-auto max-w-[158px] p-1"
+                >
+                  <div
+                    *ngFor="let slide of msg.slides"
+                    class="flex-shrink-0 flex flex-col items-center space-y-1"
+                  >
+                    <img
+                      [src]="slide.image"
+                      class="max-w-[150px] rounded-lg border border-gray-300"
+                      alt="Slide Image"
+                    />
+                    <span
+                      *ngIf="slide.title"
+                      class="text-gray-600 text-[10px]"
+                    >
+                      {{ slide.title }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 2️⃣ Image -->
                 <img
-                  *ngSwitchCase="'image'"
+                  *ngIf="msg.type === 'image' && !msg.slides"
                   [src]="msg.fileUrl"
                   alt="Image message"
                   class="max-w-[200px] rounded-lg border border-gray-300"
                 />
 
-                <!-- 2️⃣ Video -->
+                <!-- 3️⃣ Video -->
                 <video
-                  *ngSwitchCase="'video'"
+                  *ngIf="msg.type === 'video'"
                   [src]="msg.fileUrl"
                   controls
                   class="max-w-[200px] rounded-lg border border-gray-300"
                 ></video>
 
-                <!-- 3️⃣ Audio -->
+                <!-- 4️⃣ Audio -->
                 <audio
-                  *ngSwitchCase="'audio'"
+                  *ngIf="msg.type === 'audio'"
                   [src]="msg.fileUrl"
                   controls
                   class="rounded-lg border border-gray-300 w-[200px]"
                 ></audio>
 
+                <!-- 5️⃣ Text Message -->
                 <span
-                  *ngIf="!msg.type && !msg.quickReplies"
+                  *ngIf="!msg.type && !msg.quickReplies && !msg.slides"
                   class="px-4 py-2 rounded-lg inline-block"
                   [ngClass]="{
                     'bg-blue-600 text-white rounded-br-none':
@@ -223,14 +247,18 @@
                   {{ msg.text }}
                 </span>
 
-                <!-- Quick Replies -->
-                <div *ngIf="msg.quickReplies" class="space-y-2 py-2 px-4 bg-gray-300 text-gray-600 rounded-lg inline-block">
-                  <div
-                  >
-                    {{ msg.text }}
-                  </div>
+                <!-- 6️⃣ Quick Replies -->
+                <div
+                  *ngIf="msg.quickReplies"
+                  class="space-y-2 py-2 px-4 bg-gray-300 text-gray-600 rounded-lg inline-block"
+                >
+                  <div>{{ msg.text }}</div>
                   <div class="flex space-x-2 mt-2">
-                    <button class="bg-blue-600 rounded text-white cursor-pointer px-2 py-1" *ngFor="let reply of msg.quickReplies" (click)="handleQuickReply(reply)">
+                    <button
+                      class="bg-blue-600 rounded text-white cursor-pointer px-2 py-1"
+                      *ngFor="let reply of msg.quickReplies"
+                      (click)="handleQuickReply(reply)"
+                    >
                       {{ reply }}
                     </button>
                   </div>
@@ -239,6 +267,7 @@
             </div>
           </div>
 
+          <!-- Avatar -->
           <img
             [src]="
               msg.sender === 'user'

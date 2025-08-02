@@ -11,7 +11,7 @@ import { ApiHeader } from '../../../models/chatbot-block.model';
 })
 export class JarvishBlockComponent {
   messageText: string = '';
-  messages: { sender: 'user' | 'bot', text: string, type?: string, fileUrl?: string, quickReplies?: string[]}[] = [];
+  messages: { sender: 'user' | 'bot', text: string, type?: string, fileUrl?: string, quickReplies?: string[], slides?: { image: string; title?: string; subtitle?: string }[];}[] = [];
 
   @Input() canvasBlocks: any[] = [];
   isChatStarted: boolean = false;
@@ -203,6 +203,35 @@ export class JarvishBlockComponent {
       this.processNextBlock();
       break;
 
+   case 'mediaBlock': {
+      const mediaMsg: any = { sender: 'bot' };
+
+      // ✅ Always include text if exists
+      if (block.content) {
+        mediaMsg.text = block.content;
+      }
+
+      // ✅ Handle media type if URL exists
+      else if (block.mediaType && block.mediaUrl) {
+        mediaMsg.type = block.mediaType; // 'image' | 'video' | 'audio'
+        mediaMsg.fileUrl = block.mediaUrl;
+      }
+
+      // ✅ Handle slides (image carousel)
+      else if (block.slides && block.slides.length > 0) {
+        mediaMsg.slides = block.slides;
+      }
+
+      // ✅ Push to chat
+      this.messages.push(mediaMsg);
+      this.scrollToBottom();
+      console.log(mediaMsg);
+
+      // ✅ Auto-continue after short delay
+      this.currentBlockIndex++;
+      setTimeout(() => this.processNextBlock(), 1000);
+      break;
+    }
     default:
       this.messages.push({ sender: 'bot', text: `[Unsupported block: ${block.type}]` });
       this.currentBlockIndex++;
@@ -255,7 +284,7 @@ export class JarvishBlockComponent {
         });
         this.scrollToBottom();
 
-        if (this.formFieldIndex < this.currentFormFields.length - 1) {
+        if (this.formFieldIndex <= this.currentFormFields.length - 1) {
         this.formFieldIndex++;
         this.askNextFormField();
         } else {
@@ -329,4 +358,33 @@ export class JarvishBlockComponent {
   setTimeout(() => this.processNextBlock(), 800);
   }
 
+  private handleMediaBlock(block: any) {
+  const mediaMsg: any = { sender: 'bot', text: block.content || '' };
+
+  // Attach media if present
+  if (block.mediaType && block.mediaUrl) {
+    mediaMsg.type = block.mediaType;  // 'image' | 'video' | 'audio'
+    mediaMsg.fileUrl = block.mediaUrl;
+  }
+
+  // If slides are present, map them into multiple media messages
+  if (block.slides && block.slides.length > 0) {
+    block.slides.forEach((slide: any) => {
+      const slideMsg: any = { sender: 'bot', text: slide.caption || '' };
+      if (slide.mediaType && slide.mediaUrl) {
+        slideMsg.type = slide.mediaType;
+        slideMsg.fileUrl = slide.mediaUrl;
+      }
+      this.messages.push(slideMsg);
+    });
+  } else {
+    this.messages.push(mediaMsg);
+  }
+
+  this.scrollToBottom();
+
+  // ✅ Continue to next block
+  this.currentBlockIndex++;
+  setTimeout(() => this.processNextBlock(), 1000);
+  }
 }
