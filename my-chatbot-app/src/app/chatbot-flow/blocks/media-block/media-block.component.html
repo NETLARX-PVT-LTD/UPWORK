@@ -34,29 +34,30 @@
         <p *ngSwitchCase="'text'" class="preview-text text-sm text-gray-700 bg-slate-50 px-3 py-2">
           {{ block.content || "No text content" }}
         </p>
-        <ng-container *ngSwitchCase="'image'">
-          <img [src]="block.slides[0]?.image" alt="Image Preview"
-            class="preview-media-thumbnail max-w-full h-auto rounded-none pt-2"
-            *ngIf="block.slides && block.slides.length > 0 && block.slides[0].image" />
-          <div *ngIf="!block.slides || block.slides.length === 0 || !block.slides[0].image"
-            class="no-media-content text-sm text-gray-500 italic">
-            No image URL provided.
-          </div>
-        </ng-container>
+       <ng-container *ngSwitchCase="'image'">
+  <img [src]="block.singleImageUrl" alt="Image Preview"
+       class="preview-media-thumbnail max-w-full h-auto rounded-none pt-2"
+       *ngIf="block.singleImageUrl" />
+  <div *ngIf="!block.singleImageUrl"
+       class="no-media-content text-sm text-gray-500 italic">
+    No image URL provided.
+  </div>
+</ng-container>
 
         <ng-container *ngSwitchCase="'video'">
-          <video [src]="block.mediaUrl" controls class="preview-media-thumbnail max-w-full h-auto rounded-md"
-            *ngIf="block.mediaUrl"></video>
-          <div *ngIf="!block.mediaUrl" class="no-media-content text-sm text-gray-500 italic">
+          <video [src]="block.videoUrl" controls class="preview-media-thumbnail max-w-full h-auto rounded-md"
+            *ngIf="block.videoUrl"></video>
+          <div *ngIf="!block.videoUrl" class="no-media-content text-sm text-gray-500 italic">
             No video URL provided.
           </div>
         </ng-container>
-<div *ngSwitchCase="'audio'" class="preview-audio-display flex items-center gap-2 text-blue-600">
-            <mat-icon>volume_up</mat-icon>
-            <span>{{ block.mediaUrl ? 'Audio Attached' : 'No audio' }}</span>
-        </div>
+<div *ngSwitchCase="'audio'" class="preview-audio-display flex items-center mt-2 justify-center gap-2 text-gray-600">
+    <mat-icon>play_circle</mat-icon>
+    <mat-icon *ngIf="block.audioUrl">graphic_eq</mat-icon>
+    <span *ngIf="!block.audioUrl">No audio</span>
+</div>
         <div *ngSwitchCase="'file'" class="preview-file-display flex flex-col items-center justify-center mt-2">
-            <div *ngIf="block.mediaUrl; else noFile" class="relative w-24 h-32">
+            <div *ngIf="block.fileUrl; else noFile" class="relative w-24 h-32">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/1200px-PDF_file_icon.svg.png" 
                      alt="PDF Icon" 
                      class="w-full h-full object-contain">
@@ -208,22 +209,27 @@
 
     <div class="phone-frame-container flex justify-center">
       <div class="relative bg-black rounded-3xl-custom p-phone-bezel shadow-2xl-custom phone-half-frame-height">
-        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 bg-black rounded-b-xl-custom z-10 notch-custom">
+        <img
+    src="https://app.botsify.com/theme/images/apple-iphone-x-landing-page-blank-png-22.png"
+    alt="iPhone Frame"
+    class="absolute top-0 left-0 w-full h-full z-10 pointer-events-none"
+  />
+        <div class="absolute ">
         </div>
         <div class="bg-white rounded-screen-custom h-full flex flex-col relative overflow-hidden">
           <div class="flex justify-between items-center px-4 py-2 text-xs font-medium text-black bg-white">
-            <span>9:41</span>
+            <!-- <span>9:41</span> -->
             <div class="flex items-center gap-1">
-              <div class="w-4 h-2 bg-black rounded-sm"></div>
-              <div class="w-1 h-3 bg-black rounded-sm"></div>
-              <div class="w-6 h-3 border border-black rounded-sm relative">
-                <div class="absolute right-0 top-0 w-4 h-full bg-black rounded-sm"></div>
-              </div>
+              <!-- <div class="w-4 h-2 bg-black rounded-sm"></div>
+              <div class="w-1 h-3 bg-black rounded-sm"></div> -->
+              <!-- <div class="w-6 h-3 border border-black rounded-sm relative"> -->
+                <!-- <div class="absolute right-0 top-0 w-4 h-full bg-black rounded-sm"></div> -->
+              <!-- </div> -->
             </div>
           </div>
 
           <div class="flex-1 px-4 pb-8 flex flex-col justify-center bg-gray-100">
-            <div class="bg-transparent rounded-2xl p-4 justify-center max-w-[85%] self-center ">
+            <div class="bg-transparent rounded-2xl p-4 justify-center max-w-[85%] self-center  mt-[-500px]">
               <ng-container [ngSwitch]="block.mediaType">
                 <p *ngSwitchCase="'text'" class="text-sm text-gray-700">
                   <mat-form-field appearance="outline"
@@ -233,39 +239,38 @@
                     <mat-icon matSuffix class="text-gray-500">emoji_emotions</mat-icon>
                   </mat-form-field>
                 </p>
-                <ng-container *ngSwitchCase="'image'">
-                  <div class="image-upload-container relative bg-transparent rounded-lg p-3 mb-3">
-                    <div
-                      class="image-display-area relative bg-gray-200 rounded-lg flex flex-col items-center justify-center h-40 mb-3 border-2 border-dashed border-gray-300 overflow-hidden w-full">
-                      <div
-                        class="upload-content text-center cursor-pointer p-4 w-full h-full flex items-center justify-center"
-                        [class.hidden]="block.mediaUrl" (click)="openUploadModal('image')">
-                        <div class="flex flex-col items-center justify-center">
-                          <div class="upload-icon mb-2">
-                            <div class="w-8 h-8 mx-auto bg-blue-500 rounded-full flex items-center justify-center">
-                              <mat-icon class="text-white text-lg">image</mat-icon>
-                            </div>
-                          </div>
-                          <p class="text-gray-600 text-sm font-medium mb-1">Drag your image here or click</p>
-                          <p class="text-gray-600 text-sm font-medium">to upload</p>
-                        </div>
-                      </div>
+               <ng-container *ngSwitchCase="'image'">
+  <div class="image-upload-container relative bg-transparent rounded-lg p-3 mb-3">
+    <div
+      class="image-display-area relative bg-gray-200 rounded-lg flex flex-col items-center justify-center h-40 mb-3 border-2 border-dashed border-gray-300 overflow-hidden w-full">
+      <div
+        class="upload-content text-center cursor-pointer p-4 w-full h-full flex items-center justify-center"
+        [class.hidden]="block.singleImageUrl" (click)="openUploadModal('image')">
+        <div class="flex flex-col items-center justify-center">
+          <div class="upload-icon mb-2">
+            <div class="w-8 h-8 mx-auto bg-blue-500 rounded-full flex items-center justify-center">
+              <mat-icon class="text-white text-lg">image</mat-icon>
+            </div>
+          </div>
+          <p class="text-gray-600 text-sm font-medium mb-1">Drag your image here or click</p>
+          <p class="text-gray-600 text-sm font-medium">to upload</p>
+        </div>
+      </div>
 
-                      <div class="image-display w-full h-full" *ngIf="block.mediaUrl">
-                        <img [src]="block.mediaUrl" alt="Image Preview" class="w-full h-full object-cover rounded-lg">
-                        <button
-                          class="absolute top-2 right-2 w-6 h-6 rounded-lg flex items-center justify-center bg-red-500 bg-opacity-80 text-white hover:bg-opacity-100 transition-colors shadow-md z-20"
-                          (click)="removeMedia()">
-                          <mat-icon class="text-xs">delete</mat-icon>
-                        </button>
-                      </div>
+      <div class="image-display w-full h-full" *ngIf="block.singleImageUrl">
+        <img [src]="block.singleImageUrl" alt="Image Preview" class="w-full h-full object-cover rounded-lg">
+        <button
+          class="absolute top-2 right-2 w-6 h-6 rounded-lg flex items-center justify-center bg-red-500 bg-opacity-80 text-white hover:bg-opacity-100 transition-colors shadow-md z-20"
+          (click)="removeMedia()">
+          <mat-icon class="text-xs">delete</mat-icon>
+        </button>
+      </div>
 
-                      <input type="file" #imageUploadInput accept="image/*" (change)="onImageUpload($event)"
-                        class="hidden">
-                    </div>
-                  </div>
-                </ng-container>
-
+      <input type="file" #imageUploadInput accept="image/*" (change)="onImageUpload($event)"
+        class="hidden">
+    </div>
+  </div>
+</ng-container>
                <!-- Replace your existing video case in the template with this improved version -->
 <ng-container *ngSwitchCase="'video'">
   <!-- Video Upload Container -->
@@ -276,7 +281,7 @@
       
       <!-- Default Video Display (placeholder) -->
       <div 
-        *ngIf="!block.mediaUrl"
+        *ngIf="!block.videoUrl"
         class="w-80 h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
         
         <!-- Large Play Button -->
@@ -315,9 +320,9 @@
       </div>
 
       <!-- Video Display (when video exists) -->
-      <div *ngIf="block.mediaUrl" class="relative w-full h-full">
+      <div *ngIf="block.videoUrl" class="relative w-full h-full">
         <video 
-          [src]="block.mediaUrl" 
+          [src]="block.videoUrl" 
           controls 
           class="w-full h-full object-cover">
         </video>
@@ -348,31 +353,69 @@
       class="hidden">
   </div>
 </ng-container>
-               <ng-container *ngSwitchCase="'audio'">
-    <audio controls [src]="block.mediaUrl" *ngIf="block.mediaUrl" class="w-full mb-3"></audio>
-
-    <div *ngIf="!block.mediaUrl" class="w-full h-48 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-4 p-4">
-        <div class="mb-2">
-            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v8"></path>
-            </svg>
-        </div>
-        <span class="text-sm text-gray-500 italic">Please Upload Audio File</span>
-        <button mat-flat-button color="primary" class="mt-4" (click)="triggerAudioUpload()">
-            Upload Audio
+              <!-- Replace your existing audio case in the phone preview section with this fixed version -->
+<ng-container *ngSwitchCase="'audio'">
+  <!-- Audio Upload Container -->
+  <div class="relative bg-transparent rounded-lg p-3 mb-3">
+    
+    <!-- Audio Display Area -->
+    <div class="relative bg-white rounded-lg overflow-hidden mb-4" style="height: 120px; width: 400px;">
+      
+      <!-- Audio Player (when audio exists) -->
+      <div *ngIf="block.audioUrl" class="w-full h-full flex items-center justify-center p-4">
+        <audio 
+          controls 
+          [src]="block.audioUrl" 
+          class="w-full max-w-full">
+          Your browser does not support the audio element.
+        </audio>
+        
+        <!-- Delete Button -->
+        <button
+          class="absolute top-2 right-2 w-6 h-6 rounded-lg flex items-center justify-center bg-red-500 bg-opacity-80 text-white hover:bg-opacity-100 transition-colors shadow-md z-20"
+          (click)="removeAudioMedia()">
+          <mat-icon class="text-xs">delete</mat-icon>
         </button>
+      </div>
+      
+      <!-- Default Audio Display (placeholder) -->
+      <div 
+        *ngIf="!block.audioUrl"
+        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 p-4">
+        
+        <!-- Audio Icon and Placeholder -->
+        <div class="flex flex-col items-center text-gray-500">
+          <mat-icon class="text-3xl mb-2">volume_up</mat-icon>
+          <span class="text-sm">No audio file</span>
+        </div>
+      </div>
     </div>
 
-    <input type="file" #audioUploadInput style="display: none;" (change)="onAudioUpload($event)" accept="audio/*">
+    <!-- Upload Button -->
+    <button 
+      class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1.5 px-6 rounded-lg flex items-center justify-center gap-3 transition-colors"
+      (click)="triggerAudioUpload()">
+      <span class="text-xl">+</span>
+      <span>Upload Audio</span>
+    </button>
+
+    <!-- Hidden File Input -->
+    <input 
+      type="file" 
+      #audioUploadInput 
+      accept="audio/*" 
+      (change)="onAudioUpload($event)"
+      class="hidden">
+  </div>
 </ng-container>
                 <ng-container *ngSwitchCase="'file'">
-    <a [href]="block.mediaUrl" target="_blank"
-       class="flex items-center gap-2 text-blue-600 no-underline text-sm mb-3" *ngIf="block.mediaUrl">
+    <a [href]="block.fileUrl" target="_blank"
+       class="flex items-center gap-2 text-blue-600 no-underline text-sm mb-3" *ngIf="block.fileUrl">
       <mat-icon class="text-lg w-4 h-4">attachment</mat-icon>
       Download File
     </a>
 
-    <div *ngIf="!block.mediaUrl" class="w-full h-48 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-4 p-4">
+    <div *ngIf="!block.fileUrl" class="w-full h-48 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-4 p-4">
         <div class="mb-2">
             <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v8"></path>
@@ -384,7 +427,7 @@
         </button>
     </div>
 
-    <div *ngIf="block.mediaUrl" class="w-full h-24 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-4 p-4 relative">
+    <div *ngIf="block.fileUrl" class="w-full h-24 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-4 p-4 relative">
         <div class="flex items-center gap-2">
             <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -897,70 +940,3 @@
     </div>
   </div>
 </div>
-<!-- video upload modal -->
-
-<!-- <div *ngIf="showUploadModal" class="fixed inset-0 z-50 flex items-center justify-end top-1 right-26  bg-opacity-50">
-  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold">
-        {{ activeMediaType === 'image' ? 'Upload Image' : 'Upload Video' }}
-      </h2>
-      <button mat-icon-button (click)="closeUploadModal()">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <mat-tab-group>
-      <mat-tab label="Upload">
-        <div class="py-4">
-          <p class="text-gray-600 mb-2">
-            Upload a {{ activeMediaType }} from your computer.
-          </p>
-          <div class="flex items-center justify-between border-2 border-dashed border-gray-300 p-4 rounded-lg">
-            <span class="text-gray-500 truncate">{{ uploadedFileName || 'Choose file' }}</span>
-
-            <ng-container *ngIf="activeMediaType === 'image'">
-              <input #imageUploadInput type="file" accept="image/*" class="hidden" (change)="onImageUpload($event)">
-              <button mat-flat-button color="primary" (click)="imageUploadInput.click()">Browse</button>
-            </ng-container>
-
-            <ng-container *ngIf="activeMediaType === 'video'">
-              <input #videoUploadInput type="file" accept="video/*" class="hidden" (change)="onVideoUpload($event)">
-              <button mat-flat-button color="primary" (click)="videoUploadInput.click()">Browse</button>
-            </ng-container>
-
-          </div>
-        </div>
-      </mat-tab>
-
-      <mat-tab label="URL">
-        <div class="py-4">
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>{{ activeMediaType === 'image' ? 'Image URL' : 'Video URL' }}</mat-label>
-
-            <input matInput
-              [placeholder]="activeMediaType === 'image' ? 'https://example.com/image.jpg' : 'https://example.com/video.mp4'"
-              [ngModel]="activeMediaType === 'image' ? imageUrlInput : videoUrlInput"
-              (ngModelChange)="activeMediaType === 'image' ? imageUrlInput = $event : videoUrlInput = $event">
-          </mat-form-field>
-          <div class="flex justify-end mt-2">
-            <button mat-flat-button color="primary"
-              (click)="activeMediaType === 'image' ? uploadImageUrl() : uploadVideoUrl()">
-              Upload {{ activeMediaType }}
-            </button>
-          </div>
-        </div>
-      </mat-tab>
-    </mat-tab-group>
-  </div>
-</div>
-
-<button mat-button class="bg-gray-200 text-gray-800 w-[80%] mb-2 font-medium" (click)="openUploadModal('video')">
-  <mat-icon>upload</mat-icon>
-  Upload Video
-</button>
-
-<button mat-button class="bg-gray-200 text-gray-800 w-[80%] mb-2 font-medium" (click)="openUploadModal('image')">
-  <mat-icon>upload</mat-icon>
-  Upload Image
-</button> -->

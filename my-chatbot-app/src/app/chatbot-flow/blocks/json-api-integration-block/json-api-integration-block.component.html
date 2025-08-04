@@ -1,43 +1,27 @@
 <ng-container *ngIf="!isSelected">
-  <div class="block-header">
-    <div class="block-type-badges">
+  <div class="block-card">
+    <div class="block-header ">
       <div class="block-title" (click)="onSelectBlock()">
-        <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
+        <img src="https://app.botsify.com/theme/images/Story-Icons/api.png" class="block-icon-img" alt="Block Icon" />
         <span>{{ block.name }}</span>
       </div>
+
+      <div class="block-menu-icon">
+        <mat-icon class="menu-trigger">more_vert</mat-icon>
+      </div>
     </div>
 
-   
-     <div class="block-close-icon">
-  <button mat-icon-button class="close-btn" (click)="onRemoveBlock()" aria-label="Remove Block">
-    <mat-icon>close</mat-icon>
-  </button>
-</div>
+    <div class="block-body">
+      <p class="block-description">
+        Integrate JSON API to 
+        <strong>fetch or post data to your webservice</strong>
+      </p>
 
-  </div>
-
-  <div class="block-body">
-    <div
-      class="block-description border-b-2 pb-2 border-[#CECECE]"
-      *ngIf="block.description"
-    >
-      {{ block.description }}
-    </div>
-
-    <!-- Show API details below the description -->
-    <div
-      class="block-api-info mt-2 text-gray-700 space-y-1"
-      *ngIf="block.apiEndpoint || block.requestType"
-    >
-      <div *ngIf="block.requestType">
-        <strong class="text-l">Request Type : </strong> {{ block.requestType }}
-      </div>
-      <div *ngIf="block.apiEndpoint">
-        <strong class="text-l">API Endpoint : </strong> {{ block.apiEndpoint }}
-      </div>
+      <p class="block-setup">Click <strong>⋮</strong> to set up your block</p>
     </div>
   </div>
 </ng-container>
+
 
 <div
   class="connection-point connection-output"
@@ -53,117 +37,94 @@
 
 <div class="right-panel" *ngIf="isSelected">
   <div class="panel-header">
-    <!-- <div class="panel-title">JSON Plugin Integration</div> -->
+    <div class="panel-title ">JSON Plugin Integration</div>
     <div class="panel-subtitle">
-      {{ block.description }}
+      Integrate JSON API to fetch or post data to your webservice
     </div>
   </div>
 
   <div class="panel-content">
-    <mat-expansion-panel
-      [expanded]="expandedSection === 'apiConfig'"
-      (opened)="expandedSection = 'apiConfig'"
-    >
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <mat-icon>api</mat-icon>
-          <span>API Configuration</span>
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-
-      <div class="section-content">
-        <mat-form-field
-          appearance="outline"
-          class="full-width-input custom-height"
-        >
-          <!-- <mat-label>API Endpoint</mat-label> -->
+    <div class="section-content">
+      <div class="form-group">
+        <label for="api-endpoint" class="form-label">API Endpoint</label>
+        <div class="input-group">
           <input
-            matInput
             type="url"
+            id="api-endpoint"
+            class="form-control"
             [(ngModel)]="block.apiEndpoint"
-            (ngModelChange)="onContentChange()"
             placeholder="Enter Your API Endpoint"
           />
-          <mat-icon
-            matSuffix
-            class="info-icon"
-            matTooltip="Enter the URL of your API endpoint."
-            >info</mat-icon
-          >
-        </mat-form-field>
-
-        <div class="setting-item json-format-link">
-          <a
-            href="https://botify.zendesk.com/hc/en-us/articles/36771596020193-JSON-API-Response-Format"
-            target="_blank"
-            >Check out the JSON format</a
-          >
-        </div>
-
-        <mat-form-field appearance="outline" class="full-width-input">
-          <mat-label>Request Type</mat-label>
-          <mat-select
-            [(ngModel)]="block.requestType"
-            (ngModelChange)="onContentChange()"
-          >
-            <mat-option value="POST">POST</mat-option>
-            <mat-option value="GET">GET</mat-option>
-            <mat-option value="PUT">PUT</mat-option>
-            <mat-option value="DELETE">DELETE</mat-option>
-            <mat-option value="PATCH">PATCH</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <div class="headers-section">
-          <div class="section-header">
-            <h4>Select Headers</h4>
-            <mat-icon
-              matTooltip="Add custom headers for your API request"
-              class="info-icon"
-              >info</mat-icon
-            >
-          </div>
-          <div
-            class="header-item"
-            *ngFor="let header of block.apiHeaders; let i = index"
-          >
-            <mat-form-field appearance="outline" class="header-key-input">
-              <!-- <mat-label>Header Key</mat-label> -->
-              <input
-                matInput
-                [(ngModel)]="header.key"
-                (ngModelChange)="onContentChange()"
-                placeholder="Header Key"
-              />
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="header-value-input">
-              <!-- <mat-label>Header Value</mat-label> -->
-              <input
-                matInput
-                [(ngModel)]="header.value"
-                (ngModelChange)="onContentChange()"
-                placeholder="Header Value"
-              />
-            </mat-form-field>
-            <button
-              class="mat-icon-button w-14 h-14 self-start"
-              color="warn"
-              (click)="removeApiHeader(i)"
-              matTooltip="Remove Header"
-            >
-              <mat-icon class="">delete</mat-icon>
-            </button>
-          </div>
-          <button
-            mat-stroked-button
-            class="add-header-button"
-            (click)="addApiHeader()"
-          >
-            <mat-icon>add</mat-icon>
-            Add Header
-          </button>
+          <span class="info-icon" title="Enter the URL of your API endpoint.">
+          </span>
         </div>
       </div>
-    </mat-expansion-panel>
+
+      <div class="json-format-link">
+        <a href="#">Check out the JSON format</a>
+      </div>
+
+      <div class="form-group">
+        <label for="request-type" class="form-label">Request Type</label>
+        <select id="request-type" class="form-control" [(ngModel)]="block.requestType">
+          <option>POST</option>
+          <option>GET</option>
+          <option>PUT</option>
+          <option>DELETE</option>
+          <option>PATCH</option>
+        </select>
+      </div>
+
+      <div class="headers-section">
+        <div class="section-header">
+          <h4>Select Headers</h4>
+        </div>
+        
+        <div class="header-item" *ngIf="block.apiHeaders === undefined || block.apiHeaders.length === 0">
+          <input
+            type="text"
+            class="form-control header-key-input"
+            placeholder="Header Key"
+          />
+          <input
+            type="text"
+            class="form-control header-value-input"
+            placeholder="Header Value"
+          />
+          <button class="icon-btn add-btn" (click)="addApiHeader()">+</button>
+        </div>
+
+        <ng-container *ngIf="block.apiHeaders && block.apiHeaders.length > 0">
+          <div class="header-item" *ngFor="let header of block.apiHeaders; let i = index">
+            <input
+              type="text"
+              class="form-control header-key-input"
+              [(ngModel)]="header.key"
+              placeholder="Header Key"
+            />
+            <input
+              type="text"
+              class="form-control header-value-input"
+              [(ngModel)]="header.value"
+              placeholder="Header Value"
+            />
+            <button
+              class="icon-btn add-btn"
+              (click)="addApiHeader()"
+              *ngIf="i === block.apiHeaders.length - 1"
+            >
+              +
+            </button>
+            <button
+              class="icon-btn remove-btn"
+              (click)="removeApiHeader(i)"
+              *ngIf="block.apiHeaders.length > 1"
+            >
+              &times;
+            </button>
+          </div>
+        </ng-container>
+      </div>
+    </div>
   </div>
 </div>

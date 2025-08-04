@@ -22,8 +22,17 @@ export interface ChatbotBlock {
   delaySeconds?: number; // For TypingDelay
   mediaId?: string; // For MediaBlock (selected media ID)
   mediaType?: 'text' | 'image' | 'video' | 'file' | 'Image Slider' | 'audio'; // For MediaBlock (type of media)
-  mediaUrl?: string; // For MediaBlock (URL of image/video/file/audio, for single media)
-  imageSliderUrls?: string[]; // For Image Slider mediaType
+  
+  // 💥 NEW: DEDICATED PROPERTIES FOR EACH MEDIA TYPE 💥
+  // These replace the generic `mediaUrl` property to prevent conflicts.
+  singleImageUrl?: string; // For a single 'image' media type
+  videoUrl?: string; // For a single 'video' media type
+  audioUrl?: string; // For a single 'audio' media type
+  fileUrl?: string; // For a single 'file' media type
+  
+  // 💥 NOTE: Your `slides` property for Image Slider is already correctly defined.
+  slides?: ImageSlide[]; // Array of slide objects
+  
   mediaName?: string; // For MediaBlock (name of selected media)
   linkStoryId?: string; // For LinkStory (selected story ID)
   linkStoryName?: string; // For LinkStory (name of selected story)
@@ -65,9 +74,9 @@ export interface ChatbotBlock {
   apiEndpoint?: string;
   requestType?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   apiHeaders?: ApiHeader[]; // Array of API headers
-   similarPhrases?: string;
+  similarPhrases?: string;
 
-   // Quick Reply related properties - ADD THESE
+  // Quick Reply related properties - ADD THESE
   // quickReplies?: QuickReply[];
   parentId?: string; // For quick reply children blocks to reference their parent
   quickReplyIndex?: number; // For individual quick reply blocks to know their index
@@ -83,11 +92,10 @@ export interface ChatbotBlock {
   // NEW: An array to hold multiple buttons
   buttons?: Button[];
 
-  // Add Image Slider properties
-  // slideTitle?: string;
-  // slideSubtitle?: string;
-  // slideImages?: string[];
-  slides?: ImageSlide[]; // NEW: Array of slide objects
+  // This property is now deprecated and should be removed from your component's logic.
+  // mediaUrl?: string; 
+  // This property is now deprecated and should be removed.
+  // imageSliderUrls?: string[];
 }
 
 // Define possible types of chatbot blocks
