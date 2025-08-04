@@ -179,6 +179,7 @@ def process_video_from_youtube(video_url):
             "candidates": data["candidates"]
         }
 
+    # Save debug info locally only – do not upload to S3
     with open(debug_file, "w", encoding="utf-8") as f:
         json.dump(frame_debug_info, f, indent=2)
     print(f"📋 Frame selection debug info saved to {debug_file}")
@@ -216,22 +217,22 @@ def process_video_from_youtube(video_url):
     except Exception as e:
         print(f"⚠️ Cleanup warning: {e}")
 
-    # === Upload to S3 ===
-    print("☁️ Uploading transcript and frames to S3...")
+    # === Upload to S3 (only mapping and frames) ===
+    print("☁️ Uploading transcript mapping and frames to S3...")
     s3 = boto3.client(
         "s3",
         aws_access_key_id=AWS_ACCESS_KEY_ID,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY
     )
 
-    for local_file in [mapping_file, debug_file]:
-        if os.path.exists(local_file):
-            s3_key = f"{safe_url}/{os.path.basename(local_file)}"
-            try:
-                s3.upload_file(local_file, BUCKET_NAME, s3_key)
-                print(f"✅ Uploaded: s3://{BUCKET_NAME}/{s3_key}")
-            except Exception as e:
-                print(f"❌ Failed to upload {s3_key}: {e}")
+    # Only upload transcript_to_frames.json (exclude debug and full transcript)
+    if os.path.exists(mapping_file):
+        s3_key = f"{safe_url}/{os.path.basename(mapping_file)}"
+        try:
+            s3.upload_file(mapping_file, BUCKET_NAME, s3_key)
+            print(f"✅ Uploaded: s3://{BUCKET_NAME}/{s3_key}")
+        except Exception as e:
+            print(f"❌ Failed to upload {s3_key}: {e}")
 
     for root, dirs, files in os.walk(frames_dir):
         for file in files:
