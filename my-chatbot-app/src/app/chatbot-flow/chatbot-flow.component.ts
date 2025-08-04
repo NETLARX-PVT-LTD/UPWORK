@@ -232,6 +232,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     { id: 'story-2', name: '(Hii),' },
     { id: 'story-3', name: 'Report Incident' },
     { id: 'story-4', name: 'Process for setting up shop' },
+    { id : 'Aishwary', name : 'Aishwary'}
   ];
 
   zoomLevel: number = 1.0;
@@ -346,6 +347,15 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       };
       this.canvasBlocks.push(conversationalFormBlock);
     }
+
+    // this.availableStories.push()
+      this.availableStories.push({
+        id: `story-${Date.now()}`, // Unique ID
+        name: 'My Current Canvas Story',
+        blocks: [...this.canvasBlocks] // Save all blocks as one story
+      });
+
+      console.log('Available Stories:', this.availableStories);
   }
 
   ngAfterViewInit(): void {

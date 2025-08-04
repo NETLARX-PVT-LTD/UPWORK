@@ -200,10 +200,7 @@
                       class="max-w-[150px] rounded-lg border border-gray-300"
                       alt="Slide Image"
                     />
-                    <span
-                      *ngIf="slide.title"
-                      class="text-gray-600 text-[10px]"
-                    >
+                    <span *ngIf="slide.title" class="text-gray-600 text-[10px]">
                       {{ slide.title }}
                     </span>
                   </div>
@@ -232,6 +229,47 @@
                   controls
                   class="rounded-lg border border-gray-300 w-[200px]"
                 ></audio>
+
+                <!-- 7️⃣ Generic File / PDF Block -->
+                <div
+                  *ngIf="msg.type === 'file'"
+                  class="flex flex-col items-center space-y-2 rounded-lg border border-gray-300 w-[200px] bg-gray-100 p-2"
+                >
+                  <!-- PDF Icon -->
+                  <img
+                    *ngIf="isPdf(msg.fileUrl)"
+                    src="/PDF_file_icon.png"
+                    alt="PDF File"
+                    class="w-[50px] h-[50px] cursor-pointer"
+                    (click)="openFile(msg.fileUrl)"
+                  />
+
+                  <!-- Generic File Icon -->
+                  <img
+                    *ngIf="!isPdf(msg.fileUrl)"
+                    src="/PDF_file_icon.png"
+                    alt="File"
+                    class="w-[50px] h-[50px] cursor-pointer"
+                    (click)="openFile(msg.fileUrl)"
+                  />
+
+                  <!-- File Name -->
+                  <span
+                    class="text-gray-700 text-xs break-all text-center px-1"
+                  >
+                    {{ msg.text || "Document" }}
+                  </span>
+
+                  <!-- Download Button -->
+                  <a
+                    [href]="msg.fileUrl || ''"
+                    download
+                    target="_blank"
+                    class="bg-blue-600 text-white px-3 py-1 rounded-lg text-xs hover:bg-blue-700 transition"
+                  >
+                    📥 Download
+                  </a>
+                </div>
 
                 <!-- 5️⃣ Text Message -->
                 <span
@@ -262,6 +300,27 @@
                       {{ reply }}
                     </button>
                   </div>
+                </div>
+
+                <div
+                  *ngIf="msg.buttons?.length"
+                  class="flex flex-wrap gap-2 mt-2"
+                >
+                  <button
+                    *ngFor="let btn of msg.buttons"
+                    class="px-3 py-1 bg-blue-500 w-full text-white rounded-lg text-xs hover:bg-blue-600"
+                    (click)="onButtonClick(msg, btn)"
+                  >
+                    {{ btn.title }}
+                  </button>
+                </div>
+
+                <!-- Show selected button message -->
+                <div
+                  *ngIf="msg.selectedButtonMessage"
+                  class="mt-2 p-2 bg-gray-100 text-gray-700 rounded-lg border text-xs"
+                >
+                  {{ msg.selectedButtonMessage }}
                 </div>
               </ng-container>
             </div>
