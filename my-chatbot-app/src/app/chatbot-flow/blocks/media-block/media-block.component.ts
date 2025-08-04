@@ -66,6 +66,7 @@ export class MediaBlockComponent implements OnInit {
   @Input() isSelected: boolean = false;
   @Input() isSidebarOpen: boolean = false;
   @Input() availableMedia: AvailableMedia[] = [];
+  @Input() availableStories : AvailableStory[] = [];
 
   @Output() blockUpdated = new EventEmitter<ChatbotBlock>();
   @Output() selectBlock = new EventEmitter<ChatbotBlock>();
@@ -145,13 +146,7 @@ export class MediaBlockComponent implements OnInit {
   filteredUserAttributes: string[] = [];
   // --- END NEW PROPERTIES FOR INFO MODAL ---
 
-  public availableStories: AvailableStory[] = [
-    { id: 'story1', name: '(hello,hi,hey),' },
-    { id: 'story2', name: '(Hii),' },
-    { id: 'story3', name: 'Report Incident' },
-    { id: 'story4', name: 'Process for setting up shop' },
-    // Add more stories as needed
-  ];
+  
   
   // Add this line to declare the activeTab property
   activeTab: 'upload' | 'url' = 'upload';

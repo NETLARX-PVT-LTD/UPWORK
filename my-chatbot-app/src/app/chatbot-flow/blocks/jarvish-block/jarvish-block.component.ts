@@ -1,7 +1,25 @@
+interface ChatButton {
+  title: string;
+  type: string;       // e.g., "text_message"
+  textMessage?: string;
+}
+
+interface ChatMessage {
+  sender: 'user' | 'bot';
+  text?: string;  // <-- Make optional
+  type?: string;
+  fileUrl?: string;
+  quickReplies?: string[];
+  slides?: { image: string; title?: string; subtitle?: string }[];
+  buttons?: Button[];
+  selectedButtonMessage?: string;
+}
+
+
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { Component, ElementRef, ViewChild, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ApiHeader } from '../../../models/chatbot-block.model';
+import { ApiHeader, AvailableStory, Button } from '../../../models/chatbot-block.model';
 
 @Component({
   selector: 'app-jarvish-block',
@@ -11,9 +29,15 @@ import { ApiHeader } from '../../../models/chatbot-block.model';
 })
 export class JarvishBlockComponent {
   messageText: string = '';
-  messages: { sender: 'user' | 'bot', text: string, type?: string, fileUrl?: string, quickReplies?: string[], slides?: { image: string; title?: string; subtitle?: string }[];}[] = [];
+  messages: ChatMessage[] = [];  // ✅ Now type-safe
+
+  // messages: { sender: 'user' | 'bot', text: string, type?: string, fileUrl?: string, quickReplies?: string[], slides?: { image: string; title?: string; subtitle?: string }[];}[] = [];
+  // i update this with this part
+
 
   @Input() canvasBlocks: any[] = [];
+  @Input() availableMedia: any[] = []; 
+  @Input() availableStories : AvailableStory[] = [];
   isChatStarted: boolean = false;
   currentBlockIndex: number = 0;
   waitingForUserInput: boolean = false;
@@ -203,8 +227,8 @@ export class JarvishBlockComponent {
       this.processNextBlock();
       break;
 
-   case 'mediaBlock': {
-      const mediaMsg: any = { sender: 'bot' };
+    case 'mediaBlock': {
+      const mediaMsg: ChatMessage = { sender: 'bot', text: block.content || '' };
 
       // ✅ Always include text if exists
       if (block.content) {
@@ -215,11 +239,25 @@ export class JarvishBlockComponent {
       else if (block.mediaType && block.mediaUrl) {
         mediaMsg.type = block.mediaType; // 'image' | 'video' | 'audio'
         mediaMsg.fileUrl = block.mediaUrl;
+        mediaMsg.text = block.mediaName || block.content || 'File'; 
       }
 
       // ✅ Handle slides (image carousel)
       else if (block.slides && block.slides.length > 0) {
         mediaMsg.slides = block.slides;
+      }
+
+      // ✅ Attach buttons if present
+      if (block.buttons && block.buttons.length > 0) {
+        mediaMsg.buttons = block.buttons.map((btn: Button) => ({
+          // title: btn.title,
+          // type: btn.type,
+          // textMessage: btn.textMessage || '',
+          // url: btn.url || '',           // ✅ Add URL
+          // phoneNumber: btn.phoneNumber, // ✅ Add call support if needed
+          // apiEndpoint: btn.apiEndpoint  // ✅ Add API support if needed
+          ...btn
+        }));
       }
 
       // ✅ Push to chat
@@ -232,6 +270,44 @@ export class JarvishBlockComponent {
       setTimeout(() => this.processNextBlock(), 1000);
       break;
     }
+
+    case 'linkStory': {
+      console.log(this.availableStories);
+      if (block.linkStoryId) {
+        // Find the linked story from availableStories
+        const linkedStory = this.availableStories.find(story => story.id === block.linkStoryId);
+
+        if (linkedStory && linkedStory.blocks && linkedStory.blocks.length > 0) {
+          this.messages.push({ 
+            sender: 'bot', 
+            text: `🔗 Linking story: ${linkedStory.name}` 
+          });
+
+          // ✅ Insert the linked story blocks right after the current block
+          this.canvasBlocks.splice(this.currentBlockIndex + 1, 0, ...linkedStory.blocks);
+
+          // Move to the next block
+          this.currentBlockIndex++;
+          setTimeout(() => this.processNextBlock(), 500);
+        } else {
+          this.messages.push({ 
+            sender: 'bot', 
+            text: '⚠️ Linked story not found or empty.' 
+          });
+          this.currentBlockIndex++;
+          setTimeout(() => this.processNextBlock(), 500);
+        }
+      } else {
+        this.messages.push({ 
+          sender: 'bot', 
+          text: '⚠️ No linked story assigned to this block.' 
+        });
+        this.currentBlockIndex++;
+        setTimeout(() => this.processNextBlock(), 500);
+      }
+      break;
+    }
+
     default:
       this.messages.push({ sender: 'bot', text: `[Unsupported block: ${block.type}]` });
       this.currentBlockIndex++;
@@ -359,32 +435,227 @@ export class JarvishBlockComponent {
   }
 
   private handleMediaBlock(block: any) {
-  const mediaMsg: any = { sender: 'bot', text: block.content || '' };
+      const mediaMsg: ChatMessage = { sender: 'bot', text: block.content || '' };
 
-  // Attach media if present
-  if (block.mediaType && block.mediaUrl) {
-    mediaMsg.type = block.mediaType;  // 'image' | 'video' | 'audio'
-    mediaMsg.fileUrl = block.mediaUrl;
-  }
-
-  // If slides are present, map them into multiple media messages
-  if (block.slides && block.slides.length > 0) {
-    block.slides.forEach((slide: any) => {
-      const slideMsg: any = { sender: 'bot', text: slide.caption || '' };
-      if (slide.mediaType && slide.mediaUrl) {
-        slideMsg.type = slide.mediaType;
-        slideMsg.fileUrl = slide.mediaUrl;
+      // ✅ Always include text if exists
+      if (block.content) {
+        mediaMsg.text = block.content;
       }
-      this.messages.push(slideMsg);
-    });
-  } else {
-    this.messages.push(mediaMsg);
+
+      // ✅ Handle media type if URL exists
+      else if (block.mediaType && block.mediaUrl) {
+        mediaMsg.type = block.mediaType; // 'image' | 'video' | 'audio'
+        mediaMsg.fileUrl = block.mediaUrl;
+        mediaMsg.text = block.mediaName || block.content || 'File'; 
+      }
+
+      // ✅ Handle slides (image carousel)
+      else if (block.slides && block.slides.length > 0) {
+        mediaMsg.slides = block.slides;
+      }
+
+      // ✅ Attach buttons if present
+      if (block.buttons && block.buttons.length > 0) {
+        mediaMsg.buttons = block.buttons.map((btn: Button) => ({
+          // title: btn.title,
+          // type: btn.type,
+          // textMessage: btn.textMessage || '',
+          // url: btn.url || '',           // ✅ Add URL
+          // phoneNumber: btn.phoneNumber, // ✅ Add call support if needed
+          // apiEndpoint: btn.apiEndpoint  // ✅ Add API support if needed
+          ...btn
+        }));
+      }
+
+      // ✅ Push to chat
+      this.messages.push(mediaMsg);
+      this.scrollToBottom();
+      console.log(mediaMsg);
+
+      // ✅ Auto-continue after short delay
+      this.currentBlockIndex++;
+      setTimeout(() => this.processNextBlock(), 1000);
   }
 
-  this.scrollToBottom();
-
-  // ✅ Continue to next block
-  this.currentBlockIndex++;
-  setTimeout(() => this.processNextBlock(), 1000);
+  isPdf(fileUrl?: string): boolean {
+     return !!fileUrl && fileUrl.toLowerCase().endsWith('.pdf');
   }
+
+  openFile(url?: string): void {
+    if (url) {
+      window.open(url, '_blank');
+    }
+  }
+
+  onButtonClick(msg: ChatMessage, button: Button) {
+      // 1️⃣ Push the button title as a user message
+      this.messages.push({
+        sender: 'user',
+        text: button.title
+      });
+
+      switch (button.type) {
+        case 'text_message':
+          if (button.textMessage) {
+            this.messages.push({
+              sender: 'bot',
+              text: button.textMessage
+            });
+          }
+          break;
+
+        case 'media_block': {
+          if (button.linkedMediaId) {
+            const mediaBlock = this.availableMedia.find(
+              (m: any) => m.id === button.linkedMediaId
+            );
+
+            if (mediaBlock) {
+              this.handleMediaBlock(mediaBlock);
+            } else {
+              this.messages.push({
+                sender: 'bot',
+                text: '⚠️ Media block not found in available media!'
+              });
+            }
+          }
+           else {
+            this.messages.push({
+              sender: 'bot',
+              text: '⚠️ No media linked to this button.'
+            });
+          }
+          break;
+        }
+        case 'website_url':
+          // console.log("check it matches correctly or not",button);
+          
+          if (button.url) {
+            let safeUrl = button.url;
+
+            // 🔹 Ensure URL starts with http or https
+            if (!safeUrl.startsWith('http://') && !safeUrl.startsWith('https://')) {
+              safeUrl = 'https://' + safeUrl;
+            }
+
+            // 🔹 Open the link in a new tab
+            window.open(safeUrl, '_blank', 'noopener,noreferrer');
+
+            // 🔹 Optional: Bot confirmation message
+            this.messages.push({
+              sender: 'bot',
+              text: `🌐 Opening: ${safeUrl}`
+            });
+          }
+          break;
+
+        case 'direct_call':
+          if (button.phoneNumber) {
+            const phoneNumber = button.phoneNumber.replace(/\s+/g, ''); // Clean spaces
+
+            // ✅ Trigger the phone call
+            window.open(`tel:${phoneNumber}`, '_self'); 
+
+            // ✅ Optional: Add a bot confirmation message
+            this.messages.push({
+              sender: 'bot',
+              text: `📞 Calling ${phoneNumber}...`
+            });
+          } else {
+            this.messages.push({
+              sender: 'bot',
+              text: '⚠️ No phone number linked to this button.'
+            });
+          }
+          break;
+
+        case 'json_api':
+          this.messages.push({
+            sender: 'bot',
+            text: 'Fetching data from API...'
+          });
+          if (button.apiEndpoint) {
+            this.handleJsonApiButton(button);
+          }
+          break;
+
+        case 'human_help':
+          this.messages.push({
+            sender: 'bot',
+            text: button.messageAfterAction || '👨‍💻 Human support will contact you shortly.'
+          });
+          break;
+
+        case 'conversational_form':
+          this.messages.push({
+            sender: 'bot',
+            text: button.messageAfterAction || '📝 Please start the form.'
+          });
+          break;
+
+        case 'start_story':
+          if (button.storyId) {
+            console.log(this.availableStories);
+            const linkedStory = this.availableStories.find(story => story.id === button.storyId);
+
+            if (linkedStory && linkedStory.blocks && linkedStory.blocks.length > 0) {
+              this.messages.push({
+                sender: 'bot',
+                text: `🚀 Starting story: ${linkedStory.name}`
+              });
+
+              // ✅ Reset current story to linked story
+              this.canvasBlocks = [...linkedStory.blocks];
+              this.currentBlockIndex = 0;
+
+              // ✅ Begin processing the new story
+              this.processNextBlock();
+            } else {
+              this.messages.push({
+                sender: 'bot',
+                text: '⚠️ Linked story not found or has no blocks.'
+              });
+            }
+          } else {
+            this.messages.push({
+              sender: 'bot',
+              text: '⚠️ No story linked to this button.'
+            });
+          }
+      break;
+        default:
+          this.messages.push({
+            sender: 'bot',
+            text: `⚡ Action triggered: ${button.type}`
+          });
+      }
+    this.scrollToBottom();
+  }
+
+
+  private async handleJsonApiButton(button: Button) {
+    try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      (button.apiHeaders || []).forEach(h => {
+        if (h.key && h.value) headers[h.key] = h.value;
+      });
+
+      const method = (button.requestType || 'GET').toUpperCase();
+      const options: RequestInit = { method, headers };
+
+      if (['POST', 'PUT', 'PATCH'].includes(method)) {
+        options.body = button.jsonApiBody || '{}';
+      }
+
+      const res = await fetch(button.apiEndpoint!, options);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      this.messages.push({ sender: 'bot', text: `✅ API Response: ${JSON.stringify(data)}` });
+    } catch (err) {
+      this.messages.push({ sender: 'bot', text: `❌ API Error: ${err}` });
+    }
+    this.scrollToBottom();
+  }
+
 }

@@ -139,6 +139,7 @@ export interface AvailableMedia {
 export interface AvailableStory {
   id: string;
   name: string;
+  blocks? : ChatbotBlock[]
   // Add other properties if your story objects have them (e.g., description, blocks)
 }
 
