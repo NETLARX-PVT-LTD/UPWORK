@@ -19,7 +19,7 @@
     <div class="left-sidebar">
       <div class="sidebar-header">
         <p class="instruction-text">
-          Drag blocks to the node tree below using the drag handle
+          Drag blocks to the canvas or click to add them
         </p>
       </div>
 
@@ -28,7 +28,7 @@
           <mat-icon matPrefix>search</mat-icon>
           <input
             matInput
-            placeholder="Search..."
+            placeholder="Search blocks..."
             [formControl]="searchControl"
           />
         </mat-form-field>
@@ -37,8 +37,12 @@
       <div class="blocks-list" cdkDropList (cdkDropListDropped)="drop($event)">
         <div
           *ngFor="let block of filteredBlocks$ | async"
-          class="block-item"
+          class="block-item enhanced-drag-item"
+          [class.dragging]="isDraggingFromPalette && draggedPaletteBlock?.id === block.id"
           cdkDrag
+          [cdkDragData]="block"
+          (cdkDragStarted)="onPaletteDragStarted($event, block)"
+          (cdkDragEnded)="onPaletteDragEnded($event, block)"
           (click)="addBlockToCanvas(block)"
         >
           <div
@@ -59,8 +63,9 @@
             </div>
           </div>
       
-          <div class="drag-handle" cdkDragHandle>
+          <div class="drag-handle enhanced-drag-handle" cdkDragHandle>
             <mat-icon>drag_indicator</mat-icon>
+            <div class="drag-hint">Drag to canvas</div>
           </div>
         </div>
       </div>
@@ -73,30 +78,39 @@
             mat-icon-button
             (click)="zoomIn()"
             [disabled]="zoomLevel >= maxZoom"
+            matTooltip="Zoom In"
           >
             <mat-icon class="mt-2 mr-0.9">add</mat-icon>
           </button>
-          <span class="zoom-level"
-            >{{ zoomLevel * 100 | number : "1.0-0" }}%</span
-          >
+          <span class="zoom-level">{{ zoomLevel * 100 | number : "1.0-0" }}%</span>
           <button
             mat-icon-button
             (click)="zoomOut()"
             [disabled]="zoomLevel <= minZoom"
+            matTooltip="Zoom Out"
           >
             <mat-icon class="mt-2 mr-0.9">remove</mat-icon>
           </button>
         </div>
-        <button mat-icon-button (click)="resetZoom()" matTooltip="Reset zoom">
+        <button mat-icon-button (click)="resetZoom()" matTooltip="Reset zoom and pan">
           <span class="reset-text">Reset</span>
         </button>
       </div>
 
       <div
-        class="canvas-wrapper bg-[#F1F2F3]"
+        class="canvas-wrapper bg-[#F1F2F3] enhanced-drop-zone"
+        [class.drop-zone-active]="isDraggingFromPalette"
+        [class.drop-zone-hover]="isOverDropZone"
         #canvasWrapper
         [style.cursor]="isPanning ? 'grabbing' : 'default'"
       >
+        <div class="drop-zone-indicator" [class.visible]="isDraggingFromPalette">
+          <div class="drop-zone-content">
+            <mat-icon class="drop-zone-icon">add_circle_outline</mat-icon>
+            <span class="drop-zone-text">Drop block here to add to canvas</span>
+          </div>
+        </div>
+
         <div class="canvas-content" #canvasContent id="canvas">
           <div class="flow-start-indicator">
             <div class="flow-start-text">Flow starts here</div>
@@ -108,11 +122,12 @@
           <div class="blocks-container">
             <div
               *ngFor="let block of canvasBlocks"
-              class="canvas-block jsplumb-draggable"
+              class="canvas-block jsplumb-draggable enhanced-canvas-block"
               [id]="'block-' + block.id"
               [class]="'canvas-block-' + block.type"
               [class.selected]="selectedBlock?.id === block.id"
               [class.dragging]="isDraggingBlock && draggedBlockId === block.id"
+              [class.connection-target]="nearestConnectionPoint?.blockId === block.id"
               [style.left.px]="block.x"
               [style.top.px]="block.y"
               [style.border-color]="getStatusColor(block.status)"
@@ -121,7 +136,13 @@
               (cdkDragStarted)="onBlockDragStarted($event, block)"
               (cdkDragEnded)="onBlockDragEnded($event, block)"
               (mousedown)="endConnection($event, block)"
-              [cdkDragFreeDragPosition]="{x: 0, y: 0}" >
+              [cdkDragFreeDragPosition]="{x: 0, y: 0}"
+            >
+              <div class="connection-indicators">
+                <div class="connection-input-indicator"></div>
+                <div class="connection-output-indicator"></div>
+              </div>
+
               <ng-container [ngSwitch]="block.type">
                 <app-user-input-block
                   *ngSwitchCase="'userInput'"
@@ -229,7 +250,7 @@
                 ></app-json-api-integration-block>
               </ng-container>
             </div>
-            
+
             <div
               *ngFor="let block of canvasBlocks"
               class="quick-reply-cards-wrapper"
@@ -341,9 +362,7 @@
                   >
                     <div class="quick-reply-card-header">
                       <div class="quick-reply-icon-wrapper">
-                        <mat-icon class="quick-reply-icon"
-                          >chat_bubble</mat-icon
-                        >
+                        <mat-icon class="quick-reply-icon">chat_bubble</mat-icon>
                       </div>
                       <span class="quick-reply-title">Quick Reply:</span>
                       <div class="quick-reply-badge">{{ reply.text }}</div>
@@ -462,5 +481,4 @@
   <button class="absolute right-10 bottom-8 w-14 cursor-pointer z-[100000]" (click)="toggleJarvis()">
     <img src="/msg.png" alt="" class="rounded-full">
   </button>
-
 </div>
