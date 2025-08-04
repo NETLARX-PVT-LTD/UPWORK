@@ -11,7 +11,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { trigger, transition, style, animate } from '@angular/animations'; 
-import { ChatbotBlock, AvailableMedia, Button, AvailableStory,ImageSlide } from '../../../models/chatbot-block.model';
+import { ChatbotBlock, AvailableMedia, Button, AvailableStory, ImageSlide } from '../../../models/chatbot-block.model';
 import { MatTabsModule } from '@angular/material/tabs'; 
 
 type ButtonIntegrationType = 'text_message' | 'media_block' | 'website_url' | 'direct_call' | 'start_story' | 'rss_feed' | 'json_api' | 'human_help' | 'conversational_form' | null;
@@ -28,6 +28,26 @@ export interface ApiBlock {
   apiHeaders?: ApiHeader[];
 }
 
+// Define interfaces for isolated data storage
+interface SingleImageData {
+  image: string;
+  title: string;
+  subtitle: string;
+}
+
+interface VideoData {
+  url: string;
+}
+
+interface AudioData {
+  url: string;
+}
+
+interface FileData {
+  url: string;
+  fileName: string;
+}
+
 @Component({
   selector: 'app-media-block',
   standalone: true,
@@ -42,13 +62,12 @@ export interface ApiBlock {
     MatSelectModule,
     MatButtonToggleModule,
     MatSnackBarModule,
-     MatTabsModule,
+    MatTabsModule,
     CdkTextareaAutosize
   ],
   templateUrl: './media-block.component.html',
   styleUrls: ['./media-block.component.scss'],
-   // Add the animations metadata property here
- animations: [
+  animations: [
     trigger('slideAnimation', [
       transition(':increment', [
         style({ transform: 'translateX(100%)', opacity: 0 }),
@@ -82,17 +101,17 @@ export class MediaBlockComponent implements OnInit {
   showCommonIntegrationCard: boolean = false;
   videoUrlInput: string = '';
   
-  // NEW: Property to control the visibility of the upload modal
+  // Properties to control the visibility of the upload modal
   activeMediaType: 'image' | 'video' | 'file' | null = null;
   showUploadModal: boolean = false;
   uploadedFileName: string = '';
   imageUrlInput: string = '';
   
-  // NEW: Temporary properties to manage the button being added or edited
+  // Temporary properties to manage the button being added or edited
   currentButton: Partial<Button> = {};
   currentButtonIndex: number = -1; // -1 for a new button, otherwise the index of the button being edited
 
-  // --- NEW PROPERTIES FOR INFO MODAL ---
+  // Properties for info modal
   showInfoModal: boolean = false;
   private activeInputElementType: 'buttonTitle' | 'buttonTextMessage' | null = null;
   searchTerm: string = '';
@@ -100,16 +119,26 @@ export class MediaBlockComponent implements OnInit {
   // Add this property for tracking current slide
   currentSlideIndex: number = 0;
 
-  // Add these missing properties for data isolation
-  private singleImageData: { image: string; title: string; subtitle: string } = { image: '', title: '', subtitle: '' };
-  private imageSliderData: ImageSlide[] = [{ image: '', title: '', subtitle: '' }];
+  // FIXED: Add missing properties for data isolation
+  singleImageData: SingleImageData = { image: '', title: '', subtitle: '' };
+  imageSliderData: ImageSlide[] = [{ image: '', title: '', subtitle: '' }];
+  videoData: VideoData = { url: '' };
+  audioData: AudioData = { url: '' };
+  fileData: FileData = { url: '', fileName: '' };
 
-   // New ViewChild for the file input
+  // Complete data isolation with centralized storage
+  private mediaTypeData = {
+    text: { content: '' },
+    image: { image: '', title: '', subtitle: '' },
+    'Image Slider': [{ image: '', title: '', subtitle: '' }] as ImageSlide[],
+    video: { url: '' },
+    audio: { url: '' },
+    file: { url: '', fileName: '' }
+  };
+
+  // ViewChild references
   @ViewChild('fileUploadInput') fileUploadInput!: ElementRef<HTMLInputElement>;
-  // New ViewChild for the audio file input
   @ViewChild('audioUploadInput') audioUploadInput!: ElementRef<HTMLInputElement>;
-
-  // New ViewChild for the video file input
   @ViewChild('videoUploadInput') videoUploadInput!: ElementRef<HTMLInputElement>;
   @ViewChild('imageUploadInput') imageUploadInput!: ElementRef<HTMLInputElement>;
   @ViewChild('buttonTitleAutosize', { read: ElementRef }) buttonTitleAutosizeElement!: ElementRef<HTMLTextAreaElement>;
@@ -143,92 +172,286 @@ export class MediaBlockComponent implements OnInit {
   filteredGeneralAttributes: string[] = [];
   filteredFormAttributes: string[] = [];
   filteredUserAttributes: string[] = [];
-  // --- END NEW PROPERTIES FOR INFO MODAL ---
 
   public availableStories: AvailableStory[] = [
     { id: 'story1', name: '(hello,hi,hey),' },
     { id: 'story2', name: '(Hii),' },
     { id: 'story3', name: 'Report Incident' },
     { id: 'story4', name: 'Process for setting up shop' },
-    // Add more stories as needed
   ];
   
-  // Add this line to declare the activeTab property
   activeTab: 'upload' | 'url' = 'upload';
 
   constructor(private _snackBar: MatSnackBar) { }
 
-  get hasContent(): boolean {
-    return !!this.block.content ||
-           !!this.block.mediaUrl ||
-           (this.block.buttons?.length ?? 0) > 0;
-  }
+  // Create this new method to check for any media content
+hasMediaContent(): boolean {
+  return (
+    !!this.block.singleImageUrl ||
+    !!this.block.videoUrl ||
+    !!this.block.audioUrl ||
+    !!this.block.fileUrl ||
+    (this.block.slides && this.block.slides.length > 0)
+  ) ?? false; // <-- Add this to ensure a boolean is always returned
+}
+
+ get hasContent(): boolean {
+    return !!this.block.content ||
+           !!this.block.singleImageUrl ||
+           !!this.block.videoUrl ||
+           !!this.block.audioUrl ||
+           !!this.block.fileUrl ||
+           (this.block.slides && this.block.slides.length > 0) ||
+           (this.block.buttons?.length ?? 0) > 0;
+  }
+
+  // FIXED: Complete rewrite of onMediaTypeChange method
+ onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Slider' | 'audio'): void {
+    const previousMediaType = this.block.mediaType || 'text';
+    
+    // Step 1: Save current block data to the isolated storage
+    this.saveCurrentDataToIsolatedStorage(previousMediaType);
+    
+    // Step 2: Set the new media type on the block
+    this.block.mediaType = newMediaType;
+    
+    // Step 3: Load data for the new media type from isolated storage
+    this.loadDataFromIsolatedStorage(newMediaType);
+
+    this.onContentChange();
+}
+
+  // Method to save current block data to isolated storage
+ // Add a property to your component to hold the isolated data
+isolatedMediaData: { 
+  text?: string;
+  image?: string;
+  video?: string;
+  audio?: string;
+  file?: string;
+  slides?: ImageSlide[];
+} = {};
+
+saveCurrentDataToIsolatedStorage(mediaType: string): void {
+    switch (mediaType) {
+        case 'text':
+            this.isolatedMediaData.text = this.block.content;
+            break;
+
+        case 'image':
+            // Save single image data and also prepare it for Image Slider
+            this.isolatedMediaData.image = this.block.singleImageUrl;
+            if (this.block.singleImageUrl) {
+                this.isolatedMediaData.slides = [{
+                    image: this.block.singleImageUrl,
+                    title: this.block.slides?.[0]?.title || '',
+                    subtitle: this.block.slides?.[0]?.subtitle || ''
+                }];
+            } else {
+                 this.isolatedMediaData.slides = undefined;
+            }
+            break;
+            
+        case 'Image Slider':
+            // Save the entire slides array and also prepare the first image for a single image
+            this.isolatedMediaData.slides = this.block.slides ? JSON.parse(JSON.stringify(this.block.slides)) : undefined;
+            if (this.block.slides?.[0]?.image) {
+                this.isolatedMediaData.image = this.block.slides[0].image;
+            } else {
+                this.isolatedMediaData.image = undefined;
+            }
+            break;
+            
+        case 'video':
+            this.isolatedMediaData.video = this.block.videoUrl;
+            break;
+            
+        case 'audio':
+            this.isolatedMediaData.audio = this.block.audioUrl;
+            break;
+            
+        case 'file':
+            this.isolatedMediaData.file = this.block.fileUrl;
+            break;
+    }
+}
+
+  // Method to load data from isolated storage to block
+loadDataFromIsolatedStorage(mediaType: string): void {
+    // Reset all media properties on the main block object
+    this.block.content = undefined;
+    this.block.singleImageUrl = undefined;
+    this.block.videoUrl = undefined;
+    this.block.audioUrl = undefined;
+    this.block.fileUrl = undefined;
+    this.block.slides = undefined;
+    
+    switch (mediaType) {
+        case 'text':
+            this.block.content = this.isolatedMediaData.text || '';
+            break;
+            
+        case 'image':
+            this.block.singleImageUrl = this.isolatedMediaData.image || '';
+            // Also update the slides array to reflect the single image
+            this.block.slides = [{ image: this.block.singleImageUrl, title: '', subtitle: '' }];
+            break;
+            
+        case 'Image Slider':
+            // Use the slides from the isolated storage, or create a new empty slide if none exist
+            this.block.slides = this.isolatedMediaData.slides ? JSON.parse(JSON.stringify(this.isolatedMediaData.slides)) : [{ image: '', title: '', subtitle: '' }];
+            // Reset slide index to 0
+            this.currentSlideIndex = 0;
+            break;
+            
+        case 'video':
+            this.block.videoUrl = this.isolatedMediaData.video || '';
+            break;
+            
+        case 'audio':
+            this.block.audioUrl = this.isolatedMediaData.audio || '';
+            break;
+            
+        case 'file':
+            this.block.fileUrl = this.isolatedMediaData.file || '';
+            break;
+    }
+}
 
 
-   // New method to trigger the hidden file input
+  // Initialize isolated storage from current block data
+ private initializeIsolatedStorageFromBlock(): void {
+    const mediaType = this.block.mediaType;
+    
+    switch (mediaType) {
+        case 'text':
+            this.mediaTypeData.text.content = this.block.content || '';
+            break;
+            
+        case 'image':
+            // Prioritize the singleImageUrl if it exists.
+            // This is the source of truth for the 'image' type.
+            this.mediaTypeData.image = {
+                image: this.block.singleImageUrl || '',
+                title: this.block.slides && this.block.slides[0] ? this.block.slides[0].title || '' : '',
+                subtitle: this.block.slides && this.block.slides[0] ? this.block.slides[0].subtitle || '' : ''
+            };
+            break;
+            
+        case 'Image Slider':
+            if (this.block.slides && this.block.slides.length > 0) {
+                // Perform a deep copy of the slides array
+                this.mediaTypeData['Image Slider'] = JSON.parse(JSON.stringify(this.block.slides));
+            } else if (this.block.singleImageUrl) {
+                // If there's a singleImageUrl, initialize the slider with that image
+                this.mediaTypeData['Image Slider'] = [{ image: this.block.singleImageUrl, title: '', subtitle: '' }];
+            } else {
+                // If no data exists, initialize with a single empty slide
+                this.mediaTypeData['Image Slider'] = [{ image: '', title: '', subtitle: '' }];
+            }
+            break;
+            
+        case 'video':
+            this.mediaTypeData.video.url = this.block.videoUrl || '';
+            break;
+            
+        case 'audio':
+            this.mediaTypeData.audio.url = this.block.audioUrl || '';
+            break;
+            
+        case 'file':
+            this.mediaTypeData.file = {
+                url: this.block.fileUrl || '',
+                fileName: this.uploadedFileName || ''
+            };
+            break;
+    }
+}
+
+  // File upload methods
   triggerFileUpload(): void {
     this.fileUploadInput.nativeElement.click();
   }
 
-  // New method to handle the file upload
   onFileUpload(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      // Create a temporary URL and store the file name
-      this.block.mediaUrl = URL.createObjectURL(file);
+      const fileUrl = URL.createObjectURL(file);
       this.uploadedFileName = file.name;
       
-      this.onContentChange();
+      this.mediaTypeData.file = {
+        url: fileUrl,
+        fileName: file.name
+      };
+      this.block.fileUrl = fileUrl;
       
+      this.onContentChange();
       this._snackBar.open('File uploaded successfully!', 'Dismiss', { duration: 2000 });
       
-      // Reset the input to allow uploading the same file again if needed
       event.target.value = null;
     }
   }
 
-  // New method to remove the uploaded file
-  removeFile(): void {
-    this.block.mediaUrl = '';
-    this.uploadedFileName = '';
-    this.onContentChange();
-    this._snackBar.open('File removed.', 'Dismiss', { duration: 2000 });
-  }
-  // New method to trigger the hidden file input
   triggerAudioUpload(): void {
     this.audioUploadInput.nativeElement.click();
   }
 
-  // New method to handle the audio file upload
   onAudioUpload(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      // You can get the file name and URL here
       const audioUrl = URL.createObjectURL(file);
       
-      // Update the block with the new audio URL
-      this.block.mediaUrl = audioUrl;
-      this.onContentChange(); // or emit a blockUpdated event
+      this.mediaTypeData.audio.url = audioUrl;
+      this.block.audioUrl = audioUrl;
       
+      this.onContentChange();
       this._snackBar.open('Audio uploaded successfully!', 'Dismiss', { duration: 2000 });
       
-      // Reset the input to allow uploading the same file again if needed
       event.target.value = null;
     }
   }
+
+  // Remove methods
+  removeAudioMedia(): void {
+    if (this.block.mediaType === 'audio') {
+      this.mediaTypeData.audio.url = '';
+      this.block.audioUrl = '';
+      this.contentChange.emit();
+      this._snackBar.open('Audio removed successfully!', 'Dismiss', { duration: 2000 });
+    }
+  }
+
+  removeVideoMedia(): void {
+    if (this.block.mediaType === 'video') {
+      this.mediaTypeData.video.url = '';
+      this.block.videoUrl = '';
+      this.contentChange.emit();
+      this._snackBar.open('Video removed successfully!', 'Dismiss', { duration: 2000 });
+    }
+  }
+
+  removeFile(): void {
+    this.mediaTypeData.file = { url: '', fileName: '' };
+    this.block.fileUrl = '';
+    this.uploadedFileName = '';
+    this.onContentChange();
+    this._snackBar.open('File removed.', 'Dismiss', { duration: 2000 });
+  }
+
   removeMedia(): void {
     if (this.block.mediaType === 'image') {
-      this.block.mediaUrl = ''; // Clear the media URL
+      this.mediaTypeData.image.image = '';
+      this.block.singleImageUrl = '';
+      if (this.block.slides && this.block.slides[0]) {
+        this.block.slides[0].image = '';
+      }
       this.contentChange.emit();
     }
   }
 
-  // Method to open the upload modal
+  // Modal methods
   openUploadModal(mediaType: 'image' | 'video' | 'file'): void {
-    // Set the type of media we are about to upload
     this.activeMediaType = mediaType;
-    
-    // Reset previous state and open the modal
     this.showUploadModal = true;
     this.uploadedFileName = '';
     this.imageUrlInput = '';
@@ -240,32 +463,34 @@ export class MediaBlockComponent implements OnInit {
     this.activeMediaType = null;
   }
 
-  // method for image upload
   openImageUploadModal(): void {
-    // Assuming 'imageUploadInput' is a reference to the single image file input
     const fileInput = document.getElementById('imageUploadInput') as HTMLInputElement;
     if (fileInput) {
       fileInput.click();
     }
   }
 
-  // NEW: Method to handle video file upload
+  // Video upload methods
   onVideoUpload(event: any): void {
     const file = event.target.files[0];
     if (file) {
       this.uploadedFileName = file.name;
       const videoUrl = URL.createObjectURL(file);
-      this.block.mediaUrl = videoUrl;
+      
+      this.mediaTypeData.video.url = videoUrl;
+      this.block.videoUrl = videoUrl;
+      
       this.onContentChange();
       this.closeUploadModal();
       this._snackBar.open('Video uploaded successfully!', 'Dismiss', { duration: 2000 });
     }
   }
 
-  // NEW: Method to handle video URL input
   uploadVideoUrl(): void {
     if (this.videoUrlInput) {
-      this.block.mediaUrl = this.videoUrlInput;
+      this.mediaTypeData.video.url = this.videoUrlInput;
+      this.block.videoUrl = this.videoUrlInput;
+      
       this.onContentChange();
       this.closeUploadModal();
       this._snackBar.open('Video URL added successfully!', 'Dismiss', { duration: 2000 });
@@ -274,7 +499,7 @@ export class MediaBlockComponent implements OnInit {
     }
   }
   
-  // --- API HEADER METHODS ---
+  // API header methods
   addApiHeader(): void {
     if (!this.currentButton.apiHeaders) {
       this.currentButton.apiHeaders = [];
@@ -288,19 +513,15 @@ export class MediaBlockComponent implements OnInit {
     }
   }
 
-  // --- UPDATED BUTTON METHODS ---
-
-  // REWRITTEN: This method now opens the card for editing a specific button
+  // Button methods
   onEditButtonClick(button: Button, index: number): void {
     this.showButtonTypeCard = false;
     this.showCommonIntegrationCard = true;
     this.currentButtonIndex = index;
-    // Create a deep copy to prevent direct mutation of the original object
     this.currentButton = JSON.parse(JSON.stringify(button));
     this._snackBar.open(`Editing ${this.currentButton.type?.replace('_', ' ')}.`, 'Dismiss', { duration: 2000 });
   }
 
-  // REWRITTEN: This method now deletes a specific button by its index
   onDeleteButtonClick(index: number): void {
     if (this.block.buttons) {
       this.block.buttons.splice(index, 1);
@@ -309,84 +530,107 @@ export class MediaBlockComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {
-    
-    // Initialize the 'slides' array if it doesn't exist
-    if (this.block.slides === undefined || this.block.slides.length === 0) {
-      this.block.slides = [{ image: '', title: '', subtitle: '' }]; // Start with one empty slide
-    }
-  
-    // Initialize current slide index
-    this.currentSlideIndex = 0;
-    
-    // Initialize the buttons array if it doesn't exist
-    if (!this.block.buttons) {
-      this.block.buttons = [];
-    }
-
-    if (!this.block.mediaType) {
-      this.block.mediaType = 'text';
-    }
-    if (this.block.content === undefined) {
-      this.block.content = '';
-    }
-    if (this.block.mediaUrl === undefined) {
-      this.block.mediaUrl = '';
-    }
-    if (this.block.mediaName === undefined) {
-      this.block.mediaName = '';
-    }
-
-    if (this.isSelected && this.block.mediaId) {
-      const selected = this.availableMedia.find(m => m.id === this.block.mediaId);
-      if (selected) {
-        this.block.mediaName = selected.name;
-        this.block.mediaType = selected.type;
-        this.block.content = selected.content;
-        this.block.mediaUrl = selected.url;
-      }
-    }
-
-    this.resetFilteredAttributes();
+  // FIXED: Initialize component
+ngOnInit(): void {
+  if (this.block.mediaType) {
+    this.initializeIsolatedStorageFromBlock();
   }
 
-  //  onContentChange(): void {
-  //   // Update stored data based on current media type
-  //   if (this.block.mediaType === 'image') {
-  //     this.updateSingleImageData();
-  //   } else if (this.block.mediaType === 'Image Slider') {
-  //     this.updateImageSliderData();
-  //   }
-    
-  //   this.blockUpdated.emit(this.block);
-  // }
+  if (!this.block.buttons) {
+    this.block.buttons = [];
+  }
 
-  // 7. Add methods for slide management that update stored data
+  if (!this.block.mediaType) {
+    this.block.mediaType = 'text';
+  }
+  if (this.block.content === undefined) {
+    this.block.content = '';
+  }
+  // FIXED: Remove mediaUrl references, use specific media type properties
+  if (this.block.mediaName === undefined) {
+    this.block.mediaName = '';
+  }
+
+  if (this.block.mediaType === 'image' || this.block.mediaType === 'Image Slider') {
+    if (!this.block.slides || this.block.slides.length === 0) {
+      this.block.slides = [{ image: '', title: '', subtitle: '' }];
+    }
+  }
+
+  this.currentSlideIndex = 0;
+
+  if (this.isSelected && this.block.mediaId) {
+    const selected = this.availableMedia.find(m => m.id === this.block.mediaId);
+    if (selected) {
+      this.block.mediaName = selected.name;
+      this.block.mediaType = selected.type;
+      this.block.content = selected.content;
+      // FIXED: Use specific properties instead of mediaUrl
+      this.setMediaUrlFromSelected(selected);
+      this.block.slides = selected.slides ? JSON.parse(JSON.stringify(selected.slides)) : [];
+      
+      this.initializeIsolatedStorageFromBlock();
+    }
+  }
+
+  this.resetFilteredAttributes();
+}
+
+private setMediaUrlFromSelected(selected: AvailableMedia): void {
+  switch (selected.type) {
+    case 'video':
+      this.block.videoUrl = selected.url;
+      break;
+    case 'audio':
+      this.block.audioUrl = selected.url;
+      break;
+    case 'file':
+      this.block.fileUrl = selected.url;
+      break;
+    case 'image':
+      this.block.singleImageUrl = selected.url;
+      break;
+    // Image Slider uses slides array, not a direct URL
+  }
+}
+
+  // FIXED: Updated onContentChange method (remove duplicate)
+  onContentChange(): void {
+    if (this.block.mediaType) {
+      this.saveCurrentDataToIsolatedStorage(this.block.mediaType);
+    }
+    this.blockUpdated.emit(this.block);
+  }
+
+  // Slide management methods
   addNewSlide(): void {
     if (this.block.mediaType === 'Image Slider') {
-      if (!this.block.slides) {
-        this.block.slides = [];
+      this.mediaTypeData['Image Slider'].push({ image: '', title: '', subtitle: '' });
+      this.block.slides = JSON.parse(JSON.stringify(this.mediaTypeData['Image Slider']));
+      // FIXED: Check if slides exist before accessing length
+      if (this.block.slides) {
+        this.currentSlideIndex = this.block.slides.length - 1;
       }
-      this.block.slides.push({ image: '', title: '', subtitle: '' });
-      this.currentSlideIndex = this.block.slides.length - 1;
-      this.updateImageSliderData(); // Update stored data
+      
       this.blockUpdated.emit(this.block);
       this._snackBar.open('New slide added.', 'Dismiss', { duration: 2000 });
     }
   }
 
   removeCurrentSlide(): void {
-    if (this.block.mediaType === 'Image Slider' && this.block.slides && this.block.slides.length > 1) {
-      this.block.slides.splice(this.currentSlideIndex, 1);
-      if (this.currentSlideIndex >= this.block.slides.length) {
-        this.currentSlideIndex = this.block.slides.length - 1;
+    if (this.block.mediaType === 'Image Slider' && this.mediaTypeData['Image Slider'].length > 1) {
+      this.mediaTypeData['Image Slider'].splice(this.currentSlideIndex, 1);
+      if (this.currentSlideIndex >= this.mediaTypeData['Image Slider'].length) {
+        this.currentSlideIndex = this.mediaTypeData['Image Slider'].length - 1;
       }
-      this.updateImageSliderData(); // Update stored data
+      this.block.slides = JSON.parse(JSON.stringify(this.mediaTypeData['Image Slider']));
+      
       this.blockUpdated.emit(this.block);
       this._snackBar.open('Slide removed successfully!', 'Dismiss', { duration: 2000 });
-    } else if (this.block.mediaType === 'Image Slider' && this.block.slides && this.block.slides.length === 1) {
-      this.block.slides[0] = { image: '', title: '', subtitle: '' };
-      this.updateImageSliderData(); // Update stored data
+    } else if (this.block.mediaType === 'Image Slider' && this.mediaTypeData['Image Slider'].length === 1) {
+      this.mediaTypeData['Image Slider'][0] = { image: '', title: '', subtitle: '' };
+      this.block.slides = JSON.parse(JSON.stringify(this.mediaTypeData['Image Slider']));
+      
       this.blockUpdated.emit(this.block);
       this._snackBar.open('Slide content reset.', 'Dismiss', { duration: 2000 });
     }
@@ -394,13 +638,13 @@ export class MediaBlockComponent implements OnInit {
 
   removeCurrentImage(index: number): void {
     if (this.block.slides && this.block.slides[index]) {
-      this.block.slides[index].image = '';
-      
       if (this.block.mediaType === 'image') {
-        this.singleImageData.image = '';
-        this.block.mediaUrl = '';
+        this.mediaTypeData.image.image = '';
+        this.block.slides[index].image = '';
+        this.block.singleImageUrl = '';
       } else if (this.block.mediaType === 'Image Slider') {
-        this.updateImageSliderData();
+        this.mediaTypeData['Image Slider'][index].image = '';
+        this.block.slides[index].image = '';
       }
       
       this.blockUpdated.emit(this.block);
@@ -408,87 +652,74 @@ export class MediaBlockComponent implements OnInit {
     }
   }
   
-  // Method to trigger the hidden file input
   triggerImageUpload(): void {
     this.imageUploadInput.nativeElement.click();
   }
 
-  // Inside your MediaBlockComponent class
-// Replace your existing onImageUpload method with this fixed version
-onImageUpload(event: any): void {
-    const file = event.target.files[0];
-    if (!file) {
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      const imageDataUrl = e.target.result as string;
-
-      if (this.block.mediaType === 'image') {
-        // For single image type - store in singleImageData and block.slides[0]
-        this.singleImageData.image = imageDataUrl;
-        this.block.slides = [{ ...this.singleImageData }];
-        this.block.mediaUrl = imageDataUrl; // For backwards compatibility
-        this.currentSlideIndex = 0;
-        
-      } else if (this.block.mediaType === 'Image Slider') {
-        // For image slider type - store in imageSliderData and block.slides
-        if (!this.imageSliderData || this.imageSliderData.length === 0) {
-          this.imageSliderData = [{ image: '', title: '', subtitle: '' }];
-          this.currentSlideIndex = 0;
-        }
-        this.imageSliderData[this.currentSlideIndex].image = imageDataUrl;
-        this.block.slides = [...this.imageSliderData]; // Create new array
-        this.block.mediaUrl = ''; // Clear mediaUrl for slider
-      }
-      
-      this.contentChange.emit();
-    };
-
-    reader.readAsDataURL(file);
-    this.closeUploadModal();
-    this._snackBar.open('Image uploaded successfully!', 'Dismiss', { duration: 2000 });
+ onImageUpload(event: any): void {
+  const file = event.target.files[0];
+  if (!file) {
+    return;
   }
 
-// Also update the uploadImageUrl method to fix the same issue
-uploadImageUrl(): void {
-    if (this.imageUrlInput) {
-      if (this.block.mediaType === 'image') {
-        // For single image type
-        this.singleImageData.image = this.imageUrlInput;
-        this.block.slides = [{ ...this.singleImageData }];
-        this.block.mediaUrl = this.imageUrlInput;
-        this.currentSlideIndex = 0;
-        
-      } else if (this.block.mediaType === 'Image Slider') {
-        // For image slider type
-        if (!this.imageSliderData || this.imageSliderData.length === 0) {
-          this.imageSliderData = [{ image: '', title: '', subtitle: '' }];
-          this.currentSlideIndex = 0;
-        }
-        this.imageSliderData[this.currentSlideIndex].image = this.imageUrlInput;
-        this.block.slides = [...this.imageSliderData]; // Create new array
-        this.block.mediaUrl = ''; // Clear mediaUrl for slider
-      }
-      
-      this.onContentChange();
-      this.closeUploadModal();
-      this._snackBar.open('Image from URL added successfully!', 'Dismiss', { duration: 2000 });
-    } else {
-      this._snackBar.open('Please enter a valid image URL.', 'Dismiss', { duration: 2000 });
-    }
-  }
+  const reader = new FileReader();
+  reader.onload = (e: any) => {
+    const imageDataUrl = e.target.result as string;
 
-  
-removeVideoMedia(): void {
-  if (this.block.mediaType === 'video') {
-    this.block.mediaUrl = ''; // Clear the video URL
+    if (this.block.mediaType === 'image') {
+      this.mediaTypeData.image.image = imageDataUrl;
+      this.block.slides = [{ ...this.mediaTypeData.image }];
+      // FIXED: Use singleImageUrl instead of mediaUrl
+      this.block.singleImageUrl = imageDataUrl;
+      this.currentSlideIndex = 0;
+      
+    } else if (this.block.mediaType === 'Image Slider') {
+      if (!this.mediaTypeData['Image Slider'] || this.mediaTypeData['Image Slider'].length === 0) {
+        this.mediaTypeData['Image Slider'] = [{ image: '', title: '', subtitle: '' }];
+        this.currentSlideIndex = 0;
+      }
+      this.mediaTypeData['Image Slider'][this.currentSlideIndex].image = imageDataUrl;
+      this.block.slides = JSON.parse(JSON.stringify(this.mediaTypeData['Image Slider']));
+      // Image slider doesn't use singleImageUrl
+    }
+    
     this.contentChange.emit();
-    this._snackBar.open('Video removed successfully!', 'Dismiss', { duration: 2000 });
+  };
+
+  reader.readAsDataURL(file);
+  this.closeUploadModal();
+  this._snackBar.open('Image uploaded successfully!', 'Dismiss', { duration: 2000 });
+}
+
+
+uploadImageUrl(): void {
+  if (this.imageUrlInput) {
+    if (this.block.mediaType === 'image') {
+      this.mediaTypeData.image.image = this.imageUrlInput;
+      this.block.slides = [{ ...this.mediaTypeData.image }];
+      // FIXED: Use singleImageUrl instead of mediaUrl
+      this.block.singleImageUrl = this.imageUrlInput;
+      this.currentSlideIndex = 0;
+      
+    } else if (this.block.mediaType === 'Image Slider') {
+      if (!this.mediaTypeData['Image Slider'] || this.mediaTypeData['Image Slider'].length === 0) {
+        this.mediaTypeData['Image Slider'] = [{ image: '', title: '', subtitle: '' }];
+        this.currentSlideIndex = 0;
+      }
+      this.mediaTypeData['Image Slider'][this.currentSlideIndex].image = this.imageUrlInput;
+      this.block.slides = JSON.parse(JSON.stringify(this.mediaTypeData['Image Slider']));
+      // Image slider doesn't use singleImageUrl
+    }
+    
+    this.onContentChange();
+    this.closeUploadModal();
+    this._snackBar.open('Image from URL added successfully!', 'Dismiss', { duration: 2000 });
+  } else {
+    this._snackBar.open('Please enter a valid image URL.', 'Dismiss', { duration: 2000 });
   }
 }
-  // Refactor `nextSlide`, `previousSlide`, and `goToSlide` to use the new slides array
+
+  // Slide navigation methods
   nextSlide(): void {
     if (this.block.slides && this.currentSlideIndex < this.block.slides.length - 1) {
       this.currentSlideIndex++;
@@ -507,47 +738,57 @@ removeVideoMedia(): void {
     }
   }
 
-  // --- EXISTING METHODS (no major changes needed) ---
+  // Media selection and management methods
+ onMediaSelectionChange(): void {
+  const selected = this.availableMedia.find(m => m.id === this.block.mediaId);
+  if (selected) {
+    this.block.mediaName = selected.name;
+    this.block.mediaType = selected.type;
+    this.block.content = selected.content;
+    // FIXED: Use helper method instead of direct mediaUrl assignment
+    this.setMediaUrlFromSelected(selected);
+    this.block.slides = selected.slides ? JSON.parse(JSON.stringify(selected.slides)) : [];
 
-  onMediaSelectionChange(): void {
-    const selected = this.availableMedia.find(m => m.id === this.block.mediaId);
-    if (selected) {
-      this.block.mediaName = selected.name;
-      this.block.mediaType = selected.type;
-      this.block.content = selected.content;
-      this.block.mediaUrl = selected.url;
-      this.block.slides = selected.slides ? JSON.parse(JSON.stringify(selected.slides)) : []; // Deep copy slides to avoid mutation
-      
-      // NEW: If the selected media is an image type, but slides are empty,
-      // ensure there is at least one slide.
-      if (selected.type === 'image' && (!this.block.slides || this.block.slides.length === 0)) {
-          this.block.slides = [{ image: selected.url || '', title: '', subtitle: '' }];
-      }
-    } else {
-      this.block.mediaName = '';
-      this.block.mediaType = 'text';
-      this.block.content = '';
-      this.block.mediaUrl = '';
-      this.block.slides = []; // Clear slides when no media is selected
+    if (selected.type === 'image' && (!this.block.slides || this.block.slides.length === 0)) {
+      this.block.slides = [{ image: selected.url || '', title: '', subtitle: '' }];
     }
-    this.blockUpdated.emit(this.block);
-    this.showNewMediaForm = false;
-    this.showButtonTypeCard = false;
-    this.closeCommonIntegrationCard();
-  }
 
-  createNewMediaBlock(): void {
-    this.showNewMediaForm = true;
-    this.block.mediaId = undefined;
-    this.block.mediaName = this.generateDefaultMediaBlockName();
+    this.initializeIsolatedStorageFromBlock();
+  } else {
+    this.block.mediaName = '';
     this.block.mediaType = 'text';
     this.block.content = '';
-    this.block.mediaUrl = '';
-    this.blockUpdated.emit(this.block);
-    this.showButtonTypeCard = false;
-    this.closeCommonIntegrationCard();
-    this._snackBar.open('Ready to create a new media block. Fill in the details.', 'Dismiss', { duration: 3000 });
+    // FIXED: Clear all media URLs instead of just mediaUrl
+    this.clearAllMediaUrls();
+    this.block.slides = [];
   }
+  this.blockUpdated.emit(this.block);
+  this.showNewMediaForm = false;
+  this.showButtonTypeCard = false;
+  this.closeCommonIntegrationCard();
+}
+
+ private clearAllMediaUrls(): void {
+  this.block.singleImageUrl = '';
+  this.block.videoUrl = '';
+  this.block.audioUrl = '';
+  this.block.fileUrl = '';
+}
+
+// FIXED: Updated createNewMediaBlock method
+createNewMediaBlock(): void {
+  this.showNewMediaForm = true;
+  this.block.mediaId = undefined;
+  this.block.mediaName = this.generateDefaultMediaBlockName();
+  this.block.mediaType = 'text';
+  this.block.content = '';
+  // FIXED: Clear all media URLs instead of just mediaUrl
+  this.clearAllMediaUrls();
+  this.blockUpdated.emit(this.block);
+  this.showButtonTypeCard = false;
+  this.closeCommonIntegrationCard();
+  this._snackBar.open('Ready to create a new media block. Fill in the details.', 'Dismiss', { duration: 3000 });
+}
 
   editExistingMediaBlock(): void {
     if (this.block.mediaId) {
@@ -562,235 +803,162 @@ removeVideoMedia(): void {
   }
 
   saveMedia(): void {
-    const currentMediaType = this.block.mediaType || 'text';
+  const currentMediaType = this.block.mediaType || 'text';
 
-    // 1. Always validate the Media Name
-    if (!this.block.mediaName || this.block.mediaName.trim() === '') {
-      this._snackBar.open('Media Name cannot be empty.', 'Dismiss', { duration: 3000 });
-      return;
-    }
+  if (!this.block.mediaName || this.block.mediaName.trim() === '') {
+    this._snackBar.open('Media Name cannot be empty.', 'Dismiss', { duration: 3000 });
+    return;
+  }
 
-    // 2. Validate content and clean up unused data based on the selected Media Type
-    switch (currentMediaType) {
-      case 'text':
-        if (!this.block.content || this.block.content.trim() === '') {
-          this._snackBar.open('Text content cannot be empty for text media type.', 'Dismiss', { duration: 3000 });
+  switch (currentMediaType) {
+    case 'text':
+      if (!this.block.content || this.block.content.trim() === '') {
+        this._snackBar.open('Text content cannot be empty for text media type.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      this.block.slides = [];
+      // FIXED: Clear all media URLs instead of just mediaUrl
+      this.clearAllMediaUrls();
+      break;
+
+    case 'image':
+      if (!this.block.slides || this.block.slides.length === 0 || !this.block.slides[0].image) {
+        this._snackBar.open('Please provide an image for the image block.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      this.block.slides = [this.block.slides[0]];
+      this.block.singleImageUrl = this.block.slides[0].image; // Set the single image URL
+      this.block.content = '';
+      break;
+
+    case 'Image Slider':
+      if (!this.block.slides || this.block.slides.length === 0) {
+        this._snackBar.open('Please add at least one slide for the Image Slider.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      for (const slide of this.block.slides) {
+        if (!slide.image || slide.image.trim() === '') {
+          this._snackBar.open('Each slide must have an image.', 'Dismiss', { duration: 3000 });
           return;
         }
-        // Clear other properties
-        this.block.slides = [];
-        this.block.mediaUrl = '';
-        break;
-
-      case 'image':
-        // This is for a single image. It must have exactly one slide.
-        if (!this.block.slides || this.block.slides.length === 0 || !this.block.slides[0].image) {
-          this._snackBar.open('Please provide an image for the image block.', 'Dismiss', { duration: 3000 });
+        if (!slide.title || slide.title.trim() === '') {
+          this._snackBar.open('Each slide must have a title.', 'Dismiss', { duration: 3000 });
           return;
         }
-        // --- FIX: Ensure only the first slide is kept for a single image ---
-        this.block.slides = [this.block.slides[0]];
-        // Clear unused properties
-        this.block.mediaUrl = '';
-        this.block.content = '';
-        break;
+      }
+      this.block.content = '';
+      // Clear single image URL for slider
+      this.block.singleImageUrl = '';
+      break;
 
-      case 'Image Slider':
-        // This is for a carousel.
-        if (!this.block.slides || this.block.slides.length === 0) {
-          this._snackBar.open('Please add at least one slide for the Image Slider.', 'Dismiss', { duration: 3000 });
-          return;
-        }
-        for (const slide of this.block.slides) {
-          if (!slide.image || slide.image.trim() === '') {
-            this._snackBar.open('Each slide must have an image.', 'Dismiss', { duration: 3000 });
-            return;
-          }
-          if (!slide.title || slide.title.trim() === '') {
-            this._snackBar.open('Each slide must have a title.', 'Dismiss', { duration: 3000 });
-            return;
-          }
-        }
-        // Clear unused properties
-        this.block.content = '';
-        this.block.mediaUrl = '';
-        break;
+    case 'video':
+      if (!this.block.videoUrl || this.block.videoUrl.trim() === '') {
+        this._snackBar.open('Please provide a URL for video media.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      this.block.slides = [];
+      this.block.content = '';
+      break;
 
-      case 'video':
-      case 'audio':
-      case 'file':
-        if (!this.block.mediaUrl || this.block.mediaUrl.trim() === '') {
-          this._snackBar.open(`Please provide a URL for ${currentMediaType} media.`, 'Dismiss', { duration: 3000 });
-          return;
-        }
-        // Clear unused properties
-        this.block.slides = [];
-        this.block.content = '';
-        break;
-    }
+    case 'audio':
+      if (!this.block.audioUrl || this.block.audioUrl.trim() === '') {
+        this._snackBar.open('Please provide a URL for audio media.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      this.block.slides = [];
+      this.block.content = '';
+      break;
 
-    // 3. The rest of the saving logic remains the same
-    const isNewMedia = !this.block.mediaId;
-    if (isNewMedia) {
-      const newMediaId = 'media-' + Date.now().toString();
-      const newMedia: AvailableMedia = {
-        id: newMediaId,
+    case 'file':
+      if (!this.block.fileUrl || this.block.fileUrl.trim() === '') {
+        this._snackBar.open('Please provide a URL for file media.', 'Dismiss', { duration: 3000 });
+        return;
+      }
+      this.block.slides = [];
+      this.block.content = '';
+      break;
+  }
+
+  const isNewMedia = !this.block.mediaId;
+  if (isNewMedia) {
+    const newMediaId = 'media-' + Date.now().toString();
+    const newMedia: AvailableMedia = {
+      id: newMediaId,
+      name: this.block.mediaName,
+      type: currentMediaType,
+      content: this.block.content ?? '',
+      // FIXED: Use appropriate URL property based on media type
+      url: this.getUrlForMediaType(currentMediaType),
+      slides: this.block.slides ? JSON.parse(JSON.stringify(this.block.slides)) : []
+    };
+    this.availableMedia.push(newMedia);
+    this.block.mediaId = newMediaId;
+    this._snackBar.open('New Media Block content saved and linked!', 'Dismiss', { duration: 3000 });
+  } else {
+    const existingMediaIndex = this.availableMedia.findIndex(m => m.id === this.block.mediaId);
+    if (existingMediaIndex > -1) {
+      this.availableMedia[existingMediaIndex] = {
+        ...this.availableMedia[existingMediaIndex],
         name: this.block.mediaName,
         type: currentMediaType,
         content: this.block.content ?? '',
-        url: this.block.mediaUrl ?? '',
-        slides: this.block.slides ? JSON.parse(JSON.stringify(this.block.slides)) : [] // Deep copy to avoid reference sharing
+        // FIXED: Use appropriate URL property based on media type
+        url: this.getUrlForMediaType(currentMediaType),
+        slides: this.block.slides ? JSON.parse(JSON.stringify(this.block.slides)) : []
       };
-      this.availableMedia.push(newMedia);
-      this.block.mediaId = newMediaId;
-      this._snackBar.open('New Media Block content saved and linked!', 'Dismiss', { duration: 3000 });
+      this._snackBar.open('Media Block content updated!', 'Dismiss', { duration: 3000 });
     } else {
-      const existingMediaIndex = this.availableMedia.findIndex(m => m.id === this.block.mediaId);
-      if (existingMediaIndex > -1) {
-        this.availableMedia[existingMediaIndex] = {
-          ...this.availableMedia[existingMediaIndex],
-          name: this.block.mediaName,
-          type: currentMediaType,
-          content: this.block.content ?? '',
-          url: this.block.mediaUrl ?? '',
-          slides: this.block.slides ? JSON.parse(JSON.stringify(this.block.slides)) : [] // Deep copy to avoid reference sharing
-        };
-        this._snackBar.open('Media Block content updated!', 'Dismiss', { duration: 3000 });
-      } else {
-        this._snackBar.open('Error: Could not find existing media to update.', 'Dismiss', { duration: 3000 });
-      }
+      this._snackBar.open('Error: Could not find existing media to update.', 'Dismiss', { duration: 3000 });
     }
-
-    // 4. Final state changes
-    this.showNewMediaForm = false;
-    this.showButtonTypeCard = false;
-    this.closeCommonIntegrationCard();
-    this.blockUpdated.emit(this.block);
   }
 
-  // Updated method to handle media type changes and clear data properly
- // Replace your existing onContentChange method with this updated version
-onContentChange(): void {
-  // Only initialize data if it doesn't exist, don't overwrite existing data
-  if (this.block.mediaType === 'text') {
-    if (!this.block.slides || this.block.slides.length > 0) {
-      this.block.slides = [];
-    }
-    this.block.mediaUrl = '';
-  } else if (this.block.mediaType === 'image') {
-    this.block.content = '';
-    // Keep mediaUrl for single image (for backwards compatibility)
-    // Only initialize if slides don't exist at all
-    if (!this.block.slides) {
-      this.block.slides = [{ image: '', title: '', subtitle: '' }];
-      this.currentSlideIndex = 0;
-    }
-  } else if (this.block.mediaType === 'Image Slider') {
-    this.block.content = '';
-    this.block.mediaUrl = ''; // Clear mediaUrl for image slider to avoid cross-contamination
-    // Only initialize if slides don't exist at all
-    if (!this.block.slides) {
-      this.block.slides = [{ image: '', title: '', subtitle: '' }];
-      this.currentSlideIndex = 0;
-    }
-  } else if (this.block.mediaType === 'video' || this.block.mediaType === 'audio' || this.block.mediaType === 'file') {
-    if (!this.block.slides || this.block.slides.length > 0) {
-      this.block.slides = [];
-    }
-    this.block.content = '';
-    // Keep mediaUrl for video/audio/file types
-  }
-  
+  this.showNewMediaForm = false;
+  this.showButtonTypeCard = false;
+  this.closeCommonIntegrationCard();
   this.blockUpdated.emit(this.block);
 }
 
-  // Add a new method to handle media type switching with proper data isolation
-onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Slider' | 'audio'): void {
-    const previousMediaType = this.block.mediaType;
-    
-    // Save current data before switching
-   if (previousMediaType === 'image' && this.block.slides && this.block.slides[0]) {
-        const slide = this.block.slides[0];
-        // Provide a default empty string if any property is undefined
-        this.singleImageData = { 
-            image: slide.image || '', 
-            title: slide.title || '', 
-            subtitle: slide.subtitle || '' 
-        };
-    }
-    
-    // Set new media type
-    this.block.mediaType = newMediaType;
-    
-    // Initialize data for new media type
-    if (newMediaType === 'image') {
-      // Load single image data
-      this.block.slides = [{ ...this.singleImageData }];
-      this.block.mediaUrl = this.singleImageData.image;
-      this.block.content = '';
-      this.currentSlideIndex = 0;
-      
-    } else if (newMediaType === 'Image Slider') {
-      // Load image slider data
-      this.block.slides = JSON.parse(JSON.stringify(this.imageSliderData));
-      this.block.mediaUrl = '';
-      this.block.content = '';
-      this.currentSlideIndex = 0;
-      
-    } else if (newMediaType === 'text') {
-      this.block.slides = [];
-      this.block.mediaUrl = '';
-      this.block.content = '';
-      
-    } else if (newMediaType === 'video' || newMediaType === 'audio' || newMediaType === 'file') {
-      this.block.slides = [];
-      this.block.content = '';
-      // Keep existing mediaUrl if it's appropriate for this media type
-    }
-    
-    this.onContentChange();
-  }
-
-  updateSingleImageData(): void {
-  if (this.block.mediaType === 'image' && this.block.slides && this.block.slides[0]) {
-    const slide = this.block.slides[0];
-    // Provide a default empty string if any property is undefined
-    this.singleImageData = { 
-        image: slide.image || '', 
-        title: slide.title || '', 
-        subtitle: slide.subtitle || '' 
-    };
+// FIXED: Helper method to get URL for media type
+private getUrlForMediaType(mediaType: string): string {
+  switch (mediaType) {
+    case 'video':
+      return this.block.videoUrl || '';
+    case 'audio':
+      return this.block.audioUrl || '';
+    case 'file':
+      return this.block.fileUrl || '';
+    case 'image':
+      return this.block.singleImageUrl || '';
+    default:
+      return '';
   }
 }
 
-  updateImageSliderData(): void {
-    if (this.block.mediaType === 'Image Slider' && this.block.slides) {
-      this.imageSliderData = JSON.parse(JSON.stringify(this.block.slides));
+// FIXED: Updated cancelMediaEdit method
+cancelMediaEdit(): void {
+  if (!this.block.mediaId) {
+    this.block.mediaId = undefined;
+    this.block.mediaName = '';
+    this.block.mediaType = 'text';
+    this.block.content = '';
+    // FIXED: Clear all media URLs instead of just mediaUrl
+    this.clearAllMediaUrls();
+  } else {
+    const selected = this.availableMedia.find(m => m.id === this.block.mediaId);
+    if (selected) {
+      this.block.mediaName = selected.name;
+      this.block.mediaType = selected.type;
+      this.block.content = selected.content;
+      // FIXED: Use helper method to set appropriate URL
+      this.setMediaUrlFromSelected(selected);
     }
   }
-
-  cancelMediaEdit(): void {
-    if (!this.block.mediaId) {
-      this.block.mediaId = undefined;
-      this.block.mediaName = '';
-      this.block.mediaType = 'text';
-      this.block.content = '';
-      this.block.mediaUrl = '';
-    } else {
-      const selected = this.availableMedia.find(m => m.id === this.block.mediaId);
-      if (selected) {
-        this.block.mediaName = selected.name;
-        this.block.mediaType = selected.type;
-        this.block.content = selected.content;
-        this.block.mediaUrl = selected.url;
-      }
-    }
-    this.showNewMediaForm = false;
-    this.showButtonTypeCard = false;
-    this.closeCommonIntegrationCard();
-    this.blockUpdated.emit(this.block);
-    this._snackBar.open('Media editing/creation canceled.', 'Dismiss', { duration: 2000 });
-  }
+  this.showNewMediaForm = false;
+  this.showButtonTypeCard = false;
+  this.closeCommonIntegrationCard();
+  this.blockUpdated.emit(this.block);
+  this._snackBar.open('Media editing/creation canceled.', 'Dismiss', { duration: 2000 });
+}
 
   getMediaName(mediaId: string | undefined): string {
     const media = this.availableMedia.find(m => m.id === mediaId);
@@ -835,7 +1003,6 @@ onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Sli
     return `Media Block ${randomNumber}`;
   }
 
-  // REWRITTEN: This method now just opens the card to select a button type
   onAddNewButton(): void {
     this.showButtonTypeCard = true;
     this.closeCommonIntegrationCard();
@@ -846,11 +1013,10 @@ onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Sli
     this.showButtonTypeCard = false;
   }
   
-  // NEW: A single method to handle opening the common card for any new button type
   openCommonCardForNewButton(type: ButtonIntegrationType): void {
     this.showButtonTypeCard = false;
     this.showCommonIntegrationCard = true;
-    this.currentButtonIndex = -1; // -1 indicates a new button
+    this.currentButtonIndex = -1;
     this.currentButton = {
       title: '',
       type: type as any
@@ -868,7 +1034,7 @@ onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Sli
       this.currentButton.storyId = undefined;
     } else if (type === 'rss_feed') {
       this.currentButton.rssUrl = '';
-      this.currentButton.rssItemCount = 5; // Set a default value
+      this.currentButton.rssItemCount = 5;
       this.currentButton.rssButtonText = '';
     } else if (type === 'json_api') {
       this.currentButton.apiEndpoint = '';
@@ -879,12 +1045,11 @@ onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Sli
       this.currentButton.emailForNotification = '';
       this.currentButton.stopBotForUser = false;
     } else if (type === 'conversational_form') {
-      this.currentButton.formId = ''; // Initialize with an empty string or a default form ID
+      this.currentButton.formId = '';
       this.currentButton.showInline = false;
     }
   }
 
-  // REWRITTEN: Common method to save a new or existing button
   saveCommonIntegrationCard(): void {
     if (!this.currentButton.title || this.currentButton.title.trim() === '') {
       this._snackBar.open('Button Title cannot be empty.', 'Dismiss', { duration: 3000 });
@@ -922,10 +1087,8 @@ onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Sli
           this._snackBar.open('Phone number cannot be empty.', 'Dismiss', { duration: 3000 });
           return;
         }
-        // You may add a more specific phone number validation regex here
         break;
 
-      // Add validation for Start Story
       case 'start_story':
         if (!this.currentButton.storyId) {
           this._snackBar.open('Please select a story to initiate.', 'Dismiss', { duration: 3000 });
@@ -938,7 +1101,6 @@ onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Sli
           this._snackBar.open('RSS Feed URL cannot be empty.', 'Dismiss', { duration: 3000 });
           return;
         }
-        // You may want to add URL validation here.
         if (!this.currentButton.rssItemCount || this.currentButton.rssItemCount <= 0) {
           this._snackBar.open('Number of items must be a positive number.', 'Dismiss', { duration: 3000 });
           return;
@@ -958,7 +1120,6 @@ onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Sli
           this._snackBar.open('Please select an API request type.', 'Dismiss', { duration: 3000 });
           return;
         }
-        // You may want to add validation for the headers here as well
         break;
 
       case 'human_help':
@@ -966,7 +1127,6 @@ onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Sli
           this._snackBar.open('Message After Help Action cannot be empty.', 'Dismiss', { duration: 3000 });
           return;
         }
-        // You can add an optional email validation if needed
         break;
 
       case 'conversational_form':
@@ -995,14 +1155,13 @@ onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Sli
     this.blockUpdated.emit(this.block);
   }
 
-  // REWRITTEN: Common method to close any integration card and reset state
   closeCommonIntegrationCard(): void {
     this.showCommonIntegrationCard = false;
     this.currentButtonIndex = -1;
     this.currentButton = {};
   }
 
-  // --- UPDATED INFO MODAL METHODS ---
+  // Info modal methods
   openInfoModal(inputType: 'buttonTitle' | 'buttonTextMessage'): void {
     this.showInfoModal = true;
     this.activeInputElementType = inputType;

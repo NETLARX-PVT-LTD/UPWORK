@@ -149,7 +149,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       "height": 0,
       "mediaId": undefined,
       "mediaType": undefined,
-      "mediaUrl": undefined,
+      // "mediaUrl": undefined,
       "mediaName": undefined
     },
     {
@@ -735,7 +735,10 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       delaySeconds: block.type === 'typingDelay' ? 1 : undefined,
       mediaId: block.type === 'mediaBlock' ? undefined : undefined,
       mediaType: block.type === 'mediaBlock' ? 'text' : undefined,
-      mediaUrl: block.type === 'mediaBlock' ? '' : undefined,
+     singleImageUrl: block.type === 'mediaBlock' ? '' : undefined,
+  videoUrl: block.type === 'mediaBlock' ? '' : undefined,
+  audioUrl: block.type === 'mediaBlock' ? '' : undefined,
+  fileUrl: block.type === 'mediaBlock' ? '' : undefined,
       mediaName: block.type === 'mediaBlock' ? undefined : undefined,
       linkStoryId: block.type === 'linkStory' ? undefined : undefined,
       linkStoryName: block.type === 'linkStory' ? undefined : undefined,
