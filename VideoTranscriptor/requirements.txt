@@ -4,3 +4,4 @@ pydub
 opencv-python
 ffmpeg-python
 boto3
+mediapipe
