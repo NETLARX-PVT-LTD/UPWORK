@@ -209,22 +209,27 @@
 
     <div class="phone-frame-container flex justify-center">
       <div class="relative bg-black rounded-3xl-custom p-phone-bezel shadow-2xl-custom phone-half-frame-height">
-        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 bg-black rounded-b-xl-custom z-10 notch-custom">
+        <img
+    src="https://app.botsify.com/theme/images/apple-iphone-x-landing-page-blank-png-22.png"
+    alt="iPhone Frame"
+    class="absolute top-0 left-0 w-full h-full z-10 pointer-events-none"
+  />
+        <div class="absolute ">
         </div>
         <div class="bg-white rounded-screen-custom h-full flex flex-col relative overflow-hidden">
           <div class="flex justify-between items-center px-4 py-2 text-xs font-medium text-black bg-white">
-            <span>9:41</span>
+            <!-- <span>9:41</span> -->
             <div class="flex items-center gap-1">
-              <div class="w-4 h-2 bg-black rounded-sm"></div>
-              <div class="w-1 h-3 bg-black rounded-sm"></div>
-              <div class="w-6 h-3 border border-black rounded-sm relative">
-                <div class="absolute right-0 top-0 w-4 h-full bg-black rounded-sm"></div>
-              </div>
+              <!-- <div class="w-4 h-2 bg-black rounded-sm"></div>
+              <div class="w-1 h-3 bg-black rounded-sm"></div> -->
+              <!-- <div class="w-6 h-3 border border-black rounded-sm relative"> -->
+                <!-- <div class="absolute right-0 top-0 w-4 h-full bg-black rounded-sm"></div> -->
+              <!-- </div> -->
             </div>
           </div>
 
           <div class="flex-1 px-4 pb-8 flex flex-col justify-center bg-gray-100">
-            <div class="bg-transparent rounded-2xl p-4 justify-center max-w-[85%] self-center ">
+            <div class="bg-transparent rounded-2xl p-4 justify-center max-w-[85%] self-center  mt-[-500px]">
               <ng-container [ngSwitch]="block.mediaType">
                 <p *ngSwitchCase="'text'" class="text-sm text-gray-700">
                   <mat-form-field appearance="outline"

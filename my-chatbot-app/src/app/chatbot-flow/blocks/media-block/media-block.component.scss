@@ -130,36 +130,41 @@
 
 /* Phone Frame Enhanced Styling - Precision Adjustments */
 /* Custom classes for specific border-radius, padding, shadow, width, height */
-.rounded-3xl-custom {
-    border-radius: 40px; /* Outer phone frame border-radius */
-}
+// .rounded-3xl-custom {
+//     border-radius: 40px; /* Outer phone frame border-radius */
+// }
 
-.p-phone-bezel {
-    padding: 8px; /* Padding for the bezel thickness */
-}
+// .p-phone-bezel {
+//     padding: 20px; /* Padding for the bezel thickness */
+// }
 
 .shadow-2xl-custom {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
-.notch-custom {
-    width: 100px;
-    height: 20px;
-}
+    //  /* Custom notch styling with new dimensions and radius */
+    //     .notch-custom {
+    //         position: absolute;
+    //         top: 0;
+    //         left: 50%;
+    //         /* This transform is crucial for centering the notch horizontally */
+    //         width: 280px; 
+    //         height: 60px; 
+    //         background-color: black;
+    //         border-bottom-left-radius: 200px;
+    //         border-bottom-right-radius: 200px;
+    //         z-index: 20;
+    //     }
 
-.rounded-b-xl-custom {
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-}
 
-.rounded-screen-custom {
-    border-radius: 32px;
-}
+// .rounded-screen-custom {
+//     border-radius: 32px;
+// }
 
-.home-indicator-custom {
-    width: 100px;
-    height: 2px;
-}
+// .home-indicator-custom {
+//     width: 100px;
+//     height: 2px;
+// }
 
 .bottom-home-indicator-pos {
     bottom: 8px;
@@ -167,15 +172,17 @@
 
 /* Adjustments for the "half phone frame" and increased width */
 .phone-frame-container {
-    height: 600px; /* Fixed height to show only the top part of the phone as per image_473001.jpg */
+    height: 1000px; /* Fixed height to show only the top part of the phone as per image_473001.jpg */
     overflow: auto; /* Hide the overflowing bottom part of the phone */
     display: flex;
     justify-content: center;
 }
 
 .phone-half-frame-height {
-    width: 550px; /* Adjusted width to match the second image (e.g., image_46c28d.jpg, image_4732ed.jpg) */
-    height: 500px; /* Maintain full internal height for content positioning, but container crops it */
+  width: 580px;
+  height: 1100px;
+  overflow: hidden;
+  position: relative;
 }
 
 
