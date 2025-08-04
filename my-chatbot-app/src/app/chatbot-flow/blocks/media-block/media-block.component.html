@@ -34,15 +34,15 @@
         <p *ngSwitchCase="'text'" class="preview-text text-sm text-gray-700 bg-slate-50 px-3 py-2">
           {{ block.content || "No text content" }}
         </p>
-        <ng-container *ngSwitchCase="'image'">
-          <img [src]="block.slides[0]?.image" alt="Image Preview"
-            class="preview-media-thumbnail max-w-full h-auto rounded-none pt-2"
-            *ngIf="block.slides && block.slides.length > 0 && block.slides[0].image" />
-          <div *ngIf="!block.slides || block.slides.length === 0 || !block.slides[0].image"
-            class="no-media-content text-sm text-gray-500 italic">
-            No image URL provided.
-          </div>
-        </ng-container>
+       <ng-container *ngSwitchCase="'image'">
+  <img [src]="block.singleImageUrl" alt="Image Preview"
+       class="preview-media-thumbnail max-w-full h-auto rounded-none pt-2"
+       *ngIf="block.singleImageUrl" />
+  <div *ngIf="!block.singleImageUrl"
+       class="no-media-content text-sm text-gray-500 italic">
+    No image URL provided.
+  </div>
+</ng-container>
 
         <ng-container *ngSwitchCase="'video'">
           <video [src]="block.videoUrl" controls class="preview-media-thumbnail max-w-full h-auto rounded-md"
@@ -234,39 +234,38 @@
                     <mat-icon matSuffix class="text-gray-500">emoji_emotions</mat-icon>
                   </mat-form-field>
                 </p>
-                <ng-container *ngSwitchCase="'image'">
-                  <div class="image-upload-container relative bg-transparent rounded-lg p-3 mb-3">
-                    <div
-                      class="image-display-area relative bg-gray-200 rounded-lg flex flex-col items-center justify-center h-40 mb-3 border-2 border-dashed border-gray-300 overflow-hidden w-full">
-                      <div
-                        class="upload-content text-center cursor-pointer p-4 w-full h-full flex items-center justify-center"
-                        [class.hidden]="block.singleImageUrl" (click)="openUploadModal('image')">
-                        <div class="flex flex-col items-center justify-center">
-                          <div class="upload-icon mb-2">
-                            <div class="w-8 h-8 mx-auto bg-blue-500 rounded-full flex items-center justify-center">
-                              <mat-icon class="text-white text-lg">image</mat-icon>
-                            </div>
-                          </div>
-                          <p class="text-gray-600 text-sm font-medium mb-1">Drag your image here or click</p>
-                          <p class="text-gray-600 text-sm font-medium">to upload</p>
-                        </div>
-                      </div>
+               <ng-container *ngSwitchCase="'image'">
+  <div class="image-upload-container relative bg-transparent rounded-lg p-3 mb-3">
+    <div
+      class="image-display-area relative bg-gray-200 rounded-lg flex flex-col items-center justify-center h-40 mb-3 border-2 border-dashed border-gray-300 overflow-hidden w-full">
+      <div
+        class="upload-content text-center cursor-pointer p-4 w-full h-full flex items-center justify-center"
+        [class.hidden]="block.singleImageUrl" (click)="openUploadModal('image')">
+        <div class="flex flex-col items-center justify-center">
+          <div class="upload-icon mb-2">
+            <div class="w-8 h-8 mx-auto bg-blue-500 rounded-full flex items-center justify-center">
+              <mat-icon class="text-white text-lg">image</mat-icon>
+            </div>
+          </div>
+          <p class="text-gray-600 text-sm font-medium mb-1">Drag your image here or click</p>
+          <p class="text-gray-600 text-sm font-medium">to upload</p>
+        </div>
+      </div>
 
-                      <div class="image-display w-full h-full" *ngIf="block.singleImageUrl">
-                        <img [src]="block.singleImageUrl" alt="Image Preview" class="w-full h-full object-cover rounded-lg">
-                        <button
-                          class="absolute top-2 right-2 w-6 h-6 rounded-lg flex items-center justify-center bg-red-500 bg-opacity-80 text-white hover:bg-opacity-100 transition-colors shadow-md z-20"
-                          (click)="removeMedia()">
-                          <mat-icon class="text-xs">delete</mat-icon>
-                        </button>
-                      </div>
+      <div class="image-display w-full h-full" *ngIf="block.singleImageUrl">
+        <img [src]="block.singleImageUrl" alt="Image Preview" class="w-full h-full object-cover rounded-lg">
+        <button
+          class="absolute top-2 right-2 w-6 h-6 rounded-lg flex items-center justify-center bg-red-500 bg-opacity-80 text-white hover:bg-opacity-100 transition-colors shadow-md z-20"
+          (click)="removeMedia()">
+          <mat-icon class="text-xs">delete</mat-icon>
+        </button>
+      </div>
 
-                      <input type="file" #imageUploadInput accept="image/*" (change)="onImageUpload($event)"
-                        class="hidden">
-                    </div>
-                  </div>
-                </ng-container>
-
+      <input type="file" #imageUploadInput accept="image/*" (change)="onImageUpload($event)"
+        class="hidden">
+    </div>
+  </div>
+</ng-container>
                <!-- Replace your existing video case in the template with this improved version -->
 <ng-container *ngSwitchCase="'video'">
   <!-- Video Upload Container -->

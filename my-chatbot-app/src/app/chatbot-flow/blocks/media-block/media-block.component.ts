@@ -206,166 +206,148 @@ hasMediaContent(): boolean {
   }
 
   // FIXED: Complete rewrite of onMediaTypeChange method
- onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Slider' | 'audio'): void {
-    const previousMediaType = this.block.mediaType || 'text';
-    
-    // Step 1: Save current block data to the isolated storage
-    this.saveCurrentDataToIsolatedStorage(previousMediaType);
-    
-    // Step 2: Set the new media type on the block
-    this.block.mediaType = newMediaType;
-    
-    // Step 3: Load data for the new media type from isolated storage
-    this.loadDataFromIsolatedStorage(newMediaType);
+onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Slider' | 'audio'): void {
+  const previousMediaType = this.block.mediaType || 'text';
 
-    this.onContentChange();
+  // Step 1: Save current block data to the isolated storage
+  this.saveCurrentDataToIsolatedStorage(previousMediaType);
+
+  // Step 2: Set the new media type on the block
+  this.block.mediaType = newMediaType;
+
+  // Step 3: Load data for the new media type from isolated storage
+  this.loadDataFromIsolatedStorage(newMediaType);
+
+  // Step 4: Ensure slides are reset for Image Slider
+  if (newMediaType === 'Image Slider') {
+    this.isolatedMediaData.slides = this.isolatedMediaData.slides && this.isolatedMediaData.slides.length > 0
+      ? this.isolatedMediaData.slides
+      : [{ image: '', title: '', subtitle: '' }];
+    this.block.slides = JSON.parse(JSON.stringify(this.isolatedMediaData.slides));
+    this.currentSlideIndex = 0;
+  }
+
+  this.onContentChange();
 }
 
   // Method to save current block data to isolated storage
  // Add a property to your component to hold the isolated data
-isolatedMediaData: { 
+isolatedMediaData: {
   text?: string;
   image?: string;
   video?: string;
   audio?: string;
   file?: string;
   slides?: ImageSlide[];
-} = {};
+} = {
+  text: '',
+  image: '',
+  video: '',
+  audio: '',
+  file: '',
+  slides: []
+};
 
 saveCurrentDataToIsolatedStorage(mediaType: string): void {
-    switch (mediaType) {
-        case 'text':
-            this.isolatedMediaData.text = this.block.content;
-            break;
+  switch (mediaType) {
+    case 'text':
+      this.isolatedMediaData.text = this.block.content;
+      break;
 
-        case 'image':
-            // Save single image data and also prepare it for Image Slider
-            this.isolatedMediaData.image = this.block.singleImageUrl;
-            if (this.block.singleImageUrl) {
-                this.isolatedMediaData.slides = [{
-                    image: this.block.singleImageUrl,
-                    title: this.block.slides?.[0]?.title || '',
-                    subtitle: this.block.slides?.[0]?.subtitle || ''
-                }];
-            } else {
-                 this.isolatedMediaData.slides = undefined;
-            }
-            break;
-            
-        case 'Image Slider':
-            // Save the entire slides array and also prepare the first image for a single image
-            this.isolatedMediaData.slides = this.block.slides ? JSON.parse(JSON.stringify(this.block.slides)) : undefined;
-            if (this.block.slides?.[0]?.image) {
-                this.isolatedMediaData.image = this.block.slides[0].image;
-            } else {
-                this.isolatedMediaData.image = undefined;
-            }
-            break;
-            
-        case 'video':
-            this.isolatedMediaData.video = this.block.videoUrl;
-            break;
-            
-        case 'audio':
-            this.isolatedMediaData.audio = this.block.audioUrl;
-            break;
-            
-        case 'file':
-            this.isolatedMediaData.file = this.block.fileUrl;
-            break;
-    }
+    case 'image':
+      this.isolatedMediaData.image = this.block.singleImageUrl;
+      break;
+
+    case 'Image Slider':
+      this.isolatedMediaData.slides = this.block.slides
+        ? JSON.parse(JSON.stringify(this.block.slides))
+        : [];
+      break;
+
+    case 'video':
+      this.isolatedMediaData.video = this.block.videoUrl;
+      break;
+
+    case 'audio':
+      this.isolatedMediaData.audio = this.block.audioUrl;
+      break;
+
+    case 'file':
+      this.isolatedMediaData.file = this.block.fileUrl;
+      break;
+  }
 }
 
   // Method to load data from isolated storage to block
 loadDataFromIsolatedStorage(mediaType: string): void {
-    // Reset all media properties on the main block object
-    this.block.content = undefined;
-    this.block.singleImageUrl = undefined;
-    this.block.videoUrl = undefined;
-    this.block.audioUrl = undefined;
-    this.block.fileUrl = undefined;
-    this.block.slides = undefined;
-    
-    switch (mediaType) {
-        case 'text':
-            this.block.content = this.isolatedMediaData.text || '';
-            break;
-            
-        case 'image':
-            this.block.singleImageUrl = this.isolatedMediaData.image || '';
-            // Also update the slides array to reflect the single image
-            this.block.slides = [{ image: this.block.singleImageUrl, title: '', subtitle: '' }];
-            break;
-            
-        case 'Image Slider':
-            // Use the slides from the isolated storage, or create a new empty slide if none exist
-            this.block.slides = this.isolatedMediaData.slides ? JSON.parse(JSON.stringify(this.isolatedMediaData.slides)) : [{ image: '', title: '', subtitle: '' }];
-            // Reset slide index to 0
-            this.currentSlideIndex = 0;
-            break;
-            
-        case 'video':
-            this.block.videoUrl = this.isolatedMediaData.video || '';
-            break;
-            
-        case 'audio':
-            this.block.audioUrl = this.isolatedMediaData.audio || '';
-            break;
-            
-        case 'file':
-            this.block.fileUrl = this.isolatedMediaData.file || '';
-            break;
-    }
+  // Reset all media properties on the main block object
+  this.block.content = undefined;
+  this.block.singleImageUrl = undefined;
+  this.block.videoUrl = undefined;
+  this.block.audioUrl = undefined;
+  this.block.fileUrl = undefined;
+  this.block.slides = [];
+
+  switch (mediaType) {
+    case 'text':
+      this.block.content = this.isolatedMediaData.text || '';
+      break;
+
+    case 'image':
+      this.block.singleImageUrl = this.isolatedMediaData.image || '';
+      break;
+
+    case 'Image Slider':
+      this.block.slides = this.isolatedMediaData.slides && this.isolatedMediaData.slides.length > 0
+        ? JSON.parse(JSON.stringify(this.isolatedMediaData.slides))
+        : [{ image: '', title: '', subtitle: '' }];
+      this.currentSlideIndex = 0;
+      break;
+
+    case 'video':
+      this.block.videoUrl = this.isolatedMediaData.video || '';
+      break;
+
+    case 'audio':
+      this.block.audioUrl = this.isolatedMediaData.audio || '';
+      break;
+
+    case 'file':
+      this.block.fileUrl = this.isolatedMediaData.file || '';
+      break;
+  }
 }
-
-
   // Initialize isolated storage from current block data
- private initializeIsolatedStorageFromBlock(): void {
-    const mediaType = this.block.mediaType;
-    
-    switch (mediaType) {
-        case 'text':
-            this.mediaTypeData.text.content = this.block.content || '';
-            break;
-            
-        case 'image':
-            // Prioritize the singleImageUrl if it exists.
-            // This is the source of truth for the 'image' type.
-            this.mediaTypeData.image = {
-                image: this.block.singleImageUrl || '',
-                title: this.block.slides && this.block.slides[0] ? this.block.slides[0].title || '' : '',
-                subtitle: this.block.slides && this.block.slides[0] ? this.block.slides[0].subtitle || '' : ''
-            };
-            break;
-            
-        case 'Image Slider':
-            if (this.block.slides && this.block.slides.length > 0) {
-                // Perform a deep copy of the slides array
-                this.mediaTypeData['Image Slider'] = JSON.parse(JSON.stringify(this.block.slides));
-            } else if (this.block.singleImageUrl) {
-                // If there's a singleImageUrl, initialize the slider with that image
-                this.mediaTypeData['Image Slider'] = [{ image: this.block.singleImageUrl, title: '', subtitle: '' }];
-            } else {
-                // If no data exists, initialize with a single empty slide
-                this.mediaTypeData['Image Slider'] = [{ image: '', title: '', subtitle: '' }];
-            }
-            break;
-            
-        case 'video':
-            this.mediaTypeData.video.url = this.block.videoUrl || '';
-            break;
-            
-        case 'audio':
-            this.mediaTypeData.audio.url = this.block.audioUrl || '';
-            break;
-            
-        case 'file':
-            this.mediaTypeData.file = {
-                url: this.block.fileUrl || '',
-                fileName: this.uploadedFileName || ''
-            };
-            break;
-    }
+private initializeIsolatedStorageFromBlock(): void {
+  const mediaType = this.block.mediaType;
+
+  switch (mediaType) {
+    case 'text':
+      this.isolatedMediaData.text = this.block.content || '';
+      break;
+
+    case 'image':
+      this.isolatedMediaData.image = this.block.singleImageUrl || '';
+      break;
+
+    case 'Image Slider':
+      this.isolatedMediaData.slides = this.block.slides
+        ? JSON.parse(JSON.stringify(this.block.slides))
+        : [{ image: '', title: '', subtitle: '' }];
+      break;
+
+    case 'video':
+      this.isolatedMediaData.video = this.block.videoUrl || '';
+      break;
+
+    case 'audio':
+      this.isolatedMediaData.audio = this.block.audioUrl || '';
+      break;
+
+    case 'file':
+      this.isolatedMediaData.file = this.block.fileUrl || '';
+      break;
+  }
 }
 
   // File upload methods
@@ -439,15 +421,27 @@ loadDataFromIsolatedStorage(mediaType: string): void {
   }
 
   removeMedia(): void {
-    if (this.block.mediaType === 'image') {
-      this.mediaTypeData.image.image = '';
-      this.block.singleImageUrl = '';
-      if (this.block.slides && this.block.slides[0]) {
-        this.block.slides[0].image = '';
-      }
-      this.contentChange.emit();
-    }
+  if (this.block.mediaType === 'image') {
+    this.block.singleImageUrl = '';
+    this.isolatedMediaData.image = '';
+  } else if (this.block.mediaType === 'Image Slider') {
+    this.removeCurrentSlide();
+  } else if (this.block.mediaType === 'video') {
+    this.block.videoUrl = '';
+    this.isolatedMediaData.video = '';
+  } else if (this.block.mediaType === 'audio') {
+    this.block.audioUrl = '';
+    this.isolatedMediaData.audio = '';
+  } else if (this.block.mediaType === 'file') {
+    this.block.fileUrl = '';
+    this.isolatedMediaData.file = '';
+  } else if (this.block.mediaType === 'text') {
+    this.block.content = '';
+    this.isolatedMediaData.text = '';
   }
+
+  this.onContentChange();
+}
 
   // Modal methods
   openUploadModal(mediaType: 'image' | 'video' | 'file'): void {
@@ -656,7 +650,7 @@ private setMediaUrlFromSelected(selected: AvailableMedia): void {
     this.imageUploadInput.nativeElement.click();
   }
 
- onImageUpload(event: any): void {
+onImageUpload(event: any): void {
   const file = event.target.files[0];
   if (!file) {
     return;
@@ -667,22 +661,17 @@ private setMediaUrlFromSelected(selected: AvailableMedia): void {
     const imageDataUrl = e.target.result as string;
 
     if (this.block.mediaType === 'image') {
-      this.mediaTypeData.image.image = imageDataUrl;
-      this.block.slides = [{ ...this.mediaTypeData.image }];
-      // FIXED: Use singleImageUrl instead of mediaUrl
+      this.isolatedMediaData.image = imageDataUrl;
       this.block.singleImageUrl = imageDataUrl;
-      this.currentSlideIndex = 0;
-      
     } else if (this.block.mediaType === 'Image Slider') {
-      if (!this.mediaTypeData['Image Slider'] || this.mediaTypeData['Image Slider'].length === 0) {
-        this.mediaTypeData['Image Slider'] = [{ image: '', title: '', subtitle: '' }];
+      if (!this.isolatedMediaData.slides || this.isolatedMediaData.slides.length === 0) {
+        this.isolatedMediaData.slides = [{ image: '', title: '', subtitle: '' }];
         this.currentSlideIndex = 0;
       }
-      this.mediaTypeData['Image Slider'][this.currentSlideIndex].image = imageDataUrl;
-      this.block.slides = JSON.parse(JSON.stringify(this.mediaTypeData['Image Slider']));
-      // Image slider doesn't use singleImageUrl
+      this.isolatedMediaData.slides[this.currentSlideIndex].image = imageDataUrl;
+      this.block.slides = JSON.parse(JSON.stringify(this.isolatedMediaData.slides));
     }
-    
+
     this.contentChange.emit();
   };
 
@@ -695,22 +684,17 @@ private setMediaUrlFromSelected(selected: AvailableMedia): void {
 uploadImageUrl(): void {
   if (this.imageUrlInput) {
     if (this.block.mediaType === 'image') {
-      this.mediaTypeData.image.image = this.imageUrlInput;
-      this.block.slides = [{ ...this.mediaTypeData.image }];
-      // FIXED: Use singleImageUrl instead of mediaUrl
+      this.isolatedMediaData.image = this.imageUrlInput;
       this.block.singleImageUrl = this.imageUrlInput;
-      this.currentSlideIndex = 0;
-      
     } else if (this.block.mediaType === 'Image Slider') {
-      if (!this.mediaTypeData['Image Slider'] || this.mediaTypeData['Image Slider'].length === 0) {
-        this.mediaTypeData['Image Slider'] = [{ image: '', title: '', subtitle: '' }];
+      if (!this.isolatedMediaData.slides || this.isolatedMediaData.slides.length === 0) {
+        this.isolatedMediaData.slides = [{ image: '', title: '', subtitle: '' }];
         this.currentSlideIndex = 0;
       }
-      this.mediaTypeData['Image Slider'][this.currentSlideIndex].image = this.imageUrlInput;
-      this.block.slides = JSON.parse(JSON.stringify(this.mediaTypeData['Image Slider']));
-      // Image slider doesn't use singleImageUrl
+      this.isolatedMediaData.slides[this.currentSlideIndex].image = this.imageUrlInput;
+      this.block.slides = JSON.parse(JSON.stringify(this.isolatedMediaData.slides));
     }
-    
+
     this.onContentChange();
     this.closeUploadModal();
     this._snackBar.open('Image from URL added successfully!', 'Dismiss', { duration: 2000 });
@@ -718,7 +702,6 @@ uploadImageUrl(): void {
     this._snackBar.open('Please enter a valid image URL.', 'Dismiss', { duration: 2000 });
   }
 }
-
   // Slide navigation methods
   nextSlide(): void {
     if (this.block.slides && this.currentSlideIndex < this.block.slides.length - 1) {
@@ -821,14 +804,11 @@ createNewMediaBlock(): void {
       this.clearAllMediaUrls();
       break;
 
-    case 'image':
-      if (!this.block.slides || this.block.slides.length === 0 || !this.block.slides[0].image) {
+   case 'image':
+      if (!this.block.singleImageUrl || this.block.singleImageUrl.trim() === '') {
         this._snackBar.open('Please provide an image for the image block.', 'Dismiss', { duration: 3000 });
         return;
       }
-      this.block.slides = [this.block.slides[0]];
-      this.block.singleImageUrl = this.block.slides[0].image; // Set the single image URL
-      this.block.content = '';
       break;
 
     case 'Image Slider':
