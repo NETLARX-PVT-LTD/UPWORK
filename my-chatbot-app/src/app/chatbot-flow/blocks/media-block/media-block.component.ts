@@ -212,11 +212,11 @@ onMediaTypeChange(newMediaType: 'image' | 'video' | 'file' | 'text' | 'Image Sli
   // Step 3: Load data for the new media type from isolated storage
   this.loadDataFromIsolatedStorage(newMediaType);
 
-  // Step 4: Ensure slides are reset for Image Slider
+  // Step 4: Ensure slides are properly initialized for Image Slider
   if (newMediaType === 'Image Slider') {
-    this.isolatedMediaData.slides = this.isolatedMediaData.slides && this.isolatedMediaData.slides.length > 0
-      ? this.isolatedMediaData.slides
-      : [{ image: '', title: '', subtitle: '' }];
+    if (!this.isolatedMediaData.slides || this.isolatedMediaData.slides.length === 0) {
+      this.isolatedMediaData.slides = [{ image: '', title: '', subtitle: '' }];
+    }
     this.block.slides = JSON.parse(JSON.stringify(this.isolatedMediaData.slides));
     this.currentSlideIndex = 0;
   }
@@ -245,29 +245,24 @@ isolatedMediaData: {
 saveCurrentDataToIsolatedStorage(mediaType: string): void {
   switch (mediaType) {
     case 'text':
-      this.isolatedMediaData.text = this.block.content;
+      this.isolatedMediaData.text = this.block.content || '';
       break;
-
     case 'image':
-      this.isolatedMediaData.image = this.block.singleImageUrl;
+      this.isolatedMediaData.image = this.block.singleImageUrl || '';
       break;
-
     case 'Image Slider':
       this.isolatedMediaData.slides = this.block.slides
         ? JSON.parse(JSON.stringify(this.block.slides))
-        : [];
+        : [{ image: '', title: '', subtitle: '' }];
       break;
-
     case 'video':
-      this.isolatedMediaData.video = this.block.videoUrl;
+      this.isolatedMediaData.video = this.block.videoUrl || '';
       break;
-
     case 'audio':
-      this.isolatedMediaData.audio = this.block.audioUrl;
+      this.isolatedMediaData.audio = this.block.audioUrl || '';
       break;
-
     case 'file':
-      this.isolatedMediaData.file = this.block.fileUrl;
+      this.isolatedMediaData.file = this.block.fileUrl || '';
       break;
   }
 }
@@ -275,37 +270,32 @@ saveCurrentDataToIsolatedStorage(mediaType: string): void {
   // Method to load data from isolated storage to block
 loadDataFromIsolatedStorage(mediaType: string): void {
   // Reset all media properties on the main block object
-  this.block.content = undefined;
-  this.block.singleImageUrl = undefined;
-  this.block.videoUrl = undefined;
-  this.block.audioUrl = undefined;
-  this.block.fileUrl = undefined;
+  this.block.content = '';
+  this.block.singleImageUrl = '';
+  this.block.videoUrl = '';
+  this.block.audioUrl = '';
+  this.block.fileUrl = '';
   this.block.slides = [];
 
   switch (mediaType) {
     case 'text':
       this.block.content = this.isolatedMediaData.text || '';
       break;
-
     case 'image':
       this.block.singleImageUrl = this.isolatedMediaData.image || '';
       break;
-
     case 'Image Slider':
       this.block.slides = this.isolatedMediaData.slides && this.isolatedMediaData.slides.length > 0
         ? JSON.parse(JSON.stringify(this.isolatedMediaData.slides))
         : [{ image: '', title: '', subtitle: '' }];
-      this.currentSlideIndex = 0;
+      this.currentSlideIndex = Math.min(this.currentSlideIndex, (this.block.slides?.length || 1) - 1);
       break;
-
     case 'video':
       this.block.videoUrl = this.isolatedMediaData.video || '';
       break;
-
     case 'audio':
       this.block.audioUrl = this.isolatedMediaData.audio || '';
       break;
-
     case 'file':
       this.block.fileUrl = this.isolatedMediaData.file || '';
       break;
@@ -592,18 +582,22 @@ private setMediaUrlFromSelected(selected: AvailableMedia): void {
 
   // Slide management methods
   addNewSlide(): void {
-    if (this.block.mediaType === 'Image Slider') {
-      this.mediaTypeData['Image Slider'].push({ image: '', title: '', subtitle: '' });
-      this.block.slides = JSON.parse(JSON.stringify(this.mediaTypeData['Image Slider']));
-      // FIXED: Check if slides exist before accessing length
-      if (this.block.slides) {
-        this.currentSlideIndex = this.block.slides.length - 1;
-      }
-      
-      this.blockUpdated.emit(this.block);
-      this._snackBar.open('New slide added.', 'Dismiss', { duration: 2000 });
+  if (this.block.mediaType === 'Image Slider') {
+    // Ensure slides array exists
+    if (!this.isolatedMediaData.slides) {
+      this.isolatedMediaData.slides = [{ image: '', title: '', subtitle: '' }];
     }
+    // Add a new slide to isolatedMediaData.slides
+    this.isolatedMediaData.slides.push({ image: '', title: '', subtitle: '' });
+    // Sync block.slides with isolatedMediaData.slides
+    this.block.slides = JSON.parse(JSON.stringify(this.isolatedMediaData.slides));
+    // Move to the new slide
+    this.currentSlideIndex = this.isolatedMediaData.slides.length - 1;
+    
+    this.blockUpdated.emit(this.block);
+    this._snackBar.open('New slide added.', 'Dismiss', { duration: 2000 });
   }
+}
 
   removeCurrentSlide(): void {
     if (this.block.mediaType === 'Image Slider' && this.mediaTypeData['Image Slider'].length > 1) {
@@ -644,6 +638,7 @@ private setMediaUrlFromSelected(selected: AvailableMedia): void {
     this.imageUploadInput.nativeElement.click();
   }
 
+// Method to handle image uploads
 onImageUpload(event: any): void {
   const file = event.target.files[0];
   if (!file) {
@@ -658,22 +653,33 @@ onImageUpload(event: any): void {
       this.isolatedMediaData.image = imageDataUrl;
       this.block.singleImageUrl = imageDataUrl;
     } else if (this.block.mediaType === 'Image Slider') {
-      if (!this.isolatedMediaData.slides || this.isolatedMediaData.slides.length === 0) {
+      // Ensure slides array exists and is initialized
+      if (!this.isolatedMediaData.slides) {
         this.isolatedMediaData.slides = [{ image: '', title: '', subtitle: '' }];
-        this.currentSlideIndex = 0;
       }
-      this.isolatedMediaData.slides[this.currentSlideIndex].image = imageDataUrl;
+      // Ensure the current slide index is valid
+      if (!this.isolatedMediaData.slides[this.currentSlideIndex]) {
+        // Pad the array with empty slides if necessary
+        while (this.isolatedMediaData.slides.length <= this.currentSlideIndex) {
+          this.isolatedMediaData.slides.push({ image: '', title: '', subtitle: '' });
+        }
+      }
+      // Update only the current slide's image
+      this.isolatedMediaData.slides[this.currentSlideIndex] = {
+        ...this.isolatedMediaData.slides[this.currentSlideIndex],
+        image: imageDataUrl
+      };
+      // Sync block.slides with isolatedMediaData.slides
       this.block.slides = JSON.parse(JSON.stringify(this.isolatedMediaData.slides));
     }
 
     this.contentChange.emit();
+    this._snackBar.open('Image uploaded successfully!', 'Dismiss', { duration: 2000 });
   };
 
   reader.readAsDataURL(file);
   this.closeUploadModal();
-  this._snackBar.open('Image uploaded successfully!', 'Dismiss', { duration: 2000 });
 }
-
 
 uploadImageUrl(): void {
   if (this.imageUrlInput) {

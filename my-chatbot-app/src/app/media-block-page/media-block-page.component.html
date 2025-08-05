@@ -1,0 +1,39 @@
+<div class="media-block-grid">
+  <app-media-block
+    *ngFor="let block of blocks"
+    [block]="block"
+    [isSelected]="selectedBlock?.id === block.id"
+    [availableMedia]="availableMedia"
+    [availableStories]="availableStories"
+    (blockUpdated)="onBlockUpdated($event)"
+    (selectBlock)="onSelectBlock($event)"
+    (startConnection)="onStartConnection($event)"
+    (endConnection)="onEndConnection($event)"
+    (removeBlock)="onRemoveBlock($event)"
+    (duplicateBlock)="onDuplicateBlock($event)"
+    (editBlock)="onEditBlock($event)"
+    (closeSidebarEvent)="onCloseSidebar()"
+    (contentChange)="onContentChange()"
+  ></app-media-block>
+</div>
+
+<!-- Define Media Config Section -->
+<div class="define-media-config-section" *ngIf="selectedBlock && isEditing">
+  <app-media-block
+    [block]="selectedBlock"
+    [isSelected]="true"
+    [isSidebarOpen]="true"
+    [availableMedia]="availableMedia"
+    [availableStories]="availableStories"
+    (blockUpdated)="onBlockUpdated($event)"
+    (selectBlock)="onSelectBlock($event)"
+    (startConnection)="onStartConnection($event)"
+    (endConnection)="onEndConnection($event)"
+    (removeBlock)="onRemoveBlock($event)"
+    (duplicateBlock)="onDuplicateBlock($event)"
+    (editBlock)="onEditBlock($event)"
+    (closeSidebarEvent)="onCloseSidebar()"
+    (contentChange)="onContentChange()"
+  ></app-media-block>
+  <button mat-flat-button (click)="cancelEdit()" class="cancel-btn">Cancel</button>
+</div>
