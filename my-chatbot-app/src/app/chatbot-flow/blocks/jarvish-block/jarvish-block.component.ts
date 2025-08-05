@@ -19,7 +19,7 @@ interface ChatMessage {
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { Component, ElementRef, ViewChild, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ApiHeader, AvailableStory, Button } from '../../../models/chatbot-block.model';
+import { ApiHeader, AvailableForm, AvailableMedia, AvailableStory, Button } from '../../../models/chatbot-block.model';
 
 @Component({
   selector: 'app-jarvish-block',
@@ -36,8 +36,12 @@ export class JarvishBlockComponent {
 
 
   @Input() canvasBlocks: any[] = [];
-  @Input() availableMedia: any[] = []; 
+  @Input() availableMedia: AvailableMedia[] = []; 
   @Input() availableStories : AvailableStory[] = [];
+  @Input() availableForms : AvailableForm[] = [];
+
+  activeButtonForm: AvailableForm | null = null; 
+  isButtonFormActive = false;
   isChatStarted: boolean = false;
   currentBlockIndex: number = 0;
   waitingForUserInput: boolean = false;
@@ -66,7 +70,39 @@ export class JarvishBlockComponent {
   this.messages.push({ sender: 'user', text: userMsg });
   this.scrollToBottom();
 
+  // 1️⃣ Handle active button form first
+  if (this.isButtonFormActive && this.activeButtonForm) {
+    const currentField = this.currentFormFields?.[this.formFieldIndex];
+
+    if (currentField) {
+      this.currentFormResponses[currentField.name] = userMsg;
+      this.formFieldIndex++;
+
+      if (this.formFieldIndex < this.currentFormFields.length) {
+        setTimeout(() => this.askNextFormField(), 800);
+      } else {
+        // ✅ Form finished
+        this.messages.push({ sender: 'bot', text: '✅ Thank you! Form submitted.' });
+
+        // 🔹 Reset form state
+        this.isButtonFormActive = false;
+        this.activeButtonForm = null;
+        this.currentFormFields = [];
+        this.formFieldIndex = 0;
+
+        // 🔹 Continue story if available
+        this.waitingForUserInput = false;
+        setTimeout(() => this.processNextBlock(), 800);
+      }
+    }
+    return;
+  }
+
   const block = this.canvasBlocks[this.currentBlockIndex];
+  if (!block) {
+    console.warn('No block found at index', this.currentBlockIndex);
+    return;
+  }
   console.log('Current Block:', block.type, block.subType);
 
   /** 1️⃣ Conversational Form Handling */
@@ -155,7 +191,7 @@ export class JarvishBlockComponent {
   this.waitingForUserInput = false;
   this.currentBlockIndex++;
   setTimeout(() => this.processNextBlock(), 800);
-}
+  }
 
 
   /** ✅ Auto Scrolls Chat to Bottom */
@@ -228,47 +264,45 @@ export class JarvishBlockComponent {
       break;
 
     case 'mediaBlock': {
-      const mediaMsg: ChatMessage = { sender: 'bot', text: block.content || '' };
+        const mediaMsg: ChatMessage = { sender: 'bot', text: block.content || '' };
 
-      // ✅ Always include text if exists
-      if (block.content) {
-        mediaMsg.text = block.content;
-      }
+        // ✅ Handle slides first
+        if (block.slides && block.slides.length > 0) {
+          mediaMsg.slides = block.slides;
+        }
+        // ✅ Handle media (image, video, audio, pdf)
+        else if (block.mediaType && block.mediaType !== 'text') {
+          mediaMsg.type = block.mediaType;
 
-      // ✅ Handle media type if URL exists
-      else if (block.mediaType && block.mediaUrl) {
-        mediaMsg.type = block.mediaType; // 'image' | 'video' | 'audio'
-        mediaMsg.fileUrl = block.mediaUrl;
-        mediaMsg.text = block.mediaName || block.content || 'File'; 
-      }
+          // 🔹 Pick the correct URL based on media type
+          if (block.mediaType === 'image') {
+            mediaMsg.fileUrl = block.mediaUrl || block.singleImageUrl || block.imageUrl;
+          } 
+          else if (block.mediaType === 'video') {
+            mediaMsg.fileUrl = block.mediaUrl || block.videoUrl;
+          } 
+          else if (block.mediaType === 'audio') {
+            mediaMsg.fileUrl = block.mediaUrl || block.audioUrl;
+          } 
+          else {
+            mediaMsg.fileUrl = block.mediaUrl || block.fileUrl;
+          }
 
-      // ✅ Handle slides (image carousel)
-      else if (block.slides && block.slides.length > 0) {
-        mediaMsg.slides = block.slides;
-      }
+          mediaMsg.text = block.mediaName || block.content || 'File';
+        }
 
-      // ✅ Attach buttons if present
-      if (block.buttons && block.buttons.length > 0) {
-        mediaMsg.buttons = block.buttons.map((btn: Button) => ({
-          // title: btn.title,
-          // type: btn.type,
-          // textMessage: btn.textMessage || '',
-          // url: btn.url || '',           // ✅ Add URL
-          // phoneNumber: btn.phoneNumber, // ✅ Add call support if needed
-          // apiEndpoint: btn.apiEndpoint  // ✅ Add API support if needed
-          ...btn
-        }));
-      }
+        // ✅ Attach buttons if present
+        if (block.buttons && block.buttons.length > 0) {
+          mediaMsg.buttons = block.buttons.map((btn: Button) => ({ ...btn }));
+        }
 
-      // ✅ Push to chat
-      this.messages.push(mediaMsg);
-      this.scrollToBottom();
-      console.log(mediaMsg);
+        this.messages.push(mediaMsg);
+        this.scrollToBottom();
+        console.log('Media Block Pushed:', mediaMsg);
 
-      // ✅ Auto-continue after short delay
-      this.currentBlockIndex++;
-      setTimeout(() => this.processNextBlock(), 1000);
-      break;
+        this.currentBlockIndex++;
+        setTimeout(() => this.processNextBlock(), 1000);
+        break;
     }
 
     case 'linkStory': {
@@ -435,46 +469,46 @@ export class JarvishBlockComponent {
   }
 
   private handleMediaBlock(block: any) {
+       console.log("Block aa gaya", block);
+
       const mediaMsg: ChatMessage = { sender: 'bot', text: block.content || '' };
 
-      // ✅ Always include text if exists
-      if (block.content) {
-        mediaMsg.text = block.content;
-      }
+        // ✅ Handle slides first
+        if (block.slides && block.slides.length > 0) {
+          mediaMsg.slides = block.slides;
+        }
+        // ✅ Handle media (image, video, audio, pdf)
+        else if (block.type) {
+          mediaMsg.type = block.type;
 
-      // ✅ Handle media type if URL exists
-      else if (block.mediaType && block.mediaUrl) {
-        mediaMsg.type = block.mediaType; // 'image' | 'video' | 'audio'
-        mediaMsg.fileUrl = block.mediaUrl;
-        mediaMsg.text = block.mediaName || block.content || 'File'; 
-      }
+          // 🔹 Pick the correct URL based on media type
+          if (block.type === 'image') {
+            mediaMsg.fileUrl = block.mediaUrl || block.singleImageUrl || block.imageUrl || block.url;
+          } 
+          else if (block.type === 'video') {
+            mediaMsg.fileUrl = block.mediaUrl || block.videoUrl;
+          } 
+          else if (block.type === 'audio') {
+            mediaMsg.fileUrl = block.mediaUrl || block.audioUrl;
+          } 
+          else {
+            mediaMsg.fileUrl = block.mediaUrl || block.fileUrl;
+          }
 
-      // ✅ Handle slides (image carousel)
-      else if (block.slides && block.slides.length > 0) {
-        mediaMsg.slides = block.slides;
-      }
+          mediaMsg.text = block.mediaName || block.content || 'File';
+        }
 
-      // ✅ Attach buttons if present
-      if (block.buttons && block.buttons.length > 0) {
-        mediaMsg.buttons = block.buttons.map((btn: Button) => ({
-          // title: btn.title,
-          // type: btn.type,
-          // textMessage: btn.textMessage || '',
-          // url: btn.url || '',           // ✅ Add URL
-          // phoneNumber: btn.phoneNumber, // ✅ Add call support if needed
-          // apiEndpoint: btn.apiEndpoint  // ✅ Add API support if needed
-          ...btn
-        }));
-      }
+        // ✅ Attach buttons if present
+        if (block.buttons && block.buttons.length > 0) {
+          mediaMsg.buttons = block.buttons.map((btn: Button) => ({ ...btn }));
+        }
 
-      // ✅ Push to chat
-      this.messages.push(mediaMsg);
-      this.scrollToBottom();
-      console.log(mediaMsg);
+        this.messages.push(mediaMsg);
+        this.scrollToBottom();
+        console.log('Media Block Pushed:', mediaMsg);
 
-      // ✅ Auto-continue after short delay
-      this.currentBlockIndex++;
-      setTimeout(() => this.processNextBlock(), 1000);
+        this.currentBlockIndex++;
+        setTimeout(() => this.processNextBlock(), 1000);
   }
 
   isPdf(fileUrl?: string): boolean {
@@ -506,9 +540,14 @@ export class JarvishBlockComponent {
 
         case 'media_block': {
           if (button.linkedMediaId) {
+            console.log(this.availableMedia);
+            console.log(button.linkedMediaId);
+            
             const mediaBlock = this.availableMedia.find(
               (m: any) => m.id === button.linkedMediaId
             );
+
+            console.log(mediaBlock);
 
             if (mediaBlock) {
               this.handleMediaBlock(mediaBlock);
@@ -579,19 +618,59 @@ export class JarvishBlockComponent {
           }
           break;
 
-        case 'human_help':
+        case 'human_help': {
+          // 1️⃣ Show bot message
+          const botMessage = button.messageAfterAction || '👨‍💻 Human support will contact you shortly.';
           this.messages.push({
             sender: 'bot',
-            text: button.messageAfterAction || '👨‍💻 Human support will contact you shortly.'
+            text: botMessage
           });
-          break;
 
-        case 'conversational_form':
-          this.messages.push({
-            sender: 'bot',
-            text: button.messageAfterAction || '📝 Please start the form.'
-          });
+          // 2️⃣ Send email notification if configured
+          // if (button.emailForNotification) {
+          //   const emailData = {
+          //     to: button.emailForNotification,
+          //     subject: `Human Help Requested - ${button.title}`,
+          //     message: `User clicked on "${button.title}". Please assist the user.`
+          //   };
+
+               // Example: POST to your backend email API
+          //   fetch('https://your-backend.com/send-email', {
+          //     method: 'POST',
+          //     headers: {
+          //       'Content-Type': 'application/json'
+          //     },
+          //     body: JSON.stringify(emailData)
+          //   })
+          //   .then(res => res.json())
+          //   .then(() => {
+          //     console.log('✅ Email notification sent successfully');
+          //   })
+          //   .catch(err => {
+          //     console.error('❌ Error sending email:', err);
+          //   });
+          // }
+
           break;
+        }
+        case 'conversational_form': {
+          const botMessage = button.messageAfterAction || '📝 Please start the form.';
+          this.messages.push({ sender: 'bot', text: botMessage });
+
+          const selectedForm = this.availableForms.find(f => f.id === button.formId);
+
+          if (selectedForm?.formFields?.length) {
+            this.activeButtonForm = selectedForm;
+            this.isButtonFormActive = true;
+            this.currentFormFields = selectedForm.formFields;
+            this.formFieldIndex = 0;
+            this.currentFormResponses = {};
+            this.askNextFormField();
+          } else {
+            this.messages.push({ sender: 'bot', text: '⚠️ No form fields found for this form.' });
+          }
+          break;
+        }
 
         case 'start_story':
           if (button.storyId) {
