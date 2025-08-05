@@ -224,7 +224,8 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
   availableForms: AvailableForm[] = [
     { id: 'form-1', name: 'Contact Us Form' },
     { id: 'form-2', name: 'Feedback Survey' },
-    { id: 'form-3', name: 'Support Ticket' }
+    { id: 'form-3', name: 'Support Ticket' },
+    { id : 'form-4', name:'Aishwary'}
   ];
 
   availableStories: AvailableStory[] = [
@@ -346,6 +347,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
         formFields: conversationalFormFields
       };
       this.canvasBlocks.push(conversationalFormBlock);
+      this.availableForms.push(conversationalFormBlock);
     }
 
     // this.availableStories.push()

@@ -11,8 +11,9 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { trigger, transition, style, animate } from '@angular/animations'; 
-import { ChatbotBlock, AvailableMedia, Button, AvailableStory, ImageSlide } from '../../../models/chatbot-block.model';
+import { ChatbotBlock, AvailableMedia, Button, AvailableStory, ImageSlide, AvailableForm } from '../../../models/chatbot-block.model';
 import { MatTabsModule } from '@angular/material/tabs'; 
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 type ButtonIntegrationType = 'text_message' | 'media_block' | 'website_url' | 'direct_call' | 'start_story' | 'rss_feed' | 'json_api' | 'human_help' | 'conversational_form' | null;
 
@@ -63,7 +64,8 @@ interface FileData {
     MatButtonToggleModule,
     MatSnackBarModule,
     MatTabsModule,
-    CdkTextareaAutosize
+    CdkTextareaAutosize,
+    MatSlideToggleModule
   ],
   templateUrl: './media-block.component.html',
   styleUrls: ['./media-block.component.scss'],
@@ -86,6 +88,7 @@ export class MediaBlockComponent implements OnInit {
   @Input() isSidebarOpen: boolean = false;
   @Input() availableMedia: AvailableMedia[] = [];
   @Input() availableStories : AvailableStory[] = [];
+  @Input() availableForms : AvailableForm[] = [];
 
   @Output() blockUpdated = new EventEmitter<ChatbotBlock>();
   @Output() selectBlock = new EventEmitter<ChatbotBlock>();
