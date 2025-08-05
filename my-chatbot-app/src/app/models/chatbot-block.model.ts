@@ -385,3 +385,12 @@ export interface ImageSlide {
   title?: string;
   subtitle?: string;
 }
+
+export interface IsolatedMediaData {
+  text: string;
+  image: string;
+  video: string;
+  audio: string;
+  file: string;
+  slides: ImageSlide[];
+}
