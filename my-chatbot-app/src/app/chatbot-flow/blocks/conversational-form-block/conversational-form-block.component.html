@@ -39,7 +39,7 @@
 
 <div class="right-sidebar-content" *ngIf="isSelected && isSidebarOpen">
   <div class="panel-header">
-    <div class="panel-subtitle text-[#888EA8]">
+    <div class="panel-subtitle text-[#888ea8] font-[600] mt-3">
       Ask one question at a time & send responses to your desired location or
       webservice
     </div>
@@ -51,30 +51,42 @@
       *ngIf="!showNewFormForm && !showFormConfigMode"
     >
       <div class="section-content space-y-3">
-        <label class="block text-[14px] font-[600] mb-1 text-[#516790]"
+        <label class="block text-[14px] font-[700] mb-2 text-[#506690]"
           >Conversational Form Integration</label
         >
-        <mat-form-field appearance="outline" class="full-width-input h-[56px]">
-          <!-- <mat-label class="">Select a Conversational Form</mat-label> -->
-          <mat-select
-            [(ngModel)]="block.formId"
-            (selectionChange)="onFormSelectionChange()"
-            placeholder="Choose a form"
-          >
-            <mat-option *ngFor="let form of availableForms" [value]="form.id">
+        <div class="select-container">
+          <input
+            type="text"
+            class="custom-select"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchQueryChange()"
+            (focus)="showDropdown = true"
+            (blur)="onInputBlur()"
+            placeholder="Select a Conversational Form"
+          />
+        
+          <ul class="dropdown-list" *ngIf="showDropdown">
+            <li
+              *ngFor="let form of filteredForms"
+              (click)="selectForm(form)"
+              (mousedown)="onListItemClick()"
+            >
               {{ form.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+            </li>
+          </ul>
+        </div>
 
         <div class="setting-item flex items-center gap-3">
-          <mat-slide-toggle
-            class="small-toggle"
-            [(ngModel)]="block.showAsInlineForm"
-            (ngModelChange)="onContentChange()"
-          ></mat-slide-toggle>
+          <label class="switch s-success mr-2 ">
+            <input
+              type="checkbox"
+              [(ngModel)]="block.showAsInlineForm"
+              (change)="onContentChange()"
+            />
+            <span class="slider round"></span>
+          </label>
           <span
-            class="text-lg font-medium text-gray-800 items-center flex gap-2"
+            class="text-[14px]  text-[#506690] font-[600] items-center flex gap-2"
             >Show as inline form
             <mat-icon
               matTooltip="Inline form does not work on facebook"
@@ -85,14 +97,16 @@
         </div>
 
         <div class="setting-item flex items-center gap-3">
-          <mat-slide-toggle
-            class="small-toggle"
-            [(ngModel)]="block.renderFormResponses"
-            (ngModelChange)="onContentChange()"
-          >
-          </mat-slide-toggle>
+          <label class="switch s-success mr-2 ">
+            <input
+              type="checkbox"
+              [(ngModel)]="block.renderFormResponses"
+              (change)="onContentChange()"
+            />
+            <span class="slider round"></span>
+          </label>
           <div class="setting-info">
-            <div class="setting-label text-lg font-medium text-gray-800">
+            <div class="setting-label text-[14px] font-[600] text-[#506690]">
               Render form responses
             </div>
           </div>
