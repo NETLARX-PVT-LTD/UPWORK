@@ -53,13 +53,65 @@ export class ConversationalFormBlockComponent implements OnInit {
   expandedSection: string = 'selection'; // Initialize to 'selection' by default
   // NEW: Control the visibility of the configuration panels
   showFormConfigMode: boolean = false;
+  private blurTimeout: any;
+
+  searchQuery: string = '';
+  filteredForms: AvailableForm[] = []; 
+  showDropdown: boolean = false;
+
+  constructor() { }
+  
+
 
   ngOnInit(): void {
     this.initializeBlockProperties();
     this.loadAvailableForms();
     this.handleInitialFormSelection();
     this.loadAvailableStories();
+    this.filteredForms = this.availableForms;
+    // Set initial value if available
+    if (this.block.formId) {
+      const selectedForm = this.availableForms.find(form => form.id === this.block.formId);
+      if (selectedForm) {
+        this.searchQuery = selectedForm.name;
+      }
+    }
   }
+
+  // Add a method to handle the blur event
+onInputBlur(): void {
+  // Use a small delay to allow the click on a list item to register
+  this.blurTimeout = setTimeout(() => {
+    this.showDropdown = false;
+  }, 200); // 200ms delay
+}
+
+// Add a method to prevent the blur event from immediately hiding the dropdown
+onListItemClick(): void {
+  clearTimeout(this.blurTimeout);
+}
+
+
+  // Called when the user types in the input field
+ onSearchQueryChange(): void {
+  if (this.searchQuery) {
+    this.filteredForms = this.availableForms.filter(form =>
+      form.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+    );
+  } else {
+    // When the search query is empty, show all available forms.
+    this.filteredForms = this.availableForms;
+  }
+}
+
+  // Called when the user selects an option from the list
+  selectForm(form: any): void {
+    this.searchQuery = form.name; // Set the input value to the selected form's name
+    this.block.formId = form.id; // Update the form ID
+    this.showDropdown = false; // Hide the dropdown
+    // You can also emit an event here to notify the parent component
+  }
+
 /**
    * Inserts a selected variable into the successMessage textarea at the current cursor position.
    */
