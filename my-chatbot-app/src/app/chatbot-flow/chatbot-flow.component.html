@@ -4,12 +4,7 @@
       <h2>Create Story</h2>
     </div>
     <div class="header-actions">
-      <button
-        mat-raised-button
-        color="primary"
-        class="save-button"
-        (click)="saveFlow()"
-      >
+      <button mat-raised-button color="primary" class="save-button" (click)="saveFlow()">
         Save
       </button>
     </div>
@@ -19,53 +14,52 @@
     <div class="left-sidebar">
       <div class="sidebar-header">
         <p class="instruction-text">
-          Drag blocks to the canvas or click to add them
+          Drag blocks to the canvas to build your flow
         </p>
       </div>
 
       <div class="search-container">
         <mat-form-field class="search-field">
           <mat-icon matPrefix>search</mat-icon>
-          <input
-            matInput
-            placeholder="Search blocks..."
-            [formControl]="searchControl"
-          />
+          <input matInput placeholder="Search blocks..." [formControl]="searchControl" />
         </mat-form-field>
       </div>
 
-      <div class="blocks-list" cdkDropList (cdkDropListDropped)="drop($event)">
+      <div class="blocks-list" cdkDropList>
         <div
           *ngFor="let block of filteredBlocks$ | async"
           class="block-item enhanced-drag-item"
-          [class.dragging]="isDraggingFromPalette && draggedPaletteBlock?.id === block.id"
           cdkDrag
           [cdkDragData]="block"
-          (cdkDragStarted)="onPaletteDragStarted($event, block)"
+          (cdkDragStarted)="onPaletteDragStarted($event)"
           (cdkDragEnded)="onPaletteDragEnded($event, block)"
-          (click)="addBlockToCanvas(block)"
         >
-          <div
-            class="block-icon"
-            [style.background-color]="getStatusColor(block.status)"
-          >
+          <div class="block-icon">
             <img *ngIf="block.imageUrl" [src]="block.imageUrl" alt="block-icon" class="custom-icon shadow-sm border border-gray-200 rounded">
             <mat-icon *ngIf="!block.imageUrl">{{ block.icon }}</mat-icon>
           </div>
-      
+
           <div class="block-content flex items-center">
             <div class="block-name">{{ block.name }}</div>
-            <div
-              *ngIf="block.description"
-              class="block-description ml-2 px-1.5 py-1 rounded-md bg-green-500 text-white text-xs font-semibold"
-            >
+            <div *ngIf="block.description" class="block-description ml-2 px-1.5 py-1 rounded-md bg-green-500 text-white text-xs font-semibold">
               {{ block.description }}
             </div>
           </div>
-      
-          <div class="drag-handle enhanced-drag-handle" cdkDragHandle>
+
+          <div class="drag-handle enhanced-drag-handle">
             <mat-icon>drag_indicator</mat-icon>
-            <div class="drag-hint">Drag to canvas</div>
+          </div>
+
+          <div *cdkDragPreview class="drag-preview-block">
+            <div class="drag-preview-content">
+              <div class="drag-preview-icon">
+                <img *ngIf="block.imageUrl" [src]="block.imageUrl" alt="block-icon" class="preview-icon-img">
+                <mat-icon *ngIf="!block.imageUrl">{{ block.icon }}</mat-icon>
+              </div>
+              <div class="drag-preview-text">
+                <div class="drag-preview-name">{{ block.name }}</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -74,21 +68,11 @@
     <div class="canvas-area" [class.sidebar-open]="rightSidebarOpen">
       <div class="canvas-controls">
         <div class="zoom-controls">
-          <button
-            mat-icon-button
-            (click)="zoomIn()"
-            [disabled]="zoomLevel >= maxZoom"
-            matTooltip="Zoom In"
-          >
+          <button mat-icon-button (click)="zoomIn()" [disabled]="zoomLevel >= maxZoom" matTooltip="Zoom In">
             <mat-icon class="mt-2 mr-0.9">add</mat-icon>
           </button>
           <span class="zoom-level">{{ zoomLevel * 100 | number : "1.0-0" }}%</span>
-          <button
-            mat-icon-button
-            (click)="zoomOut()"
-            [disabled]="zoomLevel <= minZoom"
-            matTooltip="Zoom Out"
-          >
+          <button mat-icon-button (click)="zoomOut()" [disabled]="zoomLevel <= minZoom" matTooltip="Zoom Out">
             <mat-icon class="mt-2 mr-0.9">remove</mat-icon>
           </button>
         </div>
@@ -99,8 +83,6 @@
 
       <div
         class="canvas-wrapper bg-[#F1F2F3] enhanced-drop-zone"
-        [class.drop-zone-active]="isDraggingFromPalette"
-        [class.drop-zone-hover]="isOverDropZone"
         #canvasWrapper
         [style.cursor]="isPanning ? 'grabbing' : 'default'"
       >
@@ -120,24 +102,18 @@
           </div>
 
           <div class="blocks-container">
-            <div
-              *ngFor="let block of canvasBlocks"
-              class="canvas-block jsplumb-draggable enhanced-canvas-block"
-              [id]="'block-' + block.id"
-              [class]="'canvas-block-' + block.type"
-              [class.selected]="selectedBlock?.id === block.id"
-              [class.dragging]="isDraggingBlock && draggedBlockId === block.id"
-              [class.connection-target]="nearestConnectionPoint?.blockId === block.id"
-              [style.left.px]="block.x"
-              [style.top.px]="block.y"
-              [style.border-color]="getStatusColor(block.status)"
-              [style.background-color]="getTypeColor(block.type)"
-              cdkDrag
-              (cdkDragStarted)="onBlockDragStarted($event, block)"
-              (cdkDragEnded)="onBlockDragEnded($event, block)"
-              (mousedown)="endConnection($event, block)"
-              [cdkDragFreeDragPosition]="{x: 0, y: 0}"
-            >
+           <div
+  *ngFor="let block of canvasBlocks"
+  class="canvas-block jsplumb-draggable enhanced-canvas-block"
+  [id]="'block-' + block.id"
+  [class]="'canvas-block-' + block.type"
+  [class.selected]="selectedBlock?.id === block.id"
+  [style.left.px]="block.x"
+  [style.top.px]="block.y"
+  [style.position]="'absolute'"
+  [style.border-color]="getStatusColor(block.status)"
+  [style.background-color]="getTypeColor(block.type)"
+>
               <div class="connection-indicators">
                 <div class="connection-input-indicator"></div>
                 <div class="connection-output-indicator"></div>
@@ -152,8 +128,6 @@
                   [isSidebarOpen]="rightSidebarOpen"
                   (blockUpdated)="onBlockUpdated($event)"
                   (selectBlock)="selectBlock($event)"
-                  (startConnection)="startConnection($event, block)"
-                  (endConnection)="endConnection($event, block)"
                   (removeBlock)="removeCanvasBlock($event)"
                   (duplicateBlock)="duplicateCanvasBlock($event)"
                   (editBlock)="editCanvasBlock($event)"
@@ -167,8 +141,6 @@
                   [isSidebarOpen]="rightSidebarOpen"
                   (blockUpdated)="onBlockUpdated($event)"
                   (selectBlock)="selectBlock($event)"
-                  (startConnection)="startConnection($event, block)"
-                  (endConnection)="endConnection($event, block)"
                   (removeBlock)="removeCanvasBlock($event)"
                   (duplicateBlock)="duplicateCanvasBlock($event)"
                   (editBlock)="editCanvasBlock($event)"
@@ -183,11 +155,8 @@
                   [isSidebarOpen]="rightSidebarOpen"
                   [availableMedia]="availableMedia"
                   [availableStories]="availableStories"
-                  [availableForms] = "availableForms"
                   (blockUpdated)="onBlockUpdated($event)"
                   (selectBlock)="selectBlock($event)"
-                  (startConnection)="startConnection($event, block)"
-                  (endConnection)="endConnection($event, block)"
                   (removeBlock)="removeCanvasBlock($event)"
                   (duplicateBlock)="duplicateCanvasBlock($event)"
                   (editBlock)="editCanvasBlock($event)"
@@ -201,8 +170,6 @@
                   [availableStories]="availableStories"
                   (blockUpdated)="onBlockUpdated($event)"
                   (selectBlock)="selectBlock($event)"
-                  (startConnection)="startConnection($event, block)"
-                  (endConnection)="endConnection($event, block)"
                   (removeBlock)="removeCanvasBlock($event)"
                   (duplicateBlock)="duplicateCanvasBlock($event)"
                   (editBlock)="editCanvasBlock($event)"
@@ -216,8 +183,6 @@
                   [availableForms]="availableForms"
                   (blockUpdated)="onBlockUpdated($event)"
                   (selectBlock)="selectBlock($event)"
-                  (startConnection)="startConnection($event, block)"
-                  (endConnection)="endConnection($event, block)"
                   (removeBlock)="removeCanvasBlock($event)"
                   (duplicateBlock)="duplicateCanvasBlock($event)"
                   (editBlock)="editCanvasBlock($event)"
@@ -230,8 +195,6 @@
                   [isSidebarOpen]="rightSidebarOpen"
                   (blockUpdated)="onBlockUpdated($event)"
                   (selectBlock)="selectBlock($event)"
-                  (startConnection)="startConnection($event, block)"
-                  (endConnection)="endConnection($event, block)"
                   (removeBlock)="removeCanvasBlock($event)"
                   (duplicateBlock)="duplicateCanvasBlock($event)"
                   (editBlock)="editCanvasBlock($event)"
@@ -244,8 +207,6 @@
                   [isSidebarOpen]="rightSidebarOpen"
                   (blockUpdated)="onBlockUpdated($event)"
                   (selectBlock)="selectBlock($event)"
-                  (startConnection)="startConnection($event, block)"
-                  (endConnection)="endConnection($event, block)"
                   (removeBlock)="removeCanvasBlock($event)"
                   (duplicateBlock)="duplicateCanvasBlock($event)"
                   (editBlock)="editCanvasBlock($event)"
@@ -256,136 +217,15 @@
             <div
               *ngFor="let block of canvasBlocks"
               class="quick-reply-cards-wrapper"
-              [class.hidden]="
-                block.type !== 'textResponse' ||
-                !block.quickReplies ||
-                block.quickReplies.length === 0
-              "
+              [class.hidden]="block.type !== 'textResponse' || !block.quickReplies || block.quickReplies.length === 0"
             >
-              <svg
-                class="quick-reply-connections-svg"
-                [attr.width]="1200"
-                [attr.height]="400"
-              >
-                <path
-                  [attr.d]="
-                    'M ' +
-                    (block.x + (block.width || 280) / 2) +
-                    ',' +
-                    ((block.y || 0) + (block.height || 150)) +
-                    ' L ' +
-                    (block.x - 180 + 140) +
-                    ',' +
-                    ((block.y || 0) + (block.height || 150) + 60)
-                  "
-                  class="connection-line no-quick-reply-connection"
-                ></path>
-
-                <path
-                  [attr.d]="
-                    'M ' +
-                    (block.x + (block.width || 280) / 2) +
-                    ',' +
-                    ((block.y || 0) + (block.height || 150)) +
-                    ' L ' +
-                    (block.x + 130 + 140) +
-                    ',' +
-                    ((block.y || 0) + (block.height || 150) + 60)
-                  "
-                  class="connection-line quick-replies-connection"
-                ></path>
-
-                <g *ngFor="let reply of block.quickReplies; let i = index">
-                  <path
-                    [attr.d]="
-                      'M ' +
-                      (block.x + 130 + 140) +
-                      ',' +
-                      ((block.y || 0) + (block.height || 150) + 60 + 75) +
-                      ' L ' +
-                      (block.x - 100 + i * 250 + 110) +
-                      ',' +
-                      ((block.y || 0) + (block.height || 150) + 200)
-                    "
-                    class="connection-line individual-quick-reply-connection"
-                  ></path>
-                </g>
-              </svg>
-
-              <div
-                class="no-quick-reply-block-external"
-                [style.left.px]="block.x - 180"
-                [style.top.px]="(block.y || 0) + (block.height || 150) + 60"
-              >
-                <div class="flow-block-header">
-                  <mat-icon class="block-icon">block</mat-icon>
-                  <span class="block-title">No Quick Reply</span>
-                </div>
-                <div class="flow-block-body">
-                  <p class="block-description">
-                    Drag modules from the user input tab
-                  </p>
-                </div>
-                <div class="connection-point connection-output">
-                  <div class="connection-dot"></div>
-                </div>
-              </div>
-
-              <div
-                class="quick-replies-main-block-external"
-                [style.left.px]="block.x + 130"
-                [style.top.px]="(block.y || 0) + (block.height || 150) + 60"
-              >
-                <div class="flow-block-header">
-                  <mat-icon class="block-icon">forum</mat-icon>
-                  <span class="block-title">Quick Replies</span>
-                </div>
-                <div class="flow-block-body">
-                  <p class="block-description">
-                    Simple buttons to carry forward the user conversation to a
-                    desired path
-                  </p>
-                </div>
-                <div class="connection-point connection-output">
-                  <div class="connection-dot"></div>
-                </div>
-              </div>
-
-              <div
-                class="individual-quick-replies-external"
-                [style.left.px]="block.x - 100"
-                [style.top.px]="(block.y || 0) + (block.height || 150) + 200"
-              >
-                <div class="quick-reply-cards-row">
-                  <div
-                    *ngFor="let reply of block.quickReplies; let i = index"
-                    class="individual-quick-reply-card"
-                    [style.left.px]="i * 250"
-                  >
-                    <div class="quick-reply-card-header">
-                      <div class="quick-reply-icon-wrapper">
-                        <mat-icon class="quick-reply-icon">chat_bubble</mat-icon>
-                      </div>
-                      <span class="quick-reply-title">Quick Reply:</span>
-                      <div class="quick-reply-badge">{{ reply.text }}</div>
-                    </div>
-                    <div class="connection-point connection-output">
-                      <div class="connection-dot"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div
-      class="right-sidebar"
-      [class.open]="rightSidebarOpen"
-      *ngIf="selectedBlock"
-    >
+    <div class="right-sidebar" [class.open]="rightSidebarOpen" *ngIf="selectedBlock">
       <div class="right-sidebar-header">
         <div class="sidebar-title">
           <mat-icon>{{ selectedBlock.icon }}</mat-icon>
@@ -427,7 +267,6 @@
             [availableStories]="availableStories"
             (closeSidebarEvent)="closeSidebar()"
             (blockUpdated)="onBlockUpdated($event)"
-            [availableForms] = "availableForms"
           ></app-media-block>
 
           <app-link-story-block
@@ -466,28 +305,10 @@
       </div>
     </div>
 
-    <div
-      class="sidebar-overlay"
-      [class.active]="rightSidebarOpen"
-      (click)="closeSidebar()"
-    ></div>
-
-    <app-message-box
-      *ngIf="showMessageBox"
-      [message]="messageBoxContent"
-      [type]="messageBoxType"
-      (closed)="onMessageBoxClosed()"
-    ></app-message-box>
+    <div class="sidebar-overlay" [class.active]="rightSidebarOpen" (click)="closeSidebar()"></div>
   </div>
 
-  <app-jarvish-block 
-  *ngIf="isJarvisVisible" 
-  [availableStories]="availableStories" 
-  [canvasBlocks]="canvasBlocks"  
-  [availableMedia]="availableMedia"
-  [availableForms]="availableForms"
-  ></app-jarvish-block>
-
+  <app-jarvish-block *ngIf="isJarvisVisible" [availableStories]="availableStories" [canvasBlocks]="canvasBlocks" [availableMedia]="availableMedia"></app-jarvish-block>
   <button class="absolute right-10 bottom-8 w-14 cursor-pointer z-[100000]" (click)="toggleJarvis()">
     <img src="/msg.png" alt="" class="rounded-full">
   </button>

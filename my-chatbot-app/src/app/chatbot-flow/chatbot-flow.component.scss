@@ -3226,3 +3226,14 @@
     transform: translateX(-50%);
   }
 }
+
+// ADD THIS TO THE VERY END of chatbot-flow.component.scss
+
+// :host ::ng-deep {
+//   /* This is the most important rule. It forces every part of the connection line
+//      (the container, the SVG element, and the path itself) to be "clickable"
+//      by the mouse, overriding any other style that might be hiding them. */
+//   .jtk-connector, .jtk-overlay, .jtk-connector svg, .jtk-connector path {
+//     pointer-events: all !important;
+//   }
+// }
