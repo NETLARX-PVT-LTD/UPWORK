@@ -31,7 +31,7 @@ import { ConversationalFormBlockComponent } from './blocks/conversational-form-b
 import { MessageBoxComponent } from '../shared/components/message-box/message-box.component';
 import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-block/json-api-integration-block.component';
 import { JarvishBlockComponent } from './blocks/jarvish-block/jarvish-block.component';
-
+import { MediaBlockPageComponent } from '../media-block-page/media-block-page.component';
 // Import the JsPlumbFlowService
 import { JsPlumbFlowService } from './services/jsplumb-flow.service';
 
@@ -39,8 +39,18 @@ type NearestConnectionPoint = { blockId: string, x: number, y: number };
 
 @Component({
   selector: 'app-chatbot-flow',
+   template: `
+    <app-media-block-page 
+      [availableMedia]="availableMedia"
+      [availableStories]="availableStories"
+      (mediaUpdated)="onMediaUpdated($event)"
+      (mediaDeleted)="onMediaDeleted($event)"
+      (mediaDuplicated)="onMediaDuplicated($event)">
+    </app-media-block-page>
+  `,
   standalone: true,
   imports: [
+    MediaBlockPageComponent,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
