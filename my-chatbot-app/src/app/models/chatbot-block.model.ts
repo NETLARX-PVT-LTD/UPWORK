@@ -187,7 +187,7 @@ export interface AvailableForm {
   validatePhone?: boolean;
   spamProtection?: boolean;
   requireCompletion?: boolean;
-
+ createdAt?: string;
   // If your available forms will also have predefined values for these, add them here:
   allowMultipleSubmission?: boolean;
   multipleSubmissionMessage?: string;
