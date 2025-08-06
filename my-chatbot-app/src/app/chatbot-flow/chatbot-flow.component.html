@@ -183,6 +183,7 @@
                   [isSidebarOpen]="rightSidebarOpen"
                   [availableMedia]="availableMedia"
                   [availableStories]="availableStories"
+                  [availableForms] = "availableForms"
                   (blockUpdated)="onBlockUpdated($event)"
                   (selectBlock)="selectBlock($event)"
                   (startConnection)="startConnection($event, block)"
@@ -426,6 +427,7 @@
             [availableStories]="availableStories"
             (closeSidebarEvent)="closeSidebar()"
             (blockUpdated)="onBlockUpdated($event)"
+            [availableForms] = "availableForms"
           ></app-media-block>
 
           <app-link-story-block
@@ -478,7 +480,13 @@
     ></app-message-box>
   </div>
 
-  <app-jarvish-block *ngIf="isJarvisVisible" [availableStories]="availableStories" [canvasBlocks]="canvasBlocks"  [availableMedia]="availableMedia"></app-jarvish-block>
+  <app-jarvish-block 
+  *ngIf="isJarvisVisible" 
+  [availableStories]="availableStories" 
+  [canvasBlocks]="canvasBlocks"  
+  [availableMedia]="availableMedia"
+  [availableForms]="availableForms"
+  ></app-jarvish-block>
 
   <button class="absolute right-10 bottom-8 w-14 cursor-pointer z-[100000]" (click)="toggleJarvis()">
     <img src="/msg.png" alt="" class="rounded-full">

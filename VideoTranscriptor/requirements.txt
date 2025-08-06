@@ -2,6 +2,6 @@ openai-whisper
 yt-dlp
 pydub
 opencv-python
-ffmpeg-python
 boto3
 mediapipe
+tqdm

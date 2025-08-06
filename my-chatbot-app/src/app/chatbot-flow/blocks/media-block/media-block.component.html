@@ -857,25 +857,31 @@
       </div>
     </div>
 
-    <div *ngSwitchCase="'conversational_form'">
-      <div class="input-group mb-4">
-        <h3 class="text-sm mb-1 font-semibold text-gray-600">Select Form *</h3>
-        <mat-form-field appearance="outline" class="full-width-input w-full">
-          <mat-select [(ngModel)]="currentButton.formId" name="formId">
-            <mat-option value="form1">Default Form 9405</mat-option>
-            <mat-option value="form2">Another Form</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+          <div *ngSwitchCase="'conversational_form'">
+            <div class="input-group mb-4">
+              <h3 class="text-sm mb-1 font-semibold text-gray-600">Select Form *</h3>
+              <mat-form-field appearance="outline" class="full-width-input w-full">
+                <mat-select [(ngModel)]="currentButton.formId" name="formId">
+                  <mat-option *ngFor="let form of availableForms" [value]="form.id">
+                    {{ form.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
 
-      <div class="flex items-center justify-start mt-4">
-        <mat-slide-toggle [(ngModel)]="currentButton.showInline" (ngModelChange)="onContentChange()">
-        </mat-slide-toggle>
-        <span>Show as inline form</span>
-        <mat-icon matTooltip="Display the form directly in the chat window."
-          class="info-icon !font-2 ml-1">info</mat-icon>
-      </div>
-    </div>
+            <div class="flex items-center justify-start mt-4">
+              <mat-slide-toggle [(ngModel)]="currentButton.showInline" (ngModelChange)="onContentChange()">
+              </mat-slide-toggle>
+              <span>Show as inline form</span>
+              <mat-icon
+                matTooltip="Display the form directly in the chat window."
+                class="info-icon !font-2 ml-1"
+              >
+                info
+              </mat-icon>
+            </div>
+          </div>
+
   </ng-container>
 
   <div class="flex justify-start mt-6">
