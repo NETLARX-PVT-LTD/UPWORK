@@ -2,46 +2,96 @@
 <div
   *ngIf="!isChatStarted"
   id="jarvis-chat"
-  class="jarvis-chat bottom-25 bg-white right-10 absolute z-[99999] h-[75vh] w-[24rem] rounded-[20px]"
+  class="jarvis-chat bottom-25 bg-white right-10 absolute z-[99999] h-[584px] w-[24rem] rounded-[20px] shadow-2xl"
 >
   <div
-    class="jarvis-header p-5 h-[40%] bg-gradient-to-b from-[#218DEB] to-[#7DC2FD] rounded-b-[20px] rounded-[20px]"
+    class="jarvis-header space-y-4 p-5 h-[40%] bg-gradient-to-b from-[#218DEB] to-[#7DC2FD] rounded-b-[30px] rounded-[20px]"
   >
     <div class="p-5 flex gap-2 items-center">
       <img
-        src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png"
+        src="/jarvis_logo.png"
         alt="Jarvis"
-        class="jarvis-avatar w-10 h-10"
+        class="jarvis-avatar w-10 h-10 rounded-full"
       />
       <div class="jarvis-title flex flex-col text-white">
         <strong>Jarvis</strong>
         <small>Reply in 10 seconds.</small>
       </div>
     </div>
-    <div>
-      <h1 class="text-white text-2xl">Let's start a conversation</h1>
-      <h2 class="text-white text-xl">Typically replies in 10 seconds.</h2>
+    <div class="jarvis-header-lower">
+      <h1 class="first text-white text-2xl">Let's start a conversation</h1>
+      <h2 class="second text-white text-lg">
+        Typically replies in 10 seconds.
+      </h2>
     </div>
   </div>
   <div class="jarvis-body p-5 space-y-5">
     <div
-      class="shadow-xl rounded-lg flex justify-between p-2 items-center tracking-tight cursor-pointer"
+      class="shadow-md rounded-3xl flex justify-between p-3 px-6 items-center tracking-tight cursor-pointer"
       (click)="startConversation()"
     >
       <div class="">
-        <h1 class="text-xl font-[500]">Start a Conversation</h1>
-        <p class="text-sm">Send us a message</p>
+        <h5 class="text-lg font-semibold text-gray-700 tracking-tight">
+          Start a Conversation
+        </h5>
+        <p class="text-xs tracking-tight text-gray-700">Send us a message</p>
       </div>
-      <img src="/rocket.jpeg" class="w-10 rounded-lg object-cover" alt="" />
+      <svg
+        data-v-d83a6c8c=""
+        id="Layer_1"
+        data-name="Layer 1"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 684.98 684.98"
+        width="40.909"
+        height="40.909"
+      >
+        <defs data-v-d83a6c8c=""></defs>
+        <circle
+          data-v-d83a6c8c=""
+          fill="#1F8CEB"
+          cx="344.47"
+          cy="342.04"
+          r="334.98"
+          style="isolation: isolate"
+        ></circle>
+        <path
+          data-v-d83a6c8c=""
+          fill="#1F8CEB"
+          d="M415,240a11.35,11.35,0,1,0,11.35,11.35A11.35,11.35,0,0,0,415,240Z"
+        ></path>
+        <path
+          data-v-d83a6c8c=""
+          fill="#fff"
+          d="M459.34,130.53H228.62c-69.22,0-115.36,46.15-115.36,115.36V384.33c0,69.21,46.14,115.36,115.36,115.36v49.14A23,23,0,0,0,264.38,568l102.67-68.29h92.29c69.22,0,115.36-46.15,115.36-115.36V245.89C574.7,176.68,528.56,130.53,459.34,130.53ZM277.16,414.69c-.21,2.73-.46,5.91-.65,9.58v0a6.85,6.85,0,0,1-4.27,6L226.8,448.39l0,0a6.93,6.93,0,0,1-2.58.5,6.82,6.82,0,0,1-6.81-6.82,6.58,6.58,0,0,1,.48-2.52l18.16-45.41c1-2.58,3.1-3.62,6.36-4.27l4.33,0h0c16.09.07,22.75.11,27.36,5.11C278.34,399.51,277.87,405.56,277.16,414.69ZM412.68,338.3v87a6.83,6.83,0,0,1-5.16,6.61L334.88,450.1h.06a6.83,6.83,0,0,1-1.7.21h0a6.79,6.79,0,0,1-6.79-6.79V393.77q-8.61,4.55-17.32,9h0l0,0h0a6.86,6.86,0,0,1-7.93-1.25l-36.32-36.32a6.86,6.86,0,0,1-2-4.83,6.77,6.77,0,0,1,.68-3c2.92-6,5.89-11.75,8.87-17.45H224.28a6.82,6.82,0,0,1-6.81-6.82,6.66,6.66,0,0,1,.2-1.65l18.16-72.64v0a6.79,6.79,0,0,1,6.59-5.11h86.95c44.21-51.07,93.67-75.08,149.43-72.64h0a6.8,6.8,0,0,1,6.47,6.33v0C489.82,252.5,459,300.05,412.68,338.3Z"
+        ></path>
+        <path
+          data-v-d83a6c8c=""
+          fill="#fff"
+          d="M263.82,403.73c-1.06-.17-8.66-.21-16.8-.24l-10.54,26.36,26.68-10.64c.13-2,.28-3.84.41-5.52,0,.07,0,.14,0,.2l0-.24h0v0a46.56,46.56,0,0,0,.4-6.17C264,406.18,263.92,404.87,263.82,403.73Z"
+        ></path>
+        <path
+          data-v-d83a6c8c=""
+          fill="#fff"
+          d="M415,276.35a25,25,0,1,1,25-25A25,25,0,0,1,415,276.35Z"
+        ></path>
+      </svg>
     </div>
     <div
-      class="shadow-xl rounded-lg flex justify-between p-2 items-center tracking-tight"
+      class="shadow-md rounded-3xl flex justify-between p-3 px-6 cursor-pointer items-center tracking-tight"
     >
       <div>
-        <h1 class="text-xl font-[500]">Continue Conversation</h1>
-        <p class="text-sm">Pick up where you left off</p>
+        <h1 class="text-lg font-semibold text-gray-700 tracking-tight">
+          Continue Conversation
+        </h1>
+        <p class="text-xs tracking-tight text-gray-700">
+          Pick up where you left off
+        </p>
       </div>
-      <img src="/rocket.jpeg" class="w-10 rounded-lg object-cover" alt="" />
+      <img
+        src="/telegram_img.jpeg"
+        class="w-10 rounded-lg object-cover"
+        alt=""
+      />
     </div>
   </div>
 </div>
@@ -49,17 +99,17 @@
 <!-- Start Conversation Chat UI -->
 <div
   *ngIf="isChatStarted"
-  class="jarvis-chat-ui absolute bottom-25 right-10 z-[100000] bg-white rounded-[20px] w-[24rem] h-[75vh] flex flex-col overflow-hidden"
+  class="jarvis-chat-ui absolute bottom-25 right-10 z-[100000] bg-white rounded-[20px] w-[24rem] h-[584px] flex flex-col overflow-hidden"
 >
   <div
-    class="bg-gradient-to-b from-[#218DEB] to-[#7DC2FD] text-white p-4 flex items-center justify-between"
+    class="absolute overlay-animate top-10 w-full h-[160px] bg-[#52A6F4] rounded-b-[30px] transition-transform duration-700 ease-in-out"
+  ></div>
+
+  <div
+    class="bg-gradient-to-b from-[#218DEB] to-[#7DC2FD] relative text-white rounded-b-[30px] p-4 flex items-center justify-between z-10"
   >
     <div class="flex items-center gap-2">
-      <img
-        src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png"
-        class="w-10 h-10 rounded-full"
-        alt="Jarvis"
-      />
+      <img src="/jarvis_logo.png" class="w-10 h-10 rounded-full" alt="Jarvis" />
       <div>
         <div class="font-bold">Jarvis</div>
         <div class="text-sm">Reply in 10 seconds.</div>
@@ -72,99 +122,7 @@
       ×
     </div>
   </div>
-
-  <!-- <div class="flex-1 p-4 overflow-y-auto">
-    <div class="bg-[#218DEB] text-white rounded-full px-4 py-2 w-fit ml-auto">
-      Start Conversation
-    </div>
-  </div>
-
-  <div class="p-4 flex items-center border-t">
-    <span class="text-xl mr-2">😊</span>
-    <input type="text" placeholder="Type your message" class="flex-1 px-3 py-2 border rounded-full outline-none" />
-    <div class="flex items-center gap-2 ml-2 text-[#218DEB] text-xl">
-      📎 🎤 📩
-    </div>
-  </div> -->
-  <!-- component -->
-  <div class="flex-1 p-2 justify-between flex flex-col h-screen">
-    <!-- <div class="flex sm:items-center justify-between py-3 border-b-2 border-gray-200">
-        <div class="relative flex items-center space-x-4">
-          <div class="relative">
-              <span class="absolute text-green-500 right-0 bottom-0">
-                <svg width="20" height="20">
-                    <circle cx="8" cy="8" r="8" fill="currentColor"></circle>
-                </svg>
-              </span>
-          <img src="https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144" alt="" class="w-10 sm:w-16 h-10 sm:h-16 rounded-full">
-          </div>
-          <div class="flex flex-col leading-tight">
-              <div class="text-2xl mt-1 flex items-center">
-                <span class="text-gray-700 mr-3">Anderson Vanhron</span>
-              </div>
-              <span class="text-lg text-gray-600">Junior Developer</span>
-          </div>
-        </div>
-        <div class="flex items-center space-x-2">
-          <button type="button" class="inline-flex items-center justify-center rounded-lg border h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-          </button>
-          <button type="button" class="inline-flex items-center justify-center rounded-lg border h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-              </svg>
-          </button>
-          <button type="button" class="inline-flex items-center justify-center rounded-lg border h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-              </svg>
-          </button>
-        </div>
-    </div> -->
-    <!-- <div #messagesContainer class="hide-scrollbar flex flex-col space-y-4 h-[55vh] overflow-y-auto">
-        <div *ngFor="let msg of messages" class="chat-message">
-          <div
-            class="flex items-end overflow-y-auto"
-            [ngClass]="{
-              'justify-end': msg.sender === 'user',
-              'justify-start': msg.sender === 'bot'
-            }"
-          >
-            <div
-              class="flex flex-col space-y-2 text-xs max-w-xs mx-2"
-              [ngClass]="{
-                'order-1 items-end': msg.sender === 'user',
-                'order-2 items-start': msg.sender === 'bot'
-              }"
-            >
-              <div>
-                <span
-                  class="px-4 py-2 rounded-lg inline-block"
-                  [ngClass]="{
-                    'bg-blue-600 text-white rounded-br-none': msg.sender === 'user',
-                    'bg-gray-300 text-gray-600 rounded-bl-none': msg.sender === 'bot'
-                  }"
-                >
-                  {{ msg.text }}
-                </span>
-              </div>
-            </div>
-            <img
-              [src]="msg.sender === 'user'
-                ? 'https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b'
-                : 'https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb'"
-              alt="profile"
-              class="w-6 h-6 rounded-full"
-              [ngClass]="{
-                'order-2': msg.sender === 'user',
-                'order-1': msg.sender === 'bot'
-              }"
-            />
-          </div>
-        </div>
-      </div> -->
+  <div class="flex-1 p-2 justify-between flex flex-col">
     <div
       #messagesContainer
       class="hide-scrollbar flex flex-col space-y-4 h-[55vh] overflow-y-auto"
