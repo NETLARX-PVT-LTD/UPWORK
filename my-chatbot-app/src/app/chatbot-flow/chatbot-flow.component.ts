@@ -435,6 +435,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.isOverDropZone && this.dropPreviewPosition) {
       this.addBlockToCanvasAtPosition(block, this.dropPreviewPosition.x, this.dropPreviewPosition.y);
+      console.log('Current canvas blocks:', this.canvasBlocks);
     }
 
     this.cleanupPaletteDrag();
@@ -494,6 +495,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  
   private cleanupPaletteDrag(): void {
     this.isDraggingFromPalette = false;
     this.draggedPaletteBlock = null;

@@ -739,6 +739,7 @@ uploadImageUrl(): void {
     // FIXED: Use helper method instead of direct mediaUrl assignment
     this.setMediaUrlFromSelected(selected);
     this.block.slides = selected.slides ? JSON.parse(JSON.stringify(selected.slides)) : [];
+this.block.buttons = selected.buttons ? JSON.parse(JSON.stringify(selected.buttons)) : [];
 
     if (selected.type === 'image' && (!this.block.slides || this.block.slides.length === 0)) {
       this.block.slides = [{ image: selected.url || '', title: '', subtitle: '' }];
@@ -877,7 +878,8 @@ createNewMediaBlock(): void {
       content: this.block.content ?? '',
       // FIXED: Use appropriate URL property based on media type
       url: this.getUrlForMediaType(currentMediaType),
-      slides: this.block.slides ? JSON.parse(JSON.stringify(this.block.slides)) : []
+      slides: this.block.slides ? JSON.parse(JSON.stringify(this.block.slides)) : [],
+      buttons: this.block.buttons ? JSON.parse(JSON.stringify(this.block.buttons)) : [] 
     };
     this.availableMedia.push(newMedia);
     this.block.mediaId = newMediaId;
@@ -901,7 +903,8 @@ createNewMediaBlock(): void {
       this._snackBar.open('Error: Could not find existing media to update.', 'Dismiss', { duration: 3000 });
     }
   }
-
+ // Add the console.log here to show the updated availableMedia array
+  console.log('Updated availableMedia:', this.availableMedia);
   this.showNewMediaForm = false;
   this.showButtonTypeCard = false;
   this.closeCommonIntegrationCard();
