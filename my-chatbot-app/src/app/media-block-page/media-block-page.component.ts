@@ -8,6 +8,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router, RouterModule } from '@angular/router';
 import { AvailableMedia, Button, AvailableStory } from '../models/chatbot-block.model';
 import { MediaService } from '../shared/services/media.service';
+import { MatDialog } from '@angular/material/dialog';
+import { CloneConfirmDialogComponent } from './clone-confirm-dialog/clone-confirm-dialog.component'; // Create this component
+import { Clipboard } from '@angular/cdk/clipboard';
+
 
 @Component({
   selector: 'app-media-block-page',
@@ -31,9 +35,39 @@ export class MediaBlockPageComponent implements OnInit {
   constructor(
     private _snackBar: MatSnackBar,
     private mediaService: MediaService,
-    private router: Router
+    private router: Router,
+    private clipboard: Clipboard, private snackBar: MatSnackBar,
+    public dialog: MatDialog
   ) { }
 
+
+ 
+
+  copyPayload(media: any) {
+    // Format the data you want to copy. For example, JSON.stringify.
+    const payload = JSON.stringify(media, null, 2); 
+
+    // Use the Clipboard service to copy the data.
+    this.clipboard.copy(payload);
+
+    // Provide user feedback.
+    this.snackBar.open('Payload copied to clipboard!', 'Dismiss', {
+      duration: 3000,
+    });
+  }
+cloneMediaBlock(media: any) {
+  const dialogRef = this.dialog.open(CloneConfirmDialogComponent, {
+    width: '400px',
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      // Logic to duplicate the media block
+      const clonedBlock = { ...media, name: media.name + ' duplicate', id: Date.now() }; // Example cloning logic, update ID
+      this.availableMedia.unshift(clonedBlock); // Add the new block to the beginning of the array
+    }
+  });
+}
   ngOnInit(): void {
     this.availableMedia = this.mediaService.getMediaBlocks();
   }
