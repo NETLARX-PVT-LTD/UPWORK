@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiX, FiUser } from 'react-icons/fi';
 import { apiRequest } from '@/lib/api';
 
 interface LoginResponse {
@@ -30,6 +30,33 @@ export default function LoginPage() {
     password: false,
   });
   const [showPassword, setShowPassword] = useState(false);
+  
+  // New state for guest modal
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const [isGuestLoading, setIsGuestLoading] = useState(false);
+
+  // Guest login handler
+  const handleGuestLogin = async () => {
+    setIsGuestLoading(true);
+    setError('');
+
+    try {
+      const response = await apiRequest<LoginResponse>('/auth/guest', {
+        method: 'POST',
+        requiresAuth: false
+      });
+
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      // Redirect to the user dashboard for guests
+      router.push('/user/dashboard');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred during guest login. Please try again.');
+    } finally {
+      setIsGuestLoading(false);
+    }
+  };
 
   // Form validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -141,7 +168,7 @@ export default function LoginPage() {
                   onBlur={handleBlur}
                   required
                   className={`w-full px-4 py-3.5 border text-gray-700 rounded-xl focus:outline-none focus:ring-2 transition-all
-                    ${errors.email}
+                    ${errors.email
                       ? 'border-red-300 focus:ring-red-500'
                       : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'}`}
                   disabled={isLoading}
@@ -187,7 +214,7 @@ export default function LoginPage() {
                   onBlur={handleBlur}
                   required
                   className={`w-full pr-12 px-4 py-3.5 border text-gray-700 rounded-xl focus:outline-none focus:ring-2 transition-all
-                    ${errors.password}
+                    ${errors.password
                       ? 'border-red-300 focus:ring-red-500'
                       : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'}`}
                   disabled={isLoading}
@@ -260,6 +287,26 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+          {/* Updated "Try the App" section */}
+          <div className="flex items-center justify-center my-6">
+            <div className="flex-grow border-t border-gray-300"></div>
+            <span className="flex-shrink mx-4 text-gray-400 text-sm">
+              OR
+            </span>
+            <div className="flex-grow border-t border-gray-300"></div>
+          </div>
+          
+          <button
+            type="button"
+            onClick={() => setShowGuestModal(true)}
+            className="w-full py-3.5 px-4 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 font-medium text-base rounded-xl border border-gray-200
+              hover:from-gray-200 hover:to-gray-100 hover:border-gray-300 focus:ring-2 focus:ring-gray-300 focus:ring-offset-2
+              transition-all duration-200 flex items-center justify-center gap-2 group"
+          >
+            <FiUser className="h-5 w-5 text-gray-500 group-hover:text-gray-600 transition-colors" />
+            Try the App as Guest
+          </button>
         </div>
       </div>
 
@@ -288,6 +335,118 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      {/* Guest Login Modal */}
+      {showGuestModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" 
+               onClick={() => setShowGuestModal(false)} />
+          
+          {/* Modal */}
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="relative w-full max-w-md transform transition-all">
+              <div className="bg-white rounded-2xl shadow-2xl p-8">
+                {/* Close button */}
+                <button
+                  onClick={() => setShowGuestModal(false)}
+                  className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  disabled={isGuestLoading}
+                >
+                  <FiX className="h-5 w-5" />
+                </button>
+
+                {/* Header */}
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <FiUser className="h-8 w-8 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    Try as Guest
+                  </h2>
+                  <p className="text-gray-600 text-sm">
+                    Explore OfficeReg without creating an account
+                  </p>
+                </div>
+
+                {/* Features list */}
+                <div className="mb-6">
+                  <ul className="space-y-3 text-sm text-gray-600">
+                    <li className="flex items-center">
+                      <svg className="w-4 h-4 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      Access to basic features
+                    </li>
+                    <li className="flex items-center">
+                      <svg className="w-4 h-4 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      No registration required
+                    </li>
+                    <li className="flex items-center">
+                      <svg className="w-4 h-4 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      Explore the interface
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Action buttons */}
+                <div className="space-y-3">
+                  <button
+                    onClick={handleGuestLogin}
+                    disabled={isGuestLoading}
+                    className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium text-base rounded-xl
+                      hover:from-blue-700 hover:to-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                      disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
+                  >
+                    {isGuestLoading ? (
+                      <>
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Logging in...
+                      </>
+                    ) : (
+                      <>
+                        <FiUser className="mr-2 h-5 w-5" />
+                        Continue as Guest
+                      </>
+                    )}
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowGuestModal(false)}
+                    disabled={isGuestLoading}
+                    className="w-full py-3 px-4 text-gray-600 font-medium text-sm hover:text-gray-800 transition-colors"
+                  >
+                    Maybe later
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

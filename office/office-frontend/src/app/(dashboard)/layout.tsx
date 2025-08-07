@@ -35,14 +35,27 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     return currentLink?.name || 'Dashboard';
   };
 
-  const handleSignOut = () => {
-    // Clear any stored auth tokens/data
-    localStorage.removeItem('token'); // Adjust based on your auth implementation
-    sessionStorage.clear();
-    
-    // Redirect to login page
-    router.push('/auth/login');
-  };
+  const handleSignOut = async () => {
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    try {
+      // Use the full backend URL from the environment variable
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/logout/cleanup`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+    } catch (error) {
+      console.error('Error during guest data cleanup:', error);
+    }
+  }
+
+  localStorage.removeItem('token');
+  sessionStorage.clear();
+  router.push('/auth/login');
+};
 
   return (
     <div className="flex min-h-screen bg-gray-50">

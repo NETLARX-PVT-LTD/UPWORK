@@ -10,7 +10,7 @@ const userRoutes = require('./routes/users');
 const docRoutes = require('./routes/documents');
 const logRoutes = require('./routes/logs');
 const adminRoutes = require('./routes/admin');
-
+const documents = require('./routes/documents');
 // deployment
 const app = express();
 
@@ -38,6 +38,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/documents', docRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/documents', documents);
 
 // Add a simple health check endpoint
 app.get('/api/health', (req, res) => {

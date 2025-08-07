@@ -9,7 +9,12 @@ const documentSchema = new mongoose.Schema({
   sender: { type: String, required: true }, // New field
   recipient: { type: String, required: true }, // New field
   attachments: [String], // Array of file paths
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+   owner: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: true,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Document', documentSchema);
