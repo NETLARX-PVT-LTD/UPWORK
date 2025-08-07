@@ -108,11 +108,24 @@
   <div
     class="bg-gradient-to-b from-[#218DEB] to-[#7DC2FD] relative text-white rounded-b-[30px] p-4 flex items-center justify-between"
   >
-    <div class="flex items-center gap-2">
-      <img src="/jarvis_logo.png" class="w-10 h-10 rounded-full" alt="Jarvis" />
-      <div>
-        <div class="font-bold">Jarvis</div>
-        <div class="text-sm">Reply in 10 seconds.</div>
+    <div class="flex gap-4">
+      <div
+        (click)="isChatStarted = false"
+        style="
+          background-image: url('https://widget.osam.one/dist/images/Chat/Back.svg');
+        "
+        class="self-center h-10 bg-center bg-no-repeat bg-auto cursor-pointer w-14 hover:bg-opacity-10 hover:rounded-sm"
+      ></div>
+      <div class="flex items-center gap-2">
+        <img
+          src="/jarvis_logo.png"
+          class="w-10 h-10 rounded-full"
+          alt="Jarvis"
+        />
+        <div>
+          <div class="font-bold">Jarvis</div>
+          <div class="text-sm">Reply in 10 seconds.</div>
+        </div>
       </div>
     </div>
     <div
@@ -125,7 +138,7 @@
   <div class="flex-1 p-2 justify-between flex flex-col">
     <div
       #messagesContainer
-      class="hide-scrollbar flex flex-col space-y-4 h-[55vh] overflow-y-auto"
+      class="hide-scrollbar flex flex-col space-y-4 h-[59vh] overflow-y-auto"
     >
       <div *ngFor="let msg of messages" class="chat-message">
         <div
@@ -302,7 +315,7 @@
       </div>
     </div>
 
-    <div class="pt-2 sm:mb-0">
+    <div class="sm:mb-0">
       <div
         class="inline-flex items-center w-full my-1 justify-between px-2 bg-gray-100 rounded-3xl gap-1"
       >
@@ -313,13 +326,68 @@
           (click)="toggleEmojiPicker()"
         />
         <!-- Emoji Picker -->
-        <div *ngIf="showEmojiPicker" class="absolute bottom-14 left-4 z-50 w-[200px] h-[200px] overflow-y-auto">
+        <div
+          *ngIf="showEmojiPicker"
+          class="absolute bottom-14 bg-[#FFFFFF] left-4 z-50 w-[300px] h-[250px] rounded-lg overflow-y-auto p-2"
+        >
           <emoji-mart
             set="apple"
             (emojiSelect)="addEmoji($event)"
             [style]="{ width: '300px' }"
             class="w-[100%] flex flex-wrap"
           ></emoji-mart>
+          <!-- <div class="absolute top-2 right-0 z-10 cursor-pointer" (click)="toggleEmojiPicker()">
+            <svg
+              data-v-6597d3d2=""
+              xmlns="http://www.w3.org/2000/svg"
+              width="16.413"
+              height="17.413"
+              stroke="#000"
+              viewBox="0 0 16.413 17.413"
+              class="h-4 w-4 mx-2"
+            >
+              <g
+                data-v-6597d3d2=""
+                id="line"
+                transform="translate(0.587 1.061)"
+              >
+                <line
+                  data-v-6597d3d2=""
+                  id="Line_7"
+                  data-name="Line 7"
+                  x2="15"
+                  y2="16"
+                  transform="translate(0.12 -0.354)"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1"
+                ></line>
+                <line
+                  data-v-6597d3d2=""
+                  id="Line_8"
+                  data-name="Line 8"
+                  x1="15"
+                  y2="16"
+                  transform="translate(0.12 -0.354)"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1"
+                ></line>
+              </g>
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span>Frequently Used</span>
+            <div class="flex flex-wrap">
+              <button class="font-[1.75rem]">👍</button>
+              <button>👎</button>
+              <button>😭</button>
+              <button>😕</button>
+              <button>😕</button>
+              <button>😊</button>
+              <button>😍</button>
+            </div>
+          </div> -->
         </div>
 
         <input
