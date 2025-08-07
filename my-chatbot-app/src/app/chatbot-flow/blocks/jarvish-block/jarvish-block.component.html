@@ -302,76 +302,91 @@
       </div>
     </div>
 
-    <div class="border-t-2 border-gray-200 pt-2 sm:mb-0">
-      <div class="relative flex">
-        <span class="absolute inset-y-0 flex items-center">
-          <button
-            type="button"
-            class="inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              class="h-6 w-6 text-gray-600"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-              ></path>
-            </svg>
-          </button>
-        </span>
+    <div class="pt-2 sm:mb-0">
+      <div
+        class="inline-flex items-center w-full my-1 justify-between px-2 bg-gray-100 rounded-3xl gap-1"
+      >
+        <img
+          src="/Smiley.svg"
+          class="w-6 h-6 cursor-pointer border-none"
+          alt=""
+          (click)="toggleEmojiPicker()"
+        />
+        <!-- Emoji Picker -->
+        <div *ngIf="showEmojiPicker" class="absolute bottom-14 left-4 z-50 w-[200px] h-[200px] overflow-y-auto">
+          <emoji-mart
+            set="apple"
+            (emojiSelect)="addEmoji($event)"
+            [style]="{ width: '300px' }"
+            class="w-[100%] flex flex-wrap"
+          ></emoji-mart>
+        </div>
+
         <input
           [(ngModel)]="messageText"
           (keyup.enter)="sendMessage()"
-          placeholder="Write your message!"
-          class="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-md py-3"
+          placeholder="Type your message"
+          class="w-full text-sm bg-transparent border-none h-9 focus:outline-0 ring-transparent px-2"
         />
-        <div class="absolute right-0 items-center inset-y-0 hidden sm:flex">
-          <!-- Trigger Button -->
-          <button
-            type="button"
-            (click)="fileInput.click()"
-            class="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none"
+
+        <!-- Hidden File Input -->
+        <input
+          #fileInput
+          type="file"
+          multiple
+          hidden
+          (change)="handleFileInput($event)"
+          accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.txt,.zip"
+        />
+
+        <!-- Trigger Button -->
+        <div (click)="fileInput.click()" class="cursor-pointer h-6 w-6">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 25.794 24.42"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              class="h-6 w-6 text-gray-600"
-            >
+            <g id="XMLID_221_" transform="translate(0 -8.794)">
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                id="XMLID_222_"
+                d="M2.4,30.814a8.216,8.216,0,0,0,11.607,0l10.07-10.07a5.862,5.862,0,0,0-8.29-8.29L6.549,21.694a3.517,3.517,0,1,0,4.974,4.974l6.085-6.085a1.172,1.172,0,1,0-1.658-1.658L9.865,25.01a1.172,1.172,0,1,1-1.658-1.658l9.241-9.241a3.517,3.517,0,0,1,4.974,4.974l-10.07,10.07a5.862,5.862,0,1,1-8.29-8.29L14.132,10.8a1.172,1.172,0,1,0-1.658-1.658L2.4,19.207a8.207,8.207,0,0,0,0,11.607Z"
+                fill="#1F8CEB"
               ></path>
-            </svg>
-          </button>
+            </g>
+          </svg>
+        </div>
 
-          <!-- Hidden File Input -->
-          <input
-            #fileInput
-            type="file"
-            multiple
-            hidden
-            (change)="handleFileInput($event)"
-            accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.txt,.zip"
-          />
-
-          <!-- Send Button -->
-          <button
-            type="button"
-            (click)="sendMessage()"
+        <div class="w-6 h-6 cursor-pointer" (click)="startListening()">
+          <svg
+            id="mic-solid-svgrepo-com"
+            xmlns="http://www.w3.org/2000/svg"
+            width="16.448"
+            height="24.672"
+            viewBox="0 0 16.448 24.672"
+            fill="#1F8CEB"
             class=""
+            [attr.fill]="isListening ? '#60EFFF' : '#1F8CEB'"
           >
-            <!-- <span class="font-bold">Send</span> -->
-            <!-- <svg
+            <path
+              id="Path_21"
+              data-name="Path 21"
+              d="M13.112,3A4.112,4.112,0,0,0,9,7.112V13.28a4.112,4.112,0,0,0,8.224,0V7.112A4.112,4.112,0,0,0,13.112,3Z"
+              transform="translate(-4.888 -3)"
+            ></path>
+            <path
+              id="Path_22"
+              data-name="Path 22"
+              d="M8.056,10.778a1.028,1.028,0,1,0-2.056,0,8.144,8.144,0,0,0,7.2,8.163v4.173H11.14a1.028,1.028,0,0,0,0,2.056h6.168a1.028,1.028,0,0,0,0-2.056H15.252V18.941a8.144,8.144,0,0,0,7.2-8.163,1.028,1.028,0,1,0-2.056,0,6.168,6.168,0,0,1-12.336,0Z"
+              transform="translate(-6 -0.498)"
+            ></path>
+          </svg>
+        </div>
+
+        <!-- Send Button -->
+        <div (click)="sendMessage()" class="cursor-pointer w-6 h-6">
+          <!-- <span class="font-bold">Send</span> -->
+          <!-- <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
               fill="currentColor"
@@ -381,12 +396,39 @@
                 d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"
               ></path>
             </svg> -->
-            <img
-              src="/telegram_img.jpeg"
-              class="w-8 rounded-2xl object-cover"
-              alt=""
-            />
-          </button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            width="24"
+            height="24"
+            viewBox="0 0 32.008 32.008"
+          >
+            <defs>
+              <clipPath id="clip-path">
+                <path
+                  id="Path_40"
+                  data-name="Path 40"
+                  d="M28.9,28.9H60.91V60.91H28.9Zm0,0"
+                  transform="translate(0 0)"
+                  fill="#1F8CEB"
+                ></path>
+              </clipPath>
+            </defs>
+            <g
+              id="Untitled_design_14_"
+              data-name="Untitled design (14)"
+              transform="translate(-28.902 -28.902)"
+              clip-path="url(#clip-path)"
+            >
+              <path
+                id="Path_39"
+                data-name="Path 39"
+                d="M44.906,28.9q-.392,0-.785.019t-.784.058q-.391.038-.779.1t-.774.134q-.385.076-.767.172t-.757.21q-.376.114-.746.246t-.733.283q-.363.15-.718.318t-.7.353q-.346.186-.683.387t-.664.42q-.327.218-.642.452t-.619.483q-.3.249-.595.513t-.569.542q-.278.278-.542.569t-.513.595q-.249.3-.483.619t-.452.642q-.218.326-.42.664t-.387.683q-.185.346-.353.7t-.318.718q-.151.363-.283.733t-.246.746q-.114.376-.21.757t-.172.767q-.077.385-.134.774t-.1.779q-.038.391-.058.784t-.019.785q0,.393.019.786t.058.783q.038.391.1.78t.134.774q.076.385.172.766t.21.757q.114.376.246.746t.283.733q.15.363.318.719t.353.7q.186.346.387.683t.42.664q.218.327.452.642t.483.619q.249.3.513.595t.542.569q.278.278.569.542t.595.513q.3.249.619.483t.642.452q.326.218.664.42t.683.387q.346.186.7.354t.718.318q.363.151.733.283t.746.246q.376.114.757.209t.767.172q.385.077.774.134t.779.1q.391.038.784.058t.785.019q.393,0,.786-.019t.783-.058q.391-.038.78-.1t.774-.134q.385-.077.766-.172t.757-.209q.376-.114.746-.246t.733-.283q.363-.15.719-.318t.7-.354q.346-.185.683-.387t.664-.42q.327-.219.642-.452t.619-.483q.3-.249.595-.513t.569-.542q.278-.278.542-.569t.513-.595q.249-.3.483-.619t.452-.642q.218-.327.42-.664t.387-.683q.186-.346.354-.7t.318-.719q.151-.363.283-.733t.246-.746q.114-.376.209-.757t.172-.766q.077-.385.134-.774t.1-.78q.038-.391.058-.783t.019-.786q0-.392-.019-.785t-.058-.783q-.039-.391-.1-.779t-.134-.774q-.077-.385-.172-.766t-.21-.757q-.114-.376-.247-.746t-.283-.733q-.15-.363-.319-.718t-.353-.7q-.185-.346-.387-.683t-.421-.664q-.218-.326-.452-.642t-.484-.619q-.249-.3-.513-.595t-.542-.569q-.278-.278-.569-.542t-.595-.513q-.3-.249-.619-.484T53.8,31.6q-.327-.219-.664-.421t-.683-.387q-.346-.186-.7-.354t-.718-.318q-.363-.15-.733-.283t-.746-.247q-.376-.114-.757-.21t-.766-.172q-.385-.077-.774-.134t-.78-.1q-.391-.038-.783-.058T44.906,28.9Zm8.664,9.186-7.8,16.441a1.356,1.356,0,0,1-.5.575,1.365,1.365,0,0,1-.734.214H44.5a1.375,1.375,0,0,1-1.238-.832l-2.016-4.726a.318.318,0,0,1-.026-.091.313.313,0,0,1,.034-.185.3.3,0,0,1,.056-.076l3.115-3.115a.666.666,0,0,0,.08-.1.636.636,0,0,0,.059-.111.633.633,0,0,0,.037-.371.612.612,0,0,0-.036-.12.638.638,0,0,0-.139-.208.636.636,0,0,0-.208-.139.647.647,0,0,0-.121-.037.664.664,0,0,0-.125-.012.646.646,0,0,0-.356.108.649.649,0,0,0-.1.08L40.4,48.5a.321.321,0,0,1-.076.056.315.315,0,0,1-.09.031.3.3,0,0,1-.1,0,.3.3,0,0,1-.091-.026L35.325,46.55a1.373,1.373,0,0,1-.832-1.24,1.376,1.376,0,0,1,.208-.75,1.37,1.37,0,0,1,.582-.517l16.441-7.8a1.391,1.391,0,0,1,.406-.118,1.388,1.388,0,0,1,.422.009,1.371,1.371,0,0,1,.205.053,1.389,1.389,0,0,1,.374.2,1.392,1.392,0,0,1,.3.3,1.406,1.406,0,0,1,.112.18,1.387,1.387,0,0,1,.083.195,1.384,1.384,0,0,1,.062.627,1.368,1.368,0,0,1-.043.207A1.354,1.354,0,0,1,53.57,38.089Zm0,0"
+                transform="translate(0 0)"
+                fill="#1F8CEB"
+              ></path>
+            </g>
+          </svg>
         </div>
       </div>
     </div>

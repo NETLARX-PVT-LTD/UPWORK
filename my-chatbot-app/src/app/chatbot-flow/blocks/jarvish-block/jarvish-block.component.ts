@@ -15,26 +15,30 @@ interface ChatMessage {
   selectedButtonMessage?: string;
 }
 
-
 import { CommonModule, NgFor, NgIf } from '@angular/common';
-import { Component, ElementRef, ViewChild, Input } from '@angular/core';
+import { Component, ElementRef, ViewChild, Input, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiHeader, AvailableForm, AvailableMedia, AvailableStory, Button } from '../../../models/chatbot-block.model';
-
+import { EmojiModule } from '@ctrl/ngx-emoji-mart/ngx-emoji';
+import { PickerModule } from '@ctrl/ngx-emoji-mart';
 @Component({
   selector: 'app-jarvish-block',
-  imports: [NgIf, FormsModule, NgFor, CommonModule],
+  imports: [NgIf, FormsModule, NgFor, CommonModule, EmojiModule,PickerModule],
   templateUrl: './jarvish-block.component.html',
   styleUrl: './jarvish-block.component.scss'
 })
+
 export class JarvishBlockComponent {
   messageText: string = '';
   messages: ChatMessage[] = [];  // ✅ Now type-safe
+  recognition : any;
+  isListening : boolean = false;
 
+  constructor(private ngZone: NgZone) {}
+  
 
   // messages: { sender: 'user' | 'bot', text: string, type?: string, fileUrl?: string, quickReplies?: string[], slides?: { image: string; title?: string; subtitle?: string }[];}[] = [];
   // i update this with this part
-
 
   @Input() canvasBlocks: any[] = [];
   @Input() availableMedia: AvailableMedia[] = []; 
@@ -66,6 +70,17 @@ export class JarvishBlockComponent {
       this.processNextBlock();
     }
   }
+
+  showEmojiPicker = false;
+
+  toggleEmojiPicker() {
+    this.showEmojiPicker = !this.showEmojiPicker;
+  }
+
+  addEmoji(event: any) {
+    this.messageText += event.emoji.native;
+  }
+
 
   showOverlay = false;
 
@@ -771,6 +786,49 @@ export class JarvishBlockComponent {
       this.messages.push({ sender: 'bot', text: `❌ API Error: ${err}` });
     }
     this.scrollToBottom();
+  }
+
+  startListening() {
+  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert('Speech Recognition is not supported in this browser.');
+    return;
+  }
+
+  if (!this.recognition) {
+    this.recognition = new SpeechRecognition();
+    this.recognition.lang = 'en-US';
+    this.recognition.continuous = false;
+    this.recognition.interimResults = false;
+
+    this.recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      this.ngZone.run(() => {
+        this.messageText += transcript;
+      });
+    };
+
+    this.recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      this.isListening = false;
+    };
+
+    this.recognition.onend = () => {
+      console.log('Speech recognition ended');
+      this.isListening = false;
+    };
+  }
+
+  if (!this.isListening) {
+    this.recognition.start();
+    this.isListening = true;
+    console.log('Speech recognition started');
+  } else {
+    this.recognition.stop();
+    this.isListening = false;
+    console.log('Speech recognition stopped');
+  }
   }
 
 }
