@@ -1,4 +1,5 @@
 const express = require('express');
+const { getDocuments, createDocument } = require('../services/documents');
 const { authenticate, authorizeRole } = require('../middleware/auth');
 const { upload, cloudinary } = require('../middleware/fileUpload');
 const Document = require('../models/Document');
@@ -9,6 +10,9 @@ const path = require('path');
 
 const router = express.Router();
 
+router.route('/')
+  .get(authenticate, getDocuments)
+  .post(authenticate, createDocument);
 // Helper function to get the next available number
 const getNextNumber = async () => {
   try {
@@ -260,7 +264,7 @@ router.get('/', authenticate, async (req, res) => {
   try {
     // Filter documents by user's department
     const documents = await Document.find({
-      department: req.user.department  // Only show documents from user's department
+       user: req.user.id // <-- Add this filter to show only the user's documents
     })
     .populate('user', 'name email department')
     .sort({ createdAt: -1 });
