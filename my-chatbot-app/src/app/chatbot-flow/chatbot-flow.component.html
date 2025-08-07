@@ -88,8 +88,8 @@
       >
         <div class="drop-zone-indicator" [class.visible]="isDraggingFromPalette">
           <div class="drop-zone-content">
-            <mat-icon class="drop-zone-icon">add_circle_outline</mat-icon>
-            <span class="drop-zone-text">Drop block here to add to canvas</span>
+            <!-- <mat-icon class="drop-zone-icon">add_circle_outline</mat-icon> -->
+            <!-- <span class="drop-zone-text">Drop block here to add to canvas</span> -->
           </div>
         </div>
 
@@ -113,11 +113,7 @@
   [style.position]="'absolute'"
   [style.border-color]="getStatusColor(block.status)"
   [style.background-color]="getTypeColor(block.type)"
->
-              <div class="connection-indicators">
-                <div class="connection-input-indicator"></div>
-                <div class="connection-output-indicator"></div>
-              </div>
+v>
 
               <ng-container [ngSwitch]="block.type">
                 <app-user-input-block
