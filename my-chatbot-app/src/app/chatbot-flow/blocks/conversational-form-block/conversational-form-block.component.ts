@@ -105,12 +105,22 @@ onListItemClick(): void {
 }
 
   // Called when the user selects an option from the list
-  selectForm(form: any): void {
-    this.searchQuery = form.name; // Set the input value to the selected form's name
-    this.block.formId = form.id; // Update the form ID
-    this.showDropdown = false; // Hide the dropdown
-    // You can also emit an event here to notify the parent component
-  }
+selectForm(form: AvailableForm): void {
+  // Clear the blur timeout to prevent the dropdown from hiding
+  clearTimeout(this.blurTimeout);
+  
+  this.searchQuery = form.name; // Set the input value to the selected form's name
+  this.block.formId = form.id; // Update the form ID
+  this.showDropdown = false; // Hide the dropdown
+
+  // Manually update the block's display properties
+  this.block.formName = form.name;
+  this.block.formFields = form.formFields;
+  this.block.description = this.getFieldNames(); // A good place to set a description
+  
+  // Emit an event here to notify the parent component of the change
+  this.onContentChange();
+}
 
 /**
    * Inserts a selected variable into the successMessage textarea at the current cursor position.
