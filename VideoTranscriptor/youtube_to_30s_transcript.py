@@ -9,8 +9,7 @@ import multiprocessing
 from tqdm import tqdm
 from pydub import AudioSegment
 from math import ceil
-from collections import defaultdict
-import mediapipe as mp
+from ultralytics import YOLO
 
 # AWS S3 Config
 AWS_ACCESS_KEY_ID = "YOUR_AWS_ACCESS_KEY_ID"
@@ -18,126 +17,66 @@ AWS_SECRET_ACCESS_KEY = "YOUR_AWS_SECRET_ACCESS_KEY"
 BUCKET_NAME = "afterlife-test"
 
 CHUNK_DURATION_MS = 30 * 1000  # 30 seconds
+yolo_model = YOLO("yolov8n.pt")  # Load YOLOv8-nano
 
+def process_slot(args):
+    slot_index, video_filename, fps, total_seconds, frames_dir = args
+    start_sec = slot_index * 30
+    end_sec = min((slot_index + 1) * 30, total_seconds)
+    start_frame = start_sec * fps
+    end_frame = end_sec * fps
 
-def calculate_sharpness(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    lap = cv2.Laplacian(gray, cv2.CV_64F)
-    return lap.var()
-
-
-def process_batch(args):
-    sec, video_filename, fps = args
     cap = cv2.VideoCapture(video_filename)
-    cap.set(cv2.CAP_PROP_POS_FRAMES, sec * fps)
+    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
 
-    mp_pose = mp.solutions.pose
-    pose_detector = mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5)
-    haar = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-
-    best_frame = None
-    best_sharpness = 0
-    best_frame_index = -1
-    best_frame_img = None
-    candidates = []
-
-    for i in range(fps):
+    for frame_number in range(start_frame, end_frame):
         ret, frame = cap.read()
         if not ret:
             break
-        frame_index = sec * fps + i
 
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        pose_result = pose_detector.process(rgb)
-        if pose_result.pose_landmarks:
-            continue
+        results = yolo_model.predict(source=frame, conf=0.3, verbose=False)[0]
+        has_person = any(int(box.cls) == 0 for box in results.boxes)  # Class 0 is 'person'
 
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = haar.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4)
-        if len(faces) > 0:
-            continue
+        if not has_person:
+            slot_folder = os.path.join(frames_dir, f"slot_{start_sec}-{end_sec}")
+            os.makedirs(slot_folder, exist_ok=True)
+            filename = f"frame_{frame_number:05d}.jpg"
+            filepath = os.path.join(slot_folder, filename)
+            cv2.imwrite(filepath, frame)
 
-        sharpness = calculate_sharpness(frame)
-        candidates.append({"frame_index": frame_index, "sharpness": sharpness})
-
-        if sharpness > best_sharpness:
-            best_sharpness = sharpness
-            best_frame = frame
-            best_frame_index = frame_index
-            best_frame_img = frame
+            cap.release()
+            return {
+                "slot": f"{start_sec}-{end_sec}",
+                "frame_number": frame_number,
+                "filename": os.path.join(f"slot_{start_sec}-{end_sec}", filename),
+                "time_sec": frame_number // fps
+            }
 
     cap.release()
-    pose_detector.close()
-
-    if best_frame_img is not None:
-        slot_start = (sec // 30) * 30
-        slot_end = slot_start + 30
-        filename = f"File_slot_{slot_start}-{slot_end}_{best_frame_index:05d}.jpg"
-        return {
-            "sec": sec,
-            "filename": filename,
-            "frame_index": best_frame_index,
-            "sharpness": best_sharpness,
-            "frame_img": best_frame_img,
-            "candidates": candidates
-        }
-    else:
-        return {
-            "sec": sec,
-            "filename": None,
-            "candidates": candidates
-        }
+    return None
 
 
-def extract_clean_frames_parallel(video_filename, frames_dir):
+def extract_slot_representative_frames_parallel(video_filename, frames_dir):
     cap = cv2.VideoCapture(video_filename)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     total_seconds = int(total_frames / fps)
+    total_slots = ceil(total_seconds / 30)
     cap.release()
 
-    print(f"📊 FPS: {fps}, Total Frames: {total_frames}, Duration: {total_seconds}s")
+    print(f"🎞 FPS: {fps}, Total Frames: {total_frames}, Duration: {total_seconds}s, Slots: {total_slots}")
 
-    frame_debug_info = {}
-    valid_frames = []
-    batches = [(sec, video_filename, fps) for sec in range(total_seconds)]
-
-    print("🧠 Processing all seconds in parallel (streaming mode)...")
+    slots = [(i, video_filename, fps, total_seconds, frames_dir) for i in range(total_slots)]
 
     results = []
     with multiprocessing.Pool(processes=min(4, os.cpu_count())) as pool:
-        with tqdm(total=len(batches), desc="🔄 Processing seconds", unit="sec") as pbar:
-            def collect_result(result):
-                results.append(result)
+        with tqdm(total=total_slots, desc="🔄 Processing slots", unit="slot") as pbar:
+            for r in pool.imap_unordered(process_slot, slots):
+                if r is not None:
+                    results.append(r)
                 pbar.update()
 
-            for batch in batches:
-                pool.apply_async(process_batch, args=(batch,), callback=collect_result)
-
-            pool.close()
-            pool.join()
-
-    for result in results:
-        sec = result["sec"]
-        frame_debug_info[sec] = {
-            "selected_frame": {
-                "filename": result.get("filename"),
-                "frame_index": result.get("frame_index"),
-                "sharpness": result.get("sharpness")
-            },
-            "candidates": result["candidates"]
-        }
-
-        if result["filename"] and result["frame_img"] is not None:
-            save_path = os.path.join(frames_dir, result["filename"])
-            cv2.imwrite(save_path, result["frame_img"])
-            valid_frames.append({
-                "filename": result["filename"],
-                "frame_index": result["frame_index"],
-                "time_sec": sec
-            })
-
-    return valid_frames, frame_debug_info
+    return results
 
 
 def process_video_from_youtube(video_url):
@@ -152,7 +91,6 @@ def process_video_from_youtube(video_url):
     frames_dir = os.path.join(base_dir, "VideoFrames")
     transcript_file = os.path.join(base_dir, "transcript_30s.json")
     mapping_file = os.path.join(base_dir, "transcript_to_frames.json")
-    debug_file = os.path.join(base_dir, "frame_selection_debug.json")
 
     os.makedirs(base_dir, exist_ok=True)
     os.makedirs(chunks_dir, exist_ok=True)
@@ -206,37 +144,32 @@ def process_video_from_youtube(video_url):
 
     with open(transcript_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
+    print(f"✅ Transcript saved to {transcript_file}")
 
-    print("🎞 Extracting sharpest human-free frame per second...")
-    valid_frames, frame_debug_info = extract_clean_frames_parallel(video_filename, frames_dir)
-
-    with open(debug_file, "w", encoding="utf-8") as f:
-        json.dump(frame_debug_info, f, indent=2)
-    print(f"📋 Frame selection debug info saved to {debug_file}")
-    print(f"✅ Saved {len(valid_frames)} sharpest frames without visible humans.")
+    print("🎞 Extracting one non-human frame per 30s slot (parallel)...")
+    valid_frames = extract_slot_representative_frames_parallel(video_filename, frames_dir)
+    print(f"✅ Saved {len(valid_frames)} frames.")
 
     print("🗺 Mapping transcript to saved clean frames...")
     mapping = []
     for entry in results:
         start_sec = entry['start_time']
         end_sec = entry['end_time']
-        matched_frames = [
-            vf["filename"]
-            for vf in valid_frames
-            if start_sec <= vf["time_sec"] <= end_sec
-        ]
+        slot_label = f"{start_sec}-{end_sec}"
+        frame_entry = next((vf for vf in valid_frames if vf["slot"] == slot_label), None)
+
         mapping.append({
             "start_time": start_sec,
             "end_time": end_sec,
             "text": entry['text'],
-            "frames": matched_frames
+            "frame": frame_entry["filename"] if frame_entry else None
         })
 
     with open(mapping_file, "w", encoding="utf-8") as f:
         json.dump(mapping, f, indent=2)
     print(f"✅ Mapping saved to {mapping_file}")
 
-    print("🧹 Cleaning up...")
+    print("🧹 Cleaning up intermediate files...")
     try:
         os.remove(video_filename)
         os.remove(audio_filename)
@@ -251,13 +184,14 @@ def process_video_from_youtube(video_url):
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY
     )
 
-    if os.path.exists(mapping_file):
-        s3_key = f"{safe_url}/{os.path.basename(mapping_file)}"
-        try:
-            s3.upload_file(mapping_file, BUCKET_NAME, s3_key)
-            print(f"✅ Uploaded: s3://{BUCKET_NAME}/{s3_key}")
-        except Exception as e:
-            print(f"❌ Failed to upload {s3_key}: {e}")
+    for file_path in [mapping_file, transcript_file]:
+        if os.path.exists(file_path):
+            s3_key = f"{safe_url}/{os.path.basename(file_path)}"
+            try:
+                s3.upload_file(file_path, BUCKET_NAME, s3_key)
+                print(f"✅ Uploaded: s3://{BUCKET_NAME}/{s3_key}")
+            except Exception as e:
+                print(f"❌ Failed to upload {s3_key}: {e}")
 
     for root, dirs, files in os.walk(frames_dir):
         for file in files:
