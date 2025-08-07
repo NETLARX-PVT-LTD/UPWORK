@@ -31,6 +31,7 @@ export class JarvishBlockComponent {
   messageText: string = '';
   messages: ChatMessage[] = [];  // ✅ Now type-safe
 
+
   // messages: { sender: 'user' | 'bot', text: string, type?: string, fileUrl?: string, quickReplies?: string[], slides?: { image: string; title?: string; subtitle?: string }[];}[] = [];
   // i update this with this part
 
@@ -52,6 +53,11 @@ export class JarvishBlockComponent {
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
 
+  isHeaderCollapsed = false;
+
+  overlayHidden = false;
+
+
   ngOnInit() {
     console.log('Received canvasBlocks:', this.canvasBlocks);
 
@@ -60,6 +66,21 @@ export class JarvishBlockComponent {
       this.processNextBlock();
     }
   }
+
+  showOverlay = false;
+
+  ngOnChanges() {
+    if (this.isChatStarted) {
+      this.showOverlay = true;
+
+      // // Remove overlay after animation ends
+      // setTimeout(() => {
+      //   this.showOverlay = false;
+      // }, 700);
+    }
+  }
+
+
 
   /** ✅ Handles user sending message */
   sendMessage() {
@@ -205,7 +226,22 @@ export class JarvishBlockComponent {
   /** ✅ Start conversation manually */
   startConversation() {
     this.isChatStarted = true;
+    // Wait for DOM to render header first
+    // setTimeout(() => {
+    //   this.isHeaderCollapsed = true;
+    // }, 50); // Delay to trigger transition
   }
+
+  /** ✅ Close conversation smoothly */
+  // closeConversation() {
+  //   // Expand first to reverse animation
+  //   this.isHeaderCollapsed = false;
+
+  //   // Wait for animation to finish before hiding
+  //   setTimeout(() => {
+  //     this.isChatStarted = false;
+  //   }, 500); // Matches Tailwind duration-500
+  // }
 
   /** ✅ Processes Next Block */
   async processNextBlock() {

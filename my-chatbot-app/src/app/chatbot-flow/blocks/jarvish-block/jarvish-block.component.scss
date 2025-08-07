@@ -22,3 +22,30 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.jarvis-header-lower{
+  // background-color: red;
+    .first {
+      font-family: 'Poppins';
+    }
+   .second {
+      font-family: 'Poppins', sans-serif;
+      // background-color: aqua; 
+   }
+}
+
+/* Slide Up Animation */
+@keyframes slideUp {
+  0% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 1;
+  }
+}
+
+.overlay-animate {
+  animation: slideUp 0.7s ease-in-out forwards;
+}

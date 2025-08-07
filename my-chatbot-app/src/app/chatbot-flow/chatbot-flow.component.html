@@ -488,7 +488,43 @@
   [availableForms]="availableForms"
   ></app-jarvish-block>
 
-  <button class="absolute right-10 bottom-8 w-14 cursor-pointer z-[100000]" (click)="toggleJarvis()">
-    <img src="/msg.png" alt="" class="rounded-full">
-  </button>
+
+<button 
+  class="absolute right-10 bottom-8 w-14 h-14 flex items-center justify-center bg-[#2563eb] rounded-full shadow-lg cursor-pointer z-[100000] overflow-hidden" 
+  (click)="toggleJarvis()">
+
+  <!-- Message Icon (skews & hides) -->
+  <svg 
+    *ngIf="!isJarvisVisible"
+    version="1.0" 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="34" 
+    height="34" 
+    viewBox="0 0 96 96" 
+    fill="white"
+    class="skew-down-fade"
+  >
+    <g transform="translate(0,96) scale(0.1,-0.1)" stroke="none">
+      <path d="M105 855 l-25 -24 0 -278 0 -277 63 62 63 62 212 0 c283 0 262 -19 262 240 0 189 0 191 -25 215 l-24 25 -251 0 -251 0 -24 -25z"></path>
+      <path d="M720 569 c0 -197 -16 -209 -269 -209 l-171 0 0 -55 c0 -46 4 -60 25 -80 l24 -25 218 0 217 0 58 -57 58 -57 0 272 0 273 -25 24 c-20 21 -34 25 -80 25 l-55 0 0 -111z"></path>
+    </g>
+  </svg>
+
+  <!-- Cross Icon (rotates in) -->
+  <svg 
+    *ngIf="isJarvisVisible"
+    xmlns="http://www.w3.org/2000/svg" 
+    width="26" 
+    height="26" 
+    viewBox="0 0 17 17" 
+    fill="white"
+    class="rotate-in"
+  >
+    <path d="M9.207 8.5l6.646 6.646-.707.707L8.5 9.207l-6.646 6.646-.707-.707L7.793 8.5 1.146 1.854l.707-.707L8.5 7.793l6.646-6.646.707.707L9.207 8.5z"></path>
+  </svg>
+
+</button>
+
+
+
 </div>

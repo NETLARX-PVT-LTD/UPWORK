@@ -1,37 +1,43 @@
 <ng-container *ngIf="!isSelected">
-  <div class="block-header">
-    <div class="block-type-badges">
-      <div class="block-title" (click)="onSelectBlock()">
-        <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
-        <span>{{ block.name }}</span>
+  <div class="block-container">
+    <div class="block-header">
+      <div class="block-type-badges">
+        <div class="block-title" (click)="onSelectBlock()">
+          <img
+            src="https://app.botsify.com/theme/images/Story-Icons/form.png"
+            alt="block icon"
+            class="block-icon"
+          />
+          <span>{{ block.name }}</span>
+        </div>
+        <span class="selected-form-badge" *ngIf="block.formName">{{
+          block.formName
+        }}</span>
+      </div>
+
+      <div class="block-close-icon">
+        <button
+          mat-icon-button
+          class="close-btn"
+          (click)="onRemoveBlock()"
+          aria-label="Remove Block"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
     </div>
 
-   
-     <div class="block-close-icon">
-  <button mat-icon-button class="close-btn" (click)="onRemoveBlock()" aria-label="Remove Block">
-    <mat-icon>close</mat-icon>
-  </button>
-</div>
-
-  </div>
-
-  <div class="block-body">
-    <div
-      class="block-description border-b-2 pb-2 border-[#CECECE]"
-      *ngIf="block.description"
-    >
-      {{ block.description }}
-    </div>
-    <div *ngIf="block.formFields?.length">
-      <strong>Fields:</strong>
-      <div class="mt-2 flex flex-wrap gap-2">
-        <button
-          *ngFor="let field of block.formFields"
-          class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600 transition"
-        >
-          {{ field.name }}
-        </button>
+    <div class="block-body">
+      <div *ngIf="block.formFields?.length">
+        <p class="text-[#515365] mt-2">Fields:</p>
+        <div class="mt-1 flex flex-wrap gap-2">
+          <button
+            *ngFor="let field of block.formFields"
+            class="bg-green-500 text-white text-[12px] px-1 py-1 rounded hover:bg-green-600 transition"
+          >
+            {{ field.name }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -39,7 +45,7 @@
 
 <div class="right-sidebar-content" *ngIf="isSelected && isSidebarOpen">
   <div class="panel-header">
-    <div class="panel-subtitle text-[#888EA8]">
+    <div class="panel-subtitle text-[#888ea8] font-[600] mt-3">
       Ask one question at a time & send responses to your desired location or
       webservice
     </div>
@@ -51,30 +57,41 @@
       *ngIf="!showNewFormForm && !showFormConfigMode"
     >
       <div class="section-content space-y-3">
-        <label class="block text-[14px] font-[600] mb-1 text-[#516790]"
+        <label class="block text-[14px] font-[700] mb-2 text-[#506690]"
           >Conversational Form Integration</label
         >
-        <mat-form-field appearance="outline" class="full-width-input h-[56px]">
-          <!-- <mat-label class="">Select a Conversational Form</mat-label> -->
-          <mat-select
-            [(ngModel)]="block.formId"
-            (selectionChange)="onFormSelectionChange()"
-            placeholder="Choose a form"
-          >
-            <mat-option *ngFor="let form of availableForms" [value]="form.id">
+        <div class="select-container">
+          <input
+            type="text"
+            class="custom-select"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchQueryChange()"
+            (focus)="showDropdown = true"
+            (blur)="onInputBlur()"
+            placeholder="Select a Conversational Form"
+          />
+
+          <ul class="dropdown-list" *ngIf="showDropdown">
+            <li
+              *ngFor="let form of filteredForms"
+              (mousedown)="selectForm(form)"
+            >
               {{ form.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+            </li>
+          </ul>
+        </div>
 
         <div class="setting-item flex items-center gap-3">
-          <mat-slide-toggle
-            class="small-toggle"
-            [(ngModel)]="block.showAsInlineForm"
-            (ngModelChange)="onContentChange()"
-          ></mat-slide-toggle>
+          <label class="switch s-success mr-2">
+            <input
+              type="checkbox"
+              [(ngModel)]="block.showAsInlineForm"
+              (change)="onContentChange()"
+            />
+            <span class="slider round"></span>
+          </label>
           <span
-            class="text-lg font-medium text-gray-800 items-center flex gap-2"
+            class="text-[14px] text-[#506690] font-[600] items-center flex gap-2"
             >Show as inline form
             <mat-icon
               matTooltip="Inline form does not work on facebook"
@@ -85,14 +102,16 @@
         </div>
 
         <div class="setting-item flex items-center gap-3">
-          <mat-slide-toggle
-            class="small-toggle"
-            [(ngModel)]="block.renderFormResponses"
-            (ngModelChange)="onContentChange()"
-          >
-          </mat-slide-toggle>
+          <label class="switch s-success mr-2">
+            <input
+              type="checkbox"
+              [(ngModel)]="block.renderFormResponses"
+              (change)="onContentChange()"
+            />
+            <span class="slider round"></span>
+          </label>
           <div class="setting-info">
-            <div class="setting-label text-lg font-medium text-gray-800">
+            <div class="setting-label text-[14px] font-[600] text-[#506690]">
               Render form responses
             </div>
           </div>
@@ -101,12 +120,9 @@
           class="selected-form-info flex flex-col gap-2"
           *ngIf="block.formId; else nextTemplate"
         >
-          <div class="selected-form-badge flex items-center gap-3">
-            <mat-icon>check_circle</mat-icon>
-            <span>Selected Form: {{ getFormName(block.formId) }}</span>
-          </div>
-
-          <div class="or-separator text-center my-5 font-semibold text-gray-600 relative">
+          <div
+            class="or-separator text-center my-5 font-semibold text-gray-600 relative"
+          >
             <span class="text-black text-l">OR</span>
           </div>
 
@@ -152,19 +168,19 @@
     <div class="section-container" *ngIf="showNewFormForm">
       <div class="section-content">
         <div class="form-basic-info">
-          <mat-form-field appearance="outline" class="full-width-input">
-            <!-- <mat-label>Form Name</mat-label> -->
-            <input
-              matInput
-              required
-              #formName="ngModel"
-              [(ngModel)]="block.formName"
-              (ngModelChange)="onContentChange()"
-              placeholder="Enter the form name"
-            />
-          </mat-form-field>
+          <label for="form-name" class="text-[#506690] font-semibold  ">Form Name</label>
+          <input
+          id="form-name"
+            type="text"
+            class="w-full mt-2 px-4 py-2 border-1 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[rgba(194,213,255,0.619608)] focus:border-[#1b55e2] focus:shadow-[0_0_5px_2px_rgba(194,213,255,0.619608)] mb-2 placeholder-gray-500 placeholder-opacity-50"
+            required
+            #formName="ngModel"
+            [(ngModel)]="block.formName"
+            (ngModelChange)="onContentChange()"
+            placeholder="Enter the form name"
+          />
           <div
-            class="error-message text-red-900 text-[13px]"
+            class="error-message text-red-900 text-[13px] mb-2 ml-2"
             *ngIf="formName.invalid && formName.touched"
           >
             Form name is required.
@@ -172,25 +188,17 @@
         </div>
 
         <!-- one of the things contains here -->
-        <div class="form-fields-section">
-          <div class="section-header flex">
-            <h4>Form Fields</h4>
-            <mat-icon
-              matTooltip="Add fields to collect information from users"
-              class="info-icon"
-              >info</mat-icon
-            >
-          </div>
+        <div class="form-fields-section mt-2 ">
           <!-- One of the things contains here -->
           <!-- <div class="form-fields-container"> -->
           <div
             *ngFor="let field of block.formFields; let i = index"
-            class="form-field-card"
+            class="form-field-card "
           >
-            <div class="field-header">
-              <div class="field-number">{{ i + 1 }}</div>
+            <div class="field-header bg-[#ecefff]">
               <div class="field-title">
-                {{ field.name || "Form Field" }}
+                Form Field
+                #{{ i + 1 }}
               </div>
               <div class="field-actions">
                 <button
@@ -220,50 +228,65 @@
               </div>
             </div>
 
-            <div class="field-content">
-              <mat-form-field appearance="outline" class="full-width-input">
-                <!-- <mat-label>Field Label</mat-label> -->
-                <input
-                  matInput
-                  [(ngModel)]="field.name"
-                  (ngModelChange)="onContentChange()"
-                  placeholder="Field Name e.g., Name"
-                />
-              </mat-form-field>
+            <div class="field-content bg-[#ecefff]">
+              <label for="field-name" class="text-[#506690] font-semibold">Label</label>
+              <input
+              id="field-name"
+                type="text"
+                class="w-full bg-white mt-2 mb-3 px-4 py-2 border-1 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[rgba(194,213,255,0.619608)] focus:border-[#1b55e2] focus:shadow-[0_0_5px_2px_rgba(194,213,255,0.619608)] placeholder-gray-500 placeholder-opacity-50"
+                [(ngModel)]="field.name"
+                (ngModelChange)="onContentChange()"
+                placeholder="Field Name e.g., Name"
+              />
+              <label for="prompt-phrase" class="text-[#506690] font-semibold">Prompt Phrase</label>
+              <input
+              id="prompt-phrase"
+                type="text"
+                class="w-full  bg-white mt-2 mb-3 px-4 py-2 border-1 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[rgba(194,213,255,0.619608)] focus:border-[#1b55e2] focus:shadow-[0_0_5px_2px_rgba(194,213,255,0.619608)] placeholder-gray-500 placeholder-opacity-50"
+                [(ngModel)]="field.promptPhrase"
+                (ngModelChange)="onContentChange()"
+                placeholder="e.g., What's your name?"
+              />
 
-              <mat-form-field appearance="outline" class="full-width-input">
-                <!-- <mat-label>Prompt Message</mat-label> -->
-                <input
-                  matInput
-                  [(ngModel)]="field.promptPhrase"
-                  (ngModelChange)="onContentChange()"
-                  placeholder="e.g., What's your name?"
-                />
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="full-width-input">
-                <!-- <mat-label>Field Type</mat-label> -->
-                <mat-select
+              <div class="full-width-input">
+                <label for="inputType" class="block  text-[#506690] font-semibold">Input Type</label>
+                <select
+                  id="inputType"
+                  class="
+                  bg-white
+                    mt-1
+                    block
+                    w-full 
+                    px-4 
+                    py-2 
+                    border-1 
+                    border-gray-300 
+                    rounded-md 
+                    focus:outline-none 
+                    focus:ring-2 
+                    focus:ring-[rgba(194,213,255,0.619608)] 
+                    focus:border-[#1b55e2] 
+                    focus:shadow-[0_0_5px_2px_rgba(194,213,255,0.619608)]
+                    placeholder-gray-500 placeholder-opacity-50
+                  "
                   [(ngModel)]="field.type"
                   (ngModelChange)="onContentChange()"
                 >
-                  <mat-option value="text">Text</mat-option>
-                  <mat-option value="email">Email</mat-option>
-                  <mat-option value="number">Number</mat-option>
-                  <mat-option value="phone">Phone</mat-option>
-                  <mat-option value="date">Date</mat-option>
-                  <mat-option value="datetime">Date & Time</mat-option>
-                  <mat-option value="options">Single Choice</mat-option>
-                  <mat-option value="multiple-options"
-                    >Multiple Choice</mat-option
-                  >
-                  <mat-option value="file">File Upload</mat-option>
-                  <mat-option value="image">Image Upload</mat-option>
-                  <mat-option value="url">URL</mat-option>
-                  <mat-option value="currency">Currency</mat-option>
-                  <mat-option value="geocode">Location</mat-option>
-                </mat-select>
-              </mat-form-field>
+                  <option value="text">Text</option>
+                  <option value="email">Email</option>
+                  <option value="number">Number</option>
+                  <option value="phone">Phone</option>
+                  <option value="date">Date</option>
+                  <option value="datetime">Date & Time</option>
+                  <option value="options">Single Choice</option>
+                  <option value="multiple-options">Multiple Choice</option>
+                  <option value="file">File Upload</option>
+                  <option value="image">Image Upload</option>
+                  <option value="url">URL</option>
+                  <option value="currency">Currency</option>
+                  <option value="geocode">Location</option>
+                </select>
+              </div>
 
               <div
                 *ngIf="
@@ -271,25 +294,51 @@
                 "
                 class="field-options"
               >
-                <mat-form-field appearance="outline" class="full-width-input">
-                  <mat-label>Options (comma separated)</mat-label>
-                  <textarea
-                    matInput
-                    [(ngModel)]="field.optionsText"
-                    (ngModelChange)="updateFieldOptions(field)"
-                    placeholder="Option 1, Option 2, Option 3"
-                    rows="3"
-                  ></textarea>
-                </mat-form-field>
+              <div class="full-width-input">
+                <label for="options" class="block text-[#506690] font-semibold">Multiple Options</label>
+                <input
+                  id="options"
+                  class="
+                   bg-white
+                    mt-1
+                    block
+                    w-full 
+                    px-4 
+                    py-2 
+                    border-2 
+                    border-gray-300 
+                    rounded-md 
+                    focus:outline-none 
+                    focus:ring-2 
+                    focus:ring-[rgba(194,213,255,0.619608)] 
+                    focus:border-[#1b55e2] 
+                    focus:shadow-[0_0_5px_2px_rgba(194,213,255,0.619608)]
+                    placeholder-gray-500 
+                    placeholder-opacity-50
+                  "
+                  [(ngModel)]="field.optionsText"
+                  (ngModelChange)="updateFieldOptions(field)"
+                  placeholder="add options"
+                  rows="3"
+                >
+              </div>
               </div>
 
               <div class="field-settings">
-                <mat-checkbox
-                  [(ngModel)]="field.required"
-                  (ngModelChange)="onContentChange()"
-                >
-                  Required field
-                </mat-checkbox>
+                <div class="flex items-center space-x-2 mt-5 ml-2">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      class="sr-only peer" 
+                      [(ngModel)]="field.required" 
+                      (ngModelChange)="onContentChange()"
+                    />
+                    <div 
+                      class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#c2d5ff] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"
+                    ></div>
+                  </label>
+                  <span class="font-semibold text-[#506690]">Required</span>
+                </div>
               </div>
             </div>
           </div>

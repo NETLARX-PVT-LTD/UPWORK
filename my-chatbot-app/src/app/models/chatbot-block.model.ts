@@ -91,7 +91,21 @@ export interface ChatbotBlock {
   buttonUrl?: string; // NEW: For 'website_url' button type
   // NEW: An array to hold multiple buttons
   buttons?: Button[];
-
+// Position and Layout
+  position?: {
+    x: number;
+    y: number;
+  };
+  
+  // Timestamps
+  createdAt?: string;
+  updatedAt?: string;
+  
+  // Connection Properties
+  connections?: {
+    input?: string[];
+    output?: string[];
+  };
   // This property is now deprecated and should be removed from your component's logic.
   // mediaUrl?: string; 
   // This property is now deprecated and should be removed.
@@ -142,12 +156,19 @@ export interface AvailableMedia {
   slideSubtitle?: string;
   slideImages?: string[];
   slides?: ImageSlide[];
+   buttons?: Button[];
+    createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AvailableStory {
   id: string;
   name: string;
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
   blocks? : ChatbotBlock[]
+  
   // Add other properties if your story objects have them (e.g., description, blocks)
 }
 
@@ -166,7 +187,7 @@ export interface AvailableForm {
   validatePhone?: boolean;
   spamProtection?: boolean;
   requireCompletion?: boolean;
-
+ createdAt?: string;
   // If your available forms will also have predefined values for these, add them here:
   allowMultipleSubmission?: boolean;
   multipleSubmissionMessage?: string;
@@ -348,8 +369,10 @@ export interface ApiHeader {
 }
 
 export interface Button {
+   id?: string;
   title: string;
-  type: 'text_message' | 'media_block' | 'website_url' | 'direct_call' | 'start_story' | 'rss_feed' | 'json_api' | 'human_help' | 'conversational_form';
+  type: 'text_message' | 'media_block' | 'website_url' | 'direct_call' | 'start_story' | 'rss_feed' | 'json_api' | 'human_help' | 'conversational_form'|null;
+  value?: string;
   textMessage?: string; // For 'text_message' type
   linkedMediaId?: string; // For 'media_block' type
   url?: string; // For 'website_url' type

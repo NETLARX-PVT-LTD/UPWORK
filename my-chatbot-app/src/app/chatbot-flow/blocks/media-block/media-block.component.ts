@@ -13,6 +13,9 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { trigger, transition, style, animate } from '@angular/animations'; 
 import { ChatbotBlock, AvailableMedia, Button, AvailableStory, ImageSlide, AvailableForm } from '../../../models/chatbot-block.model';
 import { MatTabsModule } from '@angular/material/tabs'; 
+
+import { MediaService } from '../../../shared/services/media.service';
+
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 type ButtonIntegrationType = 'text_message' | 'media_block' | 'website_url' | 'direct_call' | 'start_story' | 'rss_feed' | 'json_api' | 'human_help' | 'conversational_form' | null;
@@ -99,6 +102,8 @@ export class MediaBlockComponent implements OnInit {
   @Output() editBlock = new EventEmitter<ChatbotBlock>();
   @Output() closeSidebarEvent = new EventEmitter<void>();
   @Output() contentChange = new EventEmitter<void>();
+@Output() mediaUpdated = new EventEmitter<AvailableMedia[]>(); // New emitter for media updates
+
 
   showNewMediaForm: boolean = false;
   showButtonTypeCard: boolean = false;
@@ -734,6 +739,7 @@ uploadImageUrl(): void {
     // FIXED: Use helper method instead of direct mediaUrl assignment
     this.setMediaUrlFromSelected(selected);
     this.block.slides = selected.slides ? JSON.parse(JSON.stringify(selected.slides)) : [];
+this.block.buttons = selected.buttons ? JSON.parse(JSON.stringify(selected.buttons)) : [];
 
     if (selected.type === 'image' && (!this.block.slides || this.block.slides.length === 0)) {
       this.block.slides = [{ image: selected.url || '', title: '', subtitle: '' }];
@@ -872,10 +878,12 @@ createNewMediaBlock(): void {
       content: this.block.content ?? '',
       // FIXED: Use appropriate URL property based on media type
       url: this.getUrlForMediaType(currentMediaType),
-      slides: this.block.slides ? JSON.parse(JSON.stringify(this.block.slides)) : []
+      slides: this.block.slides ? JSON.parse(JSON.stringify(this.block.slides)) : [],
+      buttons: this.block.buttons ? JSON.parse(JSON.stringify(this.block.buttons)) : [] 
     };
     this.availableMedia.push(newMedia);
     this.block.mediaId = newMediaId;
+    this.mediaUpdated.emit(this.availableMedia); // Emit updated media list
     this._snackBar.open('New Media Block content saved and linked!', 'Dismiss', { duration: 3000 });
   } else {
     const existingMediaIndex = this.availableMedia.findIndex(m => m.id === this.block.mediaId);
@@ -889,12 +897,14 @@ createNewMediaBlock(): void {
         url: this.getUrlForMediaType(currentMediaType),
         slides: this.block.slides ? JSON.parse(JSON.stringify(this.block.slides)) : []
       };
+      this.mediaUpdated.emit(this.availableMedia); // Emit updated media list
       this._snackBar.open('Media Block content updated!', 'Dismiss', { duration: 3000 });
     } else {
       this._snackBar.open('Error: Could not find existing media to update.', 'Dismiss', { duration: 3000 });
     }
   }
-
+ // Add the console.log here to show the updated availableMedia array
+  console.log('Updated availableMedia:', this.availableMedia);
   this.showNewMediaForm = false;
   this.showButtonTypeCard = false;
   this.closeCommonIntegrationCard();
