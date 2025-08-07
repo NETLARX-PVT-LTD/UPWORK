@@ -34,6 +34,31 @@ export class JarvishBlockComponent {
   recognition : any;
   isListening : boolean = false;
 
+  isDeleteMode = false;
+  confirmDelete = false;
+
+  // When trash icon is clicked
+  enableDeleteMode() {
+    this.isDeleteMode = true;
+  }
+
+  enableConfirmMode() {
+    this.confirmDelete = true;
+  }
+
+  // When "Are you sure?" is clicked
+  deleteConversation() {
+    this.messages = []; // Clear conversation
+    this.isDeleteMode = false;
+    this.confirmDelete = false;
+    this.isChatStarted = !this.isChatStarted
+  }
+
+  cancelDelete() {
+    this.isDeleteMode = false;
+    this.confirmDelete = false;
+  }
+
   constructor(private ngZone: NgZone) {}
   
 
@@ -831,4 +856,10 @@ export class JarvishBlockComponent {
   }
   }
 
+  // clearChat() {
+  //   const confirmDelete = confirm("Are you sure you want to delete the chat?");
+  //   if (confirmDelete) {
+  //     this.messages = [];
+  //   } 
+  // } 
 }
