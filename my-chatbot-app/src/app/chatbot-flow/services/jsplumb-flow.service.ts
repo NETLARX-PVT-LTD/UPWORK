@@ -38,17 +38,19 @@ export class JsPlumbFlowService {
     }
     this.instance = jsPlumb.getInstance({
       Container: containerEl,
-      ConnectionOverlays: [['Arrow', { location: 1, id: 'arrow', length: 10, width: 10 }]],
+      // ConnectionOverlays: [['Arrow', { location: 1, id: 'arrow', length: 10, width: 10 }]],
       PaintStyle: { 
-        stroke: '#4f46e5', 
+        stroke: '#95a5a6', 
         strokeWidth: 2 
       },
       HoverPaintStyle: { stroke: '#7c3aed', strokeWidth: 3 },
+       Endpoint: 'Blank',
+
       EndpointStyle: { 
-        fill: '#4f46e5'
+        fill: '#4f46e5',
       },
       EndpointHoverStyle: { fill: '#7c3aed' },
-      Connector: ['Flowchart', { stub: [40, 60], gap: 10, cornerRadius: 5, alwaysRespectStubs: true }]
+      Connector:'Straight'
     });
 
     this.instance.bind('connection', (info: any) => {

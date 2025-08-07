@@ -244,6 +244,9 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
         await this.createConnection(closestSourceBlock.id, newBlock.id);
       }
     }
+      setTimeout(() => {
+    this.jsPlumbFlowService.repaintAllConnections();
+  },70)
   }
 
   private distanceToLineSegment(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
@@ -391,7 +394,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
         setTimeout(() => {
             this.jsPlumbFlowService.repaintAllConnections();
             resolve();
-        }, 50);
+        }, 70);
     });
   }
 
