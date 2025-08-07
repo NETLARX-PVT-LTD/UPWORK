@@ -77,8 +77,8 @@
   <div class="manage-media-blocks-container h-full bg-gray-100">
     
     <!-- Header Section -->
-    <div class="header-section bg-white border-b border-gray-200 p-6">
-      <div class="flex justify-between items-center mb-4">
+    <div class="header-section bg-white p-4">
+      <div class="flex justify-between items-center ">
         <!-- <div class="flex items-center gap-3">
           <mat-icon class="text-red-500 text-2xl">play_circle_outline</mat-icon>
           <h1 class="text-2xl font-semibold text-gray-800">Manage Media Blocks</h1>
@@ -127,29 +127,14 @@
           <div class="p-4 flex-1">
             <!-- Header with Title and Menu -->
             <div class="flex justify-between items-start mb-2">
-              <h3 class="font-semibold text-gray-900 text-base">{{ media.name }}</h3>
-              <button mat-icon-button 
-                      [matMenuTriggerFor]="mediaMenu" 
-                      class="text-gray-500 hover:text-gray-700 -mt-2 -mr-2">
-                <mat-icon class="text-lg">content_copy</mat-icon>
-              </button>
-              
-              <!-- Context Menu -->
-              <mat-menu #mediaMenu="matMenu">
-                <button mat-menu-item [routerLink]="['/media-blocks/edit', media.id]">
-                  <mat-icon>edit</mat-icon>
-                  <span>Edit</span>
-                </button>
-                <button mat-menu-item (click)="duplicateMediaBlock(media)">
-                  <mat-icon>content_copy</mat-icon>
-                  <span>Duplicate</span>
-                </button>
-                <button mat-menu-item (click)="deleteMediaBlock(media.id)" class="text-red-600">
-                  <mat-icon>delete</mat-icon>
-                  <span>Delete</span>
-                </button>
-              </mat-menu>
-            </div>
+  <h3 class="font-semibold text-gray-900 text-base">{{ media.name }}</h3>
+  <button mat-icon-button 
+          class="text-gray-500 hover:text-gray-700 -mt-2 -mr-2"
+          matTooltip="Copy Payload"
+          (click)="copyPayload(media)">
+    <mat-icon class="text-lg">content_copy</mat-icon>
+  </button>
+</div>
             
             <!-- Date -->
             <div class="text-xs text-gray-600 mb-3">{{ getFormattedDate(media.createdAt) }}</div>
@@ -190,10 +175,16 @@
               <mat-icon class="text-lg">delete</mat-icon>
             </button>
             <button mat-icon-button 
+          class="text-gray-600 hover:bg-gray-200 w-8 h-8"
+          matTooltip="Clone Block"
+          (click)="cloneMediaBlock(media)">
+    <mat-icon class="text-lg">content_copy</mat-icon>
+  </button>
+            <!-- <button mat-icon-button 
                     class="text-gray-600 hover:bg-gray-200 w-8 h-8"
                     matTooltip="More options">
               <mat-icon class="text-lg">more_horiz</mat-icon>
-            </button>
+            </button> -->
           </div>
         </div>
       </div>

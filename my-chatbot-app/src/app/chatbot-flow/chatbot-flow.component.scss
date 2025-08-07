@@ -3227,24 +3227,28 @@
   }
 }
 
+// ADD THIS TO THE VERY END of chatbot-flow.component.scss
 
-/* Message icon: fade + scale into center */
-@keyframes fadeScaleOut {
-  0% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(0); opacity: 0; }
-}
-
+// :host ::ng-deep {
+//   /* This is the most important rule. It forces every part of the connection line
+//      (the container, the SVG element, and the path itself) to be "clickable"
+//      by the mouse, overriding any other style that might be hiding them. */
+//   .jtk-connector, .jtk-overlay, .jtk-connector svg, .jtk-connector path {
+//     pointer-events: all !important;
+//   }
+// }
 /* Cross icon: rotate and scale in */
 @keyframes rotateIn {
-  0% { transform: rotate(-45deg) scale(0); opacity: 0; }
-  100% { transform: rotate(0deg) scale(1); opacity: 1; }
-}
-
-.fade-scale-out {
-  animation: fadeScaleOut 0.3s forwards;
+  0% {
+    transform: rotate(-45deg) scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
 }
 
 .rotate-in {
   animation: rotateIn 0.5s forwards;
 }
-
