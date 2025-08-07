@@ -1,0 +1,183 @@
+'use client';
+
+import { ReactNode, useState } from 'react';
+import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
+import { FiMenu, FiX, FiHome, FiUsers, FiFile, FiList, FiBookmark, FiActivity, FiLogOut, FiHash } from 'react-icons/fi';
+
+// Updated sidebar links with icons
+const sidebarLinks = {
+  admin: [
+    { name: 'Dashboard', href: '/admin/dashboard', icon: FiHome },
+    { name: 'Manage Users', href: '/admin/users', icon: FiUsers },
+    { name: 'Reserved Numbers', href: '/admin/reserved-numbers', icon: FiHash },
+    { name: 'Documents', href: '/admin/documents', icon: FiFile },
+    { name: 'Audit Log', href: '/admin/audit', icon: FiActivity },
+  ],
+  user: [
+    { name: 'Dashboard', href: '/user/dashboard', icon: FiHome },
+    { name: 'Register Document', href: '/user/register', icon: FiFile },
+    { name: 'My Documents', href: '/user/documents', icon: FiList },
+    { name: 'Reserve Number', href: '/user/reserve', icon: FiBookmark },
+  ],
+};
+
+export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const role = pathname.startsWith('/admin') ? 'admin' : 'user';
+
+  // Get the current page title
+  const getPageTitle = () => {
+    // Find the matching link from sidebarLinks
+    const currentLink = sidebarLinks[role].find(link => link.href === pathname);
+    return currentLink?.name || 'Dashboard';
+  };
+
+  const handleSignOut = () => {
+    // Clear any stored auth tokens/data
+    localStorage.removeItem('token'); // Adjust based on your auth implementation
+    sessionStorage.clear();
+    
+    // Redirect to login page
+    router.push('/auth/login');
+  };
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Mobile Header */}
+      <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 px-4 flex items-center justify-between z-30">
+        <button
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          aria-label="Open menu"
+        >
+          <FiMenu className="h-6 w-6 text-gray-600" />
+        </button>
+        <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+          OfficeReg
+        </h1>
+        <div className="w-10" />
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      <div 
+        className={`
+          fixed inset-0 bg-black/50 z-40 transition-opacity duration-200 md:hidden
+          ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+        `}
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+
+      {/* Sidebar - Updated with height fixes */}
+      <aside className={`
+        fixed md:sticky top-0 left-0 w-64 bg-white border-r border-gray-200
+        transform transition-transform duration-200 ease-in-out z-50 md:z-0
+        flex flex-col h-[100dvh]
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:translate-x-0
+      `}>
+        {/* Mobile Close Button */}
+        <button
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="md:hidden absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg"
+          aria-label="Close menu"
+        >
+          <FiX className="h-5 w-5 text-gray-600" />
+        </button>
+
+        {/* Sidebar Header */}
+        <div className="flex-shrink-0 px-6 py-6 border-b border-gray-200">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+            OfficeReg
+          </h1>
+          <p className="text-sm text-gray-500 mt-1 capitalize">{role} Portal</p>
+        </div>
+
+        {/* Navigation Links - Add flex-1 to push profile to bottom */}
+        <div className="flex-1 flex flex-col">
+          <nav className="flex-1 px-4 py-4 overflow-y-auto">
+            <div className="space-y-1">
+              {sidebarLinks[role].map((link) => {
+                const Icon = link.icon;
+                const isActive = pathname === link.href;
+                
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`
+                      flex items-center px-4 py-3 text-sm rounded-lg transition-colors
+                      group hover:bg-gray-50
+                      ${isActive 
+                        ? 'bg-blue-50 text-blue-600 font-medium' 
+                        : 'text-gray-600 hover:text-gray-900'
+                      }
+                    `}
+                  >
+                    <Icon className={`
+                      h-5 w-5 mr-3 transition-colors
+                      ${isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}
+                    `} />
+                    {link.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </nav>
+
+          {/* User Profile Section */}
+          <div className="flex-shrink-0 border-t border-gray-200 p-4 mt-auto space-y-4">
+            <Link
+              href={role === 'admin' ? '/admin/profile' : '/user/profile'}
+              className="flex items-center px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
+                <span className="text-sm font-medium text-white">
+                  {role === 'admin' ? 'A' : 'U'}
+                </span>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-900">
+                  {role === 'admin' ? 'Admin User' : 'Regular User'}
+                </p>
+                <p className="text-xs text-gray-500">View profile</p>
+              </div>
+            </Link>
+
+            {/* Sign Out Button */}
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center px-4 py-3 text-sm rounded-lg transition-colors
+                text-red-600 hover:bg-red-50 group"
+            >
+              <FiLogOut className="h-5 w-5 mr-3" />
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area - Added pt-16 for mobile header space */}
+      <div className="flex-1 flex flex-col min-h-screen md:pt-0 pt-16">
+        {/* Desktop Header */}
+        <header className="hidden md:flex h-16 bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="flex-1 px-6 flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-800">
+              {getPageTitle()}
+            </h2>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1">
+          <div className="max-w-[1600px] mx-auto p-4 md:p-6 lg:p-8">
+            {children}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
