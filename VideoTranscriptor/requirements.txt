@@ -3,5 +3,6 @@ yt-dlp
 pydub
 opencv-python
 boto3
-mediapipe
+ultralytics
 tqdm
+torch
