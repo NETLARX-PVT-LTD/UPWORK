@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideAnimations } from '@angular/platform-browser/animations';
-
+import { MatDialogModule } from '@angular/material/dialog';
 // Import Angular Material Modules and FormsModule/ReactiveFormsModule
 import { DragDropModule } from '@angular/cdk/drag-drop'; // This is a module, needs importProvidersFrom
 import { MatInputModule } from '@angular/material/input'; // Module
@@ -33,6 +33,7 @@ export const appConfig: ApplicationConfig = {
       MatButtonModule,
       MatMenuModule,         // <--- Add this
       MatSelectModule,       // <--- Add this
+       MatDialogModule,
       MatButtonToggleModule, // <--- Add this
       FormsModule,           // <--- Add this for [(ngModel)]
       ReactiveFormsModule    // <--- Keep this if you use reactive forms
