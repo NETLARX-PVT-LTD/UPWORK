@@ -66,6 +66,24 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// GET /api/auth/me - Protected route to get current user data
+router.get('/me', authenticate, async (req, res) => {
+  try {
+    // The `authenticate` middleware attaches the user object to the request
+    // We can now access `req.user.id` to find the user in the database
+    const user = await User.findById(req.user.id).select('-password'); // Exclude the password field
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ success: true, user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // POST /api/auth/guest
 router.post('/guest', async (req, res, next) => {
   try {
@@ -75,9 +93,10 @@ router.post('/guest', async (req, res, next) => {
     // 2. Create a new user document in the database
     const guestUser = await User.create({
       name: 'Guest User',
-      email: `${guestId}@temp.com`, // Use a temporary email
-      isGuest: true, // This flag is crucial for identification
+      email: `${guestId}@temp.com`,
+      isGuest: true,
       createdAt: new Date(),
+      role: 'admin', // *** ADD THIS LINE ***
     });
 
     // 3. Generate a JWT for the guest user

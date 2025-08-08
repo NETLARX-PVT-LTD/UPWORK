@@ -67,6 +67,9 @@ Create `.env` file:
 ```env
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRE=<time in days>d   e.g.30d
+CLOUDINARY_URL=cloudinary://<your_api_key>:<your_api_secret>@dmqa0nnct
+NEXT_PUBLIC_BACKEND_URL=http://localhost:<PORT>
 PORT=5000
 ```
 

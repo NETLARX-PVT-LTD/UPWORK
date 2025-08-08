@@ -1,10 +1,21 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState,useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { FiMenu, FiX, FiHome, FiUsers, FiFile, FiList, FiBookmark, FiActivity, FiLogOut, FiHash } from 'react-icons/fi';
+import { FiMenu, FiX, FiHome, FiUsers, FiFile, FiList, FiBookmark, FiActivity, FiLogOut, FiHash, FiClock } from 'react-icons/fi';
+import { parseISO, differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from 'date-fns';
 
+// Define the User type to inform TypeScript about the object structure
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  isGuest?: boolean; // isGuest is optional
+  createdAt?: string; // createdAt is optional, but needed for guest users
+  role: 'admin' | 'user';
+  department?: string;
+}
 // Updated sidebar links with icons
 const sidebarLinks = {
   admin: [
@@ -26,6 +37,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+ const [user, setUser] = useState<User | null>(null); // State now correctly typed as User or null
+  const [timeLeft, setTimeLeft] = useState(''); // State to hold countdown time
   const role = pathname.startsWith('/admin') ? 'admin' : 'user';
 
   // Get the current page title
@@ -56,6 +69,75 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   sessionStorage.clear();
   router.push('/auth/login');
 };
+
+  // --- NEW LOGIC FOR GUEST COUNTDOWN ---
+
+  // Fetch user data on initial load
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          if (res.ok) {
+            const userData = await res.json();
+            setUser(userData.user);
+          } else {
+            console.error('Failed to fetch user data');
+            handleSignOut(); // Sign out if token is invalid
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          handleSignOut();
+        }
+      } else {
+        handleSignOut();
+      }
+    };
+    fetchUser();
+  }, []);
+
+  // Countdown timer logic
+   useEffect(() => {
+    let timer: NodeJS.Timeout | null = null; // Explicitly type the timer variable
+    if (user && user.isGuest) {
+      const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+      // Ensure user.createdAt exists before parsing
+      const creationDate = user.createdAt ? parseISO(user.createdAt) : new Date();
+      const expirationDate = new Date(creationDate.getTime() + thirtyDaysInMs);
+
+      const updateCountdown = () => {
+        const now = new Date();
+        const timeRemaining = expirationDate.getTime() - now.getTime();
+
+        if (timeRemaining <= 0) {
+          setTimeLeft('Expired');
+          if (timer) clearInterval(timer);
+          handleSignOut();
+        } else {
+          const days = differenceInDays(expirationDate, now);
+          const hours = differenceInHours(expirationDate, now) % 24;
+          const minutes = differenceInMinutes(expirationDate, now) % 60;
+          const seconds = differenceInSeconds(expirationDate, now) % 60;
+          setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+        }
+      };
+
+      updateCountdown();
+      timer = setInterval(updateCountdown, 1000);
+    } else {
+        // Clear the timer if the user is no longer a guest or logs out
+        if (timer) clearInterval(timer);
+    }
+    return () => {
+        if (timer) clearInterval(timer);
+    };
+  }, [user]);
+  // --- END NEW LOGIC ---
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -143,6 +225,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
           {/* User Profile Section */}
           <div className="flex-shrink-0 border-t border-gray-200 p-4 mt-auto space-y-4">
+             {/* --- NEW COUNTDOWN DISPLAY --- */}
+          {user && user.isGuest && timeLeft && (
+            <div className="flex items-center px-4 py-3 text-sm rounded-lg bg-blue-50 text-blue-700">
+              <FiClock className="h-5 w-5 mr-3" />
+              <div className="flex flex-col">
+                <p className="font-medium">Guest Session Expires:</p>
+                <p className="text-xs">{timeLeft}</p>
+              </div>
+            </div>
+          )}
             <Link
               href={role === 'admin' ? '/admin/profile' : '/user/profile'}
               className="flex items-center px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors"
