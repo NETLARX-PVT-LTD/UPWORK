@@ -44,7 +44,7 @@ export class JsPlumbFlowService {
         strokeWidth: 2 
       },
       HoverPaintStyle: { stroke: '#7c3aed', strokeWidth: 3 },
-       Endpoint: 'Blank',
+      Endpoint: 'Blank',
 
       EndpointStyle: { 
         fill: '#4f46e5',
@@ -78,6 +78,7 @@ export class JsPlumbFlowService {
     const blockElement = document.getElementById(blockId);
     if (!this.instance || !blockElement) { return; }
 
+    // Allow unlimited connections on both ends to avoid unexpected refusal to connect
     this.instance.addEndpoint(blockElement, { anchor: 'Bottom', isSource: true, maxConnections: -1, uuid: `${blockId}-source` });
     this.instance.addEndpoint(blockElement, { anchor: 'Top', isTarget: true, maxConnections: -1, uuid: `${blockId}-target` });
 
@@ -128,6 +129,29 @@ export class JsPlumbFlowService {
   reset(): void {
     if (this.instance) {
       this.instance.reset();
+    }
+  }
+
+  // Batch jsPlumb operations to avoid transient angled lines
+  batch<T>(fn: () => T): T {
+    if (!this.instance) { return fn(); }
+    let result!: T;
+    this.instance.batch(() => {
+      result = fn();
+    });
+    return result;
+  }
+
+  // Ask jsPlumb to recompute element offsets after DOM changes
+  revalidate(blockElementId: string): void {
+    if (this.instance) {
+      this.instance.revalidate(blockElementId);
+    }
+  }
+
+  setZoom(zoom: number): void {
+    if (this.instance) {
+      this.instance.setZoom(zoom);
     }
   }
 }
