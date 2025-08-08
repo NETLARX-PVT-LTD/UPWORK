@@ -289,7 +289,7 @@ export default function LoginPage() {
           </form>
 
           {/* Updated "Try the App" section */}
-          <div className="flex items-center justify-center my-6">
+          {/* <div className="flex items-center justify-center my-6">
             <div className="flex-grow border-t border-gray-300"></div>
             <span className="flex-shrink mx-4 text-gray-400 text-sm">
               OR
@@ -306,7 +306,7 @@ export default function LoginPage() {
           >
             <FiUser className="h-5 w-5 text-gray-500 group-hover:text-gray-600 transition-colors" />
             Try the App as Guest
-          </button>
+          </button> */}
         </div>
       </div>
 
