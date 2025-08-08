@@ -195,26 +195,93 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dropPreviewPosition = null;
   }
 
-  async addBlockToCanvasAtPosition(block: ChatbotBlock, screenX: number, screenY: number): Promise<void> {
-    const newBlockId = `${block.type}-${Date.now()}`;
-    const canvasRect = this.canvasContent.nativeElement.getBoundingClientRect();
-    const canvasX = (screenX - canvasRect.left - this.panOffsetX) / this.zoomLevel;
-    const canvasY = (screenY - canvasRect.top - this.panOffsetY) / this.zoomLevel;
 
-    const newBlock: ChatbotBlock = {
-      ...block, id: newBlockId, x: canvasX, y: canvasY, width: 0, height: 0,
-      content: block.type === 'textResponse' ? '' : undefined,
-      keywordGroups: block.subType === 'keywordGroup' ? [[]] : undefined,
-      phraseText: block.subType === 'phrase' ? '' : undefined,
-      similarPhrases: block.subType === 'phrase' ? '' : undefined,
-    };
+
+
+// Updated addBlockToCanvasAtPosition method - replace the existing one in your component
+
+async addBlockToCanvasAtPosition(block: ChatbotBlock, screenX: number, screenY: number): Promise<void> {
+  const newBlockId = `${block.type}-${Date.now()}`;
+  const canvasRect = this.canvasContent.nativeElement.getBoundingClientRect();
+  const canvasX = (screenX - canvasRect.left - this.panOffsetX) / this.zoomLevel;
+  const canvasY = (screenY - canvasRect.top - this.panOffsetY) / this.zoomLevel;
+
+  const newBlock: ChatbotBlock = {
+    ...block, 
+    id: newBlockId, 
+    x: canvasX, 
+    y: canvasY, 
+    width: 0, 
+    height: 0,
+    content: block.type === 'textResponse' ? '' : undefined,
+    keywordGroups: block.subType === 'keywordGroup' ? [[]] : undefined,
+    phraseText: block.subType === 'phrase' ? '' : undefined,
+    similarPhrases: block.subType === 'phrase' ? '' : undefined,
+  };
+  
+  this.canvasBlocks.push(newBlock);
+  await new Promise(resolve => setTimeout(resolve, 0));
+  this.updateBlockDimensions(newBlock);
+  this.jsPlumbFlowService.setupBlock(`block-${newBlock.id}`);
+  this.selectBlock(newBlock);
+  
+  // Find if the block was dropped on another block
+  const targetBlock = this.findBlockAtPosition(canvasX, canvasY, newBlock.id);
+  
+  if (targetBlock) {
+    // Get all existing outgoing connections from the target block
+    const existingConnections = this.jsPlumbFlowService.getConnections({ source: `block-${targetBlock.id}` });
     
-    this.canvasBlocks.push(newBlock);
-    await new Promise(resolve => setTimeout(resolve, 0));
-    this.updateBlockDimensions(newBlock);
-    this.jsPlumbFlowService.setupBlock(`block-${newBlock.id}`);
-    this.selectBlock(newBlock);
+    if (existingConnections.length > 0) {
+      // There are existing connections - we need to insert this block in the chain
+      
+      // First, position the new block below the target block
+      await new Promise(resolve => setTimeout(resolve, 50)); 
+      this.updateBlockDimensions(newBlock);
+      
+      const verticalGap = this.MIN_VERTICAL_GAP;
+      newBlock.x = targetBlock.x + (targetBlock.width / 2) - (newBlock.width / 2);
+      newBlock.y = targetBlock.y + targetBlock.height + verticalGap;
+      
+      // Shift all existing connected blocks down
+      const shiftAmount = newBlock.height + verticalGap;
+      
+      // Get all blocks that are connected from the target block and shift them down
+      for (const conn of existingConnections) {
+        const connectedBlockId = conn.targetId.replace('block-', '');
+        const connectedBlock = this.canvasBlocks.find(b => b.id === connectedBlockId);
+        if (connectedBlock) {
+          this.shiftBlocksDown(connectedBlock, shiftAmount);
+        }
+      }
+      
+      // Remove existing connections from target block
+      for (const conn of existingConnections) {
+        this.jsPlumbFlowService.deleteJsPlumbConnection(conn);
+      }
+      
+      // Connect target block to new block
+      await this.createConnection(targetBlock.id, newBlock.id);
+      
+      // Connect new block to all the previously connected blocks
+      for (const conn of existingConnections) {
+        const connectedBlockId = conn.targetId.replace('block-', '');
+        await this.createConnection(newBlock.id, connectedBlockId);
+      }
+      
+    } else {
+      // No existing connections - just connect target block to new block
+      await new Promise(resolve => setTimeout(resolve, 50));
+      this.updateBlockDimensions(newBlock);
+      
+      newBlock.x = targetBlock.x + (targetBlock.width / 2) - (newBlock.width / 2);
+      newBlock.y = targetBlock.y + targetBlock.height + this.MIN_VERTICAL_GAP;
+      
+      await this.createConnection(targetBlock.id, newBlock.id);
+    }
     
+  } else {
+    // Block was not dropped on another block - use existing logic
     const connectionToBreak = this.getClosestConnectionToPoint(canvasX, canvasY);
 
     if (connectionToBreak) {
@@ -244,10 +311,85 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
         await this.createConnection(closestSourceBlock.id, newBlock.id);
       }
     }
-      setTimeout(() => {
-    this.jsPlumbFlowService.repaintAllConnections();
-  },70)
   }
+  
+  setTimeout(() => {
+    this.jsPlumbFlowService.repaintAllConnections();
+  }, 70);
+}
+
+// Add this new helper method to find if a block was dropped on another block
+private findBlockAtPosition(x: number, y: number, excludeId: string): ChatbotBlock | null {
+  const tolerance = 50; // Pixels tolerance for drop detection
+  
+  for (const block of this.canvasBlocks) {
+    if (block.id === excludeId) continue;
+    
+    this.updateBlockDimensions(block);
+    
+    // Check if the drop position is within the block's bounds (with tolerance)
+    if (x >= (block.x - tolerance) && 
+        x <= (block.x + block.width + tolerance) &&
+        y >= (block.y - tolerance) && 
+        y <= (block.y + block.height + tolerance)) {
+      return block;
+    }
+  }
+  
+  return null;
+}
+// Add this new helper method to find if a block was dropped on another block
+
+// private findBlockAtPosition(x: number, y: number, excludeId: string): ChatbotBlock | null {
+//   const tolerance = 30; // Reduced tolerance for more precise detection
+//   let bestMatch: ChatbotBlock | null = null;
+//   let smallestArea = Infinity;
+  
+//   for (const block of this.canvasBlocks) {
+//     if (block.id === excludeId) continue;
+    
+//     this.updateBlockDimensions(block);
+    
+//     // Check if the drop position is within the block's bounds
+//     const withinX = x >= block.x && x <= (block.x + block.width);
+//     const withinY = y >= block.y && y <= (block.y + block.height);
+    
+//     if (withinX && withinY) {
+//       // Direct hit - this is the best match
+//       const area = block.width * block.height;
+//       if (area < smallestArea) {
+//         smallestArea = area;
+//         bestMatch = block;
+//       }
+//     } else {
+//       // Check with tolerance for near misses
+//       const withinToleranceX = x >= (block.x - tolerance) && x <= (block.x + block.width + tolerance);
+//       const withinToleranceY = y >= (block.y - tolerance) && y <= (block.y + block.height + tolerance);
+      
+//       if (withinToleranceX && withinToleranceY && !bestMatch) {
+//         // Calculate distance to center of block
+//         const centerX = block.x + (block.width / 2);
+//         const centerY = block.y + (block.height / 2);
+//         const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+        
+//         // Only consider this if it's reasonably close
+//         if (distance < tolerance && (bestMatch === null || distance < smallestArea)) {
+//           smallestArea = distance;
+//           bestMatch = block;
+//         }
+//       }
+//     }
+//   }
+  
+//   // Debug logging to help troubleshoot
+//   if (bestMatch) {
+//     console.log(`Block dropped on: ${bestMatch.name} (${bestMatch.type}) - ID: ${bestMatch.id}`);
+//   } else {
+//     console.log('No target block found at position:', x, y);
+//   }
+  
+//   return bestMatch;
+// }
 
   private distanceToLineSegment(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
     const l2 = (x1 - x2) ** 2 + (y1 - y2) ** 2;
