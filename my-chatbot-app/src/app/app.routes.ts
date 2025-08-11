@@ -1,13 +1,22 @@
-import { RouterModule, Routes } from '@angular/router';
+// src/app/app.routes.ts
+
+import { Routes } from '@angular/router';
 import { ChatbotFlowComponent } from './chatbot-flow/chatbot-flow.component';
 import { MediaBlockPageComponent } from './media-block-page/media-block-page.component';
-// import { MediaBlockDetailComponent } from './media-block-page/media-block-detail/media-block-detail.component';
-import { NgModule } from '@angular/core';
 import { MediaBlockEditComponent } from './media-block-page/media-block-edit/media-block-edit.component';
-// import { MediaConfigComponent } from './media-block-page/media-config/media-config.component';
-// import { MediaBlockEditPageComponent } from './media-block-page/media-block-edit-page/media-block-edit-page.component';
+import { PublishBotComponent } from './publish-bot/publish-bot.component';
+import { ChatbotWidgetComponent } from './chatbot-widget/chatbot-widget.component';
 
 export const routes: Routes = [
+  // The main route for the publishing dashboard
+  { path: 'publish-bot', component: PublishBotComponent },
+
+  // The route for the embeddable chatbot widget (used in the iframe)
+  { path: 'chatbot-widget', component: ChatbotWidgetComponent },
+
+  // The route for the full-page landing bot
+  { path: 'landing/:id', component: ChatbotWidgetComponent },
+
   // Your other routes
   { path: 'media-blocks', component: MediaBlockPageComponent },
   {
@@ -18,18 +27,9 @@ export const routes: Routes = [
     path: 'media-blocks/edit/:id',
     component: MediaBlockEditComponent
   },
-  // { path: 'media-block-detail/:id', component: MediaBlockDetailComponent },
-  //  { path: 'media-config/:id', component: MediaConfigComponent },
-  //  { path: 'media-block/edit/:id', component: MediaBlockEditPageComponent },
   // Route for your Create Story page
   { path: 'create-story', component: ChatbotFlowComponent },
 
-  // Optional: A default route to redirect to the 'create-story' page
+  // A default route to redirect to the 'create-story' page
   { path: '', redirectTo: '/create-story', pathMatch: 'full' },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
-export class AppRoutingModule {}
