@@ -16,6 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'; // FormsModule is for [(ngModel)], ReactiveFormsModule for reactive forms
+import { HttpClientModule } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -36,7 +37,8 @@ export const appConfig: ApplicationConfig = {
        MatDialogModule,
       MatButtonToggleModule, // <--- Add this
       FormsModule,           // <--- Add this for [(ngModel)]
-      ReactiveFormsModule    // <--- Keep this if you use reactive forms
+      ReactiveFormsModule,    // <--- Keep this if you use reactive forms
+       HttpClientModule 
     )
   ]
 };
