@@ -340,7 +340,7 @@
   border: 2px solid #e2e8f0;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
+  transition: none; // Prevent left/top animation during positioning
   z-index: 10;
   cursor: grab; // Changed from 'move' for better UX indication
   // Added `overflow: visible;` - important if endpoints extend beyond block bounds
@@ -1310,7 +1310,7 @@
   min-width: 200px;
   min-height: 80px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+  transition: none; // Prevent left/top animation during positioning
   cursor: move;
   background: white;
 }
