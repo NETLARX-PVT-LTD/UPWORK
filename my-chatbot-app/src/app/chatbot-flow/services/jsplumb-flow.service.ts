@@ -109,11 +109,16 @@ export class JsPlumbFlowService {
     if (!this.instance) { return null; }
     const existing = this.instance.getConnections({ source: sourceBlockId, target: targetBlockId });
     if (existing.length > 0) { return null; }
-    return this.instance.connect({
+    const conn = this.instance.connect({
       source: sourceBlockId,
       target: targetBlockId,
       anchor: ['Bottom', 'Top'],
     });
+    // After connecting, ensure jsPlumb computes offsets immediately
+    this.instance.revalidate(sourceBlockId);
+    this.instance.revalidate(targetBlockId);
+    this.instance.repaintEverything();
+    return conn;
   }
 
   repaintAllConnections(): void {

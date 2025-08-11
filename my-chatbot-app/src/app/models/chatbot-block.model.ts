@@ -106,6 +106,8 @@ export interface ChatbotBlock {
     input?: string[];
     output?: string[];
   };
+  // Temporary UI state flag used to hide the block while it initializes on the canvas
+  isInitializing?: boolean;
   // This property is now deprecated and should be removed from your component's logic.
   // mediaUrl?: string; 
   // This property is now deprecated and should be removed.

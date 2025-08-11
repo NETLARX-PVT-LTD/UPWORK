@@ -102,18 +102,20 @@
           </div>
 
           <div class="blocks-container">
-           <div
-  *ngFor="let block of canvasBlocks"
-  class="canvas-block jsplumb-draggable enhanced-canvas-block"
-  [id]="'block-' + block.id"
-  [class]="'canvas-block-' + block.type"
-  [class.selected]="selectedBlock?.id === block.id"
-  [style.left.px]="block.x"
-  [style.top.px]="block.y"
-  [style.position]="'absolute'"
-  [style.border-color]="getStatusColor(block.status)"
-  [style.background-color]="getTypeColor(block.type)"
-v>
+            <div
+              *ngFor="let block of canvasBlocks"
+              class="canvas-block jsplumb-draggable enhanced-canvas-block"
+              [id]="'block-' + block.id"
+              [class]="'canvas-block-' + block.type"
+              [class.selected]="selectedBlock?.id === block.id"
+              [style.left.px]="block.x"
+              [style.top.px]="block.y"
+              [style.position]="'absolute'"
+              [style.border-color]="getStatusColor(block.status)"
+              [style.background-color]="getTypeColor(block.type)"
+              [style.opacity]="block.isInitializing ? 0 : 1"
+              [style.transition]="block.isInitializing ? 'none' : 'opacity 0.2s ease-in'"
+            >
 
               <ng-container [ngSwitch]="block.type">
                 <app-user-input-block
