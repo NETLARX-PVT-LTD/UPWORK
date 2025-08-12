@@ -6,13 +6,15 @@ import { MediaBlockPageComponent } from './media-block-page/media-block-page.com
 import { MediaBlockEditComponent } from './media-block-page/media-block-edit/media-block-edit.component';
 import { PublishBotComponent } from './publish-bot/publish-bot.component';
 import { ChatbotWidgetComponent } from './chatbot-widget/chatbot-widget.component';
+import { ChatbotMenuComponent } from './chatbot-menu/chatbot-menu.component';
 
 export const routes: Routes = [
   // The main route for the publishing dashboard
-  { path: 'publish-bot', component: PublishBotComponent },
+  { path: 'publish-bot', component: PublishBotComponent,data: { title: 'Publish Bot' }  },
 
   // The route for the embeddable chatbot widget (used in the iframe)
   { path: 'chatbot-widget', component: ChatbotWidgetComponent },
+  { path: 'chatbot-menu', component: ChatbotMenuComponent,data: { title: 'Chatbot Menu' }  },
 
   // The route for the full-page landing bot
   { path: 'landing/:id', component: ChatbotWidgetComponent },
