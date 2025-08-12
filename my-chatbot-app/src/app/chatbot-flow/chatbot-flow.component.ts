@@ -26,7 +26,7 @@ import { LinkStoryBlockComponent } from './blocks/link-story-block/link-story-bl
 import { ConversationalFormBlockComponent } from './blocks/conversational-form-block/conversational-form-block.component';
 import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-block/json-api-integration-block.component';
 import { JarvishBlockComponent } from './blocks/jarvish-block/jarvish-block.component';
-import { JsPlumbFlowService } from './services/jsplumb-flow.service';
+import { JsPlumbFlowService, ConnectionInfo } from './services/jsplumb-flow.service';
 
 type NearestConnectionPoint = { blockId: string, x: number, y: number };
 
@@ -128,12 +128,24 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       id: 'flow-start', name: 'User Input', icon: 'person', type: 'userInput', status: 'active',
       x: 600, y: 100, subType: 'keywordGroup', content: 'Hello 👋',
       keywordGroups: [['Hello', 'Hi']], description: 'Define keywords that trigger the conversations',
-      width: 0, height: 0
+      width: 0, height: 0,
+      connections: {input:[], output:[]}
     });
   }
 
   ngAfterViewInit(): void {
     this.jsPlumbFlowService.initialize(this.canvasContent.nativeElement);
+
+
+    // ✨ START: ADD THIS WHOLE SECTION
+    this.jsPlumbFlowService.connectionCreated.subscribe((info: ConnectionInfo) => {
+      this.handleConnectionCreated(info);
+    });
+
+
+    this.jsPlumbFlowService.connectionDeleted.subscribe((info: ConnectionInfo) => {
+      this.handleConnectionDeleted(info);
+    });
 
     this.jsPlumbFlowService.blockDragStarted.subscribe(dragInfo => {
       const block = this.canvasBlocks.find(b => b.id === dragInfo.blockId);
@@ -225,6 +237,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       keywordGroups: block.subType === 'keywordGroup' ? [[]] : undefined,
       // Initialize hidden to avoid any visible transition glitches
       isInitializing: true,
+      connections: {input:[], output:[]}
     };
 
     // Part 1: Initial render for measurement purposes ONLY
@@ -542,17 +555,27 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasWrapper.nativeElement.style.cursor = 'default';
   }
 
-  duplicateCanvasBlock(block: ChatbotBlock) {
-    const newBlockId = `${block.type}-${Date.now()}-dup`;
-    const newBlock: ChatbotBlock = { ...block, id: newBlockId, x: (block.x || 0) + 40, y: (block.y || 0) + 40 };
-    this.canvasBlocks.push(newBlock);
-    setTimeout(() => {
-      this.updateBlockDimensions(newBlock);
-      this.jsPlumbFlowService.setupBlock(`block-${newBlock.id}`);
-      this.selectBlock(newBlock);
-      this.attachResizeObserver(newBlock);
-    }, 80);
-  }
+duplicateCanvasBlock(block: ChatbotBlock) {
+  const newBlockId = `${block.type}-${Date.now()}-dup`;
+  
+  const newBlock: ChatbotBlock = { 
+    ...block, 
+    id: newBlockId, 
+    x: (block.x || 0) + 40, 
+    y: (block.y || 0) + 40,
+    connections: { input: [], output: [] }
+  };
+
+  this.canvasBlocks.push(newBlock);
+
+  // This code inside the timeout is necessary
+  setTimeout(() => {
+    this.updateBlockDimensions(newBlock);
+    this.jsPlumbFlowService.setupBlock(`block-${newBlock.id}`);
+    this.selectBlock(newBlock);
+    this.attachResizeObserver(newBlock);
+  }, 80);
+}
 
   onBlockUpdated(updatedBlock: ChatbotBlock) {
     const index = this.canvasBlocks.findIndex(b => b.id === updatedBlock.id);
@@ -641,16 +664,22 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  saveFlow() {
-    const flowData = {
-      blocks: this.canvasBlocks,
-      connections: this.jsPlumbFlowService.getConnections().map((conn: any) => ({
-        sourceId: conn.sourceId.replace('block-', ''),
-        targetId: conn.targetId.replace('block-', ''),
-      })),
-    };
-    console.log('Chatbot flow saved!', flowData);
-  }
+  // Inside saveFlow()
+
+saveFlow() {
+  const flowData = {
+    // The `blocks` array now contains the complete flow structure,
+    // including the `connections` object within each block.
+    blocks: this.canvasBlocks,
+
+    // ✨ This part is now redundant and can be removed.
+    // connections: this.jsPlumbFlowService.getConnections().map((conn: any) => ({
+    //   sourceId: conn.sourceId.replace('block-', ''),
+    //   targetId: conn.targetId.replace('block-', ''),
+    // })),
+  };
+  console.log('Chatbot flow saved!', flowData);
+}
 
   zoomIn() { this.zoomLevel = Math.min(this.maxZoom, this.zoomLevel + this.zoomStep); this.updateCanvasTransform(); this.jsPlumbFlowService.repaintAllConnections(); }
   zoomOut() { this.zoomLevel = Math.max(this.minZoom, this.zoomLevel - this.zoomStep); this.updateCanvasTransform(); this.jsPlumbFlowService.repaintAllConnections(); }
@@ -683,4 +712,54 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getStatusColor(status: string): string { return '#4CAF50'; }
   getTypeColor(type: string): string { return '#F5F5F5'; }
+
+// Add these two new functions to your component class
+
+private handleConnectionCreated(info: ConnectionInfo): void {
+  const sourceId = info.sourceId.replace('block-', '');
+  const targetId = info.targetId.replace('block-', '');
+
+  const sourceBlock = this.canvasBlocks.find(b => b.id === sourceId);
+  const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
+  
+  if (sourceBlock && targetBlock) {
+    // Ensure the connections objects exist
+    if (!sourceBlock.connections) sourceBlock.connections = { input: [], output: [] };
+    if (!targetBlock.connections) targetBlock.connections = { input: [], output: [] };
+
+    // Update source block's output
+    if (!sourceBlock.connections.output!.includes(targetId)) {
+      sourceBlock.connections.output!.push(targetId);
+    }
+
+    // Update target block's input
+    if (!targetBlock.connections.input!.includes(sourceId)) {
+      targetBlock.connections.input!.push(sourceId);
+    }
+
+    console.log(`Connection created: ${sourceId} -> ${targetId}`);
+    this.cdr.detectChanges();
+  }
+}
+
+private handleConnectionDeleted(info: ConnectionInfo): void {
+  const sourceId = info.sourceId.replace('block-', '');
+  const targetId = info.targetId.replace('block-', '');
+  
+  const sourceBlock = this.canvasBlocks.find(b => b.id === sourceId);
+  const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
+
+  // Update source block's output
+  if (sourceBlock && sourceBlock.connections && sourceBlock.connections.output) {
+    sourceBlock.connections.output = sourceBlock.connections.output.filter(id => id !== targetId);
+  }
+
+  // Update target block's input
+  if (targetBlock && targetBlock.connections && targetBlock.connections.input) {
+    targetBlock.connections.input = targetBlock.connections.input.filter(id => id !== sourceId);
+  }
+  
+  console.log(`Connection deleted: ${sourceId} -> ${targetId}`);
+  this.cdr.detectChanges();
+}
 }
