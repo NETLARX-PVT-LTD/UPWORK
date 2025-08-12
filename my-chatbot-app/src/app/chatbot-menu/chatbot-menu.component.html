@@ -1,0 +1,286 @@
+<div class="bg-gray-50 min-h-screen font-sans">
+  <div class="bg-white border-b border-gray-200">
+    <div class="flex items-center justify-between px-6 py-4">
+      <div class="flex items-center space-x-4">
+        <h1 class="text-2xl font-semibold text-gray-800">Chatbot Menu</h1>
+        <div class="flex items-center space-x-2">
+          <span class="text-gray-600">Bot 3</span>
+          <i class="fas fa-chevron-down text-gray-400"></i>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-4">
+        <button class="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600">
+          <i class="fas fa-bolt"></i>
+          <span>Agentic Platform</span>
+        </button>
+        <button class="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-md text-sm font-medium hover:bg-green-600">
+          <i class="fas fa-handshake"></i>
+          <span>Partner Portal</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white px-6 py-3 border-b border-gray-200">
+    <button class="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600">
+      <i class="fas fa-play-circle"></i>
+      <span>Tutorial</span>
+    </button>
+  </div>
+
+  <div class="flex">
+    <div class="w-80 bg-white border-r border-gray-200 h-screen overflow-y-auto">
+      <div class="p-6">
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Menu button type <span class="text-red-500">*</span>
+          </label>
+          <select 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            [(ngModel)]="selectedButtonType" 
+            (change)="onButtonTypeChange()">
+            <option value="action">Action</option>
+            <option value="submenu">Submenu</option>
+            <option value="weblink">Weblink</option>
+          </select>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Menu button label <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Item name"
+            [(ngModel)]="buttonLabel">
+        </div>
+
+        <div *ngIf="validationErrors.length > 0" class="mb-4 p-3 bg-red-50 border-l-4 border-red-400 rounded-md">
+          <div class="text-red-700 text-sm">
+            <ul class="list-disc list-inside space-y-1">
+              <li *ngFor="let error of validationErrors">{{ error }}</li>
+            </ul>
+          </div>
+        </div>
+
+        <div *ngIf="selectedButtonType === 'action'" class="mb-6">
+          <div class="flex border-b border-gray-200 mb-4">
+            <button 
+              class="px-4 py-2 text-sm font-medium border-b-2 border-transparent hover:text-blue-500 hover:border-blue-500 focus:outline-none"
+              [class.text-blue-600]="selectedTab === 'message'"
+              [class.border-blue-500]="selectedTab === 'message'"
+              [class.bg-blue-50]="selectedTab === 'message'"
+              (click)="onTabChange('message')">
+              Text Message
+            </button>
+            <button 
+              class="px-4 py-2 text-sm font-medium border-b-2 border-transparent hover:text-blue-500 hover:border-blue-500 focus:outline-none"
+              [class.text-blue-600]="selectedTab === 'story'"
+              [class.border-blue-500]="selectedTab === 'story'"
+              [class.bg-blue-50]="selectedTab === 'story'"
+              (click)="onTabChange('story')">
+              Story
+            </button>
+            <button 
+              class="px-4 py-2 text-sm font-medium border-b-2 border-transparent hover:text-blue-500 hover:border-blue-500 focus:outline-none"
+              [class.text-blue-600]="selectedTab === 'template'"
+              [class.border-blue-500]="selectedTab === 'template'"
+              [class.bg-blue-50]="selectedTab === 'template'"
+              (click)="onTabChange('template')">
+              Template
+            </button>
+            <button 
+              class="px-4 py-2 text-sm font-medium border-b-2 border-transparent hover:text-blue-500 hover:border-blue-500 focus:outline-none"
+              [class.text-blue-600]="selectedTab === 'plugin'"
+              [class.border-blue-500]="selectedTab === 'plugin'"
+              [class.bg-blue-50]="selectedTab === 'plugin'"
+              (click)="onTabChange('plugin')">
+              Plugin
+            </button>
+          </div>
+
+          <div class="relative">
+            <div *ngIf="selectedTab === 'message'">
+              <div class="relative">
+                <textarea 
+                  class="w-full px-3 py-3 border border-gray-300 rounded-md resize-y focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Write your message here..."
+                  [(ngModel)]="textMessage"
+                  rows="6">
+                </textarea>
+                <div class="absolute bottom-3 right-3">
+                  <button class="text-gray-400 hover:text-blue-500 focus:outline-none" title="Add emoji">
+                    <i class="far fa-smile text-lg"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="selectedTab === 'story'">
+              <select 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                [(ngModel)]="selectedStory">
+                <option [ngValue]="null">Select a story</option>
+                <option *ngFor="let story of availableStories" [ngValue]="story">
+                  {{ story }}
+                </option>
+              </select>
+            </div>
+
+            <div *ngIf="selectedTab === 'template'">
+              <select 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                [(ngModel)]="selectedTemplate">
+                <option [ngValue]="null">Select a template</option>
+                <option *ngFor="let template of availableTemplates" [ngValue]="template">
+                  {{ template }}
+                </option>
+              </select>
+            </div>
+
+            <div *ngIf="selectedTab === 'plugin'">
+              <select 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                [(ngModel)]="selectedPlugin">
+                <option [ngValue]="null">Select a plugin</option>
+                <option *ngFor="let plugin of availablePlugins" [ngValue]="plugin">
+                  {{ plugin }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="selectedButtonType === 'weblink'" class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Web URL <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="https://example.com"
+            [(ngModel)]="buttonUrl">
+        </div>
+
+        <button 
+          class="w-full py-3 bg-green-500 text-white font-medium rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          (click)="addButton()" 
+          [disabled]="!isFormValid()">
+          Add Button
+        </button>
+
+        <div class="flex space-x-3 mt-4">
+          <button 
+            class="flex-1 py-2 px-4 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            (click)="saveMenu()"
+            [disabled]="isLoading || !hasUnsavedChanges">
+            <span *ngIf="!isLoading">Save</span>
+            <span *ngIf="isLoading">Saving...</span>
+          </button>
+        </div>
+
+        <div class="mt-6 p-4 bg-gray-50 rounded-md">
+          <h4 class="text-sm font-medium text-gray-700 mb-2">Menu Statistics</h4>
+          <div class="text-xs text-gray-600 space-y-1">
+            <div>Level: {{ getCurrentLevel() }}</div>
+            <div>Buttons in current level: {{ currentMenu.length }} / {{ getMaxButtonsForLevel() }}</div>
+            <div>Remaining slots: {{ getRemainingSlots() }}</div>
+            <div *ngIf="hasUnsavedChanges" class="text-orange-600 font-medium">
+              <i class="fas fa-exclamation-triangle"></i> Unsaved changes
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-1 bg-gray-50 p-6">
+      <div class="max-w-lg mx-auto">
+        <div class="flex items-center space-x-2 mb-6">
+          <button 
+            *ngIf="canGoBack()" 
+            class="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            (click)="navigateBack()">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="flex items-center space-x-2 text-sm text-gray-600">
+            <span *ngFor="let crumb of getMenuBreadcrumb(); let i = index">
+              <span *ngIf="i > 0" class="mx-1">></span>
+              <span [class.font-medium]="i === getMenuBreadcrumb().length - 1">{{ crumb }}</span>
+            </span>
+          </div>
+        </div>
+
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ getCurrentMenuTitle() }}</h2>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 min-h-[400px]">
+          <div 
+            *ngIf="getFilteredCurrentMenu().length > 0; else emptyMenu"
+            class="space-y-3">
+            
+            <div 
+              *ngFor="let button of getFilteredCurrentMenu(); let i = index" 
+              class="relative group"
+              [class.border-t-2]="dragOverIndex === i"
+              [class.border-blue-500]="dragOverIndex === i"
+              draggable="true"
+              (dragstart)="onDragStart($event, i)"
+              (dragover)="onDragOver($event, i)"
+              (dragleave)="onDragLeave()"
+              (drop)="onDrop($event, i)">
+              
+              <div 
+                class="flex items-center justify-between p-3 bg-sky-400 text-white rounded-full cursor-pointer hover:bg-sky-500 transition-colors"
+                [class.opacity-50]="!button.isActive"
+                (click)="navigateToSubmenu(button)">
+                
+                <span class="mr-3 text-sm opacity-75 group-hover:opacity-100">
+                  <i class="fas fa-grip-vertical"></i>
+                </span>
+
+                <span class="flex-1 font-medium text-left">{{ button.label }}</span>
+
+                <div class="flex items-center space-x-2">
+                  <span *ngIf="button.type === 'submenu'" class="text-sm opacity-80">
+                    <i class="fas fa-chevron-right"></i>
+                  </span>
+                  
+                  <span *ngIf="button.type === 'weblink'" class="text-sm opacity-80">
+                    <i class="fas fa-external-link-alt"></i>
+                  </span>
+
+                  <button 
+                    class="text-white opacity-80 hover:opacity-100 focus:outline-none" 
+                    title="Toggle status" 
+                    (click)="toggleButtonStatus(button, $event)">
+                    <i class="fas" [class.fa-eye]="button.isActive" [class.fa-eye-slash]="!button.isActive"></i>
+                  </button>
+                  
+                  <button 
+                    class="text-white opacity-80 hover:opacity-100 focus:outline-none" 
+                    title="Remove button" 
+                    (click)="removeButton(button.id, $event)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #emptyMenu>
+            <div 
+              class="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-300 rounded-lg"
+              (dragover)="onDragOver($event, 0)"
+              (dragleave)="onDragLeave()"
+              (drop)="onDrop($event, 0)">
+              <i class="fas fa-plus-circle text-4xl text-gray-400 mb-4"></i>
+              <h3 class="text-lg font-medium text-gray-600 mb-2">+ Drag Buttons Here</h3>
+              <p class="text-sm text-gray-500">Your menu will look like this when you add items.</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

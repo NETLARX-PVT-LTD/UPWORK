@@ -411,3 +411,18 @@
         align-items: flex-start;
       }
     }
+
+    .option-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.color-gradient {
+  background: linear-gradient(to right, #f53c3c, #f1c40f, #2ecc71, #3498db, #9b59b6);
+  height: 10px;
+  border-radius: 9999px; /* This is the class for full rounded corners */
+  cursor: pointer;
+}
