@@ -1,7 +1,7 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { jsPlumb } from 'jsplumb';
 
-interface ConnectionInfo {
+export interface ConnectionInfo {
   sourceId: string;
   targetId: string;
   connectionId: string;
