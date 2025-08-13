@@ -1,0 +1,252 @@
+<ng-container *ngIf="!isSelected">
+  <div class="block-header">
+    <div class="block-type-badges">
+      <div class="block-title" (click)="onBlockClick()">
+        <mat-icon class="block-icon">{{ block.icon }}</mat-icon>
+        <span>{{ block.name }}</span>
+      </div>
+      <span
+        *ngIf="block.subType"
+        class="badge"
+        [class.keyword-group-badge]="block.subType === 'keywordGroup'"
+        [class.phrase-badge]="block.subType === 'phrase'"
+        [class.anything-badge]="block.subType === 'anything'"
+      >
+        {{
+          block.subType === "keywordGroup"
+            ? "Keyword Group"
+            : block.subType === "phrase"
+            ? "Phrase"
+            : block.subType === "anything"
+            ? "Type Anything"
+            : block.subType
+        }}
+      </span>
+    </div>
+
+   <button mat-icon-button class="close-btn" (click)="onRemoveBlock()" aria-label="Remove Block">
+    <mat-icon>close</mat-icon>
+  </button>
+  </div>
+
+  <div class="block-body">
+    <div class="block-description" *ngIf="block.description">
+      {{ block.description }}
+    </div>
+
+    <div
+      *ngIf="block.subType === 'keywordGroup' && block.keywordGroups && block.keywordGroups.length > 0"
+      class="keywords-container"
+    >
+      <div *ngFor="let group of block.keywordGroups; let i = index" class="keyword-group-summary">
+        <mat-chip-listbox>
+          <mat-chip-option
+            *ngFor="let keyword of group"
+            class="keyword-chip"
+            [matTooltip]="keyword"
+            matTooltipPosition="above"  
+          >
+            {{ keyword }}
+          </mat-chip-option>
+          <span *ngIf="group.length === 0" class="no-keywords-placeholder">No keywords</span>
+        </mat-chip-listbox>
+      </div>
+    </div>
+
+    <div
+      *ngIf="block.subType === 'phrase'"
+      class="block-content-text"
+    >
+      Phrase: "{{ block.phraseText || 'No phrase defined' }}"
+    </div>
+
+    <div
+      *ngIf="block.subType === 'anything'"
+      class="block-content-text"
+    >
+      Matches any input.
+      <span *ngIf="block.customMessage"> Message: "{{ block.customMessage }}"</span>
+    </div>
+  </div>
+</ng-container>
+
+<!-- <div
+  class="connection-point connection-output"
+  (mousedown)="onStartConnection($event)"
+  *ngIf="!isSelected"
+>
+  <div class="connection-dot"></div>
+</div>
+
+<div
+  class="connection-point connection-input"
+  *ngIf="!isSelected"
+>
+  <div class="connection-dot"></div>
+</div> -->
+
+
+<div class="right-sidebar-content" *ngIf="isSelected">
+<button mat-icon-button (click)="closeSidebar()" class="close-btn">
+    <mat-icon>close</mat-icon>
+  </button>
+  <ng-container *ngIf="block.subType === 'phrase'">
+    <h4 class="section-title ">User Input <span class="badge phrase-badge">Phrase</span></h4>
+    <p class="config-description text-[#506690]">If user query is similar to phrase</p>
+    <div class="mb-5">
+      <input
+        id="user-says"
+        type="text"
+        class=" w-full px-4 py-2 h-[44px] border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#C2D5FF] focus:border-[#1b55e2] focus:text-[#3b3f5c] transition-all duration-200 placeholder:opacity-50"
+        [(ngModel)]="block!.phraseText!"
+        (ngModelChange)="onContentChange()"
+        placeholder="User Says"
+      />
+    </div>
+  
+    <button
+      mat-flat-button
+      color="primary"
+      class="generate-similar-btn align-items-end"
+      [ngClass]="{'opacity-100 cursor-pointer': block!.phraseText!.length > 0, 'opacity-50 cursor-not-allowed': !block!.phraseText!.length}"
+      [disabled]="!block!.phraseText!.length"
+    >
+      <mat-icon>auto_awesome</mat-icon>
+      Generate Similar Phrases
+    </button>
+  
+    <div class="mb-5">
+      <label for="similar-phrases" class="block text-[16px] font-medium text-[#506690] mb-2 font-sans">Add Similar Phrases</label>
+      <input
+        id="similar-phrases"
+        type="text"
+        class="w-full px-4 py-2 h-[44px] border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#C2D5FF] focus:border-[#1b55e2] focus:text-[#3b3f5c] transition-all duration-200 placeholder:opacity-30 "
+        [(ngModel)]="block!.similarPhrases!"
+        (ngModelChange)="onContentChange()"
+        placeholder="Add similar phrases"
+      />
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="block.subType === 'keywordGroup'">
+    <h4 class="section-title">User Input <span class="badge keyword-group-badge">Keyword Group</span></h4>
+    <p class="config-description">
+      If user query matches a combination of keywords or datastore values
+    </p>
+
+    <div class="toggle-container align-items-end">
+      <mat-button-toggle-group
+        [value]="selectedInputMode"
+        (change)="onInputModeChange($event.value)"
+        name="inputMode"
+      >
+        <mat-button-toggle value="keyword">Keyword</mat-button-toggle>
+        <mat-button-toggle value="variable">Variable</mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    <ng-container *ngIf="selectedInputMode === 'keyword'">
+      <div class="keywords-section mt-4">
+        <div *ngFor="let group of block.keywordGroups; let i = index" class="keyword-input-group">
+          <div class="group-header">
+            <button mat-icon-button (click)="removeKeywordInputGroup(i)" *ngIf="block.keywordGroups && block.keywordGroups.length > 1" class="remove-group-button" matTooltip="Remove this keyword group">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-chip-grid #chipGrid [formControl]="keywordFormControls[i]">
+              <mat-chip-row *ngFor="let keyword of group" (removed)="removeKeyword(keyword, i)">
+                {{ keyword }}
+                <button matChipRemove [attr.aria-label]="'remove ' + keyword">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </mat-chip-row>
+              <input
+                [placeholder]="'Add keywords' "
+                [matChipInputFor]="chipGrid"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                [matChipInputAddOnBlur]="true"
+                (matChipInputTokenEnd)="addKeyword($event, i)"
+              />
+            </mat-chip-grid>
+          </mat-form-field>
+        </div>
+
+        <div class="add-keyword-group-btn-container">
+          <button mat-stroked-button class="add-group-btn" (click)="addKeywordInputGroup()">
+            <mat-icon>add</mat-icon>
+            Add Keyword Group
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="selectedInputMode === 'variable'">
+      <h4 class="section-title mt-4">Select Datastore Variable</h4>
+      <mat-form-field appearance="outline" class="full-width-input simple-input">
+        <mat-label>Select Datastore</mat-label>
+        <mat-select [(ngModel)]="block.datastoreVariable" (ngModelChange)="onContentChange()">
+          <mat-option *ngFor="let variable of availableVariables" [value]="variable">
+            {{ variable }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div *ngIf="block.datastoreVariable || (block.keywordGroups && block.keywordGroups.length > 0)" class="keywords-section mt-4">
+        <h5 class="sub-section-title">Keywords for {{ block.datastoreVariable || 'Selected Variable' }}</h5>
+        <div *ngFor="let group of block.keywordGroups; let i = index" class="keyword-input-group">
+          <div class="group-header">
+            <div class="group-title">Keyword Group {{ i + 1 }}</div>
+            <button mat-icon-button (click)="removeKeywordInputGroup(i)" *ngIf="block.keywordGroups && block.keywordGroups.length > 1" class="remove-group-button" matTooltip="Remove this keyword group">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Add keywords</mat-label>
+            <mat-chip-grid #chipGrid [formControl]="keywordFormControls[i]">
+              <mat-chip-row *ngFor="let keyword of group" (removed)="removeKeyword(keyword, i)">
+                {{ keyword }}
+                <button matChipRemove [attr.aria-label]="'remove ' + keyword">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </mat-chip-row>
+              <input
+                [placeholder]="'Add keywords'"
+                [matChipInputFor]="chipGrid"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                [matChipInputAddOnBlur]="true"
+                (matChipInputTokenEnd)="addKeyword($event, i)"
+              />
+            </mat-chip-grid>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="add-keyword-group-btn-container mt-3">
+        <button mat-stroked-button class="add-group-btn" (click)="addKeywordInputGroup()">
+          <mat-icon>add</mat-icon>
+          Add Keyword Group
+        </button>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <ng-container *ngIf="block.subType === 'anything'">
+    <h4 class="section-title">User Input <span class="badge anything-badge">Type Anything</span></h4>
+    <p class="config-description">This block will match any user input that doesn't trigger other blocks.</p>
+  
+    <div class="input-group">
+      <label class="input-label text-gray-700 font-medium text-sm mb-2 block">Custom message (optional)</label>
+      <textarea
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm
+               focus:outline-none focus:ring-2 focus:ring-[#C2D5FF] focus:border-[#1b55e2] focus:text-[#3b3f5c]
+               transition-all duration-200 placeholder:opacity-50
+               max-h-[80px] min-h-[80px] resize-y"
+        [(ngModel)]="block.customMessage"
+        (ngModelChange)="onContentChange()"
+        placeholder="Add a custom message to respond when anything is matched"
+        rows="4"
+      ></textarea>
+    </div>
+  </ng-container>
+</div>
