@@ -54,14 +54,15 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
 
-    // New subscription to check the current URL path
+    // Updated subscription to check the current URL path.
+    // The header and aside will now be hidden for both '/create-story' AND '/chatbot-widget' paths.
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       takeUntil(this.destroy$)
     ).subscribe((event: NavigationEnd) => {
-      // Check if the current URL contains '/create-story'
-      this.showHeaderAndAside = !event.urlAfterRedirects.includes('/create-story');
-      console.log('Current route:', event.urlAfterRedirects);
+      const url = event.urlAfterRedirects;
+      this.showHeaderAndAside = !url.includes('/create-story') && !url.includes('/chatbot-widget');
+      console.log('Current route:', url);
       console.log('Show header and aside:', this.showHeaderAndAside);
     });
   }

@@ -7,14 +7,25 @@ import { MediaBlockEditComponent } from './media-block-page/media-block-edit/med
 import { PublishBotComponent } from './publish-bot/publish-bot.component';
 import { ChatbotWidgetComponent } from './chatbot-widget/chatbot-widget.component';
 import { ChatbotMenuComponent } from './chatbot-menu/chatbot-menu.component';
+import { WhatsappPublisherComponent } from './whatsapp-publisher/whatsapp-publisher.component';
 
 export const routes: Routes = [
+  // publish bot on whatsapp
+  { path: 'whatsapp-publisher', component: WhatsappPublisherComponent, data: { title: 'Publish Bot' } },
   // The main route for the publishing dashboard
   { path: 'publish-bot', component: PublishBotComponent,data: { title: 'Publish Bot' }  },
 
   // The route for the embeddable chatbot widget (used in the iframe)
   { path: 'chatbot-widget', component: ChatbotWidgetComponent },
-  { path: 'chatbot-menu', component: ChatbotMenuComponent,data: { title: 'Chatbot Menu' }  },
+  { 
+    path: 'chatbot-menu',
+    component: ChatbotMenuComponent,
+    data: { title: 'Chatbot Menu' },
+    children: [
+      // This child route will render its component inside ChatbotMenuComponent's <router-outlet>
+      { path: 'create-story', component: ChatbotFlowComponent }
+    ]
+  },
 
   // The route for the full-page landing bot
   { path: 'landing/:id', component: ChatbotWidgetComponent },

@@ -1,5 +1,5 @@
-// src/app/chatbot-widget/chatbot-widget.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+// Updated chatbot-widget.component.ts
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -12,28 +12,25 @@ interface Message {
   typing?: boolean;
 }
 
-interface ChatSession {
-  id: string;
-  messages: Message[];
-  botConfig: any;
-}
-
 @Component({
   selector: 'app-chatbot-widget',
   standalone: true,
   imports: [CommonModule, FormsModule],
-   templateUrl: './chatbot-widget.component.html',
+  templateUrl: './chatbot-widget.component.html',
   styleUrls: ['./chatbot-widget.component.scss']
 })
-export class ChatbotWidgetComponent implements OnInit, OnDestroy {
+export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewChecked {
+  @ViewChild('messagesContainer') messagesContainer!: ElementRef;
+  
   isLandingPage: boolean = false;
-  isMinimized: boolean = true;
+  isMinimized: boolean = true; // Start minimized for widget mode
   isSending: boolean = false;
   currentMessage: string = '';
   messages: Message[] = [];
   unreadCount: number = 0;
+  private shouldScrollToBottom: boolean = false;
 
-  // Configuration
+  // Configuration with defaults
   botName: string = 'Assistant';
   welcomeMessage: string = 'Hi! How can I help you today?';
   inputPlaceholder: string = 'Type your message...';
@@ -42,6 +39,8 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy {
   backgroundStyle: string = 'gradient';
   landingTitle: string = 'Chat with our AI Assistant';
   landingDescription: string = 'Get instant answers to your questions';
+  position: string = 'bottom-right';
+  size: string = 'medium';
 
   constructor(private route: ActivatedRoute) {}
 
@@ -50,71 +49,138 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy {
     this.isLandingPage = this.route.snapshot.url[0]?.path === 'landing';
     
     if (this.isLandingPage) {
-      this.isMinimized = false;
-      // Load landing page configuration
+      this.isMinimized = false; // Always open on landing page
       this.loadLandingConfig();
     } else {
-      // Load widget configuration from URL params or default
+      this.isMinimized = true; // Start minimized for widget
       this.loadWidgetConfig();
     }
 
-    // Auto-open widget after a delay if it's the first visit
-    if (!this.isLandingPage && this.isFirstVisit()) {
-      setTimeout(() => {
-        this.isMinimized = false;
-      }, 2000);
+    // Listen for messages from parent window (embed script)
+    window.addEventListener('message', this.handleParentMessage.bind(this));
+    
+    // Send ready message to parent
+    this.sendMessageToParent({ type: 'chatbot-ready' });
+
+    console.log('Chatbot Widget initialized:', {
+      isLandingPage: this.isLandingPage,
+      isMinimized: this.isMinimized,
+      botName: this.botName,
+      primaryColor: this.primaryColor
+    });
+  }
+
+  ngAfterViewChecked() {
+    if (this.shouldScrollToBottom) {
+      this.scrollToBottom();
+      this.shouldScrollToBottom = false;
     }
   }
 
   ngOnDestroy() {
-    // Cleanup if needed
+    window.removeEventListener('message', this.handleParentMessage.bind(this));
   }
 
   loadWidgetConfig() {
-    // Get configuration from URL parameters or localStorage
+    // Get configuration from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const botId = urlParams.get('id');
     
-    if (botId) {
-      const savedConfig = localStorage.getItem(`chatbot_${botId}`);
-      if (savedConfig) {
-        const config = JSON.parse(savedConfig);
-        this.applyConfig(config);
+    this.botName = urlParams.get('name') || this.botName;
+    this.welcomeMessage = urlParams.get('greeting') || this.welcomeMessage;
+    this.inputPlaceholder = urlParams.get('placeholder') || this.inputPlaceholder;
+    this.primaryColor = urlParams.get('primaryColor') || this.primaryColor;
+    this.backgroundStyle = urlParams.get('backgroundStyle') || this.backgroundStyle;
+    this.position = urlParams.get('position') || this.position;
+    this.size = urlParams.get('size') || this.size;
+    this.showBranding = urlParams.get('showBranding') === 'true';
+
+    // Also check for config passed through the embed script
+    try {
+      if ((window as any).parent && (window as any).parent.ChatbotConfig) {
+        const config = (window as any).parent.ChatbotConfig;
+        this.applyConfigObject(config);
       }
+    } catch (e) {
+      // Cross-origin access might be blocked, that's okay
     }
+
+    console.log('Widget Config Loaded:', {
+      botName: this.botName,
+      primaryColor: this.primaryColor,
+      position: this.position,
+      size: this.size,
+      isMinimized: this.isMinimized
+    });
   }
 
   loadLandingConfig() {
-    const botId = this.route.snapshot.paramMap.get('id');
-    if (botId) {
-      const savedConfig = localStorage.getItem(`chatbot_${botId}`);
-      if (savedConfig) {
-        const config = JSON.parse(savedConfig);
-        this.applyConfig(config);
-        if (config.landingConfig) {
-          this.landingTitle = config.landingConfig.title;
-          this.landingDescription = config.landingConfig.description;
-          this.backgroundStyle = config.landingConfig.backgroundStyle;
-        }
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    this.landingTitle = urlParams.get('title') || this.landingTitle;
+    this.landingDescription = urlParams.get('description') || this.landingDescription;
+    this.backgroundStyle = urlParams.get('backgroundStyle') || this.backgroundStyle;
+    this.primaryColor = urlParams.get('primaryColor') || this.primaryColor;
+    this.botName = urlParams.get('name') || this.botName;
+    this.welcomeMessage = urlParams.get('greeting') || this.welcomeMessage;
+  }
+
+  applyConfigObject(config: any) {
+    if (config.name) this.botName = config.name;
+    if (config.greeting) this.welcomeMessage = config.greeting;
+    if (config.placeholder) this.inputPlaceholder = config.placeholder;
+    if (config.primaryColor) this.primaryColor = config.primaryColor;
+    if (config.position) this.position = config.position;
+    if (config.size) this.size = config.size;
+    if (config.showBranding !== undefined) this.showBranding = config.showBranding;
+  }
+
+  handleParentMessage(event: MessageEvent) {
+    // Handle messages from parent window (embed script)
+    if (event.data && typeof event.data === 'object') {
+      switch (event.data.type) {
+        case 'chatbot-toggle':
+          this.toggleMinimize();
+          break;
+        case 'chatbot-send-message':
+          this.receiveExternalMessage(event.data.message);
+          break;
+        case 'chatbot-minimize':
+          this.isMinimized = true;
+          break;
+        case 'chatbot-maximize':
+          this.isMinimized = false;
+          this.unreadCount = 0;
+          break;
       }
     }
   }
 
-  applyConfig(config: any) {
-    if (config.config) {
-      this.botName = config.config.name || this.botName;
-      this.welcomeMessage = config.config.greeting || this.welcomeMessage;
-      this.inputPlaceholder = config.config.placeholder || this.inputPlaceholder;
-      this.primaryColor = config.config.theme?.primaryColor || this.primaryColor;
-      this.showBranding = config.config.showBranding ?? this.showBranding;
+  sendMessageToParent(data: any) {
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage(data, '*');
+      }
+    } catch (e) {
+      // Cross-origin restrictions might prevent this, that's okay
+      console.log('Could not send message to parent:', e);
     }
   }
 
   toggleMinimize() {
     this.isMinimized = !this.isMinimized;
+    
     if (!this.isMinimized) {
       this.unreadCount = 0;
+      // Scroll to bottom when opening
+      setTimeout(() => {
+        this.shouldScrollToBottom = true;
+      }, 100);
     }
+    
+    // Notify parent window
+    this.sendMessageToParent({
+      type: this.isMinimized ? 'chatbot-minimized' : 'chatbot-maximized'
+    });
   }
 
   async sendMessage() {
@@ -131,9 +197,7 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy {
     const messageToSend = this.currentMessage;
     this.currentMessage = '';
     this.isSending = true;
-
-    // Scroll to bottom
-    setTimeout(() => this.scrollToBottom(), 100);
+    this.shouldScrollToBottom = true;
 
     // Add typing indicator
     const typingMessage: Message = {
@@ -144,16 +208,21 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy {
       typing: true
     };
     this.messages.push(typingMessage);
-    setTimeout(() => this.scrollToBottom(), 100);
+    this.shouldScrollToBottom = true;
+
+    // Notify parent about new message
+    this.sendMessageToParent({
+      type: 'chatbot-new-message',
+      message: messageToSend,
+      isUser: true
+    });
 
     try {
-      // Simulate API call
       const response = await this.callChatAPI(messageToSend);
       
       // Remove typing indicator
       this.messages = this.messages.filter(m => m.id !== 'typing');
       
-      // Add bot response
       const botMessage: Message = {
         id: this.generateMessageId(),
         text: response,
@@ -162,14 +231,25 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy {
       };
       
       this.messages.push(botMessage);
+      this.shouldScrollToBottom = true;
       
       // Update unread count if minimized
       if (this.isMinimized && !this.isLandingPage) {
         this.unreadCount++;
+        this.sendMessageToParent({
+          type: 'chatbot-notification',
+          count: this.unreadCount
+        });
       }
       
+      // Notify parent about bot response
+      this.sendMessageToParent({
+        type: 'chatbot-new-message',
+        message: response,
+        isUser: false
+      });
+      
     } catch (error) {
-      // Remove typing indicator and show error
       this.messages = this.messages.filter(m => m.id !== 'typing');
       
       const errorMessage: Message = {
@@ -180,9 +260,16 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy {
       };
       
       this.messages.push(errorMessage);
+      this.shouldScrollToBottom = true;
     } finally {
       this.isSending = false;
-      setTimeout(() => this.scrollToBottom(), 100);
+    }
+  }
+
+  private receiveExternalMessage(message: string) {
+    if (message && message.trim()) {
+      this.currentMessage = message;
+      this.sendMessage();
     }
   }
 
@@ -190,22 +277,24 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
     
-    // Simple response logic (replace with actual API call)
+    // Simple response logic - replace with actual API call
     const responses = [
-      "Thanks for your message! How can I assist you further?",
-      "That's interesting! Let me help you with that.",
-      "I understand. What would you like to know more about?",
-      "Great question! Here's what I think...",
-      "I'm here to help! Could you provide more details?"
+      `Thanks for asking about "${message}". How can I help you further?`,
+      "That's a great question! Let me provide you with some information.",
+      "I understand your inquiry. Here's what I can tell you...",
+      "Interesting! I'd be happy to assist you with that.",
+      "Let me help you with that query.",
+      "I see what you're asking about. Here's my response...",
+      "That's something I can definitely help with!"
     ];
     
     return responses[Math.floor(Math.random() * responses.length)];
   }
 
   private scrollToBottom() {
-    const container = document.querySelector('.chat-messages');
-    if (container) {
-      container.scrollTop = container.scrollHeight;
+    if (this.messagesContainer?.nativeElement) {
+      const element = this.messagesContainer.nativeElement;
+      element.scrollTop = element.scrollHeight;
     }
   }
 
@@ -213,13 +302,16 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy {
     return 'msg_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
   }
 
-  private isFirstVisit(): boolean {
-    const visited = localStorage.getItem('chatbot_visited');
-    if (!visited) {
-      localStorage.setItem('chatbot_visited', 'true');
-      return true;
-    }
-    return false;
+  // Utility function to darken a color
+  darkenColor(color: string, percent: number): string {
+    const num = parseInt(color.replace("#", ""), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = (num >> 16) - amt;
+    const B = (num >> 8 & 0x00FF) - amt;
+    const G = (num & 0x0000FF) - amt;
+    return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + 
+                  (B < 255 ? B < 1 ? 0 : B : 255) * 0x100 + 
+                  (G < 255 ? G < 1 ? 0 : G : 255)).toString(16).slice(1);
   }
 
   getCurrentTime(): string {

@@ -1,4 +1,5 @@
 <div class="app-container">
+  <!-- The header is now hidden for '/create-story' and '/chatbot-widget' paths -->
   <header class="app-header fixed top-0 left-0 right-0 bg-white/95 border-b border-gray-200 h-16 flex items-center justify-between px-6 z-50"
           *ngIf="showHeaderAndAside">
     <div class="flex items-center gap-4">
@@ -26,6 +27,7 @@
     </div>
   </header>
 
+  <!-- The aside sidebar is now hidden for '/create-story' and '/chatbot-widget' paths -->
   <aside class="fixed left-0 top-16 bottom-0 w-16 bg-blue-600 flex flex-col items-center py-4 z-40"
          *ngIf="showHeaderAndAside">
     <div class="flex flex-col gap-4">
@@ -120,6 +122,7 @@
     </div>
   </aside>
 
+  <!-- The chatbot sidebar is also hidden for '/create-story' and '/chatbot-widget' paths -->
   <div *ngIf="showWebsiteChatbotSidebar && showHeaderAndAside"
        class="fixed inset-0  z-20"
        (click)="closeWebsiteChatbotSidebar()"></div>

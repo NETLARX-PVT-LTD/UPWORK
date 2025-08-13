@@ -43,11 +43,12 @@ export class ChatbotMenuService {
   private menuSubject = new BehaviorSubject<MenuButton[]>([]);
   public menu$ = this.menuSubject.asObservable();
 
-  private defaultSettings = {
-    maxDepth: 3,
-    maxButtonsPerLevel: { 1: 3, 2: 5, 3: 5 } as { [key: number]: number },
-    allowedTypes: ['action', 'submenu', 'weblink']
-  };
+private defaultSettings = {
+  maxDepth: 3,
+  // Change the value for level 1 from 3 to 5
+  maxButtonsPerLevel: { 1: 5, 2: 5, 3: 5 } as { [key: number]: number },
+  allowedTypes: ['action', 'submenu', 'weblink']
+};
 
   constructor(private http: HttpClient) {}
 
@@ -552,15 +553,6 @@ export class ChatbotMenuService {
         story: 'human_help',
         isActive: true,
         order: 3,
-        metadata: {} // Added
-      },
-      {
-        id: 'external-link',
-        type: 'weblink',
-        label: 'Visit Our Website',
-        url: 'https://example.com',
-        isActive: true,
-        order: 4,
         metadata: {} // Added
       }
     ];

@@ -15,6 +15,7 @@
 
     init: function(options) {
       if (this.initialized) {
+        console.warn('ChatbotWidget already initialized');
         return;
       }
 
@@ -23,6 +24,8 @@
         widgetUrl: '',
         config: {}
       }, options);
+
+      console.log('Initializing ChatbotWidget with config:', this.config);
 
       this.container = document.getElementById(this.config.containerId);
       if (!this.container) {
@@ -33,39 +36,54 @@
       this.createWidget();
       this.setupEventListeners();
       this.initialized = true;
+      
+      console.log('ChatbotWidget initialized successfully');
     },
 
     createWidget: function() {
+      // Build URL with configuration parameters
+      const params = new URLSearchParams();
+      Object.keys(this.config.config).forEach(key => {
+        if (this.config.config[key] !== null && this.config.config[key] !== undefined) {
+          params.append(key, this.config.config[key].toString());
+        }
+      });
+
+      const widgetUrl = this.config.widgetUrl + '?' + params.toString();
+      console.log('Creating widget with URL:', widgetUrl);
+
       // Create iframe
       this.iframe = document.createElement('iframe');
-      this.iframe.src = this.config.widgetUrl + '&' + this.buildQueryString(this.config.config);
+      this.iframe.src = widgetUrl;
       this.iframe.style.cssText = `
-        width: 100%;
-        height: 100%;
         border: none;
         position: fixed;
-        bottom: 20px;
-        right: 20px;
         z-index: 10000;
         background: transparent;
-        pointer-events: none;
+        border-radius: 16px;
+        
+        transition: all 0.3s ease;
       `;
 
-      // Apply position and size from config
-      if (this.config.config.position) {
-        this.applyPosition(this.config.config.position);
+      // Apply initial position and size
+      this.applyPosition(this.config.config.position || 'bottom-right');
+      this.applySize(this.config.config.size || 'medium');
+
+      // Add to container (which should be in the body)
+      if (this.container.tagName.toLowerCase() === 'body' || this.container === document.body) {
+        document.body.appendChild(this.iframe);
+      } else {
+        this.container.appendChild(this.iframe);
       }
 
-      if (this.config.config.size) {
-        this.applySize(this.config.config.size);
-      }
-
-      // Add to container
-      this.container.appendChild(this.iframe);
-
-      // Enable pointer events after loading
+      // Show iframe after loading
       this.iframe.onload = () => {
-        this.iframe.style.pointerEvents = 'auto';
+        console.log('Chatbot iframe loaded successfully');
+        this.iframe.style.opacity = '1';
+      };
+
+      this.iframe.onerror = () => {
+        console.error('Failed to load chatbot iframe');
       };
     },
 
@@ -113,66 +131,73 @@
       this.iframe.style.height = dim.height;
     },
 
-    buildQueryString: function(config) {
-      const params = new URLSearchParams();
-      
-      Object.keys(config).forEach(key => {
-        if (typeof config[key] === 'object') {
-          params.append(key, JSON.stringify(config[key]));
-        } else {
-          params.append(key, config[key]);
-        }
-      });
-
-      return params.toString();
-    },
-
     setupEventListeners: function() {
       // Listen for messages from the iframe
       window.addEventListener('message', (event) => {
+        // Security check - ensure message is from our iframe
         if (event.source !== this.iframe.contentWindow) {
           return;
         }
 
+        console.log('Received message from chatbot:', event.data);
         this.handleMessage(event.data);
       });
 
-      // Handle window resize
+      // Handle window resize for responsiveness
       window.addEventListener('resize', () => {
         this.handleResize();
+      });
+
+      // Handle visibility change
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          this.sendMessageToWidget({ type: 'page-hidden' });
+        } else {
+          this.sendMessageToWidget({ type: 'page-visible' });
+        }
       });
     },
 
     handleMessage: function(data) {
       switch (data.type) {
         case 'chatbot-minimize':
-          this.minimize();
+          this.minimizeWidget();
           break;
         case 'chatbot-maximize':
-          this.maximize();
+          this.maximizeWidget();
           break;
         case 'chatbot-resize':
-          this.resize(data.size);
+          this.applySize(data.size);
           break;
         case 'chatbot-notification':
           this.showNotification(data.count);
           break;
+        case 'chatbot-ready':
+          console.log('Chatbot is ready');
+          break;
+        case 'chatbot-new-message':
+          console.log('New message:', data.message);
+          break;
+      }
+    },
+
+    sendMessageToWidget: function(data) {
+      if (this.iframe && this.iframe.contentWindow) {
+        this.iframe.contentWindow.postMessage(data, '*');
       }
     },
 
     handleResize: function() {
-      // Adjust widget position/size on window resize if needed
       const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
-
+      
       // Make widget responsive on mobile
       if (windowWidth <= 480) {
-        this.iframe.style.width = 'calc(100vw - 40px)';
-        this.iframe.style.height = 'calc(100vh - 40px)';
-        this.iframe.style.top = '20px';
-        this.iframe.style.left = '20px';
-        this.iframe.style.right = '20px';
-        this.iframe.style.bottom = '20px';
+        this.iframe.style.width = 'calc(100vw - 20px)';
+        this.iframe.style.height = 'calc(100vh - 20px)';
+        this.iframe.style.top = '10px';
+        this.iframe.style.left = '10px';
+        this.iframe.style.right = '10px';
+        this.iframe.style.bottom = '10px';
       } else {
         // Restore original size and position
         this.applySize(this.config.config.size || 'medium');
@@ -180,26 +205,29 @@
       }
     },
 
-    minimize: function() {
-      this.iframe.style.transform = 'scale(0)';
+    minimizeWidget: function() {
+      this.iframe.style.transform = 'scale(0.8)';
       this.iframe.style.opacity = '0';
+      setTimeout(() => {
+        this.iframe.style.display = 'none';
+      }, 300);
     },
 
-    maximize: function() {
-      this.iframe.style.transform = 'scale(1)';
-      this.iframe.style.opacity = '1';
-    },
-
-    resize: function(size) {
-      this.applySize(size);
+    maximizeWidget: function() {
+      this.iframe.style.display = 'block';
+      setTimeout(() => {
+        this.iframe.style.transform = 'scale(1)';
+        this.iframe.style.opacity = '1';
+      }, 10);
     },
 
     showNotification: function(count) {
-      // This could trigger browser notifications or update a badge
+      // This could trigger browser notifications
       if (count > 0 && 'Notification' in window && Notification.permission === 'granted') {
         new Notification('New message from chatbot', {
           body: `You have ${count} unread message${count > 1 ? 's' : ''}`,
-          icon: '/favicon.ico'
+          icon: '/favicon.ico',
+          tag: 'chatbot-notification'
         });
       }
     },
@@ -212,27 +240,40 @@
       this.iframe = null;
       this.container = null;
       this.config = null;
+      console.log('ChatbotWidget destroyed');
     }
   };
 
   // Auto-initialize if config is available
-  if (window.ChatbotConfig) {
-    document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, checking for chatbot config...');
+    
+    if (window.ChatbotConfig) {
+      console.log('Found ChatbotConfig:', window.ChatbotConfig);
+      
       // Find container
       const container = document.querySelector('[id^="chatbot-widget"]');
       if (container) {
+        console.log('Found chatbot container:', container.id);
+        
         window.ChatbotWidget.init({
           containerId: container.id,
-          widgetUrl: window.location.origin + '/chatbot-widget',
+          widgetUrl: window.location.protocol + '//' + window.location.host + '/chatbot-widget',
           config: window.ChatbotConfig
         });
+      } else {
+        console.error('Chatbot container not found');
       }
-    });
-  }
+    } else {
+      console.log('No ChatbotConfig found');
+    }
+  });
 
   // Request notification permission
   if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
+    Notification.requestPermission().then(permission => {
+      console.log('Notification permission:', permission);
+    });
   }
 
 })();

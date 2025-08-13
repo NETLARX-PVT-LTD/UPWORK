@@ -149,34 +149,42 @@ export class PublishBotComponent implements OnInit {
    * Generates the embed code snippet based on the current configuration.
    * This is what a user will paste into their website's HTML.
    */
-  generateInlineCode() {
-    this.generatedCode = `<!-- Chatbot Widget -->
+// Updated method in publish-bot.component.ts
+generateInlineCode() {
+  // Use your actual deployed URL instead of window.location.origin
+  const baseUrl = 'http://localhost:4200'; // Change this to your deployed URL
+  
+  this.generatedCode = `<!-- Chatbot Widget -->
 <div id="chatbot-widget-${this.config.id}"></div>
 <script>
-  window.ChatbotConfig = {
-    id: "${this.config.id}",
-    story: "${this.config.story}",
-    primaryColor: "${this.config.theme.primaryColor}",
-    backgroundStyle: "${this.landingConfig.backgroundStyle}"
-  };
-  
   (function() {
     var script = document.createElement('script');
-    script.src = '${window.location.origin}/assets/chatbot-embed.js';
+    script.src = '${baseUrl}/assets/chatbot-embed.js';
     script.async = true;
-    document.head.appendChild(script);
-    
     script.onload = function() {
       window.ChatbotWidget.init({
         containerId: 'chatbot-widget-${this.config.id}',
-        widgetUrl: '${window.location.origin}/chatbot-widget?id=${this.config.id}',
-        config: window.ChatbotConfig
+        widgetUrl: '${baseUrl}/chatbot-widget',
+        config: {
+          id: "${this.config.id}",
+          story: "${this.config.story}",
+          primaryColor: "${this.config.theme.primaryColor}",
+          backgroundStyle: "${this.landingConfig.backgroundStyle}",
+          name: "${this.config.name}",
+          greeting: "${this.config.greeting}",
+          placeholder: "${this.config.placeholder}",
+          position: "${this.config.position}",
+          size: "${this.config.size}",
+          allowFullscreen: ${this.config.allowFullscreen},
+          showBranding: ${this.config.showBranding}
+        }
       });
     };
+    document.head.appendChild(script);
   })();
 </script>`;
-    this.showCodeModal = true;
-  }
+  this.showCodeModal = true;
+}
 
   /**
    * Simulates saving the landing page configuration to a backend.

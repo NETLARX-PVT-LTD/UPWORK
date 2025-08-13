@@ -4,7 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { ChatbotMenuService, MenuValidationResult } from '../shared/services/chatbot-menu.service';
-import { MenuButton } from '../models/menu-button.model'; // Correct import path
+import { MenuButton } from '../models/menu-button.model';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router'; // Import Router
 
 @Component({
   selector: 'app-chatbot-menu',
@@ -44,22 +45,48 @@ export class ChatbotMenuComponent implements OnInit, OnDestroy {
 
   selectedTab: 'message' | 'story' | 'template' | 'plugin' = 'message';
 
-  constructor(private chatbotMenuService: ChatbotMenuService) {}
+  // New properties for enhanced functionality
+  showCreateStoryModal: boolean = false;
+  newStoryName: string = '';
+  isCreatingStory: boolean = false;
+
+  constructor(private chatbotMenuService: ChatbotMenuService,
+     private router: Router, // Inject Router here
+     private activatedRoute: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
-    this.chatbotMenuService.getMenuConfiguration(this.botId).pipe(takeUntil(this.destroy$)).subscribe(config => {
-        this.menuButtons = config.buttons;
-        this.updateCurrentMenu();
-    });
-
-    this.chatbotMenuService.getAvailableStories(this.botId).pipe(takeUntil(this.destroy$)).subscribe(stories => this.availableStories = stories);
-    this.chatbotMenuService.getAvailableTemplates(this.botId).pipe(takeUntil(this.destroy$)).subscribe(templates => this.availableTemplates = templates);
-    this.chatbotMenuService.getAvailablePlugins(this.botId).pipe(takeUntil(this.destroy$)).subscribe(plugins => this.availablePlugins = plugins);
+    this.loadMenuConfiguration();
+    this.loadAvailableOptions();
   }
 
+  
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private loadMenuConfiguration(): void {
+    this.chatbotMenuService.getMenuConfiguration(this.botId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(config => {
+        this.menuButtons = config.buttons;
+        this.updateCurrentMenu();
+      });
+  }
+
+  private loadAvailableOptions(): void {
+    this.chatbotMenuService.getAvailableStories(this.botId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(stories => this.availableStories = stories);
+    
+    this.chatbotMenuService.getAvailableTemplates(this.botId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(templates => this.availableTemplates = templates);
+    
+    this.chatbotMenuService.getAvailablePlugins(this.botId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(plugins => this.availablePlugins = plugins);
   }
   
   // --- UI and Navigation Logic ---
@@ -97,9 +124,9 @@ export class ChatbotMenuComponent implements OnInit, OnDestroy {
   }
 
   getMenuBreadcrumb(): string[] {
-      const path = this.chatbotMenuService.findButtonPath(this.menuButtons, this.currentParentId!);
-      const breadcrumbs = path.map(b => b.label);
-      return ['Chat Menu', ...breadcrumbs];
+    const path = this.chatbotMenuService.findButtonPath(this.menuButtons, this.currentParentId!);
+    const breadcrumbs = path.map(b => b.label);
+    return ['Chat Menu', ...breadcrumbs];
   }
   
   private updateCurrentMenu(): void {
@@ -120,10 +147,12 @@ export class ChatbotMenuComponent implements OnInit, OnDestroy {
     this.selectedPlugin = null;
     this.buttonUrl = '';
     this.selectedTab = 'message';
+    this.clearValidationErrors();
   }
 
   onTabChange(tab: 'message' | 'story' | 'template' | 'plugin'): void {
     this.selectedTab = tab;
+    this.clearValidationErrors();
   }
   
   isFormValid(): boolean {
@@ -145,10 +174,67 @@ export class ChatbotMenuComponent implements OnInit, OnDestroy {
     
     return true;
   }
+
+  private validateForm(): boolean {
+    this.validationErrors = [];
+
+    if (!this.buttonLabel?.trim()) {
+      this.validationErrors.push('Menu button label is required');
+    }
+
+    if (this.selectedButtonType === 'weblink') {
+      if (!this.buttonUrl?.trim()) {
+        this.validationErrors.push('Web URL is required for weblink buttons');
+      } else if (!this.chatbotMenuService.isValidUrl(this.buttonUrl)) {
+        this.validationErrors.push('Please enter a valid URL');
+      }
+    }
+
+    if (this.selectedButtonType === 'action') {
+      switch (this.selectedTab) {
+        case 'message':
+          if (!this.textMessage.trim()) {
+            this.validationErrors.push('Text message is required');
+          }
+          break;
+        case 'story':
+          if (!this.selectedStory) {
+            this.validationErrors.push('Please select a story');
+          }
+          break;
+        case 'template':
+          if (!this.selectedTemplate) {
+            this.validationErrors.push('Please select a template');
+          }
+          break;
+        case 'plugin':
+          if (!this.selectedPlugin) {
+            this.validationErrors.push('Please select a plugin');
+          }
+          break;
+      }
+    }
+
+    // Check button limit
+    const maxButtons = this.getMaxButtonsForLevel();
+    if (this.currentMenu.length >= maxButtons) {
+      this.validationErrors.push(`Maximum ${maxButtons} buttons allowed at this level`);
+    }
+
+    return this.validationErrors.length === 0;
+  }
+
+  private clearValidationErrors(): void {
+    this.validationErrors = [];
+  }
   
-  // --- Menu Operations (calling service methods) ---
+  // --- Menu Operations ---
   
   addButton(): void {
+    if (!this.validateForm()) {
+      return;
+    }
+
     const newButton: MenuButton = {
       id: this.generateId(),
       label: this.buttonLabel,
@@ -162,7 +248,10 @@ export class ChatbotMenuComponent implements OnInit, OnDestroy {
       plugin: this.selectedButtonType === 'action' && this.selectedTab === 'plugin' ? this.selectedPlugin! : undefined,
       url: this.selectedButtonType === 'weblink' ? this.buttonUrl : undefined,
       children: this.selectedButtonType === 'submenu' ? [] : undefined,
-      metadata: {} // Added this line to fix the error
+      metadata: {
+        color: this.getButtonColor(),
+        createdAt: new Date().toISOString()
+      }
     };
     
     const updatedMenu = this.chatbotMenuService.addButton(this.menuButtons, newButton, this.currentParentId ?? undefined);
@@ -173,35 +262,74 @@ export class ChatbotMenuComponent implements OnInit, OnDestroy {
   }
 
   removeButton(buttonId: string, event: Event): void {
-      event.stopPropagation();
+    event.stopPropagation();
+    
+    if (confirm('Are you sure you want to delete this button?')) {
       const updatedMenu = this.chatbotMenuService.removeButton(this.menuButtons, buttonId);
       this.menuButtons = updatedMenu;
       this.updateCurrentMenu();
       this.hasUnsavedChanges = true;
+    }
   }
 
   toggleButtonStatus(button: MenuButton, event: Event): void {
-      event.stopPropagation();
-      button.isActive = !button.isActive;
-      const updatedMenu = this.chatbotMenuService.updateButton(this.menuButtons, button);
-      this.menuButtons = updatedMenu;
-      this.hasUnsavedChanges = true;
+    event.stopPropagation();
+    button.isActive = !button.isActive;
+    const updatedMenu = this.chatbotMenuService.updateButton(this.menuButtons, button);
+    this.menuButtons = updatedMenu;
+    this.hasUnsavedChanges = true;
   }
 
   saveMenu(): void {
-      this.isLoading = true;
-      this.chatbotMenuService.saveMenuConfiguration(this.botId, this.menuButtons).pipe(takeUntil(this.destroy$)).subscribe({
-          next: () => {
-              this.isLoading = false;
-              this.hasUnsavedChanges = false;
-              alert('Menu saved successfully!');
-          },
-          error: (err) => {
-              this.isLoading = false;
-              console.error('Save failed:', err);
-              alert('Failed to save menu. Please check the console for errors.');
-          }
+    this.isLoading = true;
+    this.chatbotMenuService.saveMenuConfiguration(this.botId, this.menuButtons)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.hasUnsavedChanges = false;
+          // You can replace this with a toast notification
+          alert('Menu saved successfully!');
+        },
+        error: (err) => {
+          this.isLoading = false;
+          console.error('Save failed:', err);
+          alert('Failed to save menu. Please try again.');
+        }
       });
+  }
+
+  saveWithInputDisabled(): void {
+    // Placeholder for "Save With Input Disabled" functionality
+    console.log('Save with input disabled clicked');
+  }
+  
+  // --- Story Creation ---
+  
+ openCreateStoryModal(): void {
+    // Instead of opening a modal, navigate to the creation route
+    this.router.navigate(['/create-story']);
+  }
+
+  closeCreateStoryModal(): void {
+    this.showCreateStoryModal = false;
+    this.newStoryName = '';
+  }
+
+  createStory(): void {
+    if (!this.newStoryName.trim()) {
+      return;
+    }
+
+    this.isCreatingStory = true;
+    
+    // Simulate API call
+    setTimeout(() => {
+      this.availableStories.push(this.newStoryName);
+      this.selectedStory = this.newStoryName;
+      this.isCreatingStory = false;
+      this.closeCreateStoryModal();
+    }, 1000);
   }
   
   // --- Drag and Drop Logic ---
@@ -227,26 +355,26 @@ export class ChatbotMenuComponent implements OnInit, OnDestroy {
   }
   
   onDrop(event: DragEvent, dropIndex: number): void {
-      event.preventDefault();
-      this.dragOverIndex = -1;
+    event.preventDefault();
+    this.dragOverIndex = -1;
 
-      if (this.draggedButton) {
-          const oldIndex = this.currentMenu.findIndex(b => b.id === this.draggedButton!.id);
-          
-          if (oldIndex !== -1) {
-              const reorderedButtons = [...this.currentMenu];
-              const [movedItem] = reorderedButtons.splice(oldIndex, 1);
-              reorderedButtons.splice(dropIndex, 0, movedItem);
+    if (this.draggedButton) {
+      const oldIndex = this.currentMenu.findIndex(b => b.id === this.draggedButton!.id);
+      
+      if (oldIndex !== -1) {
+        const reorderedButtons = [...this.currentMenu];
+        const [movedItem] = reorderedButtons.splice(oldIndex, 1);
+        reorderedButtons.splice(dropIndex, 0, movedItem);
 
-              const newOrder = reorderedButtons.map(b => b.id);
-              
-              const updatedMenu = this.chatbotMenuService.reorderButtons(this.menuButtons, this.currentParentId, newOrder);
-              this.menuButtons = updatedMenu;
-              this.updateCurrentMenu();
-              this.hasUnsavedChanges = true;
-          }
+        const newOrder = reorderedButtons.map(b => b.id);
+        
+        const updatedMenu = this.chatbotMenuService.reorderButtons(this.menuButtons, this.currentParentId, newOrder);
+        this.menuButtons = updatedMenu;
+        this.updateCurrentMenu();
+        this.hasUnsavedChanges = true;
       }
-      this.draggedButton = null;
+    }
+    this.draggedButton = null;
   }
   
   // --- Utility methods ---
@@ -262,35 +390,82 @@ export class ChatbotMenuComponent implements OnInit, OnDestroy {
     this.selectedTemplate = null;
     this.selectedPlugin = null;
     this.buttonUrl = '';
+    this.clearValidationErrors();
+  }
+
+  private getButtonColor(): string {
+    const colors = ['#87ceeb', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
+    return colors[Math.floor(Math.random() * colors.length)];
   }
   
   getCurrentLevel(): number {
-      return this.navigationHistory.length + 1;
+    return this.navigationHistory.length + 1;
   }
   
   getMaxButtonsForLevel(): number {
-      const currentLevel = this.getCurrentLevel();
-      const maxButtonsPerLevel = this.chatbotMenuService.getMaxButtonsPerLevel();
-      return maxButtonsPerLevel[currentLevel] || 5;
+    const currentLevel = this.getCurrentLevel();
+    const maxButtonsPerLevel = this.chatbotMenuService.getMaxButtonsPerLevel();
+    return maxButtonsPerLevel[currentLevel] || 5;
   }
   
   getRemainingSlots(): number {
-      const maxButtons = this.getMaxButtonsForLevel();
-      const currentButtons = this.currentMenu.length;
-      return Math.max(0, maxButtons - currentButtons);
+    const maxButtons = this.getMaxButtonsForLevel();
+    const currentButtons = this.currentMenu.length;
+    return Math.max(0, maxButtons - currentButtons);
   }
   
   getFilteredCurrentMenu(): MenuButton[] {
-      return this.currentMenu;
+    return this.currentMenu;
   }
 
   editButton(button: MenuButton, event: Event): void {
     event.stopPropagation();
-    console.log('Edit button clicked:', button);
+    // Populate form with button data for editing
+    this.buttonLabel = button.label;
+    this.selectedButtonType = button.type;
+    
+    if (button.type === 'action') {
+      if (button.message) {
+        this.selectedTab = 'message';
+        this.textMessage = button.message;
+      } else if (button.story) {
+        this.selectedTab = 'story';
+        this.selectedStory = button.story;
+      } else if (button.template) {
+        this.selectedTab = 'template';
+        this.selectedTemplate = button.template;
+      } else if (button.plugin) {
+        this.selectedTab = 'plugin';
+        this.selectedPlugin = button.plugin;
+      }
+    } else if (button.type === 'weblink') {
+      this.buttonUrl = button.url || '';
+    }
   }
 
   duplicateButton(button: MenuButton, event: Event): void {
     event.stopPropagation();
-    console.log('Duplicate button clicked:', button);
+    
+    const duplicatedButton: MenuButton = {
+      ...button,
+      id: this.generateId(),
+      label: `${button.label} (Copy)`,
+      order: this.currentMenu.length + 1,
+      metadata: {
+        ...button.metadata,
+        createdAt: new Date().toISOString()
+      }
+    };
+
+    const updatedMenu = this.chatbotMenuService.addButton(this.menuButtons, duplicatedButton, this.currentParentId ?? undefined);
+    this.menuButtons = updatedMenu;
+    this.updateCurrentMenu();
+    this.hasUnsavedChanges = true;
+  }
+
+  // Tutorial functionality
+  startTutorial(): void {
+    // Implement tutorial logic
+    console.log('Starting tutorial...');
   }
 }
