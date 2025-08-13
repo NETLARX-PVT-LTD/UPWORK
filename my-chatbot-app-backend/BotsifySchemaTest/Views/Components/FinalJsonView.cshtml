@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Final Story JSON";
+}
+
+<div class="container mt-4">
+    <h3>Final Story Data</h3>
+    <pre id="finalJson" class="small p-3 border bg-light"></pre>
+    <button id="saveStoryBtn" class="btn btn-primary mt-3">Save to DB</button>
+</div>
+
+@section Scripts {
+    <script>
+        // Load JSON from localStorage
+        const finalJsonData = localStorage.getItem("finalStoryJson");
+        if (finalJsonData) {
+            document.getElementById("finalJson").textContent = JSON.stringify(JSON.parse(finalJsonData), null, 2);
+        }
+
+        document.getElementById("saveStoryBtn").addEventListener("click", async function () {
+            if (!finalJsonData) {
+                alert("No data to save!");
+                return;
+            }
+            try {
+                const res = await fetch('/Components/SaveStoryToDb', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: finalJsonData
+                });
+                if (res.ok) {
+                    alert("Story saved to DB successfully!");
+                } else {
+                    alert("Error saving story.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Something went wrong.");
+            }
+        });
+    </script>
+}
