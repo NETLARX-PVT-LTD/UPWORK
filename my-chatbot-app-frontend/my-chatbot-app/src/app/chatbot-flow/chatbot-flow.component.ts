@@ -25,6 +25,7 @@ import { MediaBlockComponent } from './blocks/media-block/media-block.component'
 import { LinkStoryBlockComponent } from './blocks/link-story-block/link-story-block.component';
 import { ConversationalFormBlockComponent } from './blocks/conversational-form-block/conversational-form-block.component';
 import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-block/json-api-integration-block.component';
+import { QuickReplyFlowComponent } from './blocks/quick-reply-flow/quick-reply-flow.component';
 import { JarvishBlockComponent } from './blocks/jarvish-block/jarvish-block.component';
 import { JsPlumbFlowService, ConnectionInfo } from './services/jsplumb-flow.service';
 
@@ -39,7 +40,7 @@ type NearestConnectionPoint = { blockId: string, x: number, y: number };
     MatButtonToggleModule, MatTooltipModule, MatSelectModule, MatCheckboxModule,
     UserInputBlockComponent, TextResponseBlockComponent, TypingDelayBlockComponent,
     MediaBlockComponent, LinkStoryBlockComponent, ConversationalFormBlockComponent,
-    JsonApiIntegrationBlockComponent, JarvishBlockComponent
+    JsonApiIntegrationBlockComponent, JarvishBlockComponent,QuickReplyFlowComponent
   ],
   templateUrl: './chatbot-flow.component.html',
   styleUrls: ['./chatbot-flow.component.scss']
@@ -268,6 +269,11 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       // CASE B: Dropped on empty space
       const existingBlocks = this.canvasBlocks.filter(b => b.id !== newBlock.id);
+      if (existingBlocks.length === 0) {
+  // This is the FIRST block on an empty canvas.
+  // We approve the drop without needing a parent connection.
+  connectOnDrop = true;
+} else {
       const hasNoConnections = this.jsPlumbFlowService.getConnections().length === 0;
 
       if (existingBlocks.length === 1 && hasNoConnections) {
@@ -304,6 +310,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     }
+  }
 
     // Part 3: Update the block's data with its final position and move it in the DOM
     newBlock.x = finalX;

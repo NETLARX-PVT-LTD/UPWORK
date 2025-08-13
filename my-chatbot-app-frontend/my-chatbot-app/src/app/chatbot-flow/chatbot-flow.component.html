@@ -216,7 +216,21 @@
               *ngFor="let block of canvasBlocks"
               class="quick-reply-cards-wrapper"
               [class.hidden]="block.type !== 'textResponse' || !block.quickReplies || block.quickReplies.length === 0"
+             [style.left.px]="(block.x || 0) - 120"
+              [style.top.px]="(block.y || 0) + (block.height || 0) + 10"
+                [attr.data-parent-id]="block.id"
             >
+              <!-- vertical connector from the Text Response block to the quick replies group -->
+              <div
+                class="qr-parent-connector"
+                [style.left.px]="120 + (block.width ? (block.width / 2) : 160)"
+                [style.top.px]="0"
+                [style.height.px]="30"
+              ></div>
+              <app-quick-reply-flow
+                [quickReplies]="block.quickReplies || []"
+                [parentBlockId]="block.id"
+              ></app-quick-reply-flow>
             </div>
           </div>
         </div>
