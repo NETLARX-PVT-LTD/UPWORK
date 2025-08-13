@@ -38,7 +38,7 @@ export const appConfig: ApplicationConfig = {
       MatButtonToggleModule, // <--- Add this
       FormsModule,           // <--- Add this for [(ngModel)]
       ReactiveFormsModule,    // <--- Keep this if you use reactive forms
-       HttpClientModule 
+       HttpClientModule ,
     )
   ]
 };
