@@ -1,0 +1,11 @@
+<div class="p-6 text-center">
+  <mat-icon class="text-yellow-500 text-6xl mb-4">warning_amber</mat-icon>
+  <h2 mat-dialog-title class="text-xl font-semibold text-gray-800">Are you sure?</h2>
+  <mat-dialog-content>
+    <p class="text-red-500 font-medium">You really want to clone this media block!</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="center" class="mt-6 gap-3">
+    <button mat-raised-button color="primary" class="!bg-blue-500 !text-white" [mat-dialog-close]="true">Clone</button>
+    <button mat-button class="!bg-gray-200 !text-gray-800" [mat-dialog-close]="false">Cancel</button>
+  </mat-dialog-actions>
+</div>

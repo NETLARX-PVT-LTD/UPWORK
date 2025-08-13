@@ -1,0 +1,193 @@
+.canvas-block.link-story-block {
+  background-color: #e0e7ff;
+  border: 2px solid  #2e66f4;
+  border-radius: 5px;
+  padding: 1px;
+  width: 300px;
+  font-family: 'Ubuntu', sans-serif;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.canvas-block.link-story-block:hover {
+  box-shadow: 0 0 0 2px #cbd5e1;
+}
+
+.canvas-block.link-story-block .block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #b1c4ff;
+}
+
+.canvas-block.link-story-block .block-header .block-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.canvas-block.link-story-block .block-header .block-title .block-icon {
+  font-size: 20px;
+  color: #3b82f6;
+  margin-top: 2px;
+}
+
+.canvas-block.link-story-block .block-header .block-title .block-title-text {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.canvas-block.link-story-block .block-header .block-menu-trigger {
+  padding: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.canvas-block.link-story-block .block-header .block-menu-trigger mat-icon {
+  color: white;
+}
+
+.canvas-block.link-story-block .block-body .description-box {
+  background: white;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  width: 100%;
+}
+
+.canvas-block.link-story-block .block-body .block-description {
+  font-size: 13px;
+  color: #475569;
+  margin: 0 0 4px;
+}
+
+.canvas-block.link-story-block .block-body .block-instruction {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.canvas-block.link-story-block .block-body .block-instruction mat-icon {
+  font-size: 16px;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+.link-story-container {
+  padding: 24px;
+}
+
+.link-story-container .header {
+  margin-bottom: 16px;
+}
+
+.link-story-container .header .title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #515365;
+  margin: 0;
+  font-family: "Ubuntu";
+}
+
+.link-story-container .header .subtitle {
+  font-size: 14px;
+  color: #888ea8;
+  margin-top: 4px;
+  font-family: sans-serif;
+  font-weight: lighter;
+}
+
+.link-story-container .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.link-story-container .form-group .field-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #506690;
+  margin-bottom: 5px;
+  font-family: sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.link-story-container .form-group .field-label .info-icon {
+  font-size: 16px;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.link-story-container .form-group .field-label .info-icon:hover {
+  background-color: #f3f4f6;
+}
+
+.link-story-container .form-group .custom-select {
+  width: 100%;
+}
+
+.link-story-container .form-group .custom-select ::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 !important;
+}
+
+.link-story-container .form-group .custom-select ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-flex {
+  align-items: center;
+  height: 44px !important;
+}
+
+.link-story-container .form-group .custom-select ::ng-deep .mat-mdc-form-field .mat-mdc-select-trigger {
+  height: 44px !important;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.link-story-container .form-group .custom-select ::ng-deep .mat-mdc-select {
+  height: 44px !important;
+  line-height: 44px !important;
+}
+
+.link-story-container .form-group .custom-select ::ng-deep .mat-mdc-select-arrow {
+  height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.link-story-container .form-group .custom-select ::ng-deep .mat-mdc-form-field-infix {
+  padding: 0 !important;
+  min-height: 44px !important;
+  display: flex;
+  align-items: center;
+}
+
+.close-btn {
+  background-color: #747d8c; /* dark background */
+  color: white;              /* white '×' */
+  border: none;
+  border-radius: 50%;        /* makes it circular */
+  width: 24px;
+  height: 24px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  position: absolute;  /* optional for placing top-right */
+  top: 2px;
+  right: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.close-btn:hover {
+  background-color: #1f2130;
+}
