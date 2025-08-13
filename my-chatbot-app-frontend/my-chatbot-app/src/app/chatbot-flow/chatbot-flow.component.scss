@@ -1205,6 +1205,13 @@
   }
 }
 
+.qr-parent-connector {
+  position: absolute;
+  width: 2px;
+  background: #d1d5db;
+  z-index: 0;
+}
+
 // Ensure the blocks container has proper positioning
 .blocks-container {
   position: relative;
