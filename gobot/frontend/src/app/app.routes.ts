@@ -8,10 +8,13 @@ import { PublishBotComponent } from './publish-bot/publish-bot.component';
 import { ChatbotWidgetComponent } from './chatbot-widget/chatbot-widget.component';
 import { ChatbotMenuComponent } from './chatbot-menu/chatbot-menu.component';
 import { WhatsappPublisherComponent } from './whatsapp-publisher/whatsapp-publisher.component';
+import { InstagramPublisherComponent } from './instagram-publisher/instagram-publisher.component';
 
 export const routes: Routes = [
   // publish bot on whatsapp
   { path: 'whatsapp-publisher', component: WhatsappPublisherComponent, data: { title: 'Publish Bot' } },
+  // publish bot on instagram
+  { path: 'instagram-publisher', component: InstagramPublisherComponent, data: { title: 'Publish Bot' } },
   // The main route for the publishing dashboard
   { path: 'publish-bot', component: PublishBotComponent,data: { title: 'Publish Bot' }  },
 
