@@ -36,6 +36,7 @@ export class JarvishBlockComponent {
 
   isDeleteMode = false;
   confirmDelete = false;
+  // currentBlockId: string | null = null;
 
   // When trash icon is clicked
   enableDeleteMode() {
@@ -73,7 +74,9 @@ export class JarvishBlockComponent {
   activeButtonForm: AvailableForm | null = null; 
   isButtonFormActive = false;
   isChatStarted: boolean = false;
-  currentBlockIndex: number = 0;
+  // currentBlockIndex: number = 0;
+  nextBlockId: string | null = null;
+  currentWaitingBlockId: string | null = null;
   waitingForUserInput: boolean = false;
 
   formFieldIndex: number = 0;
@@ -89,11 +92,22 @@ export class JarvishBlockComponent {
 
   ngOnInit() {
     console.log('Received canvasBlocks:', this.canvasBlocks);
+    // // Auto start if first block is not userInput
+    // if (this.canvasBlocks[0]?.type !== 'userInput') {
+    //   this.processNextBlock();
+    // }
 
-    // Auto start if first block is not userInput
-    if (this.canvasBlocks[0]?.type !== 'userInput') {
+    // Find the 'flow-start' block and begin the conversation.
+  const startBlock = this.canvasBlocks.find(block => block.id === 'flow-start');
+  if (startBlock) {
+    this.nextBlockId = startBlock.id;
+    // We only process if the start block is not a userInput, otherwise we wait for the user.
+    if (startBlock.type !== 'userInput') {
       this.processNextBlock();
     }
+  } else {
+    console.error('No "flow-start" block found in the canvasBlocks.');
+  }
   }
 
   showEmojiPicker = false;
@@ -123,135 +137,235 @@ export class JarvishBlockComponent {
 
 
   /** ✅ Handles user sending message */
+  // sendMessage() {
+  // if (!this.messageText.trim()) return;
+
+  // const userMsg = this.messageText.trim();
+  // this.messageText = '';
+  // this.messages.push({ sender: 'user', text: userMsg });
+  // this.scrollToBottom();
+
+  // // 1️⃣ Handle active button form first
+  // if (this.isButtonFormActive && this.activeButtonForm) {
+  //   const currentField = this.currentFormFields?.[this.formFieldIndex];
+
+  //   if (currentField) {
+  //     this.currentFormResponses[currentField.name] = userMsg;
+  //     this.formFieldIndex++;
+
+  //     if (this.formFieldIndex < this.currentFormFields.length) {
+  //       setTimeout(() => this.askNextFormField(), 800);
+  //     } else {
+  //       // ✅ Form finished
+  //       this.messages.push({ sender: 'bot', text: '✅ Thank you! Form submitted.' });
+
+  //       // 🔹 Reset form state
+  //       this.isButtonFormActive = false;
+  //       this.activeButtonForm = null;
+  //       this.currentFormFields = [];
+  //       this.formFieldIndex = 0;
+
+  //       // 🔹 Continue story if available
+  //       this.waitingForUserInput = false;
+  //       setTimeout(() => this.processNextBlock(), 800);
+  //     }
+  //   }
+  //   return;
+  // }
+
+  // const block = this.canvasBlocks[this.currentBlockIndex];
+  // if (!block) {
+  //   console.warn('No block found at index', this.currentBlockIndex);
+  //   return;
+  // }
+  // console.log('Current Block:', block.type, block.subType);
+
+  // /** 1️⃣ Conversational Form Handling */
+  // if (block.type === 'conversationalForm') {
+  //   const currentField = this.currentFormFields[this.formFieldIndex];
+  //   this.currentFormResponses[currentField.name] = userMsg;
+  //   this.formFieldIndex++;
+  //   setTimeout(() => this.askNextFormField(), 800);
+  //   return;
+  // }
+
+  // /** 2️⃣ User Input Handling */
+  // if (block.type === 'userInput') {
+
+  //   // --- 2A) Handle Anything ---
+  //   if (block.subType === 'anything') {
+  //     console.log("✅ Anything matched");
+  //     this.waitingForUserInput = false;
+  //     this.currentBlockIndex++;
+  //     setTimeout(() => this.processNextBlock(), 800);
+  //     return;
+  //   }
+
+  //   // --- 2B) Handle Keyword Group ---
+  //   else if (block.subType === 'keywordGroup') {
+  //     const userInput = userMsg.toLowerCase();
+  //     const allKeywords = block.keywordGroups?.flat().map((kw: string) => kw.toLowerCase()) || [];
+  //     console.log('All Keywords:', allKeywords);
+
+  //     const matched = allKeywords.some((keyword: string) => userInput.includes(keyword));
+
+  //     if (matched) {
+  //       console.log("✅ Keyword matched!");
+  //       this.waitingForUserInput = false;
+  //       this.currentBlockIndex++;
+  //       setTimeout(() => this.processNextBlock(), 800);
+  //     } else {
+  //       console.log("❌ No keyword match");
+  //       this.messages.push({
+  //         sender: 'bot',
+  //         text: 'Sorry, I didn’t understand. Try saying: ' + allKeywords.join(', ')
+  //       });
+  //       this.scrollToBottom();
+  //       setTimeout(() => {
+  //         this.messages.push({
+  //           sender: 'bot',
+  //           text: 'Try these keywords: ' + allKeywords.join(', ')
+  //         });
+  //       }, 5000);
+  //     }
+  //     return;
+  //   }
+
+  //   // --- 2C) Handle Phrase Matching ---
+  //   else if (block.subType === 'phrase') {
+  //     const userInput = userMsg.toLowerCase();
+
+  //     // ✅ Include main phrase and similar phrases
+  //     const phrases: string[] = [
+  //       block.phraseText || '',
+  //       ...(block.similarPhrases ? block.similarPhrases.split(',').map((p: string) => p.trim()) : [])
+  //     ].map((p: string) => p.toLowerCase());
+
+  //     console.log('All Phrases for match:', phrases);
+
+  //     const matched = phrases.some((phrase: string) => userInput.includes(phrase));
+
+  //     if (matched) {
+  //       console.log("✅ Phrase matched!");
+  //       this.waitingForUserInput = false;
+  //       this.currentBlockIndex++;
+  //       setTimeout(() => this.processNextBlock(), 800);
+  //     } else {
+  //       console.log("❌ Phrase not matched");
+  //       this.messages.push({
+  //         sender: 'bot',
+  //         text: `I couldn’t recognize that. Try saying something like: ${phrases.join(', ')}`
+  //       });
+  //       this.scrollToBottom();
+  //     }
+  //     return;
+  //   }
+  // }
+
+  // /** 3️⃣ Handle All Other Blocks (text, API, etc.) */
+  // this.waitingForUserInput = false;
+  // this.currentBlockIndex++;
+  // setTimeout(() => this.processNextBlock(), 800);
+  // }
+
   sendMessage() {
-  if (!this.messageText.trim()) return;
+    if (!this.messageText.trim()) return;
 
-  const userMsg = this.messageText.trim();
-  this.messageText = '';
-  this.messages.push({ sender: 'user', text: userMsg });
-  this.scrollToBottom();
+    const userMsg = this.messageText.trim();
+    this.messageText = '';
+    this.messages.push({ sender: 'user', text: userMsg });
+    this.scrollToBottom();
 
-  // 1️⃣ Handle active button form first
-  if (this.isButtonFormActive && this.activeButtonForm) {
-    const currentField = this.currentFormFields?.[this.formFieldIndex];
+    // 1️⃣ Handle active button form first
+    if (this.isButtonFormActive && this.activeButtonForm) {
+      const currentField = this.currentFormFields?.[this.formFieldIndex];
 
-    if (currentField) {
-      this.currentFormResponses[currentField.name] = userMsg;
-      this.formFieldIndex++;
+      if (currentField) {
+        this.currentFormResponses[currentField.name] = userMsg;
+        this.formFieldIndex++;
 
-      if (this.formFieldIndex < this.currentFormFields.length) {
-        setTimeout(() => this.askNextFormField(), 800);
-      } else {
-        // ✅ Form finished
-        this.messages.push({ sender: 'bot', text: '✅ Thank you! Form submitted.' });
+        if (this.formFieldIndex < this.currentFormFields.length) {
+          setTimeout(() => this.askNextFormField(), 800);
+        } else {
+          // ✅ Form finished
+          this.messages.push({ sender: 'bot', text: '✅ Thank you! Form submitted.' });
 
-        // 🔹 Reset form state
-        this.isButtonFormActive = false;
-        this.activeButtonForm = null;
-        this.currentFormFields = [];
-        this.formFieldIndex = 0;
+          // 🔹 Reset form state
+          this.isButtonFormActive = false;
+          this.activeButtonForm = null;
+          this.currentFormFields = [];
+          this.formFieldIndex = 0;
 
-        // 🔹 Continue story if available
-        this.waitingForUserInput = false;
-        setTimeout(() => this.processNextBlock(), 800);
+          // 🔹 Continue story if available
+          this.waitingForUserInput = false;
+          setTimeout(() => this.processNextBlock(), 800);
+        }
       }
+      return;
     }
-    return;
-  }
 
-  const block = this.canvasBlocks[this.currentBlockIndex];
-  if (!block) {
-    console.warn('No block found at index', this.currentBlockIndex);
-    return;
-  }
-  console.log('Current Block:', block.type, block.subType);
+    var block : any = [];
 
-  /** 1️⃣ Conversational Form Handling */
-  if (block.type === 'conversationalForm') {
+    // 💥 Use the new 'currentWaitingBlockId' to find the block
+    if(this.currentWaitingBlockId !== null){
+      block = this.canvasBlocks.find(b => b.id === this.currentWaitingBlockId);
+    }else{
+      block = this.canvasBlocks.find(b => b.id === this.nextBlockId);
+    }
+    
+    if (!block) {
+        // If no block is waiting for input, just clear the flag and move on
+        this.waitingForUserInput = false;
+        this.currentWaitingBlockId = null;
+        return;
+    }
+    
+    // Reset the waiting state, as we've received input
+    this.waitingForUserInput = false;
+    
+    if (block.type === 'userInput') {
+      const userInput = userMsg.toLowerCase();
+      let isMatch = false;
+
+      if (block.subType === 'anything') {
+        isMatch = true;
+      } else if (block.subType === 'keywordGroup') {
+        const allKeywords = block.keywordGroups?.flat().map((kw : string) => kw.toLowerCase()) || [];
+        isMatch = allKeywords.some((keyword : string) => userInput.includes(keyword));
+      } else if (block.subType === 'phrase') {
+        const phrases = [block.phraseText || '', ...(block.similarPhrases?.split(',').map((p : string) => p.trim()) || [])];
+        isMatch = phrases.some(phrase => userInput.includes(phrase.toLowerCase()));
+      }
+      
+      if (isMatch) {
+        this.waitingForUserInput = false;
+        // 💥 Find the next block ID from the 'connections'
+        this.nextBlockId = block.connections?.output?.[0] || null;
+        setTimeout(() => this.processNextBlock(), 800);
+      } else {
+        this.messages.push({ sender: 'bot', text: 'Sorry, I didn’t understand.' });
+        this.scrollToBottom();
+      }
+      return;
+    }else if (block.type === 'conversationalForm') {
     const currentField = this.currentFormFields[this.formFieldIndex];
     this.currentFormResponses[currentField.name] = userMsg;
     this.formFieldIndex++;
-    setTimeout(() => this.askNextFormField(), 800);
+
+    // 💥 CORRECTED LOGIC: Check if all fields are completed
+    if (this.formFieldIndex < this.currentFormFields.length) {
+      // If there are more fields, ask for the next one
+      setTimeout(() => this.askNextFormField(), 800);
+    } else {
+      // If all fields are completed, submit the form and proceed
+      setTimeout(() => this.submitForm(), 800);
+    }
     return;
   }
-
-  /** 2️⃣ User Input Handling */
-  if (block.type === 'userInput') {
-
-    // --- 2A) Handle Anything ---
-    if (block.subType === 'anything') {
-      console.log("✅ Anything matched");
-      this.waitingForUserInput = false;
-      this.currentBlockIndex++;
-      setTimeout(() => this.processNextBlock(), 800);
-      return;
-    }
-
-    // --- 2B) Handle Keyword Group ---
-    else if (block.subType === 'keywordGroup') {
-      const userInput = userMsg.toLowerCase();
-      const allKeywords = block.keywordGroups?.flat().map((kw: string) => kw.toLowerCase()) || [];
-      console.log('All Keywords:', allKeywords);
-
-      const matched = allKeywords.some((keyword: string) => userInput.includes(keyword));
-
-      if (matched) {
-        console.log("✅ Keyword matched!");
-        this.waitingForUserInput = false;
-        this.currentBlockIndex++;
-        setTimeout(() => this.processNextBlock(), 800);
-      } else {
-        console.log("❌ No keyword match");
-        this.messages.push({
-          sender: 'bot',
-          text: 'Sorry, I didn’t understand. Try saying: ' + allKeywords.join(', ')
-        });
-        this.scrollToBottom();
-        setTimeout(() => {
-          this.messages.push({
-            sender: 'bot',
-            text: 'Try these keywords: ' + allKeywords.join(', ')
-          });
-        }, 5000);
-      }
-      return;
-    }
-
-    // --- 2C) Handle Phrase Matching ---
-    else if (block.subType === 'phrase') {
-      const userInput = userMsg.toLowerCase();
-
-      // ✅ Include main phrase and similar phrases
-      const phrases: string[] = [
-        block.phraseText || '',
-        ...(block.similarPhrases ? block.similarPhrases.split(',').map((p: string) => p.trim()) : [])
-      ].map((p: string) => p.toLowerCase());
-
-      console.log('All Phrases for match:', phrases);
-
-      const matched = phrases.some((phrase: string) => userInput.includes(phrase));
-
-      if (matched) {
-        console.log("✅ Phrase matched!");
-        this.waitingForUserInput = false;
-        this.currentBlockIndex++;
-        setTimeout(() => this.processNextBlock(), 800);
-      } else {
-        console.log("❌ Phrase not matched");
-        this.messages.push({
-          sender: 'bot',
-          text: `I couldn’t recognize that. Try saying something like: ${phrases.join(', ')}`
-        });
-        this.scrollToBottom();
-      }
-      return;
-    }
-  }
-
-  /** 3️⃣ Handle All Other Blocks (text, API, etc.) */
-  this.waitingForUserInput = false;
-  this.currentBlockIndex++;
-  setTimeout(() => this.processNextBlock(), 800);
+    
+    this.waitingForUserInput = false;
+    this.nextBlockId = block.connections?.output?.[0] || null;
+    setTimeout(() => this.processNextBlock(), 800);
   }
 
 
@@ -283,11 +397,23 @@ export class JarvishBlockComponent {
   //   }, 500); // Matches Tailwind duration-500
   // }
 
-  /** ✅ Processes Next Block */
-  async processNextBlock() {
-  if (this.currentBlockIndex >= this.canvasBlocks.length) return;
 
-  const block = this.canvasBlocks[this.currentBlockIndex];
+  async processNextBlock() {
+  // if (!this.nextBlockId) {
+  //   this.messages.push({ sender: 'bot', text: 'End of conversation.' });
+  //   return;
+  // }
+
+  // Find the block using its ID
+  const block = this.canvasBlocks.find(b => b.id === this.nextBlockId);
+  if (!block) {
+    // this.messages.push({ sender: 'bot', text: `[Block with ID ${this.nextBlockId} not found.]` });
+    return;
+  }
+
+  // Determine the next block's ID from the current block's connections
+  const nextConnectionId = block.connections?.output?.[0] || null;
+  this.nextBlockId = nextConnectionId;
 
   switch (block.type) {
     case 'textResponse':
@@ -312,7 +438,7 @@ export class JarvishBlockComponent {
       }
 
       // Else continue automatically
-      this.currentBlockIndex++;
+      // this.currentBlockIndex++;
       setTimeout(() => this.processNextBlock(), 1000);
       break;
 
@@ -322,7 +448,7 @@ export class JarvishBlockComponent {
 
     case 'jsonApi':
       await this.handleJsonApiBlock(block);
-      this.currentBlockIndex++;
+      // this.currentBlockIndex++;
       setTimeout(() => this.processNextBlock(), 500);
       break;
 
@@ -330,12 +456,13 @@ export class JarvishBlockComponent {
       this.currentFormFields = block.formFields;
       this.formFieldIndex = 0;
       this.currentFormResponses = {};
+      this.currentWaitingBlockId = block.id;
       this.askNextFormField();
       break;
 
     case 'typingDelay':
       await this.handleTypingDelay(block);
-      this.currentBlockIndex++;
+      // this.currentBlockIndex++;
       this.processNextBlock();
       break;
 
@@ -376,7 +503,7 @@ export class JarvishBlockComponent {
         this.scrollToBottom();
         console.log('Media Block Pushed:', mediaMsg);
 
-        this.currentBlockIndex++;
+        // this.currentBlockIndex++;
         setTimeout(() => this.processNextBlock(), 1000);
         break;
     }
@@ -394,17 +521,21 @@ export class JarvishBlockComponent {
           });
 
           // ✅ Insert the linked story blocks right after the current block
-          this.canvasBlocks.splice(this.currentBlockIndex + 1, 0, ...linkedStory.blocks);
+          // this.canvasBlocks.splice(this.currentBlockIndex + 1, 0, ...linkedStory.blocks);
+          this.canvasBlocks = [...linkedStory.blocks];
 
-          // Move to the next block
-          this.currentBlockIndex++;
+          // // Move to the next block
+          // this.currentBlockIndex++;
+          // Update nextBlockId to be the first block of the newly inserted story.
+          this.nextBlockId = linkedStory.blocks[0].id;
+
           setTimeout(() => this.processNextBlock(), 500);
         } else {
           this.messages.push({ 
             sender: 'bot', 
             text: '⚠️ Linked story not found or empty.' 
           });
-          this.currentBlockIndex++;
+          // this.currentBlockIndex++;
           setTimeout(() => this.processNextBlock(), 500);
         }
       } else {
@@ -412,7 +543,7 @@ export class JarvishBlockComponent {
           sender: 'bot', 
           text: '⚠️ No linked story assigned to this block.' 
         });
-        this.currentBlockIndex++;
+        // this.currentBlockIndex++;
         setTimeout(() => this.processNextBlock(), 500);
       }
       break;
@@ -420,7 +551,7 @@ export class JarvishBlockComponent {
 
     default:
       this.messages.push({ sender: 'bot', text: `[Unsupported block: ${block.type}]` });
-      this.currentBlockIndex++;
+      // this.currentBlockIndex++;
       this.processNextBlock();
   }
   }
@@ -446,7 +577,7 @@ export class JarvishBlockComponent {
     console.log('Form Responses:', this.currentFormResponses);
 
     this.scrollToBottom();
-    this.currentBlockIndex++;
+    // this.currentBlockIndex++;
     setTimeout(() => this.processNextBlock(), 1000);
   }
 
@@ -540,7 +671,7 @@ export class JarvishBlockComponent {
 
   // Move to next block
   this.waitingForUserInput = false;
-  this.currentBlockIndex++;
+  // this.currentBlockIndex++;
   setTimeout(() => this.processNextBlock(), 800);
   }
 
@@ -583,7 +714,7 @@ export class JarvishBlockComponent {
         this.scrollToBottom();
         console.log('Media Block Pushed:', mediaMsg);
 
-        this.currentBlockIndex++;
+        // this.currentBlockIndex++;
         setTimeout(() => this.processNextBlock(), 1000);
   }
 
@@ -603,6 +734,15 @@ export class JarvishBlockComponent {
         sender: 'user',
         text: button.title
       });
+
+      // 💥 Crucial: Find the block that contained this button to get its connections.
+      const parentBlock = this.canvasBlocks.find(block => block.buttons?.some((b : any) => b.id === button.id));
+
+      if (!parentBlock) {
+        console.error('Could not find the block associated with this button.');
+        this.messages.push({ sender: 'bot', text: 'Error: Could not process button action.' });
+        return;
+      }
 
       switch (button.type) {
         case 'text_message':
@@ -693,42 +833,6 @@ export class JarvishBlockComponent {
             this.handleJsonApiButton(button);
           }
           break;
-
-        case 'human_help': {
-          // 1️⃣ Show bot message
-          const botMessage = button.messageAfterAction || '👨‍💻 Human support will contact you shortly.';
-          this.messages.push({
-            sender: 'bot',
-            text: botMessage
-          });
-
-          // 2️⃣ Send email notification if configured
-          // if (button.emailForNotification) {
-          //   const emailData = {
-          //     to: button.emailForNotification,
-          //     subject: `Human Help Requested - ${button.title}`,
-          //     message: `User clicked on "${button.title}". Please assist the user.`
-          //   };
-
-               // Example: POST to your backend email API
-          //   fetch('https://your-backend.com/send-email', {
-          //     method: 'POST',
-          //     headers: {
-          //       'Content-Type': 'application/json'
-          //     },
-          //     body: JSON.stringify(emailData)
-          //   })
-          //   .then(res => res.json())
-          //   .then(() => {
-          //     console.log('✅ Email notification sent successfully');
-          //   })
-          //   .catch(err => {
-          //     console.error('❌ Error sending email:', err);
-          //   });
-          // }
-
-          break;
-        }
         case 'conversational_form': {
           const botMessage = button.messageAfterAction || '📝 Please start the form.';
           this.messages.push({ sender: 'bot', text: botMessage });
@@ -741,6 +845,7 @@ export class JarvishBlockComponent {
             this.currentFormFields = selectedForm.formFields;
             this.formFieldIndex = 0;
             this.currentFormResponses = {};
+            this.currentWaitingBlockId = parentBlock.id;
             this.askNextFormField();
           } else {
             this.messages.push({ sender: 'bot', text: '⚠️ No form fields found for this form.' });
@@ -761,7 +866,10 @@ export class JarvishBlockComponent {
 
               // ✅ Reset current story to linked story
               this.canvasBlocks = [...linkedStory.blocks];
-              this.currentBlockIndex = 0;
+              // this.currentBlockIndex = 0;
+
+              // Update nextBlockId to be the first block of the newly inserted story.
+              this.nextBlockId = linkedStory.blocks[0].id;
 
               // ✅ Begin processing the new story
               this.processNextBlock();
