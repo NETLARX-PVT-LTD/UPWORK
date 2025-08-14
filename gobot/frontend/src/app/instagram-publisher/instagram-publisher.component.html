@@ -1,0 +1,352 @@
+<div class="instagram-publisher-container">
+        <!-- Header -->
+        <div class="header">
+            <h2>Instagram Bot Publisher</h2>
+            <div class="status-info">
+                <div class="status-badge" [ngClass]="botConfig.isActive ? 'status-active' : 'status-inactive'">
+                    {{ getBotStatus() }}
+                </div>
+                <span class="connection-info">{{ getConnectionStatus() }}</span>
+                <div class="bot-selector">
+                    <select [(ngModel)]="selectedBot" class="bot-dropdown">
+                        <option value="Bot 3">Bot 3</option>
+                        <option value="Bot 97">Bot 97</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step Navigation -->
+        <div class="step-navigation">
+            <div class="step-item" [ngClass]="{
+                'active': currentStep === 'connect',
+                'completed': currentStep !== 'connect' && facebookAccessToken
+            }">
+                <div class="step-number">1</div>
+                <span>Connect Facebook</span>
+            </div>
+            <div class="step-item" [ngClass]="{
+                'active': currentStep === 'select',
+                'completed': currentStep !== 'connect' && currentStep !== 'select' && selectedPage
+            }">
+                <div class="step-number">2</div>
+                <span>Select Page</span>
+            </div>
+            <div class="step-item" [ngClass]="{
+                'active': currentStep === 'configure',
+                'completed': currentStep === 'test' && botConfig.isActive
+            }">
+                <div class="step-number">3</div>
+                <span>Configure Bot</span>
+            </div>
+            <div class="step-item" [ngClass]="{
+                'active': currentStep === 'test'
+            }">
+                <div class="step-number">4</div>
+                <span>Test & Deploy</span>
+            </div>
+        </div>
+
+        <!-- Step 1: Facebook Connection -->
+        <div class="step-container" *ngIf="currentStep === 'connect'">
+            <div class="connection-info">
+                <h3><i class="fab fa-facebook"></i> Connect to Instagram via Facebook</h3>
+                <p>Instagram Business API requires your Instagram account to be connected to a Facebook page. We'll help you set up the necessary permissions to enable bot messaging on your Instagram account.</p>
+                
+                <div class="alert alert-info">
+                    <strong>Required Permissions:</strong>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li>Send and receive Instagram messages</li>
+                        <li>Manage page metadata and settings</li>
+                        <li>Access Instagram account information</li>
+                        <li>Set up webhook subscriptions</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Facebook Permissions Dialog -->
+            <div class="permissions-dialog" *ngIf="showPermissions">
+                <div class="permissions-header">
+                    <div class="facebook-logo">
+                        <i class="fab fa-facebook"></i>
+                        <span style="margin-left: 10px; font-weight: 600;">Facebook Permissions</span>
+                    </div>
+                    <div class="permissions-warning">
+                        <span class="warning-text">All permissions are required</span>
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+
+                <div class="permissions-list">
+                    <div class="permission-item" *ngFor="let permission of facebookPermissions">
+                        <div class="permission-details">
+                            <div class="permission-name">{{ permission.name }}</div>
+                            <div class="permission-description">{{ permission.description }}</div>
+                        </div>
+                        <div class="permission-toggle">
+                            <input 
+                                type="checkbox" 
+                                [checked]="permission.granted" 
+                                [disabled]="permission.required"
+                                (change)="togglePermission(permission)"
+                                class="permission-checkbox"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="permissions-actions">
+                    <button class="btn btn-secondary" (click)="cancelPermissions()">Cancel</button>
+                    <button class="btn btn-primary" (click)="approvePermissions()">Continue with Facebook</button>
+                </div>
+            </div>
+
+            <!-- Connect Button -->
+            <div class="connect-section" *ngIf="!showPermissions" style="text-align: center;">
+                <button class="btn btn-facebook btn-lg" (click)="connectFacebook()">
+                    <i class="fab fa-facebook"></i>
+                    Connect with Facebook
+                </button>
+                <p style="margin-top: 15px; color: #666; font-size: 14px;">
+                    This will open Facebook's secure authentication window
+                </p>
+            </div>
+        </div>
+
+        <!-- Step 2: Page Selection -->
+        <div class="step-container" *ngIf="currentStep === 'select'">
+            <div class="page-selection">
+                <h3><i class="fab fa-instagram"></i> Select Your Instagram Business Account</h3>
+                
+                <div class="alert alert-success" *ngIf="instagramPages.length > 0">
+                    Found {{ instagramPages.length }} Instagram business account(s) connected to your Facebook pages.
+                </div>
+                
+                <div class="alert alert-warning" *ngIf="instagramPages.length === 0">
+                    No Instagram business accounts found. Make sure your Instagram account is connected to a Facebook page and converted to a business account.
+                </div>
+                
+                <div class="pages-table" *ngIf="instagramPages.length > 0">
+                    <div class="table-header">
+                        <div class="header-cell">INSTAGRAM ACCOUNT</div>
+                        <div class="header-cell">STATUS</div>
+                        <div class="header-cell">ACTIONS</div>
+                    </div>
+                    
+                    <div class="table-row" *ngFor="let page of instagramPages">
+                        <div class="page-info">
+                            <img [src]="page.profilePicture" alt="Profile" class="page-avatar">
+                            <div class="page-details">
+                                <span class="page-name">{{ page.name }}</span>
+                                <span class="page-username">{{ page.username }}</span>
+                            </div>
+                        </div>
+                        <div class="page-status">
+                            <span class="connection-status" *ngIf="page.connected">
+                                <i class="fas fa-check-circle"></i> Connected
+                            </span>
+                            <span *ngIf="!page.connected" style="color: #999;">
+                                <i class="fas fa-circle"></i> Not Connected
+                            </span>
+                        </div>
+                        <div class="page-actions">
+                            <button 
+                                class="btn btn-danger btn-sm" 
+                                *ngIf="page.connected"
+                                (click)="disconnectPage(page)"
+                                title="Disconnect this Instagram account"
+                            >
+                                <i class="fas fa-unlink"></i> Disconnect
+                            </button>
+                            <button 
+                                class="btn btn-primary btn-sm" 
+                                *ngIf="!page.connected"
+                                (click)="connectPage(page)"
+                                title="Connect this Instagram account"
+                            >
+                                <i class="fas fa-link"></i> Connect
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-management" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+                    <button class="btn btn-success" (click)="refreshPermissions()">
+                        <i class="fas fa-sync"></i> Refresh Pages
+                    </button>
+                    <button class="btn btn-warning" (click)="goBack()">
+                        <i class="fas fa-arrow-left"></i> Back to Connection
+                    </button>
+                    <button class="btn btn-danger" (click)="removePermissions()">
+                        <i class="fas fa-trash"></i> Remove All Permissions
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Bot Configuration -->
+        <div class="step-container" *ngIf="currentStep === 'configure'">
+            <div class="bot-configuration">
+                <h3><i class="fas fa-robot"></i> Configure Your Instagram Bot</h3>
+                <p style="color: #666; margin-bottom: 30px;">
+                    Set up your bot's behavior and responses. These settings will determine how your bot interacts with Instagram users.
+                </p>
+
+                <div class="config-section">
+                    <h4>Basic Settings</h4>
+                    <div class="form-group">
+                        <label class="form-label" for="botName">Bot Name</label>
+                        <input 
+                            type="text" 
+                            id="botName"
+                            class="form-input" 
+                            [(ngModel)]="botConfig.name"
+                            placeholder="Enter your bot's name"
+                        />
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h4>Message Templates</h4>
+                    <div class="form-group">
+                        <label class="form-label" for="welcomeMessage">Welcome Message</label>
+                        <textarea 
+                            id="welcomeMessage"
+                            class="form-textarea" 
+                            [(ngModel)]="botConfig.welcomeMessage"
+                            placeholder="This message will be sent when users first interact with your bot..."
+                        ></textarea>
+                        <small style="color: #666;">This message is sent when someone starts a conversation with your Instagram account.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="fallbackMessage">Fallback Message</label>
+                        <textarea 
+                            id="fallbackMessage"
+                            class="form-textarea" 
+                            [(ngModel)]="botConfig.fallbackMessage"
+                            placeholder="This message will be sent when the bot doesn't understand the user's message..."
+                        ></textarea>
+                        <small style="color: #666;">This message is sent when your bot doesn't understand a user's message.</small>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h4>Connected Instagram Account</h4>
+                    <div class="alert alert-info" *ngIf="selectedPage">
+                        <strong>{{ selectedPage.name }}</strong> ({{ selectedPage.username }})
+                        <br><small>Your bot will respond to messages sent to this Instagram account.</small>
+                    </div>
+                </div>
+
+                <div class="config-section" style="display: flex; justify-content: space-between; align-items: center;">
+                    <button class="btn btn-secondary" (click)="goBack()">
+                        <i class="fas fa-arrow-left"></i> Back to Page Selection
+                    </button>
+                    <button class="btn btn-success btn-lg" (click)="publishBot()">
+                        <i class="fas fa-rocket"></i> Publish Bot
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Test & Deploy -->
+        <div class="step-container" *ngIf="currentStep === 'test'">
+            <div class="test-deploy">
+                <h3><i class="fas fa-flask"></i> Test Your Bot</h3>
+                <p style="color: #666; margin-bottom: 30px;">
+                    Your bot is now published! Test it below or send messages to your Instagram account to see it in action.
+                </p>
+
+                <div class="alert alert-success">
+                    <strong>🎉 Bot Successfully Published!</strong><br>
+                    Your Instagram bot is now active and will respond to messages sent to <strong>{{ selectedPage?.name }}</strong>.
+                </div>
+
+                <div class="test-container">
+                    <div class="test-controls">
+                        <h4>Test Controls</h4>
+                        <div style="margin-bottom: 20px;">
+                            <button class="btn btn-primary" (click)="startTesting()" style="width: 100%; margin-bottom: 10px;">
+                                <i class="fas fa-play"></i> Start Test Chat
+                            </button>
+                            <button class="btn btn-secondary" (click)="clearTestMessages()" style="width: 100%;">
+                                <i class="fas fa-trash"></i> Clear Messages
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Bot Status</label>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input 
+                                    type="checkbox" 
+                                    class="form-checkbox"
+                                    [(ngModel)]="botConfig.isActive"
+                                />
+                                <span>{{ botConfig.isActive ? 'Active' : 'Inactive' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="config-section">
+                            <h5>Quick Actions</h5>
+                            <button class="btn btn-warning btn-sm" (click)="goBack()" style="width: 100%; margin-bottom: 10px;">
+                                <i class="fas fa-edit"></i> Edit Configuration
+                            </button>
+                            <button class="btn btn-info btn-sm" onclick="window.open('https://instagram.com/' + selectedPage?.username?.substring(1), '_blank')" style="width: 100%;">
+                                <i class="fab fa-instagram"></i> View Instagram Profile
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="test-chat">
+                        <div class="test-header">
+                            <i class="fas fa-comments"></i> Bot Test Chat
+                        </div>
+                        
+                        <div class="test-messages">
+                            <div *ngIf="testMessages.length === 0" style="text-align: center; color: #999; padding: 50px;">
+                                <i class="fas fa-comments" style="font-size: 48px; margin-bottom: 15px;"></i>
+                                <p>Click "Start Test Chat" to begin testing your bot</p>
+                            </div>
+                            
+                            <div 
+                                *ngFor="let message of testMessages" 
+                                class="test-message"
+                                [ngClass]="message.sender"
+                            >
+                                <div>{{ message.text }}</div>
+                                <div class="message-time">
+                                    {{ message.timestamp | date:'short' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="test-input-container" *ngIf="isTestMode">
+                            <input 
+                                type="text" 
+                                class="test-input"
+                                [(ngModel)]="testInput"
+                                placeholder="Type a message to test your bot..."
+                                (keyup.enter)="sendTestMessage()"
+                            />
+                            <button class="btn btn-primary" (click)="sendTestMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info" style="margin-top: 20px;">
+                    <strong>Ready for real users!</strong><br>
+                    Your bot is live and will automatically respond to Instagram messages. Monitor performance through your Instagram Insights or set up analytics in your backend.
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" *ngIf="isLoading">
+            <div class="spinner"></div>
+            <p>{{ loadingMessage }}</p>
+        </div>
+    </div>
+    <!-- API Testing Section (add after step 4) -->

@@ -1,0 +1,25 @@
+<!-- src/app/whatsapp-publisher/botsify-chat.component.html -->
+<div class="chat-container">
+  <div class="chat-header">
+    <span>Botsify Bot</span>
+    <button mat-button (click)="onClose()" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div class="chat-messages">
+    <div class="message" *ngFor="let msg of messages" [class.user]="msg.sender === 'user'" [class.bot]="msg.sender === 'bot'">
+      <div class="message-bubble">
+        {{ msg.message }}
+        <span class="timestamp">{{ msg.timestamp | date:'shortTime' }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="chat-input">
+    <mat-form-field class="full-width">
+      <input matInput [(ngModel)]="userInput" (keyup.enter)="sendMessage()" placeholder="Type a message..." />
+    </mat-form-field>
+    <button mat-button (click)="sendMessage()" [disabled]="!userInput.trim()">
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
+</div>

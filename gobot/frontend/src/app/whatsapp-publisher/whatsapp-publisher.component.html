@@ -1,279 +1,578 @@
-<!-- whatsapp-publisher.component.html -->
 <div class="whatsapp-publisher-container">
-  
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <h1 class="main-title">
+        <i class="fab fa-whatsapp"></i>
+        Publish Your Bot to WhatsApp
+      </h1>
+      <p class="subtitle">Connect your chatbot to WhatsApp Business API in 4 simple steps</p>
+
+      <!-- Bot Info Card -->
+      <!-- <div class="bot-info-card">
+        <div class="bot-info-header">
+          <span class="bot-id-label">Bot ID:</span>
+          <span class="bot-id-value">{{ botId }}</span>
+          <button mat-button color="primary" (click)="copyBotId()">
+            <mat-icon>content_copy</mat-icon>
+          </button>
+          <button mat-button color="primary" (click)="generateBotId()">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
+
+        <!-- Bot Status -->
+        <div class="bot-status" *ngIf="botStatus">
+          <div class="status-indicator primary" *ngIf="botStatus.isActive">
+            <mat-icon>check_circle</mat-icon>
+            <span>{{ botStatus.status === 'active' ? 'Active & Running' : botStatus.status }}</span>
+          </div>
+          <button mat-button color="primary" (click)="refreshBotStatus()">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
+      </div> -->
+    </div>
+  </div>
 
   <!-- Progress Steps -->
   <div class="progress-steps">
-    <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+    <div class="step" [class.current]="currentStep === 1">
       <div class="step-number">1</div>
-      <span>Choose API</span>
+      <div class="step-content">
+        <span class="step-title">Choose API</span>
+        <span class="step-desc">Select WhatsApp API provider</span>
+      </div>
     </div>
-    <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+
+    <div class="step" [class.current]="currentStep === 2">
       <div class="step-number">2</div>
-      <span>Configure Bot</span>
+      <div class="step-content">
+        <span class="step-title">Configure Bot</span>
+        <span class="step-desc">Set up API credentials</span>
+      </div>
     </div>
-    <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
+
+    <div class="step" [class.current]="currentStep === 3">
       <div class="step-number">3</div>
-      <span>Test Bot</span>
+      <div class="step-content">
+        <span class="step-title">Test Bot</span>
+        <span class="step-desc">Verify configuration</span>
+      </div>
     </div>
-    <div class="step" [class.active]="currentStep >= 4">
+
+    <div class="step" [class.current]="currentStep === 4">
       <div class="step-number">4</div>
-      <span>Publish</span>
+      <div class="step-content">
+        <span class="step-title">Publish</span>
+        <span class="step-desc">Go live on WhatsApp</span>
+      </div>
     </div>
   </div>
 
   <!-- Main Content -->
   <div class="main-content">
-    
-    <!-- Step 1: API Selection -->
-    <div *ngIf="currentStep === 1" class="step-content">
-      <h3 class="step-title">We offer two ways to publish your chatbot on your WhatsApp Business number.</h3>
-      
-      <div class="api-options">
-        <div class="api-card" 
-             [class.selected]="selectedApi === 'meta-cloud'"
-             (click)="selectApi('meta-cloud')">
-          <div class="api-icon">
-            <i class="fab fa-whatsapp"></i>
-          </div>
-          <h4>Official Meta Cloud WhatsApp API</h4>
-          <p>Use Meta's official cloud-based WhatsApp Business API for reliable messaging</p>
-          <div class="api-badge official">Official</div>
-        </div>
 
-        <div class="api-card" 
-             [class.selected]="selectedApi === 'd360'"
-             (click)="selectApi('d360')">
-          <div class="api-icon d360">
-            <span class="d360-logo">360</span>
+    <!-- Step 1: API Selection -->
+    <div id="stepContent1" class="step-content fade-in" *ngIf="currentStep === 1">
+      <div class="step-header">
+        <h3 class="step-title">Choose Your WhatsApp API Provider</h3>
+        <p class="step-description">
+          We support two reliable ways to connect your chatbot to WhatsApp Business.
+          Choose the one that best fits your needs.
+        </p>
+      </div>
+
+      <div class="api-options">
+        <div class="api-card" *ngFor="let option of apiOptions" (click)="selectApi(option.id)">
+          <div class="api-header">
+            <div class="api-icon">
+              {{ option.icon }}
+            </div>
+            <div class="api-badge" [class.official]="option.isOfficial" [class.partner]="!option.isOfficial">
+              {{ option.isOfficial ? 'Official' : 'Partner' }}
+            </div>
           </div>
-          <h4>D360 API</h4>
-          <p>Third-party WhatsApp Business API solution with additional features</p>
-          <div class="api-badge partner">Partner</div>
+
+          <div class="api-content">
+            <h4>{{ option.name }}</h4>
+            <p>{{ option.description }}</p>
+
+            <div class="api-features">
+              <h5>Key Features:</h5>
+              <ul>
+                <li *ngFor="let feature of option.features">{{ feature }}</li>
+              </ul>
+            </div>
+
+            <div class="api-pricing">
+              <span class="pricing-label">Pricing:</span>
+              <span class="pricing-value">{{ option.pricing || 'Contact provider' }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="step-actions">
-        <button class="btn btn-primary" 
-                [disabled]="!selectedApi"
-                (click)="nextStep()">
-          Continue
+        <button mat-raised-button color="primary" [disabled]="!selectedApi" (click)="nextStep()">
+          <mat-icon>arrow_forward</mat-icon>
+          Continue with Selected API
         </button>
       </div>
     </div>
 
-      <div class="demo-section">
-    <h3 class="step-title">Bot WhatsApp Demo</h3>
-    <div class="demo-instructions">
-      <ul>
-        <li *ngFor="let instruction of demoInstructions">
-          {{ instruction }}
-        </li>
-      </ul>
-    </div>
-
-    <div class="test-actions">
-      <button class="btn btn-whatsapp" 
-              (click)="openWhatsAppTest()">
-        <i class="fab fa-whatsapp"></i>
-        Test now on WhatsApp
-      </button>
-    </div>
-  </div>
     <!-- Step 2: Bot Configuration -->
-    <div *ngIf="currentStep === 2" class="step-content">
-      <h3 class="step-title">Configure Your WhatsApp Bot</h3>
-      
-      <form [formGroup]="publishForm" class="config-form">
-        <div class="form-group">
-          <label for="botName">Bot Name *</label>
-          <input type="text" 
-                 id="botName"
-                 formControlName="botName"
-                 class="form-control"
-                 [class.error]="isFieldInvalid('botName')"
-                 placeholder="Enter bot name">
-          <div class="error-message" *ngIf="isFieldInvalid('botName')">
-            {{ getFieldError('botName') }}
+    <div id="stepContent2" class="step-content fade-in" *ngIf="currentStep === 2">
+      <div class="step-header">
+        <h3 class="step-title">Configure Your WhatsApp Bot</h3>
+        <p class="step-description">
+          Enter your API credentials and bot settings.
+        </p>
+      </div>
+
+      <form [formGroup]="publishForm" id="configForm">
+        <!-- Basic Configuration -->
+        <div class="form-section">
+          <h4 class="section-title">
+            <mat-icon>settings</mat-icon>
+            Basic Configuration
+          </h4>
+
+          <div class="form-row">
+            <mat-form-field class="form-field">
+              <mat-label>Bot Name</mat-label>
+              <input matInput formControlName="botName" placeholder="Enter a descriptive name for your bot"
+                maxlength="50">
+              <mat-hint>This name will be used for identification purposes</mat-hint>
+              <mat-error *ngIf="publishForm.get('botName')?.hasError('required')">Bot Name is required</mat-error>
+              <mat-error *ngIf="publishForm.get('botName')?.hasError('minlength')">Minimum 3 characters
+                required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field class="form-field">
+              <mat-label>WhatsApp Business Phone Number</mat-label>
+              <input matInput type="tel" formControlName="phoneNumber" placeholder="+1234567890">
+              <mat-hint>Include country code (e.g., +1 for US, +91 for India)</mat-hint>
+              <mat-error *ngIf="publishForm.get('phoneNumber')?.hasError('required')">Phone Number is
+                required</mat-error>
+              <mat-error *ngIf="publishForm.get('phoneNumber')?.hasError('invalidPhone')">Invalid phone number
+                format</mat-error>
+            </mat-form-field>
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="phoneNumber">WhatsApp Business Number *</label>
-          <input type="text" 
-                 id="phoneNumber"
-                 formControlName="phoneNumber"
-                 class="form-control"
-                 [class.error]="isFieldInvalid('phoneNumber')"
-                 placeholder="+1234567890">
-          <div class="error-message" *ngIf="isFieldInvalid('phoneNumber')">
-            {{ getFieldError('phoneNumber') }}
+        <!-- API Configuration -->
+        <div class="form-section">
+          <h4 class="section-title">
+            <mat-icon>api</mat-icon>
+            API Configuration
+          </h4>
+
+          <div class="form-row">
+            <mat-form-field class="form-field">
+              <mat-label>Access Token</mat-label>
+              <input matInput type="password" formControlName="accessToken" placeholder="Your API Access Token">
+              <mat-hint>Get this from your API provider dashboard</mat-hint>
+              <mat-error *ngIf="publishForm.get('accessToken')?.hasError('required')">Access Token is
+                required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field class="form-field">
+              <mat-label>Verify Token</mat-label>
+              <input matInput formControlName="verifyToken" placeholder="Enter a secure verify token">
+              <mat-hint>A secret token to verify webhook requests</mat-hint>
+              <mat-error *ngIf="publishForm.get('verifyToken')?.hasError('required')">Verify Token is
+                required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Meta Cloud specific fields -->
+          <div *ngIf="isMetaCloudSelected">
+            <div class="form-row">
+              <mat-form-field class="form-field">
+                <mat-label>Business Account ID</mat-label>
+                <input matInput formControlName="businessAccountId" placeholder="Your WhatsApp Business Account ID">
+              </mat-form-field>
+              <mat-form-field class="form-field">
+                <mat-label>Phone Number ID</mat-label>
+                <input matInput formControlName="phoneNumberId" placeholder="Your WhatsApp Phone Number ID">
+              </mat-form-field>
+            </div>
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="webhookUrl">Webhook URL *</label>
-          <input type="url" 
-                 id="webhookUrl"
-                 formControlName="webhookUrl"
-                 class="form-control"
-                 [class.error]="isFieldInvalid('webhookUrl')"
-                 placeholder="https://your-domain.com/webhook">
-          <div class="error-message" *ngIf="isFieldInvalid('webhookUrl')">
-            {{ getFieldError('webhookUrl') }}
-          </div>
-        </div>
+        <!-- Webhook Configuration -->
+        <div class="form-section">
+          <h4 class="section-title">
+            <mat-icon>webhook</mat-icon>
+            Webhook Configuration
+          </h4>
 
-        <div class="form-group">
-          <label for="accessToken">Access Token *</label>
-          <input type="password" 
-                 id="accessToken"
-                 formControlName="accessToken"
-                 class="form-control"
-                 [class.error]="isFieldInvalid('accessToken')"
-                 placeholder="Enter your API access token">
-          <div class="error-message" *ngIf="isFieldInvalid('accessToken')">
-            {{ getFieldError('accessToken') }}
+          <div class="form-row">
+            <mat-form-field class="form-field">
+              <mat-label>Webhook URL</mat-label>
+              <input matInput formControlName="webhookUrl" placeholder="https://your-domain.com/webhook">
+              <mat-hint>Your server endpoint to receive WhatsApp messages (must use HTTPS)</mat-hint>
+              <mat-error *ngIf="publishForm.get('webhookUrl')?.hasError('required')">Webhook URL is required</mat-error>
+              <mat-error *ngIf="publishForm.get('webhookUrl')?.hasError('httpsRequired')">Webhook URL must use
+                HTTPS</mat-error>
+            </mat-form-field>
+            <button mat-button color="primary" (click)="copyWebhookUrl()">
+              <mat-icon>content_copy</mat-icon>
+            </button>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="verifyToken">Verify Token *</label>
-          <input type="text" 
-                 id="verifyToken"
-                 formControlName="verifyToken"
-                 class="form-control"
-                 [class.error]="isFieldInvalid('verifyToken')"
-                 placeholder="Enter webhook verify token">
-          <div class="error-message" *ngIf="isFieldInvalid('verifyToken')">
-            {{ getFieldError('verifyToken') }}
+          <!-- Webhook Validation -->
+          <div class="webhook-validation">
+            <button mat-raised-button color="primary" [disabled]="webhookValidating" (click)="validateWebhook()">
+              <mat-icon>{{ webhookValidating ? 'hourglass_empty' : 'verified_user' }}</mat-icon>
+              {{ webhookValidating ? 'Validating...' : 'Validate Webhook' }}
+            </button>
+
+            <button mat-button color="primary" (click)="openWebhookGuide()">
+              <mat-icon>help</mat-icon>
+              Webhook Setup Guide
+            </button>
+          </div>
+
+          <!-- Webhook Validation Results -->
+          <div class="validation-results" *ngIf="webhookResults">
+            <div class="result-card" [class.success]="webhookResults.success" [class.error]="!webhookResults.success">
+              <mat-icon>{{ webhookResults.success ? 'check_circle' : 'error' }}</mat-icon>
+              <span>{{ webhookResults.message }}</span>
+            </div>
           </div>
         </div>
       </form>
 
       <div class="step-actions">
-        <button class="btn btn-secondary" (click)="previousStep()">
+        <button mat-button color="primary" (click)="previousStep()">
+          <mat-icon>arrow_back</mat-icon>
           Back
         </button>
-        <button class="btn btn-primary" (click)="nextStep()">
-          Continue
+        <button mat-raised-button color="primary" [disabled]="!publishForm.valid || !webhookResults?.success"
+          (click)="nextStep()">
+          <mat-icon>arrow_forward</mat-icon>
+          Continue to Testing
         </button>
       </div>
     </div>
 
     <!-- Step 3: Bot Testing -->
-    <div *ngIf="currentStep === 3" class="step-content">
-      <h3 class="step-title">Bot WhatsApp Demo</h3>
-      
-      <div class="demo-section">
-        <div class="demo-instructions">
-          <ul>
-            <li *ngFor="let instruction of demoInstructions">
-              {{ instruction }}
-            </li>
-          </ul>
-        </div>
+    <div id="stepContent3" class="step-content fade-in" *ngIf="currentStep === 3">
+      <div class="step-header">
+        <h3 class="step-title">Test Your Bot Configuration</h3>
+        <p class="step-description">
+          Verify that your bot can connect to WhatsApp and test its functionality.
+        </p>
+      </div>
+
+      <!-- API Connection Test -->
+      <div class="test-section">
+        <h4 class="section-title">
+          <mat-icon>api</mat-icon>
+          API Connection Test
+        </h4>
 
         <div class="test-actions">
-          <button class="btn btn-whatsapp" 
-                  (click)="openWhatsAppTest()"
-                  [disabled]="testingInProgress">
-            <i class="fab fa-whatsapp"></i>
-            Test now on WhatsApp
+          <button mat-raised-button color="primary" [disabled]="testingInProgress" (click)="testBot()">
+            <mat-icon>{{ testingInProgress ? 'hourglass_empty' : 'play_arrow' }}</mat-icon>
+            {{ testingInProgress ? 'Testing...' : 'Test API Connection' }}
           </button>
-          
-          <button class="btn btn-primary" 
-                  (click)="testBot()"
-                  [disabled]="testingInProgress">
-            <span *ngIf="testingInProgress">
-              <i class="fas fa-spinner fa-spin"></i> Testing...
-            </span>
-            <span *ngIf="!testingInProgress">
-              Run API Test
-            </span>
+
+          <button mat-button color="primary" [disabled]="!testResults?.success" (click)="sendTestMessage()">
+            <mat-icon>send</mat-icon>
+            Send Test Message
           </button>
         </div>
 
         <!-- Test Results -->
-        <div *ngIf="testResults" class="test-results">
+        <div class="test-results" *ngIf="testResults">
           <div class="result-card" [class.success]="testResults.success" [class.error]="!testResults.success">
-            <div class="result-icon">
-              <i [class]="testResults.success ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
+            <div class="result-header">
+              <mat-icon>{{ testResults.success ? 'check_circle' : 'error' }}</mat-icon>
+              <h4>{{ testResults.success ? 'API Test Successful!' : 'API Test Failed' }}</h4>
             </div>
             <div class="result-content">
-              <h4>{{ testResults.success ? 'Test Successful!' : 'Test Failed!' }}</h4>
               <p>{{ testResults.message }}</p>
-              <div *ngIf="testResults.success" class="result-details">
-                <span>Response Time: {{ testResults.responseTime }}</span>
-                <span>Status: {{ testResults.status }}</span>
+              <div class="result-details" *ngIf="testResults.details">
+                <div class="detail-item">
+                  <span class="label">Response Time:</span>
+                  <span class="value">{{ testResults.responseTime }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Status:</span>
+                  <span class="value">{{ testResults.status }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Account:</span>
+                  <span class="value">{{ testResults.details.accountName }}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- WhatsApp Demo Test -->
+      <div class="demo-section">
+        <h4 class="section-title">
+          <mat-icon>chat</mat-icon>
+          WhatsApp Demo Test
+        </h4>
+
+        <div class="demo-instructions">
+          <p class="demo-intro">
+            Test your bot directly on WhatsApp before going live:
+          </p>
+          <ol class="instruction-list">
+            <li>Click "Test on WhatsApp" button below</li>
+            <li>WhatsApp Web will open automatically</li>
+            <li>Login to your WhatsApp account when prompted</li>
+            <li>You will be redirected to a test conversation</li>
+            <li>Start chatting to test your bot functionality</li>
+            <li>Type "Exit Test" to end the testing session</li>
+          </ol>
+        </div>
+
+        <div class="demo-actions">
+          <button mat-raised-button color="primary" (click)="openWhatsAppTest()">
+            <mat-icon>launch</mat-icon>
+            <i class="fab fa-whatsapp"></i>
+            Test on WhatsApp
+          </button>
+
+          <button mat-button color="primary" (click)="openDirectWhatsApp()">
+            <i class="fab fa-whatsapp"></i>
+            Open WhatsApp App
+          </button>
+
+          <div class="demo-info">
+            <span class="demo-number">Demo Number: +923313014733</span>
+            <span class="demo-bot-id">Your Bot ID: {{ botId }}</span>
+          </div>
+        </div>
+
+        <!-- Chat Preview -->
+        <div class="whatsapp-chat-preview" *ngIf="botStatus?.messagesSent || botStatus?.messagesReceived">
+          <div class="chat-message user">
+            <div class="message-bubble">
+              Hi, I want to test bot ID: {{ botId }}
+              <div class="message-time">{{ botStatus?.lastSeen | date:'shortTime' }}</div>
+            </div>
+          </div>
+          <div class="chat-message bot">
+            <div class="message-bubble">
+              Welcome! I'm {{ publishForm.get('botName')?.value }}. Hello! Welcome to our chatbot. How can I help you
+              today?
+              <div class="message-time">{{ botStatus?.lastSeen | date:'shortTime' }}</div>
+            </div>
+          </div>
+          <div class="chat-message bot">
+            <div class="message-bubble">
+              I can help you with:<br>
+              1. Product Information<br>
+              2. Support<br>
+              3. Pricing<br>
+              4. General Questions
+              <div class="message-time">{{ botStatus?.lastSeen | date:'shortTime' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="step-actions">
-        <button class="btn btn-secondary" (click)="previousStep()">
+        <button mat-button color="primary" (click)="previousStep()">
+          <mat-icon>arrow_back</mat-icon>
           Back
         </button>
-        <button class="btn btn-primary" 
-                (click)="nextStep()"
-                [disabled]="!testResults?.success">
-          Continue to Publish
+        <button mat-raised-button color="primary" [disabled]="!testResults?.success" (click)="nextStep()">
+          <mat-icon>rocket_launch</mat-icon>
+          Ready to Publish
         </button>
       </div>
     </div>
 
     <!-- Step 4: Publish -->
-    <div *ngIf="currentStep === 4" class="step-content">
-      <h3 class="step-title">Ready to Publish</h3>
+   <div id="stepContent4" class="step-content fade-in" *ngIf="currentStep === Step.Publish">
+  <div class="step-header">
+    <h3 class="step-title">Ready to Publish Your Bot</h3>
+    <p class="step-description">
+      Review your configuration and publish your bot to WhatsApp Business.
+    </p>
+  </div>
+  
+  <!-- Configuration Summary -->
+  <div class="publish-summary">
+    <mat-card class="summary-card">
+      <h4 class="summary-title">
+        <mat-icon>summarize</mat-icon>
+        Bot Configuration Summary
+      </h4>
       
-      <div class="publish-summary">
-        <div class="summary-card">
-          <h4>Bot Configuration Summary</h4>
-          <div class="summary-item">
-            <span class="label">Bot ID:</span>
-            <span class="value">{{ botConfig.botId }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">Bot Name:</span>
-            <span class="value">{{ publishForm.value.botName || 'Not set' }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">Phone Number:</span>
-            <span class="value">{{ publishForm.value.phoneNumber || 'Not set' }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">API Type:</span>
-            <span class="value">{{ selectedApi === 'meta-cloud' ? 'Meta Cloud API' : 'D360 API' }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">Test Status:</span>
-            <span class="value" [class.success]="testResults?.success">
-              {{ testResults?.success ? 'Passed' : 'Not tested' }}
-            </span>
-          </div>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span class="label">Bot ID:</span>
+          <span class="value">{{ botId }}</span>
         </div>
-
-        <div class="publish-actions">
-          <button class="btn btn-success btn-large" 
-                  (click)="publishBot()"
-                  [disabled]="publishingInProgress || publishForm.invalid">
-            <span *ngIf="publishingInProgress">
-              <i class="fas fa-spinner fa-spin"></i> Publishing...
-            </span>
-            <span *ngIf="!publishingInProgress">
-              <i class="fas fa-rocket"></i> Publish Bot to WhatsApp
-            </span>
-          </button>
+        <div class="summary-item">
+          <span class="label">Bot Name:</span>
+          <span class="value">{{ publishForm.get('botName')?.value }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Phone Number:</span>
+          <span class="value">{{ publishForm.get('phoneNumber')?.value }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">API Provider:</span>
+          <span class="value">{{ selectedApi === 'meta-cloud' ? 'Meta Cloud API' : 'D360 API' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Webhook URL:</span>
+          <span class="value webhook-url">{{ publishForm.get('webhookUrl')?.value }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">API Test:</span>
+          <span class="value" [class.error]="!testResults?.success">
+            <mat-icon>{{ testResults?.success ? 'check_circle' : 'error' }}</mat-icon>
+            {{ testResults?.success ? 'Tested Successfully' : 'Not tested' }}
+          </span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Webhook Validation:</span>
+          <span class="value" [class.error]="!webhookResults?.success">
+            <mat-icon>{{ webhookResults?.success ? 'check_circle' : 'error' }}</mat-icon>
+            {{ webhookResults?.success ? 'Validated' : 'Not validated' }}
+          </span>
         </div>
       </div>
+    </mat-card>
 
-      <div class="step-actions">
-        <button class="btn btn-secondary" (click)="previousStep()">
-          Back
+    <!-- Pre-publish Checklist -->
+    <mat-card class="checklist-card">
+      <h4 class="checklist-title">
+        <mat-icon>checklist</mat-icon>
+        Pre-publish Checklist
+      </h4>
+      
+      <div class="checklist-items">
+        <div class="checklist-item" [class.completed]="selectedApi">
+          <mat-icon>{{ selectedApi ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+          <span>API provider selected</span>
+        </div>
+        <div class="checklist-item" [class.completed]="publishForm.valid">
+          <mat-icon>{{ publishForm.valid ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+          <span>All required fields completed</span>
+        </div>
+        <div class="checklist-item" [class.completed]="webhookResults?.success">
+          <mat-icon>{{ webhookResults?.success ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+          <span>Webhook endpoint validated</span>
+        </div>
+        <div class="checklist-item" [class.completed]="testResults?.success">
+          <mat-icon>{{ testResults?.success ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+          <span>API connection tested successfully</span>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Publish Actions -->
+  <div class="publish-actions">
+    <div class="action-buttons">
+      <button mat-raised-button color="primary" [disabled]="!canPublish() || publishingInProgress" (click)="publishBot()">
+        <mat-icon>{{ publishingInProgress ? 'hourglass_empty' : 'rocket_launch' }}</mat-icon>
+        {{ publishingInProgress ? 'Publishing...' : 'Publish Bot to WhatsApp' }}
+      </button>
+
+      <button mat-button color="primary" (click)="exportConfiguration()">
+        <mat-icon>download</mat-icon>
+        Export Configuration
+      </button>
+    </div>
+
+    <!-- Import Configuration -->
+    <div class="import-section">
+      <label for="importConfig" class="btn btn-secondary">
+        <mat-icon>upload</mat-icon>
+        Import Configuration
+      </label>
+      <input type="file" id="importConfig" accept=".json" (change)="importConfiguration($event)" style="display: none;">
+    </div>
+  </div>
+
+  <!-- Post-publish Information -->
+  <div class="post-publish-info" *ngIf="isPublished">
+  <div class="success-message">
+    <mat-icon>celebration</mat-icon>
+    <h4>Congratulations! Your bot is now live on WhatsApp!</h4>
+    <p>Published on: {{ publishResult?.publishedAt | date:'medium' }}</p>
+    <p *ngIf="publishResult?.whatsappTestUrl">
+      Test your bot: <a [href]="publishResult?.whatsappTestUrl" target="_blank">Open WhatsApp Test</a>
+    </p>
+  </div>
+
+    <!-- Bot Management -->
+    <div class="bot-management">
+      <h5>Bot Management</h5>
+      <div class="management-actions">
+        <button mat-button color="primary" (click)="refreshBotStatus()">
+          <mat-icon>refresh</mat-icon>
+          Refresh Status
+        </button>
+        <button mat-button color="warn" (click)="unpublishBot()">
+          <mat-icon>stop</mat-icon>
+          Unpublish Bot
         </button>
       </div>
     </div>
+
+    <!-- Next Steps -->
+    <div class="next-steps">
+      <h5>Next Steps</h5>
+      <ul>
+        <li>Monitor your bot's performance in the dashboard</li>
+        <li>Test all conversation flows thoroughly</li>
+        <li>Set up analytics and reporting</li>
+        <li>Configure advanced features like templates</li>
+        <li>Train your support team on bot management</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step-actions">
+    <button mat-button color="primary" (click)="previousStep()">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+    
+    <button mat-raised-button color="primary" *ngIf="isPublished">
+      <mat-icon>dashboard</mat-icon>
+      Go to Dashboard
+    </button>
+    <div class="chat-toggle" *ngIf="currentStep >= Step.TestBot">
+      <button mat-fab color="primary" (click)="toggleChat()" [disabled]="!testResults?.success">
+        <mat-icon>chat</mat-icon>
+      </button>
+      <app-botsify-chat *ngIf="showChat" [botId]="botId" (close)="onChatClose()"></app-botsify-chat>
+    </div>
   </div>
 </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="publishingInProgress || testingInProgress || webhookValidating">
+    <div class="loading-content">
+      <div class="spinner">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+      <h4>Processing...</h4>
+      <p>Please wait while we set up your bot</p>
+    </div>
+  </div>
+
+  
