@@ -1,0 +1,250 @@
+syntax = "proto3";
+
+package models;
+
+// ===== ENUMS =====
+enum BlockType {
+  BLOCK_TYPE_UNSPECIFIED = 0;
+  BLOCK_TYPE_TEXT_RESPONSE = 1;
+  BLOCK_TYPE_USER_INPUT = 2;
+  BLOCK_TYPE_TYPING_DELAY = 3;
+  BLOCK_TYPE_CONVERSATIONAL_FORM = 4;
+  BLOCK_TYPE_MEDIA_BLOCK = 5;
+  BLOCK_TYPE_LINK_STORY = 6;
+  BLOCK_TYPE_JSON_API = 7;
+}
+
+enum BlockStatus {
+  BLOCK_STATUS_UNSPECIFIED = 0;
+  BLOCK_STATUS_ACTIVE = 1;
+  BLOCK_STATUS_ERROR = 2;
+  BLOCK_STATUS_NEW = 3;
+  BLOCK_STATUS_DISABLED = 4;
+  BLOCK_STATUS_NORMAL = 5;
+}
+
+enum MediaType {
+  MEDIA_TYPE_UNSPECIFIED = 0;
+  MEDIA_TYPE_TEXT = 1;
+  MEDIA_TYPE_IMAGE = 2;
+  MEDIA_TYPE_VIDEO = 3;
+  MEDIA_TYPE_FILE = 4;
+  MEDIA_TYPE_IMAGE_SLIDER = 5;
+  MEDIA_TYPE_AUDIO = 6;
+}
+
+enum ButtonType {
+  BUTTON_TYPE_UNSPECIFIED = 0;
+  BUTTON_TYPE_TEXT_MESSAGE = 1;
+  BUTTON_TYPE_MEDIA_BLOCK = 2;
+  BUTTON_TYPE_WEBSITE_URL = 3;
+  BUTTON_TYPE_DIRECT_CALL = 4;
+  BUTTON_TYPE_START_STORY = 5;
+  BUTTON_TYPE_RSS_FEED = 6;
+  BUTTON_TYPE_JSON_API = 7;
+  BUTTON_TYPE_HUMAN_HELP = 8;
+  BUTTON_TYPE_CONVERSATIONAL_FORM = 9;
+}
+
+enum JsonApiMethod {
+  JSON_API_METHOD_UNSPECIFIED = 0;
+  JSON_API_METHOD_GET = 1;
+  JSON_API_METHOD_POST = 2;
+}
+
+enum RequestType {
+  REQUEST_TYPE_UNSPECIFIED = 0;
+  REQUEST_TYPE_GET = 1;
+  REQUEST_TYPE_POST = 2;
+  REQUEST_TYPE_PUT = 3;
+  REQUEST_TYPE_DELETE = 4;
+  REQUEST_TYPE_PATCH = 5;
+}
+
+enum SuccessResponseType {
+  SUCCESS_RESPONSE_TYPE_UNSPECIFIED = 0;
+  SUCCESS_RESPONSE_TYPE_TEXT_MESSAGE = 1;
+  SUCCESS_RESPONSE_TYPE_STORY = 2;
+}
+
+// ===== COMMON TYPES =====
+message ApiHeader {
+  string key = 1;
+  string value = 2;
+}
+
+message Position {
+  double x = 1;
+  double y = 2;
+}
+
+message Connections {
+  repeated string input = 1;
+  repeated string output = 2;
+}
+
+message ImageSlide {
+  string url = 1;
+  string title = 2;
+  string description = 3;
+}
+
+message QuickReply {
+  string title = 1;
+  string payload = 2;
+}
+
+message FormField {
+  string name = 1;
+  string type = 2;
+  bool required = 3;
+  string promptPhrase = 4;
+  repeated string options = 5;
+  string optionsText = 6;
+
+  message Validation {
+    int32 minLength = 1;
+    int32 maxLength = 2;
+    string pattern = 3;
+    double min = 4;
+    double max = 5;
+  }
+
+  Validation validation = 7;
+}
+
+message Button {
+  string id = 1;
+  string title = 2;
+  ButtonType type = 3;
+  string value = 4;
+  string textMessage = 5;
+  string linkedMediaId = 6;
+  string url = 7;
+  string phoneNumber = 8;
+  string storyId = 9;
+  string rssUrl = 10;
+  int32 rssItemCount = 11;
+  string rssButtonText = 12;
+  string jsonApiUrl = 13;
+  JsonApiMethod jsonApiMethod = 14;
+  string jsonApiHeaders = 15;
+  string jsonApiBody = 16;
+  string apiEndpoint = 17;
+  RequestType requestType = 18;
+  repeated ApiHeader apiHeaders = 19;
+  string messageAfterAction = 20;
+  string emailForNotification = 21;
+  bool stopBotForUser = 22;
+  string formId = 23;
+  bool showInline = 24;
+}
+
+// ===== BASE BLOCK =====
+message BaseBlock {
+  string id = 1;
+  string name = 2;
+  string icon = 3;
+  BlockType type = 4;
+  BlockStatus status = 5;
+  double x = 6;
+  double y = 7;
+  double width = 8;
+  double height = 9;
+  string description = 10;
+  string createdAt = 11;
+  string updatedAt = 12;
+  Position position = 13;
+  Connections connections = 14;
+  bool isInitializing = 15;
+}
+
+// ===== BLOCK VARIANTS =====
+message TextResponseBlock {
+  string content = 1;
+  repeated string alternateResponses = 2;
+  repeated QuickReply quickReplies = 3;
+}
+
+message UserInputBlock {
+  string subType = 1;
+  repeated string keywords = 2;
+  repeated KeywordGroup keywordGroups = 3;
+  string phraseText = 4;
+  string customMessage = 5;
+  string datastoreVariable = 6;
+
+  message KeywordGroup {
+    repeated string items = 1;
+  }
+}
+
+message TypingDelayBlock {
+  double delaySeconds = 1;
+}
+
+message ConversationalFormBlock {
+  string formId = 1;
+  string formName = 2;
+  string webhookUrl = 3;
+  bool sendEmailNotification = 4;
+  string notificationEmail = 5;
+  repeated FormField formFields = 6;
+  bool showAsInlineForm = 7;
+  bool renderFormResponses = 8;
+  bool allowMultipleSubmission = 9;
+  string multipleSubmissionMessage = 10;
+  bool allowExitForm = 11;
+  string exitFormMessage = 12;
+  SuccessResponseType successResponseType = 13;
+  string successRedirectStoryId = 14;
+  bool validateEmail = 15;
+  bool validatePhone = 16;
+  bool spamProtection = 17;
+  bool requireCompletion = 18;
+  string successMessage = 19;
+  string redirectUrl = 20;
+}
+
+message MediaBlock {
+  string mediaId = 1;
+  MediaType mediaType = 2;
+  string singleImageUrl = 3;
+  string videoUrl = 4;
+  string audioUrl = 5;
+  string fileUrl = 6;
+  repeated ImageSlide slides = 7;
+  string mediaName = 8;
+  string buttonTitle = 9;
+  string buttonTextMessage = 10;
+  ButtonType buttonType = 11;
+  string buttonLinkedMediaId = 12;
+  string buttonUrl = 13;
+  repeated Button buttons = 14;
+}
+
+message LinkStoryBlock {
+  string linkStoryId = 1;
+  string linkStoryName = 2;
+}
+
+message JsonApiBlock {
+  string apiEndpoint = 1;
+  RequestType requestType = 2;
+  repeated ApiHeader apiHeaders = 3;
+}
+
+// ===== MASTER BLOCK =====
+message Block {
+  BaseBlock base = 1;
+
+  oneof block_content {
+    TextResponseBlock textResponse = 2;
+    UserInputBlock userInput = 3;
+    TypingDelayBlock typingDelay = 4;
+    ConversationalFormBlock conversationalForm = 5;
+    MediaBlock mediaBlock = 6;
+    LinkStoryBlock linkStory = 7;
+    JsonApiBlock jsonApi = 8;
+  }
+}
