@@ -39,18 +39,24 @@ export class JsPlumbFlowService {
     this.instance = jsPlumb.getInstance({
       Container: containerEl,
       // ConnectionOverlays: [['Arrow', { location: 1, id: 'arrow', length: 10, width: 10 }]],
-      PaintStyle: { 
-        stroke: '#95a5a6', 
-        strokeWidth: 2 
+      PaintStyle: {
+        stroke: '#95a5a6',
+        strokeWidth: 2,
+        
       },
       HoverPaintStyle: { stroke: '#7c3aed', strokeWidth: 3 },
       Endpoint: 'Blank',
 
-      EndpointStyle: { 
+      EndpointStyle: {
         fill: '#4f46e5',
       },
       EndpointHoverStyle: { fill: '#7c3aed' },
-      Connector:'Straight'
+      
+      // *** MODIFIED CONNECTOR ***
+      // Using 'stub' creates a main line of a fixed length (e.g., 30px) before
+      // it branches out to connect to the target elements. This creates the
+      // clean, rectangular branching effect seen in the diagram.
+      Connector: ['Flowchart', { stub: 50,  cornerRadius: 5 }]
     });
 
     this.instance.bind('connection', (info: any) => {
@@ -70,8 +76,6 @@ export class JsPlumbFlowService {
       };
       this.connectionDeleted.emit(detachedConnectionInfo);
     });
-
-    // Removed click to delete with confirm()
   }
 
   setupBlock(blockId: string): void {
@@ -82,15 +86,27 @@ export class JsPlumbFlowService {
     this.instance.addEndpoint(blockElement, { anchor: 'Bottom', isSource: true, maxConnections: -1, uuid: `${blockId}-source` });
     this.instance.addEndpoint(blockElement, { anchor: 'Top', isTarget: true, maxConnections: -1, uuid: `${blockId}-target` });
 
-    this.instance.draggable(blockElement, {
-      start: (event: any) => {
-        this.blockDragStarted.emit({ blockId: blockId.replace('block-', ''), element: event.el });
-      },
-      stop: (event: any) => {
-        this.blockMoved.emit({ blockId: blockId.replace('block-', ''), x: event.pos[0], y: event.pos[1] });
-        this.blockDragEnded.emit({ blockId: blockId.replace('block-', ''), element: event.el });
-      }
-    });
+    // For synthetic quick-reply visuals, keep them static (non-draggable)
+    // but still allow connection anchors so we can draw visual lines.
+    const isQuickReplySynthetic = blockId.includes('-qr');
+    const isNoQuickReplySynthetic = blockId.includes('-noqr');
+    const isSyntheticChild = isQuickReplySynthetic || isNoQuickReplySynthetic;
+
+    if (!isSyntheticChild) {
+      this.instance.draggable(blockElement, {
+        start: (event: any) => {
+          this.blockDragStarted.emit({ blockId: blockId.replace('block-', ''), element: event.el });
+        },
+        stop: (event: any) => {
+          this.blockMoved.emit({ blockId: blockId.replace('block-', ''), x: event.pos[0], y: event.pos[1] });
+          this.blockDragEnded.emit({ blockId: blockId.replace('block-', ''), element: event.el });
+        }
+      });
+    } else {
+      // For synthetic blocks, ensure they have proper connection endpoints
+      // but don't make them draggable - they're part of the visual flow
+      console.log(`Setup synthetic block endpoints for: ${blockId}`);
+    }
   }
 
   removeBlock(blockId: string): void {
@@ -110,9 +126,11 @@ export class JsPlumbFlowService {
     const existing = this.instance.getConnections({ source: sourceBlockId, target: targetBlockId });
     if (existing.length > 0) { return null; }
     const conn = this.instance.connect({
-      source: sourceBlockId,
-      target: targetBlockId,
-      anchor: ['Bottom', 'Top'],
+      uuids: [`${sourceBlockId}-source`, `${targetBlockId}-target`],
+      // Using the specific endpoint UUIDs is more reliable than general anchors here.
+      // source: sourceBlockId,
+      // target: targetBlockId,
+      // anchor: ['Bottom', 'Top'],
     });
     // After connecting, ensure jsPlumb computes offsets immediately
     this.instance.revalidate(sourceBlockId);
