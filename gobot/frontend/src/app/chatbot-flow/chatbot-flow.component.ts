@@ -523,7 +523,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  @HostListener('wheel', ['$event']) onWheel(event: WheelEvent) {
+   onWheel(event: WheelEvent) {
     event.preventDefault(); 
     if (event.ctrlKey) {
       const delta = event.deltaY > 0 ? -this.zoomStep : this.zoomStep;
@@ -592,6 +592,11 @@ duplicateCanvasBlock(block: ChatbotBlock) {
       setTimeout(() => {
         this.updateBlockDimensions(updatedBlock);
         this.jsPlumbFlowService.repaintAllConnections();
+        // Intialize quick-reply visual connections whne quick replies are present
+        // Initialize quick-reply visual connections when quick replies are present
+        if (updatedBlock.type === 'textResponse' && updatedBlock.quickReplies && updatedBlock.quickReplies.length > 0) {
+          this.initializeQuickReplyConnections(updatedBlock);
+        }
       }, 80);
     }
   }
@@ -704,6 +709,11 @@ saveFlow() {
     this.rightSidebarOpen = true;
     requestAnimationFrame(() => this.jsPlumbFlowService.repaintAllConnections());
     setTimeout(() => this.jsPlumbFlowService.repaintAllConnections(), 320);
+    // Also ensure quick reply connections appear for text responses
+   // Also ensure quick reply connections appear for text responses
+    if (block.type === 'textResponse' && block.quickReplies && block.quickReplies.length > 0) {
+      setTimeout(() => this.initializeQuickReplyConnections(block), 50);
+    }
   }
   
   closeSidebar() { 
@@ -719,6 +729,63 @@ saveFlow() {
 
   getStatusColor(status: string): string { return '#4CAF50'; }
   getTypeColor(type: string): string { return '#F5F5F5'; }
+
+    // Create visual jsPlumb connections for quick-reply synthetic child blocks
+  private initializeQuickReplyConnections(parent: ChatbotBlock): void {
+    const parentId = `block-${parent.id}`;
+    const noQrId = `block-${parent.id}-noqr`;
+    const qrId = `block-${parent.id}-qr`;
+
+    // Ensure DOM elements exist before setup
+    const ensureEl = (id: string) => !!document.getElementById(id);
+    if (!ensureEl(noQrId) || !ensureEl(qrId)) { return; }
+
+    this.jsPlumbFlowService.setupBlock(noQrId);
+    this.jsPlumbFlowService.setupBlock(qrId);
+    
+    // Connect parent to the flow branches
+    this.jsPlumbFlowService.connectBlocks(parentId, noQrId);
+    this.jsPlumbFlowService.connectBlocks(parentId, qrId);
+
+    // Individual quick replies
+    const replies = parent.quickReplies || [];
+    replies.forEach((_, idx) => {
+      const replyId = `block-${parent.id}-qr-${idx}`;
+      if (ensureEl(replyId)) {
+        this.jsPlumbFlowService.setupBlock(replyId);
+        // Connect Quick Replies container to each individual quick reply
+        this.jsPlumbFlowService.connectBlocks(qrId, replyId);
+      }
+    });
+
+    // Repaint after creating connections
+    this.jsPlumbFlowService.repaintAllConnections();
+    
+    // Force change detection to ensure connection lines are rendered
+    setTimeout(() => {
+      this.cdr.detectChanges();
+    }, 100);
+  }
+
+  // Handle connections from quick reply endpoints to other components
+  onQuickReplyConnection(sourceBlockId: string, targetBlockId: string): void {
+    // This will be called when user connects from a quick reply endpoint to another component
+    console.log(`Quick reply connection: ${sourceBlockId} -> ${targetBlockId}`);
+    // The connection is already established by jsPlumb, just log for now
+  }
+
+  // Handle start connection events from quick reply endpoints
+  onQuickReplyStartConnection(connectionInfo: {event: MouseEvent, type: string}): void {
+    const { event, type } = connectionInfo;
+    const parentBlockId = event.target ? (event.target as HTMLElement).closest('.quick-reply-cards-wrapper')?.getAttribute('data-parent-id') : null;
+    
+    if (parentBlockId) {
+      console.log(`Starting connection from quick reply endpoint: ${type} of parent ${parentBlockId}`);
+      // This will allow jsPlumb to handle the connection from the quick reply endpoint
+      // The endpoint is already set up with jsPlumb, so dragging from it will work
+    }
+  }
+
 
 // Add these two new functions to your component class
 

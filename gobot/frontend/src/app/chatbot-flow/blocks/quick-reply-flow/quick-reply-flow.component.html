@@ -1,1 +1,54 @@
-<p>quick-reply-flow works!</p>
+<div class="quick-reply-flow-container">
+  <!-- Main flow structure with connection lines -->
+  
+  <!-- Top level: No Quick Reply and Quick Replies blocks -->
+  <div class="top-level-blocks">
+    <!-- No Quick Reply Block -->
+    <div class="flow-block no-quick-reply-block" [attr.id]="'block-' + parentBlockId + '-noqr'">
+      <div class="block-header">
+        <mat-icon class="block-icon">block</mat-icon>
+        <span class="block-title">No Quick Reply</span>
+      </div>
+      <div class="block-body">
+        <p class="block-description">Continue without using quick reply modules from the user input</p>
+      </div>
+      <div class="connection-point output-point">
+        <div class="connection-dot"></div>
+      </div>
+    </div>
+
+    <!-- Quick Replies Main Block -->
+    <div class="flow-block quick-replies-main-block" [attr.id]="'block-' + parentBlockId + '-qr'">
+      <div class="block-header">
+        <mat-icon class="block-icon">forum</mat-icon>
+        <span class="block-title">Quick Replies</span>
+      </div>
+      <div class="block-body">
+        <p class="block-description">Simple buttons to carry forward the user conversation to a desired path</p>
+      </div>
+      <div class="connection-point output-point">
+        <div class="connection-dot"></div>
+      </div>
+    </div>
+  </div>
+
+ 
+
+  <!-- Individual Quick Reply Cards -->
+  <div class="individual-quick-replies" *ngIf="quickReplies && quickReplies.length > 0">
+    <div class="quick-reply-cards-row">
+      <div *ngFor="let reply of quickReplies; let i = index" 
+           class="individual-quick-reply-card" 
+           [attr.id]="'block-' + parentBlockId + '-qr-' + i">
+        <div class="quick-reply-card-header">
+          <mat-icon class="quick-reply-icon">chat_bubble</mat-icon>
+          <span class="quick-reply-label">QUICK REPLY:</span>
+          <span class="quick-reply-text">{{ reply.text }}</span>
+        </div>
+        <div class="connection-point output-point">
+          <div class="connection-dot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

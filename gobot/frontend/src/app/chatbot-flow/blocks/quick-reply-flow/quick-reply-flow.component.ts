@@ -8,60 +8,7 @@ import { QuickReply } from '../../../models/chatbot-block.model';
   selector: 'app-quick-reply-flow',
   standalone: true,
   imports: [CommonModule, MatIconModule],
-  template: `
-    <!-- Connection line from parent block -->
-    <div class="connection-line-from-parent"></div>
-
-    <!-- No Quick Reply and Quick Replies container blocks -->
-    <div class="quick-replies-flow-container">
-      <!-- Left side: No Quick Reply block -->
-      <div class="no-quick-reply-block">
-        <div class="flow-block-header">
-          <mat-icon class="block-icon">block</mat-icon>
-          <span class="block-title">No Quick Reply</span>
-        </div>
-        <div class="flow-block-body">
-          <p class="block-description">Continue without using quick reply modules from the user input</p>
-        </div>
-        <div class="connection-point connection-output">
-          <div class="connection-dot"></div>
-        </div>
-      </div>
-
-      <!-- Right side: Quick Replies block -->
-      <div class="quick-replies-main-block">
-        <div class="flow-block-header">
-          <mat-icon class="block-icon">forum</mat-icon>
-          <span class="block-title">Quick Replies</span>
-        </div>
-        <div class="flow-block-body">
-          <p class="block-description">Simple buttons to carry forward the user conversation to a desired path</p>
-        </div>
-        <div class="connection-point connection-output">
-          <div class="connection-dot"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Connection line to individual quick reply cards -->
-    <div class="connection-line-to-individual-replies"></div>
-
-    <!-- Individual Quick Reply Cards -->
-    <div class="individual-quick-replies">
-      <div class="quick-reply-cards-row">
-        <div *ngFor="let reply of quickReplies; let i = index" class="individual-quick-reply-card">
-          <div class="quick-reply-card-header">
-            <mat-icon class="quick-reply-icon">chat_bubble</mat-icon>
-            <span class="quick-reply-label">Quick Reply:</span>
-            <span class="quick-reply-status">{{ reply.text }}</span>
-          </div>
-          <div class="connection-point connection-output">
-            <div class="connection-dot"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './quick-reply-flow.component.html',
   styleUrls: ['./quick-reply-flow.component.scss']
 })
 export class QuickReplyFlowComponent {
@@ -73,10 +20,40 @@ export class QuickReplyFlowComponent {
     quickReply: QuickReply
   }>();
   
+  @Output() startConnection = new EventEmitter<{event: MouseEvent, type: string}>();
+  
   onQuickReplyClick(quickReply: QuickReply) {
     this.quickReplySelected.emit({
       parentBlockId: this.parentBlockId,
       quickReply: quickReply
     });
+  }
+
+  onStartConnection(event: MouseEvent, type: string) {
+    this.startConnection.emit({event, type});
+  }
+
+  getConnectionLinePosition(index: number): { left: number, width: number } {
+    // Calculate position for connection lines from Quick Replies block to individual cards
+    const cardWidth = 180; // Width of each quick reply card
+    const gap = 20; // Gap between cards
+    const totalWidth = this.quickReplies.length * cardWidth + (this.quickReplies.length - 1) * gap;
+    
+    // Center the cards under the Quick Replies block
+    const containerWidth = 800; // Total width of the flow container
+    const startLeft = (containerWidth - totalWidth) / 2;
+    
+    const cardLeft = startLeft + index * (cardWidth + gap);
+    const quickRepliesBlockCenter = containerWidth / 2; // Center of the Quick Replies block
+    
+    // Calculate the actual width needed for the connection line
+    const cardCenter = cardLeft + cardWidth / 2;
+    const lineWidth = Math.abs(cardCenter - quickRepliesBlockCenter);
+    
+    // Always start from the Quick Replies block center
+    return {
+      left: quickRepliesBlockCenter,
+      width: lineWidth
+    };
   }
 }

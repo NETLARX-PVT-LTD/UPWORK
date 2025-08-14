@@ -2,117 +2,178 @@
 
 :host {
   display: block;
-  margin: 20px 0;
-}
-
-// Connection line from parent block
-.connection-line-from-parent {
-  width: 2px;
-  height: 30px;
-  background: #d1d5db;
-  margin: 0 auto;
   position: relative;
+  width: 100%;
 }
 
-// Quick Replies Flow Container (No Quick Reply + Quick Replies blocks)
-.quick-replies-flow-container {
+.quick-reply-flow-container {
+  position: relative;
+  width: 100%;
+  padding: 20px 0;
+  min-height: 300px; // Ensure enough space for the flow
+}
+
+// Top level blocks container
+.top-level-blocks {
   display: flex;
   gap: 40px;
-  margin-bottom: 20px;
   justify-content: center;
-
-  .no-quick-reply-block,
-  .quick-replies-main-block {
-    background: #ffffff;
-    border: 2px solid #e1e5e9;
-    border-radius: 12px;
-    padding: 16px;
-    width: 200px;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-    .flow-block-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-
-      .block-icon {
-        font-size: 18px;
-        color: #3b82f6;
-      }
-
-      .block-title {
-        font-weight: 600;
-        color: #1f2937;
-        font-size: 14px;
-      }
-    }
-
-    .flow-block-body {
-      .block-description {
-        font-size: 12px;
-        color: #6b7280;
-        line-height: 1.4;
-      }
-    }
-
-    .connection-point {
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      .connection-dot {
-        width: 8px;
-        height: 8px;
-        background: #3b82f6;
-        border-radius: 50%;
-        border: 2px solid #ffffff;
-      }
-    }
-  }
-
-  .no-quick-reply-block {
-    background: #fef3e2;
-    border-color: #f59e0b;
-
-    .flow-block-header .block-icon {
-      color: #f59e0b;
-    }
-  }
-
-  .quick-replies-main-block {
-    background: #e0f2fe;
-    border-color: #0ea5e9;
-
-    .flow-block-header .block-icon {
-      color: #0ea5e9;
-    }
-  }
-}
-
-// Connection line to individual quick reply cards
-.connection-line-to-individual-replies {
-  width: 2px;
-  height: 30px;
-  background: #d1d5db;
-  margin: 0 auto;
+  margin-bottom: 40px;
   position: relative;
 }
 
-// Individual Quick Reply Cards Row
+// Base flow block styles
+.flow-block {
+  background: #ffffff;
+  border: 2px solid #e1e5e9;
+  border-radius: 12px;
+  padding: 16px;
+  width: 200px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+
+  .block-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+
+    .block-icon {
+      font-size: 18px;
+      color: #3b82f6;
+    }
+
+    .block-title {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 14px;
+    }
+  }
+
+  .block-body {
+    flex: 1;
+    
+    .block-description {
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.4;
+      margin: 0;
+    }
+  }
+
+  .connection-point {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+
+    .connection-dot {
+      width: 8px;
+      height: 8px;
+      background: #3b82f6;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 0 2px #3b82f6;
+    }
+  }
+}
+
+// No Quick Reply block styling
+.no-quick-reply-block {
+  background: #fef3e2;
+  border-color: #f59e0b;
+
+  .block-header .block-icon {
+    color: #f59e0b;
+  }
+
+  .connection-point .connection-dot {
+    background: #f59e0b;
+    box-shadow: 0 0 0 2px #f59e0b;
+  }
+}
+
+// Quick Replies main block styling
+.quick-replies-main-block {
+  background: #e0f2fe;
+  border-color: #0ea5e9;
+
+  .block-header .block-icon {
+    color: #0ea5e9;
+  }
+
+  .connection-point .connection-dot {
+    background: #0ea5e9;
+    box-shadow: 0 0 0 2px #0ea5e9;
+  }
+}
+
+// Connection lines container
+.connection-lines-container {
+  position: absolute;
+  top: 160px; // Position below the top level blocks
+  left: 0;
+  right: 0;
+  height: 40px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+// Individual connection lines
+.connection-line {
+  position: absolute;
+  height: 2px;
+  background: #d1d5db;
+  top: 0;
+  transform-origin: left center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -4px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid #d1d5db;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+}
+
+// Add vertical connection line from parent to Quick Replies block
+.quick-reply-flow-container::before {
+  content: '';
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 30px;
+  background: #d1d5db;
+  z-index: 1;
+}
+
+// Individual Quick Reply Cards
 .individual-quick-replies {
+  margin-top: 60px;
+  position: relative;
+  
   .quick-reply-cards-row {
     display: flex;
     gap: 20px;
     justify-content: center;
     flex-wrap: wrap;
+    position: relative;
 
     .individual-quick-reply-card {
       background: #f3e8ff;
@@ -125,6 +186,9 @@
       box-shadow: 0 2px 8px rgba(168, 85, 247, 0.1);
       cursor: pointer;
       transition: all 0.2s ease;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
 
       &:hover {
         background: #ede9fe;
@@ -137,6 +201,7 @@
         align-items: center;
         gap: 6px;
         flex-wrap: wrap;
+        flex: 1;
 
         .quick-reply-icon {
           color: #a855f7;
@@ -152,7 +217,7 @@
           text-transform: uppercase;
         }
 
-        .quick-reply-status {
+        .quick-reply-text {
           font-size: 12px;
           font-weight: 500;
           color: #1f2937;
@@ -178,6 +243,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        z-index: 10;
 
         .connection-dot {
           width: 8px;
@@ -185,6 +251,7 @@
           background: #a855f7;
           border-radius: 50%;
           border: 2px solid #ffffff;
+          box-shadow: 0 0 0 2px #a855f7;
         }
       }
     }
@@ -193,13 +260,12 @@
 
 // Responsive adjustments
 @media (max-width: 768px) {
-  .quick-replies-flow-container {
+  .top-level-blocks {
     flex-direction: column;
     align-items: center;
     gap: 20px;
 
-    .no-quick-reply-block,
-    .quick-replies-main-block {
+    .flow-block {
       width: 250px;
     }
   }
