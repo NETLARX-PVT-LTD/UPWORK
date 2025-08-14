@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package chatbot;
+
+message FormField {
+  string name = 1;
+  string type = 2;
+  bool required = 3;
+  string promptPhrase = 4;
+  repeated string options = 5;
+  string optionsText = 6;
+
+  message Validation {
+    int32 minLength = 1;
+    int32 maxLength = 2;
+    string pattern = 3;
+    double min = 4;
+    double max = 5;
+  }
+
+  Validation validation = 7;
+}
+
+message ConversationalFormBlock {
+  string type = 1; // "conversationalForm"
+  string formId = 2;
+  string formName = 3;
+  string webhookUrl = 4;
+  bool sendEmailNotification = 5;
+  string notificationEmail = 6;
+  repeated FormField formFields = 7;
+  bool showAsInlineForm = 8;
+  bool renderFormResponses = 9;
+  bool allowMultipleSubmission = 10;
+  string multipleSubmissionMessage = 11;
+  bool allowExitForm = 12;
+  string exitFormMessage = 13;
+  string successResponseType = 14; // "textMessage" | "story"
+  string successRedirectStoryId = 15;
+  bool validateEmail = 16;
+  bool validatePhone = 17;
+  bool spamProtection = 18;
+  bool requireCompletion = 19;
+  string successMessage = 20;
+  string redirectUrl = 21;
+}

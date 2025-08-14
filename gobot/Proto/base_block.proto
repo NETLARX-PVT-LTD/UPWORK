@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package chatbot;
+
+import "google/protobuf/timestamp.proto";
+
+enum BlockStatus {
+  ACTIVE = 0;
+  ERROR = 1;
+  NEW = 2;
+  DISABLED = 3;
+  NORMAL = 4;
+}
+
+enum BlockType {
+  TEXT_RESPONSE = 0;
+  USER_INPUT = 1;
+  TYPING_DELAY = 2;
+  CONVERSATIONAL_FORM = 3;
+  MEDIA_BLOCK = 4;
+  LINK_STORY = 5;
+  JSON_API = 6;
+}
+
+message Position {
+  double x = 1;
+  double y = 2;
+}
+
+message Connections {
+  repeated string input = 1;
+  repeated string output = 2;
+}
+
+message BaseBlock {
+  string id = 1;
+  string name = 2;
+  string icon = 3;
+  BlockType type = 4;
+  BlockStatus status = 5;
+  double x = 6;
+  double y = 7;
+  double width = 8;
+  double height = 9;
+  string description = 10;
+  google.protobuf.Timestamp createdAt = 11;
+  google.protobuf.Timestamp updatedAt = 12;
+  Position position = 13;
+  Connections connections = 14;
+  bool isInitializing = 15;
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package chatbot;
+
+import "button.proto";
+
+message JsonApiBlock {
+  string type = 1; // "jsonApi"
+  string apiEndpoint = 2;
+  string requestType = 3; // "GET", "POST", etc.
+  repeated ApiHeader apiHeaders = 4;
+}

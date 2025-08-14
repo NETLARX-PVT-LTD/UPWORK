@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package chatbot;
+
+enum UserInputSubType {
+  TEXT = 0;
+  NUMBER = 1;
+  EMAIL = 2;
+  PHONE = 3;
+}
+
+message UserInputBlock {
+  string type = 1; // "userInput"
+  UserInputSubType subType = 2;
+  repeated string keywords = 3;
+  repeated repeated string keywordGroups = 4;
+  string phraseText = 5;
+  string customMessage = 6;
+  string datastoreVariable = 7;
+}

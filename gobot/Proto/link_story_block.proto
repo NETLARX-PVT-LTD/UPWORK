@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package chatbot;
+
+message LinkStoryBlock {
+  string type = 1; // "linkStory"
+  string linkStoryId = 2;
+  string linkStoryName = 3;
+}

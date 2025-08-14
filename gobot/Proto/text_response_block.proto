@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package chatbot;
+
+message QuickReply {
+  string title = 1;
+  string value = 2;
+}
+
+message TextResponseBlock {
+  string type = 1; // "textResponse"
+  string content = 2;
+  repeated string alternateResponses = 3;
+  repeated QuickReply quickReplies = 4;
+}
