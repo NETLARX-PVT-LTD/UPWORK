@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package chatbot;
+
+message ApiHeader {
+  string key = 1;
+  string value = 2;
+}
+
+message Button {
+  string id = 1;
+  string title = 2;
+  string type = 3;
+  string value = 4;
+  string textMessage = 5;
+  string linkedMediaId = 6;
+  string url = 7;
+  string phoneNumber = 8;
+  string storyId = 9;
+  string rssUrl = 10;
+  int32 rssItemCount = 11;
+  string rssButtonText = 12;
+  string jsonApiUrl = 13;
+  string jsonApiMethod = 14;
+  string jsonApiHeaders = 15;
+  string jsonApiBody = 16;
+  string apiEndpoint = 17;
+  string requestType = 18;
+  repeated ApiHeader apiHeaders = 19;
+  string messageAfterAction = 20;
+  string emailForNotification = 21;
+  bool stopBotForUser = 22;
+  string formId = 23;
+  bool showInline = 24;
+}

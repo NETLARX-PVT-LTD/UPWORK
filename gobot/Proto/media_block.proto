@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package chatbot;
+
+import "button.proto";
+
+message ImageSlide {
+  string url = 1;
+  string title = 2;
+  string description = 3;
+}
+
+enum MediaType {
+  TEXT = 0;
+  IMAGE = 1;
+  VIDEO = 2;
+  FILE = 3;
+  IMAGE_SLIDER = 4;
+  AUDIO = 5;
+}
+
+message MediaBlock {
+  string type = 1; // "mediaBlock"
+  string mediaId = 2;
+  MediaType mediaType = 3;
+  string singleImageUrl = 4;
+  string videoUrl = 5;
+  string audioUrl = 6;
+  string fileUrl = 7;
+  repeated ImageSlide slides = 8;
+  string mediaName = 9;
+  string buttonTitle = 10;
+  string buttonTextMessage = 11;
+  string buttonType = 12;
+  string buttonLinkedMediaId = 13;
+  string buttonUrl = 14;
+  repeated Button buttons = 15;
+}
