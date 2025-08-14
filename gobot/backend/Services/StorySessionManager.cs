@@ -1,4 +1,5 @@
 ﻿using BotsifySchemaTest.Models;
+using System.Collections.Concurrent;
 
 namespace BotsifySchemaTest.Services
 {
@@ -10,23 +11,19 @@ namespace BotsifySchemaTest.Services
         public List<Connection> Connections { get; set; } = new();
         public Stories Story { get; set; } = new();
     }
+
     public static class StorySessionManager
     {
-        private static Dictionary<int, StorySessionData> _stories = new();
+        private static ConcurrentDictionary<int, StorySessionData> _stories = new();
 
         public static StorySessionData GetStory(int storyId)
         {
-            if (!_stories.ContainsKey(storyId))
-                _stories[storyId] = new StorySessionData();
-            return _stories[storyId];
+            return _stories.GetOrAdd(storyId, new StorySessionData());
         }
 
         public static void ClearStory(int storyId)
         {
-            if (!_stories.ContainsKey(storyId))
-                _stories.Remove(storyId);
-            
+            _stories.TryRemove(storyId, out _);
         }
-
     }
 }
