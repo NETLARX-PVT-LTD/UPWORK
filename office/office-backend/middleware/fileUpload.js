@@ -1,3 +1,5 @@
+// app.js (or server.js) — first line
+require('dotenv').config();
 const multer = require('multer');
 const path = require('path');
 const { v2: cloudinary } = require('cloudinary');
@@ -29,7 +31,7 @@ const createUpload = () => {
     // In production (Vercel), always use Cloudinary for all files
     const upload = multer({
       storage: multer.memoryStorage(),
-      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+      limits: { fileSize: 25 * 1024 * 1024 }, // 10MB limit
       fileFilter
     }).array('attachments', 5);
 
@@ -62,7 +64,8 @@ const createUpload = () => {
                     folder: 'office-documents',
                     public_id: publicId,
                     resource_type: 'raw',
-                    format: 'pdf'
+                    format: 'pdf',
+                    timeout: 60000 // <-- add this
                   },
                   (error, result) => {
                     if (error) {
@@ -81,7 +84,8 @@ const createUpload = () => {
                   {
                     folder: 'office-documents',
                     public_id: publicId,
-                    resource_type: 'image'
+                    resource_type: 'image',
+                    timeout : 60000 // <-- add this
                   },
                   (error, result) => {
                     if (error) {

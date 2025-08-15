@@ -20,7 +20,7 @@ async function createAdminUser() {
     const hashedPassword = await bcrypt.hash('admin123', 10);
     const adminUser = new User({
       name: 'System Admin',
-      email: 'admin@office.com',
+      email: 'admin@office1.com',
       password: hashedPassword,
       role: 'admin',
       department: 'Administration'

@@ -17,6 +17,7 @@ router.post('/login', async (req, res) => {
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -96,7 +97,7 @@ router.post('/guest', async (req, res, next) => {
       email: `${guestId}@temp.com`,
       isGuest: true,
       createdAt: new Date(),
-      role: 'admin', // *** ADD THIS LINE ***
+      role: 'user', // *** ADD THIS LINE ***
     });
 
     // 3. Generate a JWT for the guest user
@@ -108,22 +109,24 @@ router.post('/guest', async (req, res, next) => {
   }
 });
 
-// DELETE /api/auth/logout/cleanup
 router.delete('/logout/cleanup', authenticate, async (req, res, next) => {
   try {
-    // 1. Get user ID from the protected route middleware
-    const userId = req.user.id;
-    
-    // 2. Delete all data owned by this user from all collections
-    await Document.deleteMany({ owner: userId });
-    // await AuditLog.deleteMany({ owner: userId });
-    
-    // 3. Delete the user account itself
-    await User.findByIdAndDelete(userId);
+    const user = await User.findById(req.user.id);
 
-    res.status(200).json({ success: true, message: 'Guest data deleted.' });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Only delete data + account if it's a guest/demo user
+    if (user.isGuest) {
+      await Document.deleteMany({ owner: user._id });
+      await User.findByIdAndDelete(user._id);
+    } else {
+      await Document.deleteMany({ owner: user._id }); // optional: clear data but keep account
+    }
+
+    res.status(200).json({ success: true, message: 'Cleanup done.' });
   } catch (err) {
     next(err);
   }
 });
+
 module.exports = router;
