@@ -17,7 +17,7 @@ const app = express();
 // CORS configuration for production
 const corsOptions = {
   origin: [
-    'http://localhost:3000',
+    'http://localhost:3500',
     'http://localhost:3001', 
     'https://office-registration-sigma.vercel.app',
     'https://office-registration-frontend.vercel.app',

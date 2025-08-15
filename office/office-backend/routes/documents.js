@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.route('/')
   .get(authenticate, getDocuments)
-  .post(authenticate, createDocument);
+  .post(authenticate,upload, createDocument);
 // Helper function to get the next available number
 const getNextNumber = async () => {
   try {

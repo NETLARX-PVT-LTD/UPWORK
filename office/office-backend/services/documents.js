@@ -17,13 +17,38 @@ exports.getDocuments = async (req, res, next) => {
 // @desc      Create a new document
 // @route     POST /api/documents
 // @access    Private
+// exports.createDocument = async (req, res, next) => {
+//   try {
+//     // Add the user's ID to the request body before creation
+//     req.body.owner = req.user.id;
+//     const document = await Document.create(req.body);
+//     res.status(201).json({ success: true, data: document });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 exports.createDocument = async (req, res, next) => {
   try {
-    // Add the user's ID to the request body before creation
+    if (!req.body) {
+      return res.status(400).json({ message: 'No form data received' });
+    }
+    
+    console.log('req.user :', req.user);
+    console.log('req.body :', req.body); // ✅ Now parsed by multer
+    console.log('req.files :', req.files); // ✅ Uploaded files
+
     req.body.owner = req.user.id;
-    const document = await Document.create(req.body);
+    req.body.user = req.user.id;
+
+    const document = await Document.create({
+      ...req.body,
+      attachments: req.files?.map(f => f.path) || []
+    });
+
     res.status(201).json({ success: true, data: document });
   } catch (error) {
+    console.error('Error creating document:', error);
     next(error);
   }
 };
