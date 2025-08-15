@@ -50,7 +50,7 @@ export default function LoginPage() {
       localStorage.setItem('user', JSON.stringify(response.user));
       
       // Redirect to the user dashboard for guests
-      router.push('/user/dashboard');
+      router.push('/admin/dashboard');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred during guest login. Please try again.');
     } finally {
@@ -104,6 +104,7 @@ export default function LoginPage() {
       // Access token and user directly from response
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
+      console.log('Login successful:', response.user);
       
       // Redirect based on role
       router.push(response.user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard');
