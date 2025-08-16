@@ -1,7 +1,5 @@
-<!-- Updated chatbot-widget.component.html -->
 <div class="chatbot-container" [ngClass]="{'landing-mode': isLandingPage, 'widget-mode': !isLandingPage}">
-  
-  <!-- Landing Page Layout -->
+
   <div class="w-full" *ngIf="isLandingPage">
     <div class="px-8 py-16 text-center text-white" [ngClass]="{
       'bg-gradient-to-br from-indigo-500 to-purple-700': backgroundStyle === 'gradient',
@@ -11,52 +9,115 @@
       <h1 class="text-4xl font-semibold mb-4">{{landingTitle}}</h1>
       <p class="text-xl opacity-90">{{landingDescription}}</p>
     </div>
-    
-    <!-- Landing Page Chat Widget -->
+
     <div class="max-w-3xl mx-auto -mt-8 relative bg-white rounded-2xl shadow-xl overflow-hidden">
-      <div class="chat-header bg-gradient-to-br from-indigo-500 to-purple-700 text-white p-4 flex items-center gap-3" 
-           [style.background]="'linear-gradient(135deg, ' + primaryColor + ', ' + darkenColor(primaryColor, 20) + ')'">
+      <div class="chat-header bg-gradient-to-br from-indigo-500 to-purple-700 text-white p-4 flex items-center gap-3"
+        [style.background]="'linear-gradient(135deg, ' + primaryColor + ', ' + darkenColor(primaryColor, 20) + ')'">
         <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-xl">
           <span>🤖</span>
         </div>
-        <div>
+        <div class="flex-1">
           <h3 class="m-0 text-lg font-semibold">{{botName}}</h3>
           <span class="text-sm opacity-80">Online</span>
         </div>
-      </div>
-      
-      <div class="chat-messages flex-1 overflow-y-auto p-4 bg-slate-50 h-96" #messagesContainer>
-        <!-- Welcome Message -->
-        <div class="flex gap-3 mb-4 items-end" *ngIf="messages.length === 0">
-          <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-base shrink-0">
-            <span>🤖</span>
-          </div>
-          <div class="max-w-[70%]">
-            <div class="p-3 bg-white text-gray-800 rounded-2xl rounded-bl-sm shadow-sm inline-block break-words">
-              {{welcomeMessage}}
+
+        <div class="relative">
+          <button class="header-menu-btn"
+            (click)="toggleHeaderMenu()"
+            title="Menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+
+          <div class="header-menu-dropdown"
+            [ngClass]="{'show': showHeaderMenu}"
+            (click)="$event.stopPropagation()">
+            
+            <!-- Menu Buttons Section -->
+            <div class="menu-buttons-section" *ngIf="currentMenu.length > 0">
+              <!-- <div class="menu-section-header">Quick Actions</div> -->
+              <button *ngIf="canGoBack()"
+                (click)="goBackToPreviousMenu()"
+                class="menu-item back-button">
+                <span class="menu-icon">←</span>
+                <span>Back to {{getPreviousMenuTitle()}}</span>
+              </button>
+              
+              <div class="menu-buttons-container">
+                <button *ngFor="let button of currentMenu.slice(0, 4)"
+                  (click)="handleMenuButtonClickFromHeader(button)"
+                  class="menu-item menu-button-item"
+                  [style.border-left]="'3px solid ' + (button.metadata?.color || primaryColor)">
+                  <div class="flex items-center space-x-2">
+                    <span class="menu-icon">{{getButtonIcon(button)}}</span>
+                    <span>{{button.label}}</span>
+                  </div>
+                  <div *ngIf="button.type === 'submenu'" class="text-xs opacity-75">
+                    {{button.children?.length || 0}}
+                  </div>
+                </button>
+              </div>
+              
+              <button *ngIf="currentMenu.length > 4"
+                (click)="showAllMenuOptions()"
+                class="menu-item show-more-button">
+                <span class="menu-icon">📋</span>
+                <span>Show All Options ({{currentMenu.length - 4}} more)</span>
+              </button>
+              
+              <button (click)="resetToMainMenuFromHeader()"
+                class="menu-item reset-menu-button"
+                *ngIf="canGoBack()">
+                <span class="menu-icon">🏠</span>
+                <span>Main Menu</span>
+              </button>
+              
+              <div class="menu-divider"></div>
             </div>
-            <div class="text-xs text-gray-400 mt-1 pl-1">
-              {{getCurrentTime()}}
+
+            <!-- System Actions Section -->
+            <div class="system-actions-section">
+              <div class="menu-section-header">Settings</div>
+              <div class="menu-item" (click)="clearChat()">
+                <span class="menu-icon">🗑️</span>
+                <span>Clear Chat</span>
+              </div>
+              <div class="menu-item" (click)="downloadChat()">
+                <span class="menu-icon">💾</span>
+                <span>Download Chat</span>
+              </div>
+              <div class="menu-divider"></div>
+              <div class="menu-item" (click)="toggleDarkMode()">
+                <span class="menu-icon">🌙</span>
+                <span>{{isDarkMode ? 'Light' : 'Dark'}} Mode</span>
+              </div>
+              <div class="menu-item" (click)="showSettings()">
+                <span class="menu-icon">⚙️</span>
+                <span>Settings</span>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Messages -->
-        <div class="flex gap-3 mb-4 items-end" 
-             *ngFor="let message of messages" 
-             [ngClass]="{'flex-row-reverse': message.isUser}">
-          
+      <div class="chat-messages flex-1 overflow-y-auto p-4 bg-slate-50 h-96" #messagesContainer>
+        <div class="flex gap-3 mb-4 items-end"
+          *ngFor="let message of messages"
+          [ngClass]="{'flex-row-reverse': message.isUser}">
           <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-base shrink-0" *ngIf="!message.isUser">
             <span>🤖</span>
           </div>
-          
+
           <div class="flex-1 max-w-[70%]" [ngClass]="{'text-right': message.isUser}">
             <div class="p-3 rounded-2xl break-words inline-block"
-                 [ngClass]="{
-                   'text-white rounded-br-sm': message.isUser, 
-                   'bg-white text-gray-800 rounded-bl-sm shadow-sm': !message.isUser
-                 }"
-                 [style.background-color]="message.isUser ? primaryColor : ''">
+              [ngClass]="{
+                'text-white rounded-br-sm': message.isUser,
+                'bg-white text-gray-800 rounded-bl-sm shadow-sm': !message.isUser
+              }"
+              [style.background-color]="message.isUser ? primaryColor : ''">
               <span *ngIf="message.typing" class="flex items-center gap-1">
                 <span class="typing-dot"></span>
                 <span class="typing-dot" style="animation-delay: 0.2s;"></span>
@@ -68,28 +129,74 @@
               {{formatTime(message.timestamp)}}
             </div>
           </div>
-          
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-base shrink-0 text-white" 
-               *ngIf="message.isUser"
-               [style.background-color]="primaryColor">
+
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-base shrink-0 text-white"
+            *ngIf="message.isUser"
+            [style.background-color]="primaryColor">
             <span>👤</span>
           </div>
         </div>
       </div>
 
-      <!-- Input Area -->
-      <div class="p-4 bg-white border-t border-gray-200">
+      <!-- Separate bot menu (now only shown when explicitly requested) -->
+      <div *ngIf="showBotMenu" class="bot-menu p-4 bg-white border-t border-gray-200">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="font-medium text-gray-700">All Menu Options</h4>
+            <button (click)="closeBotMenu()" class="text-gray-400 hover:text-gray-600">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          
+          <button *ngIf="canGoBack()"
+            (click)="goBackToPreviousMenu()"
+            class="w-full flex items-center space-x-2 text-blue-600 hover:text-blue-800 text-sm p-2 hover:bg-blue-50 rounded transition-colors border-b">
+            <span>←</span>
+            <span>Back to previous menu</span>
+          </button>
+
+          <div class="space-y-2">
+            <button *ngFor="let button of currentMenu"
+              (click)="handleMenuButtonClick(button)"
+              class="w-full flex items-center justify-between p-3 rounded-lg border-2 border-transparent hover:border-gray-200 transition-all duration-200 text-left hover:shadow-sm"
+              [style.background-color]="button.metadata?.color || '#f8f9fa'"
+              [style.color]="button.metadata?.color ? '#ffffff' : '#374151'">
+              <div class="flex items-center space-x-3">
+                <span>{{getButtonIcon(button)}}</span>
+                <span class="font-medium">{{button.label}}</span>
+              </div>
+              <div *ngIf="button.type === 'submenu'" class="text-xs opacity-75">
+                {{button.children?.length || 0}} items
+              </div>
+            </button>
+          </div>
+          <div class="flex gap-2 mt-3 pt-3 border-t">
+            <button (click)="resetToMainMenu()"
+              class="text-xs text-blue-600 hover:text-blue-800 px-2 py-1 hover:bg-blue-50 rounded">
+              Main Menu
+            </button>
+            <div class="text-xs text-gray-500 px-2 py-1">
+              {{currentMenu.length}} options
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 bg-white border-t border-gray-200" [ngClass]="{'hidden': showBotMenu}">
         <div class="flex gap-3 items-center">
-          <input type="text" 
-                 [(ngModel)]="currentMessage"
-                 (keyup.enter)="sendMessage()"
-                 [placeholder]="inputPlaceholder"
-                 [disabled]="isSending"
-                 class="flex-1 p-3 border border-gray-300 rounded-full text-base outline-none bg-gray-50 focus:border-indigo-600 focus:bg-white">
-          <button class="send-button" 
-                  (click)="sendMessage()" 
-                  [disabled]="!currentMessage.trim() || isSending"
-                  [style.background-color]="primaryColor">
+          <input type="text"
+            [(ngModel)]="currentMessage"
+            (keyup.enter)="sendMessage()"
+            [placeholder]="inputPlaceholder"
+            [disabled]="isSending"
+            class="flex-1 p-3 border border-gray-300 rounded-full text-base outline-none bg-gray-50 focus:border-indigo-600 focus:bg-white">
+          <button class="send-button"
+            (click)="sendMessage()"
+            [disabled]="!currentMessage.trim() || isSending"
+            [style.background-color]="primaryColor">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="22" y1="2" x2="11" y2="13"></line>
               <polygon points="22,2 15,22 11,13 2,9"></polygon>
@@ -98,35 +205,28 @@
         </div>
       </div>
 
-      <!-- Branding -->
       <div class="text-center p-2 text-xs text-gray-400 bg-gray-50 border-t border-gray-100" *ngIf="showBranding">
         <span>Powered by YourChatbot</span>
       </div>
     </div>
   </div>
 
-  <!-- Widget Mode Layout (for embedding on external sites) -->
+  <!-- Widget Mode (similar changes applied) -->
   <div class="widget-layout" *ngIf="!isLandingPage">
-    
-    <!-- Floating Chat Icon (shown when minimized) -->
-    <div class="floating-icon" 
-         *ngIf="isMinimized"
-         (click)="toggleMinimize()"
-         [style.background-color]="primaryColor"
-         [ngClass]="'position-' + position">
+    <div class="floating-icon"
+      *ngIf="isMinimized"
+      (click)="toggleMinimize()"
+      [style.background-color]="primaryColor"
+      [ngClass]="'position-' + position">
       <span class="text-2xl">💬</span>
-      <!-- Unread Messages Badge -->
       <div class="unread-badge" *ngIf="unreadCount > 0">
         {{unreadCount > 9 ? '9+' : unreadCount}}
       </div>
     </div>
 
-    <!-- Chat Widget (shown when maximized) -->
-    <div class="chat-widget" 
-         *ngIf="!isMinimized"
-         [ngClass]="'position-' + position + ' size-' + size">
-      
-      <!-- Chat Header -->
+    <div class="chat-widget"
+      *ngIf="!isMinimized"
+      [ngClass]="'position-' + position + ' size-' + size">
       <div class="chat-header" [style.background]="'linear-gradient(135deg, ' + primaryColor + ', ' + darkenColor(primaryColor, 20) + ')'">
         <div class="flex items-center gap-3 flex-1">
           <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-base">
@@ -137,9 +237,77 @@
             <span class="text-xs text-white opacity-80">Online</span>
           </div>
         </div>
-        
-        <!-- Header Controls -->
+
         <div class="flex gap-1">
+          <div class="relative">
+            <button class="header-btn header-menu-btn"
+              (click)="toggleHeaderMenu()"
+              title="Menu">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+
+            <div class="header-menu-dropdown widget-menu"
+              [ngClass]="{'show': showHeaderMenu}"
+              (click)="$event.stopPropagation()">
+              
+              <!-- Menu Buttons Section -->
+              <div class="menu-buttons-section !mt-2" *ngIf="currentMenu.length > 0">
+                <!-- <div class="menu-section-header">Quick Actions</div> -->
+                <button *ngIf="canGoBack()"
+                  (click)="goBackToPreviousMenu()"
+                  class="menu-item back-button">
+                  <span class="menu-icon">←</span>
+                  <span>Back</span>
+                </button>
+                
+                <div class="menu-buttons-container">
+                  <button *ngFor="let button of currentMenu.slice(0, 3)"
+                    (click)="handleMenuButtonClickFromHeader(button)"
+                    class="menu-item menu-button-item"
+                    [style.border-left]="'3px solid ' + (button.metadata?.color || primaryColor)">
+                    <div class="flex items-center space-x-2">
+                      <!-- <span class="menu-icon text-xs">{{getButtonIcon(button)}}</span> -->
+                      <span class="text-sm">{{button.label}}</span>
+                    </div>
+                    <div *ngIf="button.type === 'submenu'" class="text-xs opacity-75">
+                      {{button.children?.length || 0}}
+                    </div>
+                  </button>
+                </div>
+                
+                <button *ngIf="currentMenu.length > 3"
+                  (click)="showAllMenuOptions()"
+                  class="menu-item show-more-button">
+                  <!-- <span class="menu-icon">📋</span> -->
+                  <span>More ({{currentMenu.length - 3}})</span>
+                </button>
+                
+                <div class="menu-divider"></div>
+              </div>
+
+              <!-- System Actions Section -->
+              <div class="system-actions-section">
+                <div class="menu-item" (click)="clearChat()">
+                  <!-- <span class="menu-icon">🗑️</span> -->
+                  <span>Clear Chat</span>
+                </div>
+                <div class="menu-item" (click)="downloadChat()">
+                  <!-- <span class="menu-icon">💾</span> -->
+                  <span>Download</span>
+                </div>
+                <div class="menu-divider"></div>
+                <div class="menu-item" (click)="toggleDarkMode()">
+                  <!-- <span class="menu-icon">🌙</span> -->
+                  <span>{{isDarkMode ? 'Light' : 'Dark'}} Mode</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <button class="header-btn" (click)="toggleMinimize()" title="Minimize">
             <span>−</span>
           </button>
@@ -149,36 +317,18 @@
         </div>
       </div>
 
-      <!-- Messages Area -->
       <div class="chat-messages" #messagesContainer>
-        <!-- Welcome Message -->
-        <div class="flex gap-2 mb-4 items-end" *ngIf="messages.length === 0">
-          <div class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs shrink-0">
-            <span>🤖</span>
-          </div>
-          <div class="max-w-[75%]">
-            <div class="message-bubble bot-message">
-              {{welcomeMessage}}
-            </div>
-            <div class="message-time">
-              {{getCurrentTime()}}
-            </div>
-          </div>
-        </div>
-
-        <!-- Chat Messages -->
-        <div class="flex gap-2 mb-4 items-end" 
-             *ngFor="let message of messages" 
-             [ngClass]="{'flex-row-reverse': message.isUser}">
-          
+        <div class="flex gap-2 mb-4 items-end"
+          *ngFor="let message of messages"
+          [ngClass]="{'flex-row-reverse': message.isUser}">
           <div class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs shrink-0" *ngIf="!message.isUser">
             <span>🤖</span>
           </div>
-          
+
           <div class="flex-1 max-w-[75%]" [ngClass]="{'text-right': message.isUser}">
             <div class="message-bubble"
-                 [ngClass]="message.isUser ? 'user-message' : 'bot-message'"
-                 [style.background-color]="message.isUser ? primaryColor : ''">
+              [ngClass]="message.isUser ? 'user-message' : 'bot-message'"
+              [style.background-color]="message.isUser ? primaryColor : ''">
               <span *ngIf="message.typing" class="typing-indicator">
                 <span class="typing-dot"></span>
                 <span class="typing-dot"></span>
@@ -190,28 +340,74 @@
               {{formatTime(message.timestamp)}}
             </div>
           </div>
-          
-          <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 text-white" 
-               *ngIf="message.isUser"
-               [style.background-color]="primaryColor">
+
+          <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 text-white"
+            *ngIf="message.isUser"
+            [style.background-color]="primaryColor">
             <span>👤</span>
           </div>
         </div>
       </div>
 
-      <!-- Input Area -->
-      <div class="chat-input">
+      <!-- Bot menu for widget (similar to landing page) -->
+      <div *ngIf="showBotMenu" class="bot-menu p-2 bg-white border-t border-gray-200">
+        <div class="space-y-1">
+          <div class="flex items-center justify-between mb-2">
+            <h5 class="font-medium text-gray-700 text-sm">All Options</h5>
+            <button (click)="closeBotMenu()" class="text-gray-400 hover:text-gray-600">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          
+          <button *ngIf="canGoBack()"
+            (click)="goBackToPreviousMenu()"
+            class="w-full flex items-center space-x-2 text-blue-600 hover:text-blue-800 text-xs p-2 hover:bg-blue-50 rounded transition-colors border-b">
+            <span>←</span>
+            <span>Back</span>
+          </button>
+
+          <div class="space-y-1">
+            <button *ngFor="let button of currentMenu"
+              (click)="handleMenuButtonClick(button)"
+              class="w-full flex items-center justify-between p-2 rounded text-left hover:bg-gray-50 transition-colors text-sm"
+              [style.background-color]="button.metadata?.color ? button.metadata.color + '20' : '#f8f9fa'"
+              [style.border-left]="'3px solid ' + (button.metadata?.color || '#4f46e5')">
+              <div class="flex items-center space-x-2">
+                <span class="text-xs">{{getButtonIcon(button)}}</span>
+                <span class="font-medium text-gray-700">{{button.label}}</span>
+              </div>
+              <div *ngIf="button.type === 'submenu'" class="text-xs text-gray-500">
+                {{button.children?.length || 0}}
+              </div>
+            </button>
+          </div>
+          <div class="flex justify-between items-center mt-2 pt-2 border-t text-xs">
+            <button (click)="resetToMainMenu()"
+              class="text-blue-600 hover:text-blue-800 px-1 py-1 hover:bg-blue-50 rounded">
+              Main Menu
+            </button>
+            <span class="text-gray-500">
+              {{currentMenu.length}} options
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input" [ngClass]="{'hidden': showBotMenu}">
         <div class="flex gap-2 items-center">
-          <input type="text" 
-                 [(ngModel)]="currentMessage"
-                 (keyup.enter)="sendMessage()"
-                 [placeholder]="inputPlaceholder"
-                 [disabled]="isSending"
-                 class="message-input">
-          <button class="send-button" 
-                  (click)="sendMessage()" 
-                  [disabled]="!currentMessage.trim() || isSending"
-                  [style.background-color]="primaryColor">
+          <input type="text"
+            [(ngModel)]="currentMessage"
+            (keyup.enter)="sendMessage()"
+            [placeholder]="inputPlaceholder"
+            [disabled]="isSending"
+            class="message-input">
+          <button class="send-button"
+            (click)="sendMessage()"
+            [disabled]="!currentMessage.trim() || isSending"
+            [style.background-color]="primaryColor">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="22" y1="2" x2="11" y2="13"></line>
               <polygon points="22,2 15,22 11,13 2,9"></polygon>
@@ -220,10 +416,13 @@
         </div>
       </div>
 
-      <!-- Branding -->
       <div class="chat-branding" *ngIf="showBranding">
         <span>Powered by YourChatbot</span>
       </div>
     </div>
   </div>
+
+  <div class="header-menu-overlay"
+    *ngIf="showHeaderMenu"
+    (click)="closeHeaderMenu()"></div>
 </div>
