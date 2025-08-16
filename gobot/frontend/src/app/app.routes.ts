@@ -9,12 +9,21 @@ import { ChatbotWidgetComponent } from './chatbot-widget/chatbot-widget.componen
 import { ChatbotMenuComponent } from './chatbot-menu/chatbot-menu.component';
 import { WhatsappPublisherComponent } from './whatsapp-publisher/whatsapp-publisher.component';
 import { InstagramPublisherComponent } from './instagram-publisher/instagram-publisher.component';
+import { FacebookPagePublisherComponent } from './facebook-page-publisher/facebook-page-publisher.component';
+import { TelegramBotConnectionComponent } from './telegram-bot-connection/telegram-bot-connection.component';
+import { TwilioSmsConnectionComponent } from './twilio-sms-connection/twilio-sms-connection.component';
 
 export const routes: Routes = [
   // publish bot on whatsapp
   { path: 'whatsapp-publisher', component: WhatsappPublisherComponent, data: { title: 'Publish Bot' } },
   // publish bot on instagram
   { path: 'instagram-publisher', component: InstagramPublisherComponent, data: { title: 'Publish Bot' } },
+  // publish bot on facebook
+  { path: 'facebook-publisher', component: FacebookPagePublisherComponent, data: { title: 'Publish Bot' } },
+  // telegram bot connection
+   { path: 'connect-to-telegram', component: TelegramBotConnectionComponent, data: { title: 'Publish Bot' } },
+  //  Twilio SMS connection
+   { path: 'twilio-sms', component: TwilioSmsConnectionComponent, data: { title: 'Publish Bot' } },
   // The main route for the publishing dashboard
   { path: 'publish-bot', component: PublishBotComponent,data: { title: 'Publish Bot' }  },
 

@@ -1,0 +1,537 @@
+// facebook-page-publisher.component.scss
+
+.facebook-publisher-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
+
+  .publisher-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+
+    h2 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .bot-selector {
+      .form-select {
+        padding: 8px 15px;
+        border: 2px solid #007bff;
+        border-radius: 6px;
+        font-size: 14px;
+        min-width: 120px;
+        
+        &:focus {
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+      }
+    }
+  }
+
+  .connection-screen {
+    text-align: center;
+    padding: 60px 20px;
+
+    .connection-info {
+      margin-bottom: 40px;
+      
+      p {
+        font-size: 16px;
+        color: #6c757d;
+        line-height: 1.6;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+    }
+
+    .facebook-connect-btn {
+      background: linear-gradient(45deg, #1877f2, #42a5f5);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+
+      &:hover:not(:disabled) {
+        background: linear-gradient(45deg, #166fe5, #3d96e6);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+      }
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      i.fab.fa-facebook {
+        font-size: 18px;
+      }
+
+      .loading-text {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+  }
+
+  .permission-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+
+    .permission-content {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+
+      .permission-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 20px;
+
+        .facebook-logo, .botsify-logo {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+        }
+
+        .facebook-logo {
+          background: #1877f2;
+          color: white;
+        }
+
+        .botsify-logo {
+          background: #28a745;
+          color: white;
+        }
+
+        .sync-icon {
+          font-size: 20px;
+          color: #6c757d;
+        }
+      }
+
+      .permission-info {
+        text-align: center;
+        margin-bottom: 30px;
+
+        h3 {
+          margin: 0 0 10px 0;
+          color: #2c3e50;
+          font-size: 18px;
+        }
+
+        p {
+          color: #6c757d;
+          margin: 0;
+        }
+      }
+
+      .permission-list {
+        .permission-notice {
+          text-align: center;
+          margin-bottom: 20px;
+          
+          .text-danger {
+            color: #dc3545 !important;
+            font-weight: 500;
+          }
+        }
+
+        .permissions-container {
+          border: 1px solid #dee2e6;
+          border-radius: 8px;
+          max-height: 300px;
+          overflow-y: auto;
+
+          .permission-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+            transition: background-color 0.2s;
+
+            &:last-child {
+              border-bottom: none;
+            }
+
+            &:hover {
+              background-color: #f8f9fa;
+            }
+
+            &.granted {
+              .permission-checkbox i {
+                color: #007bff;
+              }
+            }
+
+            .permission-checkbox {
+              margin-right: 12px;
+              
+              i {
+                font-size: 16px;
+                color: #6c757d;
+              }
+            }
+
+            .permission-text {
+              flex: 1;
+              font-size: 14px;
+              color: #495057;
+              line-height: 1.4;
+            }
+
+            .permission-status {
+              .status-badge {
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 11px;
+                font-weight: 600;
+                background: #dc3545;
+                color: white;
+
+                &.granted {
+                  background: #28a745;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .permission-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin: 30px 0 20px 0;
+
+        .btn {
+          padding: 10px 25px;
+          border-radius: 6px;
+          font-weight: 500;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+
+          &.btn-secondary {
+            background: #6c757d;
+            color: white;
+
+            &:hover {
+              background: #5a6268;
+            }
+          }
+
+          &.btn-primary {
+            background: #007bff;
+            color: white;
+
+            &:hover {
+              background: #0056b3;
+            }
+          }
+        }
+      }
+
+      .permission-footer {
+        font-size: 12px;
+        color: #6c757d;
+        line-height: 1.4;
+
+        p {
+          margin: 8px 0;
+
+          a {
+            color: #007bff;
+            text-decoration: none;
+
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .pages-container {
+    .pages-header {
+      display: flex;
+      background: #007bff;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px 8px 0 0;
+      font-weight: 600;
+
+      .page-name-header {
+        flex: 1;
+      }
+
+      .action-header {
+        width: 200px;
+        text-align: center;
+      }
+    }
+
+    .pages-list {
+      border: 1px solid #dee2e6;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+
+      .page-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid #dee2e6;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background-color: #f8f9fa;
+        }
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .page-info {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          gap: 15px;
+
+          .page-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+
+            .page-icon {
+              font-size: 18px;
+            }
+          }
+
+          .page-details {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            .page-name {
+              font-weight: 500;
+              color: #2c3e50;
+            }
+
+            .page-link {
+              color: #6c757d;
+              text-decoration: none;
+              font-size: 14px;
+
+              &:hover {
+                color: #007bff;
+              }
+            }
+          }
+        }
+
+        .page-action {
+          width: 200px;
+          text-align: center;
+
+          .connect-section {
+            .connect-btn {
+              background: #007bff;
+              color: white;
+              border: none;
+              padding: 8px 20px;
+              border-radius: 6px;
+              font-weight: 500;
+              cursor: pointer;
+              transition: all 0.2s;
+
+              &:hover:not(:disabled) {
+                background: #0056b3;
+                transform: translateY(-1px);
+              }
+
+              &:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+              }
+            }
+          }
+
+          .connected-section {
+            .connected-text {
+              display: block;
+              font-size: 14px;
+              color: #28a745;
+              font-weight: 500;
+              margin-bottom: 8px;
+            }
+
+            .disconnect-btn {
+              padding: 4px 12px;
+              font-size: 12px;
+              border: 1px solid #dc3545;
+              color: #dc3545;
+              background: transparent;
+              border-radius: 4px;
+              cursor: pointer;
+              transition: all 0.2s;
+
+              &:hover:not(:disabled) {
+                background: #dc3545;
+                color: white;
+              }
+
+              &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .action-buttons {
+      margin-top: 30px;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+
+        &.btn-success {
+          background: #28a745;
+          color: white;
+
+          &:hover:not(:disabled) {
+            background: #1e7e34;
+            transform: translateY(-1px);
+          }
+        }
+
+        &.btn-danger {
+          background: #dc3545;
+          color: white;
+
+          &:hover:not(:disabled) {
+            background: #c82333;
+            transform: translateY(-1px);
+          }
+        }
+      }
+    }
+  }
+
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+
+    .loading-content {
+      text-align: center;
+
+      i {
+        color: #007bff;
+        margin-bottom: 15px;
+      }
+
+      p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .facebook-publisher-container {
+    padding: 15px;
+
+    .publisher-header {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+    }
+
+    .pages-container {
+      .pages-header,
+      .page-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+      }
+
+      .page-action {
+        width: 100% !important;
+      }
+    }
+
+    .action-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+}

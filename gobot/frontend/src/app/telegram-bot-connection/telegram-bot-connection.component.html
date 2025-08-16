@@ -1,0 +1,206 @@
+<!-- telegram-bot-connection.component.html (Fixed) -->
+<div class="telegram-bot-container">
+  <div class="header-section">
+    <div class="tutorial-link">
+      <span class="tutorial-icon">📹</span>
+      <span class="tutorial-text">Tutorial</span>
+    </div>
+    
+    <h2 class="setup-title">Setup Telegram Account</h2>
+    
+    <div class="instructions">
+      <ul class="instruction-list">
+        <li>
+          Read the <a href="https://core.telegram.org/bots#creating-a-new-bot" target="_blank" class="documentation-link">documentation</a> and follow the steps as per instructed
+        </li>
+        <li>Copy the <strong>Access Token</strong> and <strong>Phone Number</strong></li>
+        <li>Fill out the form below carefully.</li>
+        <li>Once you save the details your chatbot should now start responding to your telegram clients.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Bot Info Display -->
+  <div *ngIf="botInfo" class="bot-info-card">
+    <div class="bot-info-header">
+      <span class="bot-icon">🤖</span>
+      <div class="bot-details">
+        <h4>{{ botInfo.first_name }}</h4>
+        <p>{{ '@' + botInfo.username }} • ID: {{ botInfo.id }}</p>
+        <span class="webhook-status" [ngClass]="webhookStatus ? 'active' : 'inactive'">
+          Webhook: {{ webhookStatus || 'Not Set' }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <form [formGroup]="telegramForm" (ngSubmit)="onSubmit()" class="telegram-form">
+    
+    <!-- Access Token Field -->
+    <div class="form-group">
+      <label for="accessToken" class="form-label">
+        Access Token <span class="required">*</span>
+        <span class="field-hint">Get this from &#64;BotFather on Telegram</span>
+      </label>
+      <div class="input-with-button">
+        <input
+          type="text"
+          id="accessToken"
+          formControlName="accessToken"
+          class="form-input"
+          [class.error]="isFieldInvalid('accessToken')"
+          placeholder="e.g., 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+          (focus)="clearMessages()"
+        />
+        <button
+          type="button"
+          class="test-token-btn"
+          [disabled]="!telegramForm.get('accessToken')?.value || isTesting"
+          (click)="testConnection()"
+        >
+          <span *ngIf="!isTesting">Test</span>
+          <span *ngIf="isTesting" class="loading-spinner">Testing</span>
+        </button>
+      </div>
+      <div *ngIf="isFieldInvalid('accessToken')" class="error-message">
+        {{ getFieldError('accessToken') }}
+      </div>
+    </div>
+
+    <!-- Bot Name Field -->
+    <div class="form-group">
+      <label for="botName" class="form-label">
+        Bot Name <span class="required">*</span>
+        <span class="field-hint">This will be auto-filled after token validation</span>
+      </label>
+      <input
+        type="text"
+        id="botName"
+        formControlName="botName"
+        class="form-input"
+        [class.error]="isFieldInvalid('botName')"
+        placeholder="Enter your bot name"
+        (focus)="clearMessages()"
+        [readonly]="botInfo !== null"
+      />
+      <div *ngIf="isFieldInvalid('botName')" class="error-message">
+        {{ getFieldError('botName') }}
+      </div>
+    </div>
+
+    <!-- Telegram Number Field -->
+    <div class="form-group">
+      <label for="telegramNumber" class="form-label">
+        Telegram Number <span class="required">*</span>
+        <span class="field-hint">Your phone number registered with Telegram</span>
+      </label>
+      <input
+        type="tel"
+        id="telegramNumber"
+        formControlName="telegramNumber"
+        class="form-input"
+        [class.error]="isFieldInvalid('telegramNumber')"
+        placeholder="+1234567890"
+        (focus)="clearMessages()"
+      />
+      <div *ngIf="isFieldInvalid('telegramNumber')" class="error-message">
+        {{ getFieldError('telegramNumber') }}
+      </div>
+    </div>
+
+    <!-- Telegram Chatbot URL Field -->
+    <div class="form-group">
+      <label for="chatbotUrl" class="form-label">
+        Telegram Chatbot URL <span class="required">*</span>
+        <span class="field-hint">Your server endpoint for receiving webhook updates</span>
+      </label>
+      <div class="input-with-button">
+        <input
+          type="url"
+          id="chatbotUrl"
+          formControlName="chatbotUrl"
+          class="form-input"
+          [class.error]="isFieldInvalid('chatbotUrl')"
+          placeholder="https://your-domain.com"
+          (focus)="clearMessages()"
+        />
+        <button
+          type="button"
+          class="test-webhook-btn"
+          [disabled]="!isWebhookUrlValid() || isLoading"
+          (click)="testWebhook()"
+        >
+          Test URL
+        </button>
+      </div>
+      <div *ngIf="isFieldInvalid('chatbotUrl')" class="error-message">
+        {{ getFieldError('chatbotUrl') }}
+      </div>
+      <div class="webhook-info">
+        <small>Webhook will be set to: {{ getWebhookDisplayUrl() }}</small>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="button-group">
+      <button
+        type="button"
+        class="clear-button"
+        (click)="clearForm()"
+        [disabled]="isLoading"
+      >
+        Clear Form
+      </button>
+
+      <button
+        type="button"
+        class="delete-webhook-button"
+        *ngIf="webhookStatus === 'Active' || (webhookStatus && webhookStatus.includes('Active'))"
+        [disabled]="isLoading"
+        (click)="deleteWebhook()"
+      >
+        Delete Webhook
+      </button>
+
+      <button
+        type="submit"
+        class="save-button"
+        [disabled]="telegramForm.invalid || isLoading"
+      >
+        <span *ngIf="!isLoading">💾 Save & Connect</span>
+        <span *ngIf="isLoading" class="loading-spinner">Connecting...</span>
+      </button>
+    </div>
+
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="success-message">
+      <span class="success-icon">✅</span>
+      <div class="message-content" [innerHTML]="formatMessage(successMessage)"></div>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-message-box">
+      <span class="error-icon">❌</span>
+      <div class="message-content">
+        {{ errorMessage }}
+      </div>
+    </div>
+
+  </form>
+
+  <!-- Additional Information Section -->
+  <div class="info-section">
+    <h3>How to get your Telegram Bot Token:</h3>
+    <ol class="setup-steps">
+      <li>Open Telegram and search for <strong>&#64;BotFather</strong></li>
+      <li>Send <code>/newbot</code> command</li>
+      <li>Follow the instructions to create your bot</li>
+      <li>Copy the token provided by BotFather</li>
+      <li>Paste it in the Access Token field above</li>
+    </ol>
+    
+    <div class="security-notice">
+      <strong>⚠️ Security Notice:</strong> Keep your bot token secure! Anyone with this token can control your bot.
+    </div>
+  </div>
+</div>

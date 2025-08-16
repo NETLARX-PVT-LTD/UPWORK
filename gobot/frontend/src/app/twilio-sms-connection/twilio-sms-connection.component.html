@@ -1,0 +1,195 @@
+<!-- twilio-sms-connection.component.html -->
+<div class="twilio-connection-container">
+  <div class="header-section">
+    <h2>Connect to Twilio</h2>
+    <p class="beta-notice">
+      <span class="beta-badge">BETA</span>
+      Twilio SMS is a BETA feature and is currently under development.
+    </p>
+    
+    <div class="info-section">
+      <div class="info-item">
+        <span class="bullet">•</span>
+        <span>Please read the SMS coverage documentation carefully, 
+          <a href="#" target="_blank">Twilio SMS Coverage</a>.
+        </span>
+      </div>
+      <div class="info-item">
+        <span class="bullet">•</span>
+        <span>When using a trial account, you can only send and receive SMS from verified phone number. 
+          To add a number, please visit 
+          <a href="#" target="_blank">Verified Phone Numbers</a>.
+        </span>
+      </div>
+      <div class="info-item">
+        <span class="bullet">•</span>
+        <span>When entering your twilio number, make sure you enter the exact number from your twilio dashboard 
+          that includes the country code (e.g. <strong>+16154900514</strong>).
+        </span>
+      </div>
+      <div class="info-item">
+        <span class="bullet">•</span>
+        <span>For Botsify to receive and respond to the customers, you must provide a webhook from your twilio number. 
+          Select your active number from the list of phone numbers, scroll down to the bottom towards the 
+          <strong>Message</strong> portion and select <strong>Webhook</strong> from the dropdown.
+        </span>
+      </div>
+      <div class="info-item">
+        <span class="bullet">•</span>
+        <span>The webhook should be: <strong>{{ defaultWebhookUrl }}</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <form [formGroup]="twilioForm" (ngSubmit)="onSubmit()" class="twilio-form">
+    <!-- Configuration Section -->
+    <div class="config-section">
+      <div class="section-header">
+        <h3>Configuration</h3>
+        <div class="webhook-display">
+          <label>Webhook URL:</label>
+          <div class="webhook-input-group">
+            <input type="text" 
+                   formControlName="webhookUrl" 
+                   class="webhook-input"
+                   readonly>
+            <button type="button" 
+                    class="copy-btn" 
+                    (click)="copyWebhookUrl()"
+                    title="Copy webhook URL">
+              📋
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message Handling Configuration -->
+      <div class="message-config">
+        <h4>A MESSAGE COMES IN</h4>
+        <div class="config-row">
+          <select formControlName="messageHandlingType" class="config-select">
+            <option value="webhook">Webhook</option>
+            <option *ngFor="let type of messageHandlingTypes" [value]="type.value">
+              {{ type.label }}
+            </option>
+          </select>
+          <input type="url" 
+                 formControlName="webhookUrl" 
+                 class="config-input"
+                 placeholder="https://your-app.com/twilio/receive/sms">
+          <select formControlName="messageHandlingMethod" class="config-select">
+            <option *ngFor="let method of httpMethods" [value]="method.value">
+              {{ method.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Primary Handler Fails -->
+      <div class="message-config">
+        <h4>PRIMARY HANDLER FAILS</h4>
+        <div class="config-row">
+          <select formControlName="primaryHandlerFailsType" class="config-select">
+            <option value="webhook">Webhook</option>
+            <option *ngFor="let type of messageHandlingTypes" [value]="type.value">
+              {{ type.label }}
+            </option>
+          </select>
+          <select formControlName="primaryHandlerFailsMethod" class="config-select">
+            <option *ngFor="let method of httpMethods" [value]="method.value">
+              {{ method.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Credentials Section -->
+    <div class="credentials-section">
+      <!-- Twilio Account SID -->
+      <div class="form-group">
+        <label for="accountSid">Twilio Account SID <span class="required">*</span></label>
+        <input type="text" 
+               id="accountSid"
+               formControlName="accountSid" 
+               placeholder="Twilio Account SID"
+               class="form-control"
+               [class.error]="accountSid?.invalid && accountSid?.touched">
+        <div class="error-message" *ngIf="accountSid?.invalid && accountSid?.touched">
+          <span *ngIf="accountSid?.errors?.['required']">Account SID is required</span>
+        </div>
+      </div>
+
+      <!-- Twilio Auth Token -->
+      <div class="form-group">
+        <label for="authToken">Twilio Auth Token <span class="required">*</span></label>
+        <input type="password" 
+               id="authToken"
+               formControlName="authToken" 
+               placeholder="Twilio Auth Token"
+               class="form-control"
+               [class.error]="authToken?.invalid && authToken?.touched">
+        <div class="error-message" *ngIf="authToken?.invalid && authToken?.touched">
+          <span *ngIf="authToken?.errors?.['required']">Auth Token is required</span>
+        </div>
+      </div>
+
+      <!-- Twilio SMS Number -->
+      <div class="form-group">
+        <label for="smsNumber">Twilio SMS Number <span class="required">*</span></label>
+        <input type="tel" 
+               id="smsNumber"
+               formControlName="smsNumber" 
+               placeholder="Twilio SMS Number (e.g., +16154900514)"
+               class="form-control"
+               [class.error]="smsNumber?.invalid && smsNumber?.touched">
+        <div class="error-message" *ngIf="smsNumber?.invalid && smsNumber?.touched">
+          <span *ngIf="smsNumber?.errors?.['required']">SMS Number is required</span>
+          <span *ngIf="smsNumber?.errors?.['pattern']">Please enter a valid phone number with country code (e.g., +1234567890)</span>
+        </div>
+      </div>
+
+      <!-- Twilio Sender ID (Optional) -->
+      <div class="form-group">
+        <label for="senderId">
+          Twilio Sender ID 
+          <span class="info-icon" title="Optional: Custom sender ID for SMS messages">ℹ️</span>
+        </label>
+        <input type="text" 
+               id="senderId"
+               formControlName="senderId" 
+               placeholder="Twilio Sender ID (Optional)"
+               class="form-control">
+      </div>
+    </div>
+
+    <!-- Advanced Settings -->
+    <div class="advanced-section" *ngIf="showAdvanced">
+      <h3>Advanced Settings</h3>
+      <!-- Add more advanced configuration options here if needed -->
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button type="button" 
+              class="btn btn-secondary" 
+              (click)="toggleAdvanced()">
+        {{ showAdvanced ? 'Hide' : 'Show' }} Advanced
+      </button>
+      
+      <button type="button" 
+              class="btn btn-outline" 
+              (click)="testConnection()"
+              [disabled]="isLoading || !accountSid?.valid || !authToken?.valid">
+        Test Connection
+      </button>
+      
+      <button type="submit" 
+              class="btn btn-primary" 
+              [disabled]="isLoading || twilioForm.invalid">
+        <span *ngIf="isLoading" class="loading-spinner">⏳</span>
+        {{ isLoading ? 'Saving...' : 'Save Configuration' }}
+      </button>
+    </div>
+  </form>
+</div>
