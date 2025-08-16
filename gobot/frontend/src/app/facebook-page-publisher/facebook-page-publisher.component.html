@@ -1,0 +1,168 @@
+<!-- facebook-page-publisher.component.html -->
+<div class="facebook-publisher-container">
+  
+  <!-- Header -->
+  <div class="publisher-header">
+    <h2>Publish Bot</h2>
+    <div class="bot-selector">
+      <select [(ngModel)]="selectedBot" class="form-select">
+        <option *ngFor="let bot of availableBots" [value]="bot">{{bot}}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Initial Connection Screen -->
+  <div *ngIf="!isConnected && !showPermissionDialog" class="connection-screen">
+    <div class="connection-info">
+      <p>The Facebook bot works with a Facebook page that you are an administrator of. Connect your Facebook account to get a list of your Facebook pages.</p>
+    </div>
+    
+    <button 
+      class="facebook-connect-btn" 
+      (click)="connectToFacebook()" 
+      [disabled]="isLoading">
+      <i class="fab fa-facebook"></i>
+      <span *ngIf="!isLoading">Connect with Facebook</span>
+      <span *ngIf="isLoading" class="loading-text">
+        <i class="fas fa-spinner fa-spin"></i> Connecting...
+      </span>
+    </button>
+  </div>
+
+  <!-- Permission Dialog -->
+  <div *ngIf="showPermissionDialog" class="permission-dialog">
+    <div class="permission-content">
+      <div class="permission-header">
+        <div class="facebook-logo">
+          <i class="fab fa-facebook"></i>
+        </div>
+        <div class="sync-icon">⟷</div>
+        <div class="botsify-logo">
+          <i class="fas fa-robot"></i>
+        </div>
+      </div>
+
+      <div class="permission-info">
+        <h3>You previously logged in to Botsify with Facebook.</h3>
+        <p>Would you like to continue?</p>
+      </div>
+
+      <div class="permission-list">
+        <div class="permission-notice">
+          <span class="text-danger">Make sure to check all listed permissions</span>
+        </div>
+        
+        <div class="permissions-container">
+          <div 
+            *ngFor="let permission of requiredPermissions" 
+            class="permission-item"
+            [class.granted]="permission.granted">
+            <div class="permission-checkbox">
+              <i [class]="permission.granted ? 'fas fa-check-circle text-primary' : 'far fa-circle'"></i>
+            </div>
+            <div class="permission-text">
+              {{permission.name}}
+            </div>
+            <div class="permission-status">
+              <span class="status-badge" [class.granted]="permission.granted">
+                {{permission.granted ? 'YES' : 'NO'}}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="permission-actions">
+        <button class="btn btn-secondary" (click)="cancelPermissions()">Cancel</button>
+        <button class="btn btn-primary" (click)="confirmPermissions()">Continue as User</button>
+      </div>
+
+      <div class="permission-footer">
+        <p>By continuing, Botsify will receive ongoing access to the information that you share and Facebook will record when Botsify accesses it. <a href="#">Learn more</a> about this sharing and the settings you have.</p>
+        <p>Botsify's <a href="#">Privacy Policy</a> and <a href="#">Terms of Service</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connected State - Pages List -->
+  <div *ngIf="isConnected" class="pages-container">
+    
+    <!-- Pages Table Header -->
+    <div class="pages-header">
+      <div class="page-name-header">PAGE NAME</div>
+      <div class="action-header">ACTION</div>
+    </div>
+
+    <!-- Pages List -->
+    <div class="pages-list">
+      <div 
+        *ngFor="let page of pages; let i = index" 
+        class="page-item">
+        
+        <div class="page-info">
+          <div class="page-avatar" [style.background-color]="getPageColor(i)">
+            <span class="page-icon">{{getPageIcon(page)}}</span>
+          </div>
+          <div class="page-details">
+            <div class="page-name">{{page.name}}</div>
+            <a href="#" class="page-link">
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="page-action">
+          <div *ngIf="!page.connected" class="connect-section">
+            <button 
+              class="btn btn-primary connect-btn" 
+              (click)="connectPageToBot(page)"
+              [disabled]="isLoading">
+              <span *ngIf="!isLoading">Connect</span>
+              <span *ngIf="isLoading">
+                <i class="fas fa-spinner fa-spin"></i>
+              </span>
+            </button>
+          </div>
+          
+          <div *ngIf="page.connected" class="connected-section">
+            <span class="connected-text">Connected with {{page.botName}}</span>
+            <button 
+              class="btn btn-outline-danger btn-sm disconnect-btn" 
+              (click)="disconnectPage(page)"
+              [disabled]="isLoading">
+              Disconnect
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button 
+        class="btn btn-success" 
+        (click)="refreshPagePermissions()"
+        [disabled]="isLoading">
+        <i class="fas fa-sync-alt"></i>
+        Refresh Page Permissions
+      </button>
+      
+      <button 
+        class="btn btn-danger" 
+        (click)="removePagePermissions()"
+        [disabled]="isLoading">
+        <i class="fas fa-times"></i>
+        Remove Page Permissions
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <i class="fas fa-spinner fa-spin fa-2x"></i>
+      <p>Processing...</p>
+    </div>
+  </div>
+
+</div>

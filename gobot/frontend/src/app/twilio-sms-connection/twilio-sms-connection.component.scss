@@ -1,0 +1,403 @@
+/* twilio-sms-connection.component.scss */
+.twilio-connection-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.header-section {
+  margin-bottom: 32px;
+
+  h2 {
+    color: #2c3e50;
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .beta-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    color: #6c757d;
+
+    .beta-badge {
+      background: #17a2b8;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+  }
+}
+
+.info-section {
+  background: #e8f4f8;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #17a2b8;
+  margin-bottom: 24px;
+
+  .info-item {
+    display: flex;
+    margin-bottom: 12px;
+    line-height: 1.6;
+    color: #495057;
+
+    .bullet {
+      margin-right: 8px;
+      color: #17a2b8;
+      font-weight: bold;
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    strong {
+      color: #2c3e50;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.twilio-form {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.config-section {
+  padding: 24px;
+  border-bottom: 1px solid #e9ecef;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+
+    h3 {
+      color: #2c3e50;
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .webhook-display {
+      flex: 1;
+      max-width: 400px;
+      margin-left: 24px;
+
+      label {
+        display: block;
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .webhook-input-group {
+        display: flex;
+        border: 2px solid #007bff;
+        border-radius: 6px;
+        overflow: hidden;
+
+        .webhook-input {
+          flex: 1;
+          padding: 8px 12px;
+          border: none;
+          background: #f8f9fa;
+          font-size: 14px;
+          font-family: monospace;
+          color: #495057;
+
+          &:focus {
+            outline: none;
+            background: white;
+          }
+        }
+
+        .copy-btn {
+          padding: 8px 12px;
+          border: none;
+          background: #007bff;
+          color: white;
+          cursor: pointer;
+          font-size: 14px;
+
+          &:hover {
+            background: #0056b3;
+          }
+        }
+      }
+    }
+  }
+
+  .message-config {
+    margin-bottom: 24px;
+
+    h4 {
+      color: #6c757d;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .config-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+
+      .config-select, .config-input {
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+        background: white;
+
+        &:focus {
+          outline: none;
+          border-color: #007bff;
+          box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+      }
+
+      .config-select {
+        min-width: 120px;
+      }
+
+      .config-input {
+        flex: 1;
+      }
+    }
+  }
+}
+
+.credentials-section {
+  padding: 24px;
+
+  .form-group {
+    margin-bottom: 24px;
+
+    label {
+      display: block;
+      font-weight: 500;
+      color: #495057;
+      margin-bottom: 8px;
+      font-size: 14px;
+
+      .required {
+        color: #dc3545;
+        margin-left: 2px;
+      }
+
+      .info-icon {
+        margin-left: 4px;
+        cursor: help;
+        opacity: 0.7;
+      }
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.2s ease;
+      background: white;
+
+      &:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+      }
+
+      &.error {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+      }
+
+      &::placeholder {
+        color: #6c757d;
+      }
+    }
+
+    .error-message {
+      margin-top: 8px;
+      color: #dc3545;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      &::before {
+        content: "⚠️";
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+.advanced-section {
+  padding: 24px;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+
+  h3 {
+    color: #2c3e50;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+}
+
+.action-buttons {
+  padding: 24px;
+  background: #f8f9fa;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  border-top: 1px solid #e9ecef;
+
+  .btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &.btn-primary {
+      background: #007bff;
+      color: white;
+
+      &:hover:not(:disabled) {
+        background: #0056b3;
+      }
+    }
+
+    &.btn-secondary {
+      background: #6c757d;
+      color: white;
+
+      &:hover:not(:disabled) {
+        background: #545b62;
+      }
+    }
+
+    &.btn-outline {
+      background: transparent;
+      color: #007bff;
+      border: 1px solid #007bff;
+
+      &:hover:not(:disabled) {
+        background: #007bff;
+        color: white;
+      }
+    }
+
+    .loading-spinner {
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .twilio-connection-container {
+    padding: 16px;
+  }
+
+  .config-section {
+    .section-header {
+      flex-direction: column;
+      gap: 16px;
+
+      .webhook-display {
+        margin-left: 0;
+        max-width: none;
+      }
+    }
+
+    .message-config .config-row {
+      flex-direction: column;
+      align-items: stretch;
+
+      .config-select {
+        min-width: auto;
+      }
+    }
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    
+    .btn {
+      justify-content: center;
+    }
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .twilio-connection-container {
+    background: #1a1a1a;
+    color: #e9ecef;
+  }
+
+  .twilio-form {
+    background: #2d2d2d;
+  }
+
+  .info-section {
+    background: #2c3e50;
+    color: #e9ecef;
+  }
+
+  .form-control {
+    background: #3a3a3a;
+    border-color: #495057;
+    color: #e9ecef;
+
+    &:focus {
+      background: #404040;
+    }
+  }
+
+  .advanced-section,
+  .action-buttons {
+    background: #2a2a2a;
+  }
+}
