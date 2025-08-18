@@ -11,8 +11,8 @@ import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
   selector: 'app-chatbot-menu',
   standalone: true,
   imports: [FormsModule, CommonModule],
-  templateUrl: './chatbot-menu.component.html',
-  styleUrls: ['./chatbot-menu.component.scss']
+  templateUrl: './chatbot-menu.component.html'
+  // styleUrls: ['./chatbot-menu.component.scss']
 })
 export class ChatbotMenuComponent implements OnInit, OnDestroy {
   @ViewChild('textMessageInput', { static: false }) textMessageInput!: ElementRef<HTMLTextAreaElement>;
@@ -428,10 +428,18 @@ export class ChatbotMenuComponent implements OnInit, OnDestroy {
     return 'button-' + Math.random().toString(36).substring(2, 9);
   }
 
-  private getButtonColor(): string {
-    const colors = ['#87ceeb', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
-    return colors[Math.floor(Math.random() * colors.length)];
+  public getButtonColor(button: any): string {
+  // Implement your logic here to return a color based on the button object's properties.
+  // For example:
+  if (button.type === 'action') {
+    return '#3B82F6'; // Indigo color
+  } else if (button.type === 'submenu') {
+    return '#3B82F6'; // Green color
+  } else if (button.type === 'weblink') {
+    return '#3B82F6'; // Red color
   }
+  return '#3B82F6'; // Default blue color
+}
   
   getCurrentLevel(): number {
     return this.navigationHistory.length + 1;
@@ -508,44 +516,46 @@ export class ChatbotMenuComponent implements OnInit, OnDestroy {
     this.clearValidationErrors();
   }
 
-  addButton(): void {
-    if (!this.validateForm()) {
-      return;
-    }
-
-    if (this.isEditMode && this.editingButtonId) {
-      this.updateExistingButton();
-    } else {
-      this.addNewButton();
-    }
+  public addButton(): void { // No argument needed
+  if (!this.validateForm()) {
+    return;
   }
+
+  if (this.isEditMode && this.editingButtonId) {
+    this.updateExistingButton();
+  } else {
+    this.addNewButton(); // Call without an argument
+  }
+}
 
   private addNewButton(): void {
-    const newButton: MenuButton = {
-      id: this.generateId(),
-      label: this.buttonLabel,
-      type: this.selectedButtonType,
-      parentId: this.currentParentId || undefined,
-      isActive: true,
-      order: this.currentMenu.length + 1,
-      message: this.selectedButtonType === 'action' && this.selectedTab === 'message' ? this.textMessage : undefined,
-      story: this.selectedButtonType === 'action' && this.selectedTab === 'story' ? this.selectedStory! : undefined,
-      template: this.selectedButtonType === 'action' && this.selectedTab === 'template' ? this.selectedTemplate! : undefined,
-      plugin: this.selectedButtonType === 'action' && this.selectedTab === 'plugin' ? this.selectedPlugin! : undefined,
-      url: this.selectedButtonType === 'weblink' ? this.buttonUrl : undefined,
-      children: this.selectedButtonType === 'submenu' ? [] : undefined,
-      metadata: {
-        color: this.getButtonColor(),
-        createdAt: new Date().toISOString()
-      }
-    };
-    
-    const updatedMenu = this.chatbotMenuService.addButton(this.menuButtons, newButton, this.currentParentId ?? undefined);
-    this.menuButtons = updatedMenu;
-    this.updateCurrentMenu();
-    this.hasUnsavedChanges = true;
-    this.resetForm();
-  }
+  const newButton: MenuButton = {
+    id: this.generateId(),
+    label: this.buttonLabel,
+    type: this.selectedButtonType,
+    parentId: this.currentParentId || undefined,
+    isActive: true,
+    order: this.currentMenu.length + 1,
+    message: this.selectedButtonType === 'action' && this.selectedTab === 'message' ? this.textMessage : undefined,
+    story: this.selectedButtonType === 'action' && this.selectedTab === 'story' ? this.selectedStory! : undefined,
+    template: this.selectedButtonType === 'action' && this.selectedTab === 'template' ? this.selectedTemplate! : undefined,
+    plugin: this.selectedButtonType === 'action' && this.selectedTab === 'plugin' ? this.selectedPlugin! : undefined,
+    url: this.selectedButtonType === 'weblink' ? this.buttonUrl : undefined,
+    children: this.selectedButtonType === 'submenu' ? [] : undefined,
+    metadata: {
+      createdAt: new Date().toISOString()
+    }
+  };
+
+  // Assign the color after the newButton object is fully defined
+  newButton.metadata.color = this.getButtonColor(newButton);
+
+  const updatedMenu = this.chatbotMenuService.addButton(this.menuButtons, newButton, this.currentParentId ?? undefined);
+  this.menuButtons = updatedMenu;
+  this.updateCurrentMenu();
+  this.hasUnsavedChanges = true;
+  this.resetForm();
+}
 
   private updateExistingButton(): void {
     const existingButton = this.chatbotMenuService.findButtonById(this.menuButtons, this.editingButtonId!);

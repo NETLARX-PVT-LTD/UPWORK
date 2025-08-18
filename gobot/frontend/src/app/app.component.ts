@@ -23,7 +23,13 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class AppComponent implements OnInit, OnDestroy {
   pageHeading: string = 'Dashboard';
-  showSocialCard: boolean = false;
+  showSocialMediaCard = false;
+  showWebsiteSidebar = false;
+  showWhatsAppSidebar = false;
+  showInstagramSidebar = false;
+  showMessengerSidebar = false;
+  showTelegramSidebar = false;
+  showSMSSidebar = false;
   showWebsiteChatbotSidebar: boolean = false;
   private leaveTimer: any;
   private destroy$ = new Subject<void>();
@@ -61,7 +67,7 @@ export class AppComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe((event: NavigationEnd) => {
       const url = event.urlAfterRedirects;
-      this.showHeaderAndAside = !url.includes('/create-story') && !url.includes('/chatbot-widget');
+      this.showHeaderAndAside = !url.includes('/create-story') && !url.includes('/chatbot-widget') && !url.startsWith('/landing/');
       console.log('Current route:', url);
       console.log('Show header and aside:', this.showHeaderAndAside);
     });
@@ -76,23 +82,65 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
+  onSocialMediaClick(platform: string, event: Event) {
+    event.stopPropagation();
+    this.showSocialMediaCard = false;
+    
+    switch(platform) {
+      case 'website':
+        this.showWebsiteSidebar = true;
+        break;
+      case 'whatsapp':
+        this.showWhatsAppSidebar = true;
+        break;
+      case 'instagram':
+        this.showInstagramSidebar = true;
+        break;
+      case 'messenger':
+        this.showMessengerSidebar = true;
+        break;
+      case 'telegram':
+        this.showTelegramSidebar = true;
+        break;
+      case 'sms':
+        this.showSMSSidebar = true;
+        break;
+    }
+  }
+
+  closeAllSidebars() {
+    this.showWebsiteSidebar = false;
+    this.showWhatsAppSidebar = false;
+    this.showInstagramSidebar = false;
+    this.showMessengerSidebar = false;
+    this.showTelegramSidebar = false;
+    this.showSMSSidebar = false;
+  }
+
   onMouseEnter() {
     if (this.leaveTimer) {
       clearTimeout(this.leaveTimer);
     }
-    this.showSocialCard = true;
+    this.showSocialMediaCard = true;
   }
 
   onMouseLeave() {
     this.leaveTimer = setTimeout(() => {
-      this.showSocialCard = false;
-    }, 300);
+      this.showSocialMediaCard = false;
+    }, 500); // Increased delay for better UX
   }
 
-  openWebsiteChatbotSidebar() {
-    this.showSocialCard = false;
-    this.showWebsiteChatbotSidebar = true;
-    this.sidebarAnimationClass = 'entering';
+  // Fix for social media card mouse events
+  onSocialCardMouseEnter() {
+    if (this.leaveTimer) {
+      clearTimeout(this.leaveTimer);
+    }
+  }
+
+  onSocialCardMouseLeave() {
+    this.leaveTimer = setTimeout(() => {
+      this.showSocialMediaCard = false;
+    }, 300);
   }
 
   closeWebsiteChatbotSidebar() {
@@ -103,34 +151,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }, 200);
   }
 
-  onSocialMediaClick(platform: string, event: Event) {
-    event.preventDefault();
-    switch (platform) {
-      case 'website':
-        this.openWebsiteChatbotSidebar();
-        break;
-      case 'whatsapp':
-        console.log('Opening WhatsApp integration...');
-        break;
-      case 'instagram':
-        console.log('Opening Instagram integration...');
-        break;
-      case 'facebook':
-        console.log('Opening Facebook integration...');
-        break;
-      case 'twitter':
-        console.log('Opening Twitter integration...');
-        break;
-      case 'sms':
-        console.log('Opening SMS integration...');
-        break;
-      default:
-        console.log('Unknown platform:', platform);
-    }
-    this.showSocialCard = false;
-  }
-
-  // UPDATED METHOD to navigate using the router
+  // UPDATED METHOD to navigate using the router with integrated routes
   onSidebarNavClick(item: string, event: Event) {
     event.preventDefault();
     this.closeWebsiteChatbotSidebar(); // Close sidebar on navigation
@@ -151,7 +172,73 @@ export class AppComponent implements OnInit, OnDestroy {
         this.router.navigate(['/messaging']);
         break;
       default:
-        this.router.navigate(['/dashboard']); // Fallback
+        this.router.navigate(['/create-story']); // Updated fallback to match your default route
+    }
+  }
+
+  // New methods for handling platform-specific sidebar navigation
+  onWhatsAppSidebarNavClick(item: string, event: Event) {
+    event.preventDefault();
+    this.closeAllSidebars();
+    switch (item) {
+      case 'publish':
+        this.router.navigate(['/whatsapp-publisher']);
+        break;
+      // Add other WhatsApp-specific routes as needed
+      default:
+        this.router.navigate(['/whatsapp-publisher']);
+    }
+  }
+
+  onInstagramSidebarNavClick(item: string, event: Event) {
+    event.preventDefault();
+    this.closeAllSidebars();
+    switch (item) {
+      case 'publish':
+        this.router.navigate(['/instagram-publisher']);
+        break;
+      // Add other Instagram-specific routes as needed
+      default:
+        this.router.navigate(['/instagram-publisher']);
+    }
+  }
+
+  onMessengerSidebarNavClick(item: string, event: Event) {
+    event.preventDefault();
+    this.closeAllSidebars();
+    switch (item) {
+      case 'publish':
+        this.router.navigate(['/facebook-publisher']);
+        break;
+      // Add other Messenger-specific routes as needed
+      default:
+        this.router.navigate(['/facebook-publisher']);
+    }
+  }
+
+  onTelegramSidebarNavClick(item: string, event: Event) {
+    event.preventDefault();
+    this.closeAllSidebars();
+    switch (item) {
+      case 'publish':
+        this.router.navigate(['/connect-to-telegram']);
+        break;
+      // Add other Telegram-specific routes as needed
+      default:
+        this.router.navigate(['/connect-to-telegram']);
+    }
+  }
+
+  onSMSSidebarNavClick(item: string, event: Event) {
+    event.preventDefault();
+    this.closeAllSidebars();
+    switch (item) {
+      case 'publish':
+        this.router.navigate(['/twilio-sms']);
+        break;
+      // Add other SMS-specific routes as needed
+      default:
+        this.router.navigate(['/twilio-sms']);
     }
   }
 }

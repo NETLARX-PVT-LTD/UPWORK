@@ -1,37 +1,46 @@
 <!-- src/app/chatbot-menu/chatbot-menu.component.html -->
-<div class="bg-gray-50 min-h-screen font-sans">
-  <!-- Tutorial Button -->
-  <div class="bg-white px-6 py-8 border-b border-gray-200">
+<div class="bg-gray-100 min-h-screen">
+  
+  
+  <!-- Tutorial Button Row -->
+  <div class="px-6  pt-10 border-gray-200">
     <button 
-      class="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded text-sm font-medium hover:bg-red-600 transition-colors"
+      class="flex items-center space-x-2 text-red-500 hover:text-red-600"
       (click)="startTutorial()">
-      <i class="fas fa-play-circle"></i>
-      <span>Tutorial</span>
+      <div class="w-8 h-6 bg-transparent rounded-lg border-2 border-red-500 flex items-center justify-center">
+        <i class="fas fa-play text-red-500 text-xs"></i>
+      </div>
+      <span class="text-sm font-medium">Tutorial</span>
     </button>
   </div>
 
-  <div class="flex">
+  <div class="flex rounded-lg shadow-lg overflow-hidden border-2 border-gray-100 m-4">
     <!-- Left Panel - Form -->
-    <div class="w-96 bg-white border-r border-gray-200 h-screen overflow-y-auto">
+    <div class="w-180 bg-white  border-gray-200">
       <div class="p-6">
-        <!-- Button Type -->
+        <!-- Menu Button Type -->
         <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-gray-500 mb-2">
             Menu button type <span class="text-red-500">*</span>
           </label>
-          <select 
-            class="w-full px-3 py-2 border border-gray-300 rounded text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            [(ngModel)]="selectedButtonType" 
-            (change)="onButtonTypeChange()">
-            <option value="action">Action</option>
-            <option value="submenu">Submenu</option>
-            <option value="weblink">Weblink</option>
-          </select>
+          <div class="relative">
+            <select 
+              class="w-full px-3 py-2 border border-gray-300 rounded bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [(ngModel)]="selectedButtonType" 
+              (change)="onButtonTypeChange()">
+              <option value="action">Action</option>
+              <option value="submenu">Submenu</option>
+              <option value="weblink">Weblink</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+            </div>
+          </div>
         </div>
 
-        <!-- Button Label -->
+        <!-- Menu Button Label -->
         <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-gray-500 mb-2">
             Menu button label <span class="text-red-500">*</span>
           </label>
           <input 
@@ -42,7 +51,7 @@
         </div>
 
         <!-- Validation Errors -->
-        <div *ngIf="validationErrors.length > 0" class="mb-4 p-3 bg-red-50 border-l-4 border-red-400 rounded">
+        <div *ngIf="validationErrors.length > 0" class="mb-4 p-3 bg-red-50 border border-red-200 rounded">
           <div class="text-red-700 text-sm">
             <ul class="list-disc list-inside space-y-1">
               <li *ngFor="let error of validationErrors">{{ error }}</li>
@@ -52,17 +61,17 @@
 
         <!-- Action Type Content -->
         <div *ngIf="selectedButtonType === 'action'" class="mb-6">
-          <!-- Tab Navigation -->
+          <!-- Tab Navigation - Only Text Message and Story -->
           <div class="flex border-b border-gray-200 mb-4">
             <button 
-              class="px-4 py-2 text-sm font-medium border-b-2 transition-colors"
-              [class]="selectedTab === 'message' ? 'text-blue-600 border-blue-500 bg-blue-50' : 'text-gray-500 border-transparent hover:text-blue-500 hover:border-blue-300'"
+              class="px-4 py-2 text-sm font-medium rounded"
+              [class]="selectedTab === 'message' ? 'text-white bg-blue-500' : 'text-gray-600 hover:text-gray-800 bg-gray-100'"
               (click)="onTabChange('message')">
               Text Message
             </button>
             <button 
-              class="px-4 py-2 text-sm font-medium border-b-2 transition-colors"
-              [class]="selectedTab === 'story' ? 'text-blue-600 border-blue-500 bg-blue-50' : 'text-gray-500 border-transparent hover:text-blue-500 hover:border-blue-300'"
+              class="px-4 py-2 text-sm font-medium ml-2 rounded"
+              [class]="selectedTab === 'story' ? 'text-white bg-blue-500' : 'text-gray-600 hover:text-gray-800 bg-gray-100'"
               (click)="onTabChange('story')">
               Story
             </button>
@@ -73,28 +82,23 @@
             <!-- Text Message Tab -->
             <div *ngIf="selectedTab === 'message'" class="relative">
               <div class="relative">
+                
                 <textarea 
                   #textMessageInput
-                  class="w-full px-3 py-3 pb-10 border border-gray-300 rounded resize-y focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-3 pr-16 border border-gray-300 rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm placeholder-gray-300"
                   placeholder="Write your message here..."
                   [(ngModel)]="textMessage"
                   rows="6">
                 </textarea>
-                <div class="absolute bottom-3 right-3 flex items-center space-x-2">
+                <div class="absolute top-2 right-3 flex items-center space-x-1">
                   <!-- Add Variable Button -->
                   <div class="relative variable-dropdown-container">
-                    <button 
-                      type="button"
-                      class="px-3 py-1.5 bg-gray-800 text-white text-xs rounded hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
-                      (click)="toggleVariableDropdown($event)"
-                      title="Add a Variable">
-                      Add a Variable
-                    </button>
+                    
                     
                     <!-- Variables Dropdown -->
                     <div 
                       *ngIf="showVariableDropdown" 
-                      class="absolute bottom-full right-0 mb-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+                      class="absolute top-0 right-0 mb-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
                       
                       <!-- Search Input -->
                       <div class="p-3 border-b border-gray-100">
@@ -119,7 +123,7 @@
                           <button
                             *ngFor="let variable of category.variables"
                             type="button"
-                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus:bg-blue-50 focus:text-blue-700 transition-colors"
+                            class="w-full text-left px-4 py-2 text-sm text-gray-500 hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus:bg-blue-50 focus:text-blue-700 transition-colors"
                             (click)="insertVariable(variable, $event)">
                             <span class="font-mono text-blue-600">{{ variable.display }}</span>
                           </button>
@@ -133,10 +137,11 @@
                     </div>
                   </div>
                   
-                  <!-- Emoji Button -->
-                  <button type="button" class="text-gray-400 hover:text-blue-500 transition-colors" title="Add emoji">
-                    <i class="far fa-smile text-lg"></i>
+                  <!-- Info Icon (similar to Botsify) -->
+                  <button type="button" (click)="toggleVariableDropdown($event)" class="text-blue-500 hover:text-blue-600 w-6 h-6 flex items-center justify-center rounded-full border-2 border-blue-500" title="Information">
+                    <i class="fas fa-code text-xs"></i>
                   </button>
+                  
                 </div>
               </div>
             </div>
@@ -145,15 +150,15 @@
             <div *ngIf="selectedTab === 'story'">
               <div class="space-y-3">
                 <div class="flex items-center justify-between">
-                  <label class="text-sm font-medium text-gray-700">Select Story</label>
+                  <label class="text-sm font-medium text-gray-500">Select Story</label>
                   <button 
-                    class="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 transition-colors"
+                    class="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
                     (click)="openCreateStoryModal()">
                     + Create Story
                   </button>
                 </div>
                 <select 
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                   [(ngModel)]="selectedStory">
                   <option [ngValue]="null">Select a story</option>
                   <option *ngFor="let story of availableStories" [ngValue]="story">
@@ -167,7 +172,7 @@
 
         <!-- Weblink URL -->
         <div *ngIf="selectedButtonType === 'weblink'" class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-gray-500 mb-2">
             Web URL <span class="text-red-500">*</span>
           </label>
           <input 
@@ -189,8 +194,8 @@
 
           <div class="flex space-x-2">
             <button 
-              class="flex-1 py-3 font-medium rounded focus:outline-none focus:ring-2 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-              [class]="isEditMode ? 'bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-500 text-white' : 'bg-green-500 hover:bg-green-600 focus:ring-green-500 text-white'"
+              class="flex-1 py-2 font-medium rounded focus:outline-none focus:ring-2 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm"
+              [class]="isEditMode ? 'bg-green-500 hover:bg-green-600 focus:ring-green-500 text-white' : 'bg-green-500 hover:bg-green-600 focus:ring-green-500 text-white'"
               (click)="addButton()" 
               [disabled]="!isFormValid()">
               {{ getAddButtonText() }}
@@ -199,234 +204,163 @@
             <!-- Cancel Edit Button -->
             <button 
               *ngIf="isEditMode"
-              class="px-4 py-3 bg-gray-400 text-white font-medium rounded hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors"
+              class="px-4 py-2 bg-blue-500 text-white font-medium rounded hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
               (click)="cancelEdit()">
               Cancel
             </button>
           </div>
         </div>
 
-        <!-- Save Buttons -->
-        <div class="flex space-x-3 mt-4">
+        <!-- Save Buttons Row -->
+        <div class="flex items-center space-x-3 mt-4">
           <button 
-            class="flex-1 py-2 px-4 bg-blue-500 text-white font-medium rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            class="px-4 py-2 bg-blue-500 text-white font-medium rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm"
             (click)="saveMenu()"
             [disabled]="isLoading || !hasUnsavedChanges">
             <span *ngIf="!isLoading">Save</span>
-            <span *ngIf="isLoading" class="flex items-center justify-center">
+            <span *ngIf="isLoading" class="flex items-center">
               <i class="fas fa-spinner fa-spin mr-2"></i>Saving...
             </span>
           </button>
+          
           <button 
-            class="flex-1 py-2 px-4 bg-gray-400 text-white font-medium rounded hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors"
+            class="px-4 py-2 bg-white text-blue-500 font-medium rounded border border-blue-500 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             (click)="saveWithInputDisabled()">
             Save With Input Disabled
+          </button>
+          
+          <button class="p-2 text-red-500 hover:text-red-700">
+            <i class="fas fa-trash"></i>
           </button>
         </div>
 
         <!-- Menu Statistics -->
-        <div class="mt-6 p-4 bg-gray-50 rounded">
-          <h4 class="text-sm font-medium text-gray-700 mb-2">Menu Statistics</h4>
-          <div class="text-xs text-gray-600 space-y-1">
-            <div>Level: {{ getCurrentLevel() }}</div>
-            <div>Buttons in current level: {{ currentMenu.length }} / {{ getMaxButtonsForLevel() }}</div>
-            <div>Remaining slots: {{ getRemainingSlots() }}</div>
-            <div *ngIf="hasUnsavedChanges" class="text-orange-600 font-medium">
-              <i class="fas fa-exclamation-triangle"></i> Unsaved changes
+        <!-- <div class="mt-6 p-4 bg-gray-50 rounded border">
+          <h4 class="text-sm font-medium text-gray-500 mb-3">Menu Statistics</h4>
+          <div class="text-xs text-gray-600 space-y-2">
+            <div class="flex justify-between">
+              <span>Level:</span>
+              <span class="font-medium">{{ getCurrentLevel() }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Buttons in current level:</span>
+              <span class="font-medium">{{ currentMenu.length }} / {{ getMaxButtonsForLevel() }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Remaining slots:</span>
+              <span class="font-medium">{{ getRemainingSlots() }}</span>
+            </div>
+            <div *ngIf="hasUnsavedChanges" class="text-orange-600 font-medium flex items-center">
+              <i class="fas fa-exclamation-triangle mr-1"></i> 
+              <span>Unsaved changes</span>
             </div>
           </div>
+        </div> -->
+      </div>
+    </div>
+
+    <!-- Right Panel - Chat Menu -->
+    <div class="flex-1 bg-white">
+      <div class="p-6">
+        <!-- Chat Menu Header -->
+        <div class="mb-4">
+          <h2 class="text-md font-medium text-gray-500">Chat Menu</h2>
         </div>
-      </div>
-    </div>
 
-   <!-- Right Panel - Menu Preview -->
-<div class="flex-1 bg-gray-50 p-6">
-  <div class="max-w-md mx-auto">
-    <!-- Navigation Header -->
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center space-x-3">
-        <button 
-          *ngIf="canGoBack()" 
-          class="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-          (click)="navigateBack()">
-          <i class="fas fa-arrow-left text-sm"></i>
-        </button>
-        <h2 class="text-xl font-semibold text-gray-800">{{ getCurrentMenuTitle() }}</h2>
-      </div>
-    </div>
+        <div class=" w-180">
+          <!-- Navigation Breadcrumb -->
+          <div class="flex items-center space-x-3 mb-4" *ngIf="canGoBack()">
+            <button 
+              class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              (click)="navigateBack()">
+              <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="flex items-center space-x-1 text-sm text-gray-600">
+              <span *ngFor="let crumb of getMenuBreadcrumb(); let i = index">
+                <span *ngIf="i > 0" class="mx-1">></span>
+                <span [class.font-medium]="i === getMenuBreadcrumb().length - 1">{{ crumb }}</span>
+              </span>
+            </div>
+          </div>
 
-    <!-- Breadcrumb -->
-    <div *ngIf="getMenuBreadcrumb().length > 1" class="flex items-center space-x-1 text-sm text-gray-600 mb-6">
-      <span *ngFor="let crumb of getMenuBreadcrumb(); let i = index">
-        <span *ngIf="i > 0" class="mx-1 text-gray-400">></span>
-        <span [class.font-medium]="i === getMenuBreadcrumb().length - 1">{{ crumb }}</span>
-      </span>
-    </div>
-
-    <!-- Menu Buttons Display -->
-    <div class="bg-white rounded-lg shadow-lg border border-gray-200 min-h-[400px]">
-      <!-- Menu has buttons -->
-      <div *ngIf="getFilteredCurrentMenu().length > 0; else emptyMenu" class="p-4">
-        <div class="space-y-3">
-          <div 
-            *ngFor="let button of getFilteredCurrentMenu(); let i = index" 
-            class="relative group"
-            draggable="true"
-            (dragstart)="onDragStart($event, i)"
-            (dragover)="onDragOver($event, i)"
-            (dragleave)="onDragLeave()"
-            (drop)="onDrop($event, i)">
+          <!-- Menu Preview Container -->
+          <div class="border-1 border-dashed border-blue-500 rounded-none h-auto relative">
             
-            <!-- Main Button Container -->
+            <!-- Existing Menu Button (if any) -->
             <div 
-              class="relative rounded-lg border border-gray-300 overflow-hidden"
-              [class.opacity-50]="!button.isActive"
-              [class.ring-2]="isEditingButton(button.id)"
-              [class.ring-yellow-400]="isEditingButton(button.id)">
+              *ngIf="getFilteredCurrentMenu().length > 0; else emptyState"
+              class="p-4">
               
-              <!-- Button Content Area -->
               <div 
-                class="flex items-center p-3 text-white cursor-pointer transition-all duration-200"
-                [style.background-color]="button.metadata?.color || (button.type === 'action' && button.message ? '#87CEEB' : (button.type === 'submenu' ? '#4ECDC4' : '#45B7D1'))"
-                (click)="navigateToSubmenu(button)">
+                *ngFor="let button of getFilteredCurrentMenu(); let i = index" 
+                class="mb-3 last:mb-0 group"
+                draggable="true"
+                (dragstart)="onDragStart($event, i)"
+                (dragover)="onDragOver($event, i)"
+                (drop)="onDrop($event, i)">
                 
-                <!-- Left Content -->
-                <div class="flex items-center space-x-3 flex-1">
-                  <i class="fas fa-bars text-white opacity-70"></i>
-                  <span class="font-medium text-white">{{ button.label }}</span>
+                <div 
+                  class="flex items-center justify-between px-4 py-1.5 rounded-lg cursor-pointer transition-all duration-200 relative"
+                  [class.opacity-50]="!button.isActive"
+                  [style.background-color]="getButtonColor(button)"
+                  (click)="navigateToSubmenu(button)">
                   
-                  <!-- Type Indicator -->
-                  <span class="text-white opacity-80">
-                    <i *ngIf="button.type === 'submenu'" class="fas fa-chevron-right text-xs"></i>
-                    <i *ngIf="button.type === 'weblink'" class="fas fa-external-link-alt text-xs"></i>
-                    <i *ngIf="button.type === 'action'" class="fas fa-comment text-xs"></i>
-                  </span>
-                </div>
-
-                <!-- Right Action Buttons - Always Visible -->
-                <div class="flex items-center space-x-2 ml-4">
-                  <!-- Edit Button -->
-                  <button 
-                    type="button"
-                    class="p-1.5 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50" 
-                    title="Edit button" 
-                    (click)="editButton(button, $event)">
-                    <i class="fas fa-edit text-sm"></i>
-                  </button>
-                  
-                  <!-- Delete Button -->
-                  <button 
-                    type="button"
-                    class="p-1.5 bg-white bg-opacity-20 hover:bg-opacity-30 hover:bg-red-500 rounded-full text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50" 
-                    title="Delete button" 
-                    (click)="removeButton(button.id, $event)">
-                    <i class="fas fa-trash text-sm"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Button Details (Weblink type) -->
-            <div *ngIf="button.type === 'weblink'" class="mt-2 ml-4">
-              <div class="text-xs bg-blue-50 p-2 rounded border-l-4 border-blue-400">
-                <span class="font-semibold text-blue-700">URL:</span> 
-                <a [href]="button.url" target="_blank" class="text-blue-600 hover:underline ml-1">
-                  {{ button.url }}
-                </a>
-              </div>
-            </div>
-
-            <!-- Submenu Children -->
-            <div *ngIf="button.type === 'submenu' && button.children && button.children.length > 0" 
-                 class="mt-2 ml-6 pl-4 border-l-2 border-gray-200">
-              <div class="text-xs text-gray-600 font-medium mb-2">
-                <i class="fas fa-folder text-xs mr-1"></i>
-                Submenu items ({{ button.children.length }}):
-              </div>
-              <div class="space-y-1">
-                <div *ngFor="let child of button.children.slice(0, 3)" 
-                     class="flex items-center justify-between text-xs bg-gray-50 p-2 rounded hover:bg-gray-100 transition-colors">
-                  <div class="flex items-center space-x-2 flex-1">
-                    <i class="fas fa-arrow-right text-xs text-gray-400"></i>
-                    <span class="text-gray-700 truncate">{{ child.label }}</span>
-                    <span class="text-gray-400 text-xs">
-                      <i *ngIf="child.type === 'action'" class="fas fa-comment" title="Action"></i>
-                      <i *ngIf="child.type === 'weblink'" class="fas fa-external-link-alt" title="Web Link"></i>
-                      <i *ngIf="child.type === 'submenu'" class="fas fa-folder" title="Submenu"></i>
-                    </span>
-                  </div>
-                  <div class="flex items-center space-x-1 ml-2">
+                  <!-- Button Content -->
+                  <div class="flex items-center space-x-1 text-white">
                     <button 
-                      type="button"
-                      class="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors" 
-                      title="Edit child button" 
-                      (click)="editButton(child, $event)">
-                      <i class="fas fa-edit text-xs"></i>
+                      class="w-7 h-7 bg-transparent bg-opacity-20 hover:bg-opacity-30 rounded flex items-center justify-center transition-colors"
+                      (click)="editButton(button, $event)"
+                      title="Edit">
+                      <i class="fas fa-edit" title="Edit"></i>
                     </button>
+                    <i *ngIf="button.type === 'submenu'"></i>
+                    <i *ngIf="button.type === 'action'"></i>
+                    <i *ngIf="button.type === 'weblink'"></i>
+                    <span class="font-medium text-sm">{{ button.label }}</span>
+                  </div>
+
+                  <!-- Action Icons (matching Botsify style) -->
+                  <div class="flex items-center space-x-1 opacity-100 group-hover:opacity-100 transition-opacity duration-200">
+                   
+                    <!-- <button 
+                      class="w-7 h-7 bg-transparent bg-opacity-20 hover:bg-opacity-30 rounded flex items-center justify-center transition-colors"
+                      (click)="duplicateButton(button, $event)"
+                      title="Duplicate">
+                      <i class="fas fa-copy text-white text-xs"></i>
+                    </button> -->
+                    <!-- <button 
+                      class="w-7 h-7 bg-white bg-opacity-20 hover:bg-opacity-30 rounded flex items-center justify-center transition-colors"
+                      (click)="toggleButtonStatus(button, $event)"
+                      [title]="button.isActive ? 'Hide' : 'Show'">
+                      <i class="fas text-white text-xs" [class.fa-eye]="button.isActive" [class.fa-eye-slash]="!button.isActive"></i>
+                    </button> -->
                     <button 
-                      type="button"
-                      class="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors" 
-                      title="Delete child button" 
-                      (click)="removeButton(child.id, $event)">
-                      <i class="fas fa-trash text-xs"></i>
+                      class="w-7 h-7 bg-transparent bg-opacity-80 hover:bg-opacity-100 rounded flex items-center justify-center transition-colors"
+                      (click)="removeButton(button.id, $event)"
+                      title="Delete">
+                      <i class="fas fa-trash text-white text-xs"></i>
                     </button>
                   </div>
                 </div>
-                
-                <!-- Show more indicator -->
-                <div *ngIf="button.children.length > 3" class="text-xs text-gray-500 italic pl-4">
-                  ... and {{ button.children.length - 3 }} more items
-                </div>
               </div>
             </div>
+
+            <!-- Empty State Template -->
+            <ng-template #emptyState>
+              <div class="flex items-center justify-center h-full min-h-[300px]">
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-plus text-2xl text-gray-400"></i>
+                  </div>
+                  <p class="text-gray-500 text-sm">Your menu will appear here</p>
+                </div>
+              </div>
+            </ng-template>
+
+            <!-- Sub Menu Indicator (visible when there are buttons) -->
+            
           </div>
         </div>
-      </div>
-
-      <!-- Empty State -->
-      <ng-template #emptyMenu>
-        <div 
-          class="flex flex-col items-center justify-center h-64 text-center p-8"
-          (dragover)="onDragOver($event, 0)"
-          (dragleave)="onDragLeave()"
-          (drop)="onDrop($event, 0)">
-          
-          <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 w-full hover:border-gray-400 transition-colors">
-            <i class="fas fa-plus-circle text-4xl text-gray-400 mb-4"></i>
-            <h3 class="text-lg font-medium text-gray-600 mb-2">+ Drag Buttons Here</h3>
-            <p class="text-sm text-gray-500 max-w-xs mx-auto">
-              Your menu will look like this when you add items. Use the form on the left to create your first menu button.
-            </p>
-          </div>
-        </div>
-      </ng-template>
-
-      <!-- Menu Preview Info -->
-      <div class="p-4 border-t border-gray-200 bg-gray-50">
-        <div class="text-center text-xs text-gray-500 space-y-1">
-          <div class="flex items-center justify-center space-x-4">
-            <span><i class="fas fa-arrows-alt mr-1"></i>Drag to reorder</span>
-            <span><i class="fas fa-edit mr-1"></i>Click to edit</span>
-            <span><i class="fas fa-trash mr-1"></i>Delete button</span>
-          </div>
-          <p>This is how your menu will appear to users</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Stats -->
-    <div class="mt-4 grid grid-cols-3 gap-3 text-center">
-      <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
-        <div class="text-lg font-semibold text-gray-800">{{ currentMenu.length }}</div>
-        <div class="text-xs text-gray-600">Buttons</div>
-      </div>
-      <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
-        <div class="text-lg font-semibold text-gray-800">{{ getCurrentLevel() }}</div>
-        <div class="text-xs text-gray-600">Level</div>
-      </div>
-      <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
-        <div class="text-lg font-semibold text-gray-800">{{ getRemainingSlots() }}</div>
-        <div class="text-xs text-gray-600">Slots Left</div>
       </div>
     </div>
   </div>

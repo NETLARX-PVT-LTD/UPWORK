@@ -1,10 +1,10 @@
 <div class="app-container">
   <!-- The header is now hidden for '/create-story' and '/chatbot-widget' paths -->
-  <header class="app-header fixed top-0 left-0 right-0 bg-white/95 border-b border-gray-200 h-16 flex items-center justify-between px-6 z-50"
-          *ngIf="showHeaderAndAside">
+  <header class="app-header fixed top-0 left-16 right-0 bg-gray-100  h-16 flex items-center justify-between px-6 z-50"
+    *ngIf="showHeaderAndAside">
     <div class="flex items-center gap-4">
       <div class="flex items-center gap-3">
-        <mat-icon class="text-red-500 text-2xl">play_circle_outline</mat-icon>
+        <!-- <mat-icon class="text-red-500 text-2xl">play_circle_outline</mat-icon> -->
         <h1 class="text-2xl font-semibold text-gray-800">{{ pageHeading }}</h1>
         <div class="flex items-center gap-2 ml-4">
           <span class="text-sm text-gray-600">Bot 2</span>
@@ -14,122 +14,473 @@
     </div>
     <div class="flex items-center gap-4">
       <div class="flex items-center bg-gray-100 rounded-lg p-1">
-        <button mat-flat-button class="!bg-blue-500 !text-white !text-sm font-medium !px-4 !py-2 !rounded-md !h-auto transition-all hover:!bg-blue-600">
+        <button mat-flat-button
+          class="!bg-blue-500 !text-white !text-sm font-medium !px-4 !py-2 !rounded-md !h-auto transition-all hover:!bg-blue-600">
           ⚡ Agentic Platform
         </button>
-        <button mat-flat-button class="!bg-green-500 !text-white !text-sm font-medium !px-4 !py-2 !rounded-md !h-auto !ml-1 transition-all hover:!bg-green-600">
+        <button mat-flat-button
+          class="!bg-green-500 !text-white !text-sm font-medium !px-4 !py-2 !rounded-md !h-auto !ml-1 transition-all hover:!bg-green-600">
           💬 Partner Portal
         </button>
+        <button mat-icon-button
+          class="!w-12 py-2 !bg-green-500 !ml-1 !rounded-lg flex items-center justify-center hover:!bg-green-600 transition-colors"
+          aria-label="User profile">
+          <mat-icon class="text-white text-md">person</mat-icon>
+        </button>
       </div>
-      <button mat-icon-button class="!w-8 !h-8 bg-green-500 rounded-full flex items-center justify-center hover:!bg-green-600 transition-colors" aria-label="User profile">
-        <mat-icon class="text-white text-sm">person</mat-icon>
-      </button>
+
     </div>
   </header>
 
   <!-- The aside sidebar is now hidden for '/create-story' and '/chatbot-widget' paths -->
-  <aside class="fixed left-0 top-16 bottom-0 w-16 bg-blue-600 flex flex-col items-center py-4 z-40"
-         *ngIf="showHeaderAndAside">
-    <div class="flex flex-col gap-4">
-      <button mat-icon-button class="sidebar-nav-button !w-10 !h-10 !rounded-lg !bg-blue-700 !text-white hover:!bg-blue-500 transition-all duration-200" aria-label="Dashboard">
-        <mat-icon class="text-lg">grid_view</mat-icon>
-      </button>
-      <button mat-icon-button class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200" aria-label="Schedule">
-        <mat-icon class="text-lg">schedule</mat-icon>
-      </button>
-      <button mat-icon-button class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200" aria-label="Chat">
-        <mat-icon class="text-lg">chat</mat-icon>
-      </button>
-      <button mat-icon-button class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200" aria-label="People">
-        <mat-icon class="text-lg">people</mat-icon>
-      </button>
-      <button mat-icon-button class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200" aria-label="Settings">
-        <mat-icon class="text-lg">settings</mat-icon>
-      </button>
+  <aside class="fixed left-0 top-0 bottom-0 w-16 bg-blue-600 flex flex-col items-center py-4 z-40"
+    *ngIf="showHeaderAndAside">
+    <div class="flex flex-col gap-24">
+       <button mat-icon-button
+          class="sidebar-nav-button !w-10 !h-10 !rounded-lg !bg-blue-500 shadow-lg !text-white hover:!bg-blue-500 transition-all duration-200"
+          aria-label="Dashboard">
+         <i class="fas fa-comment-alt text-white text-lg" title="Dashboard"></i>
+        </button>
+      <div class="flex flex-col gap-4">
 
-      <div class="relative" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
-        <button mat-icon-button class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200" aria-label="Share">
-          <mat-icon class="text-lg">share</mat-icon>
+        <button mat-icon-button
+          class="sidebar-nav-button !w-10 !h-10 !rounded-lg !bg-blue-700 !text-white hover:!bg-blue-500 transition-all duration-200"
+          aria-label="Dashboard">
+          <mat-icon class="text-lg">grid_view</mat-icon>
+        </button>
+        <button mat-icon-button
+          class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200"
+          aria-label="Schedule">
+          <mat-icon class="text-lg">schedule</mat-icon>
+        </button>
+        <button mat-icon-button
+          class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200"
+          aria-label="Chat">
+          <mat-icon class="text-lg">chat</mat-icon>
+        </button>
+        <button mat-icon-button
+          class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200"
+          aria-label="People">
+          <mat-icon class="text-lg">people</mat-icon>
+        </button>
+        <button mat-icon-button
+          class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200"
+          aria-label="Settings">
+          <mat-icon class="text-lg">settings</mat-icon>
         </button>
 
-        <div *ngIf="showSocialCard"
-             class="social-media-card absolute left-16 top-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden min-w-[220px] animate-fadeIn">
+        <div class="relative" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+          <button mat-icon-button
+            class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200"
+            aria-label="Share">
+            <mat-icon class="text-lg">share</mat-icon>
+          </button>
 
-          <div class="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
-            <h4 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
-              <mat-icon class="!w-4 !h-4 text-blue-600">share</mat-icon>
-              Share on Socials
-            </h4>
-          </div>
+          <div *ngIf="showSocialMediaCard"
+            class="social-media-card absolute left-16 top-1/2 -translate-y-1/2 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 overflow-hidden w-80"
+            (mouseenter)="onSocialCardMouseEnter()" (mouseleave)="onSocialCardMouseLeave()">
 
-          <div class="p-3">
-            <div class="flex items-center justify-around">
-              <button class="flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group"
-                      (click)="onSocialMediaClick('website', $event)" aria-label="Share on website">
-                <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                  <mat-icon class="!w-5 !h-5 text-gray-600 group-hover:text-blue-600">public</mat-icon>
-                </div>
-              </button>
 
-              <button class="flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 group"
-                      (click)="onSocialMediaClick('whatsapp', $event)" aria-label="Share on WhatsApp">
-                <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-green-100 transition-colors">
-                  <mat-icon class="!w-5 !h-5 text-gray-600 group-hover:text-green-600">message</mat-icon>
-                </div>
-              </button>
+            <div class="p-4">
+              <div class="grid grid-cols-6 gap-3">
 
-              <button class="flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-all duration-200 group"
-                      (click)="onSocialMediaClick('instagram', $event)" aria-label="Share on Instagram">
-                <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-pink-100 transition-colors">
-                  <mat-icon class="!w-5 !h-5 text-gray-600 group-hover:text-pink-600">camera_alt</mat-icon>
-                </div>
-              </button>
+                <!-- Website -->
+                <button
+                  class="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 group"
+                  (click)="onSocialMediaClick('website', $event)">
+                  <div
+                    class="w-10 h-10 border-2 border-blue-600 rounded-full bg-transparent flex items-center justify-center">
+                    <i class="fas fa-globe text-blue-600 text-lg" title="Website"></i>
+                  </div>
+                </button>
 
-              <button class="flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 group"
-                      (click)="onSocialMediaClick('facebook', $event)" aria-label="Share on Facebook">
-                <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                  <mat-icon class="!w-5 !h-5 text-gray-600 group-hover:text-blue-700">groups</mat-icon>
-                </div>
-              </button>
+                <!-- WhatsApp -->
+                <button
+                  class="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 group"
+                  (click)="onSocialMediaClick('whatsapp', $event)">
+                  <div
+                    class="w-10 h-10 rounded-full bg-transparent border-2 border-green-500 flex items-center justify-center">
+                    <i class="fab fa-whatsapp text-green-500 text-lg" title="WhatsApp"></i>
+                  </div>
 
-              <button class="flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-sky-50 hover:text-sky-600 transition-all duration-200 group"
-                      (click)="onSocialMediaClick('twitter', $event)" aria-label="Share on Twitter">
-                <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-sky-100 transition-colors">
-                  <mat-icon class="!w-5 !h-5 text-gray-600 group-hover:text-sky-600">tag</mat-icon>
-                </div>
-              </button>
+                </button>
 
-              <button class="flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-800 transition-all duration-200 group"
-                      (click)="onSocialMediaClick('sms', $event)" aria-label="Share via SMS">
-                <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                  <mat-icon class="!w-5 !h-5 text-gray-600 group-hover:text-gray-800">textsms</mat-icon>
-                </div>
-              </button>
+                <!-- Instagram -->
+                <button
+                  class="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 group"
+                  (click)="onSocialMediaClick('instagram', $event)">
+                  <div
+                    class="w-10 h-10 rounded-full bg-transparent border-2 border-pink-600 flex items-center justify-center">
+                    <i class="fab fa-instagram text-pink-600 text-lg" title="Instagram"></i>
+                  </div>
+
+                </button>
+
+                <!-- Messenger -->
+                <button
+                  class="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 group"
+                  (click)="onSocialMediaClick('messenger', $event)">
+                  <div
+                    class="w-10 h-10 rounded-full bg-transparent border-2 border-blue-500 flex items-center justify-center">
+                    <i class="fab fa-facebook-messenger text-blue-500 text-lg" title="Facebook"></i>
+                  </div>
+
+                </button>
+
+                <!-- Telegram -->
+                <button
+                  class="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 group"
+                  (click)="onSocialMediaClick('telegram', $event)">
+                  <div
+                    class="w-10 h-10 rounded-full bg-transparent border-2 border-blue-400 flex items-center justify-center">
+                    <i class="fab fa-telegram-plane text-blue-400 text-lg" title="Telegram"></i>
+                  </div>
+
+                </button>
+
+                <!-- SMS -->
+                <button
+                  class="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 group"
+                  (click)="onSocialMediaClick('sms', $event)">
+                  <div
+                    class="w-10 h-10 rounded-full bg-transparent border-2 border-orange-500 flex items-center justify-center">
+                    <i class="fas fa-sms text-orange-500 text-lg" title="SMS"></i>
+                  </div>
+
+                </button>
+
+              </div>
             </div>
-          </div>
 
-          <div class="px-4 py-2 bg-gray-50 border-t border-gray-100">
-            <p class="text-xs text-gray-500 text-center">Choose a platform to share your bot</p>
           </div>
         </div>
       </div>
-    </div>
+      </div>
 
-    <div class="mt-auto">
-      <button mat-icon-button class="!w-10 !h-10 !rounded-full !border-2 !border-blue-300 !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200" aria-label="Help">
-        <mat-icon class="text-lg">help_outline</mat-icon>
-      </button>
-    </div>
+      <div class="mt-auto">
+        <button mat-icon-button
+          class="!w-10 !h-10 !rounded-full !border-2 !border-blue-300 !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200"
+          aria-label="Help">
+          <mat-icon class="text-lg">help_outline</mat-icon>
+        </button>
+      </div>
   </aside>
 
+  <div *ngIf="showWebsiteSidebar" class="fixed inset-1 z-20 bg-transparent " (click)="closeAllSidebars()"></div>
+
+  <div *ngIf="showWebsiteSidebar"
+    class="fixed left-16 top-16 bottom-0 w-64 bg-[#ecefff] border-r border-gray-200 shadow-xl z-30 sidebar-slide-in">
+    <div class="p-4 h-full flex flex-col">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-800 mb-1">Website Chatbot</h2>
+          <p class="text-sm text-gray-500">Manage your website chatbot settings.</p>
+        </div>
+        <button mat-icon-button class="!w-6 !h-6 !text-gray-400 hover:!text-gray-600 transition-colors"
+          (click)="closeAllSidebars()">
+          <mat-icon class="text-base">close</mat-icon>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        <div class="flex flex-col gap-1">
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all duration-200"   (click)="onSidebarNavClick('publish', $event)">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm font-medium">Publish Bot</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200"   (click)="onSidebarNavClick('menu', $event)">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Chatbot Menu</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Branding</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Advance Settings</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Page Messaging</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showWhatsAppSidebar"
+    class="fixed left-16 top-16 bottom-0 w-64 bg-[#ecefff] border-r border-gray-200 shadow-xl z-30 sidebar-slide-in">
+    <div class="p-4 h-full flex flex-col">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-800 mb-1">WhatsApp Chatbot</h2>
+          <p class="text-sm text-gray-500">Power your chatbot through WhatsApp Business account.</p>
+        </div>
+        <button mat-icon-button class="!w-6 !h-6 !text-gray-400 hover:!text-gray-600 transition-colors"
+          (click)="closeAllSidebars()">
+          <mat-icon class="text-base">close</mat-icon>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        <div class="flex flex-col gap-1">
+
+         <!-- Update the WhatsApp sidebar "Publish Bot" button -->
+<button
+  class="flex items-center gap-3 p-3 rounded-lg  text-gray-700 hover:bg-green-100 transition-all duration-200"
+  (click)="onWhatsAppSidebarNavClick('publish', $event)">
+  <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100 flex items-center justify-center">
+  </div>
+  <span class="text-sm font-medium">Publish Bot</span>
+</button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100 flex items-center justify-center">
+            </div>
+            <span class="text-sm">Whatsapp Media Blocks</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Whatsapp Broadcast</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Single Message</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Schedule Messages</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Auto Sequences</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Broadcast Report</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Whatsapp Catalog</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showInstagramSidebar" class="fixed inset-1 z-20 bg-transparent" (click)="closeAllSidebars()"></div>
+
+  <div *ngIf="showInstagramSidebar"
+    class="fixed left-16 top-16 bottom-0 w-64 bg-[#ecefff] border-r border-gray-200 shadow-xl z-30 sidebar-slide-in">
+    <div class="p-4 h-full flex flex-col">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-800 mb-1">Instagram Chatbot</h2>
+          <p class="text-sm text-gray-500">Manage your Instagram chatbot settings.</p>
+        </div>
+        <button mat-icon-button class="!w-6 !h-6 !text-gray-400 hover:!text-gray-600 transition-colors"
+          (click)="closeAllSidebars()">
+          <mat-icon class="text-base">close</mat-icon>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        <div class="flex flex-col gap-1">
+          <button
+  class="flex items-center gap-3 p-3 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 transition-all duration-200"
+  (click)="onInstagramSidebarNavClick('publish', $event)">
+  <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+  <span class="text-sm font-medium">Publish Bot</span>
+</button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Instagram Stories</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Comments Management</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Direct Messages</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showMessengerSidebar" class="fixed inset-1 z-20 bg-transparent" (click)="closeAllSidebars()"></div>
+
+  <div *ngIf="showMessengerSidebar"
+    class="fixed left-16 top-16 bottom-0 w-64 bg-[#ecefff] border-r border-gray-200 shadow-xl z-30 sidebar-slide-in">
+    <div class="p-4 h-full flex flex-col">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-800 mb-1">Facebook Messenger</h2>
+          <p class="text-sm text-gray-500">Manage your Facebook Messenger chatbot.</p>
+        </div>
+        <button mat-icon-button class="!w-6 !h-6 !text-gray-400 hover:!text-gray-600 transition-colors"
+          (click)="closeAllSidebars()">
+          <mat-icon class="text-base">close</mat-icon>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        <div class="flex flex-col gap-1">
+         <button
+  class="flex items-center gap-3 p-3 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all duration-200"
+  (click)="onMessengerSidebarNavClick('publish', $event)">
+  <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+  <span class="text-sm font-medium">Publish Bot</span>
+</button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Messenger Settings</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Auto Responses</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showTelegramSidebar" class="fixed inset-1 z-20 bg-transparent" (click)="closeAllSidebars()"></div>
+
+  <div *ngIf="showTelegramSidebar"
+    class="fixed left-16 top-16 bottom-0 w-64 bg-[#ecefff] border-r border-gray-200 shadow-xl z-30 sidebar-slide-in">
+    <div class="p-4 h-full flex flex-col">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-800 mb-1">Telegram Chatbot</h2>
+          <p class="text-sm text-gray-500">Manage your Telegram chatbot settings.</p>
+        </div>
+        <button mat-icon-button class="!w-6 !h-6 !text-gray-400 hover:!text-gray-600 transition-colors"
+          (click)="closeAllSidebars()">
+          <mat-icon class="text-base">close</mat-icon>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        <div class="flex flex-col gap-1">
+         <button
+  class="flex items-center gap-3 p-3 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all duration-200"
+  (click)="onTelegramSidebarNavClick('publish', $event)">
+  <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+  <span class="text-sm font-medium">Publish Bot</span>
+</button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Bot Commands</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Group Management</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Notifications</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showSMSSidebar" class="fixed inset-1 z-20 bg-transparent bg-opacity-25" (click)="closeAllSidebars()">
+  </div>
+
+  <div *ngIf="showSMSSidebar"
+    class="fixed left-16 top-16 bottom-0 w-64 bg-[#ecefff] border-r border-gray-200 shadow-xl z-30 sidebar-slide-in">
+    <div class="p-4 h-full flex flex-col">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-800 mb-1">SMS Chatbot</h2>
+          <p class="text-sm text-gray-500">Manage your SMS chatbot settings.</p>
+        </div>
+        <button mat-icon-button class="!w-6 !h-6 !text-gray-400 hover:!text-gray-600 transition-colors"
+          (click)="closeAllSidebars()">
+          <mat-icon class="text-base">close</mat-icon>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        <div class="flex flex-col gap-1">
+         <button
+  class="flex items-center gap-3 p-3 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 transition-all duration-200"
+  (click)="onSMSSidebarNavClick('publish', $event)">
+  <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+  <span class="text-sm font-medium">Publish Bot</span>
+</button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">SMS Templates</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">Contact Management</span>
+          </button>
+
+          <button
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+            <span class="text-sm">SMS Campaigns</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- The chatbot sidebar is also hidden for '/create-story' and '/chatbot-widget' paths -->
-  <div *ngIf="showWebsiteChatbotSidebar && showHeaderAndAside"
-       class="fixed inset-0  z-20"
-       (click)="closeWebsiteChatbotSidebar()"></div>
+  <div *ngIf="showWebsiteChatbotSidebar && showHeaderAndAside" class="fixed inset-0 z-20 bg-black bg-opacity-25"
+    (click)="closeWebsiteChatbotSidebar()"></div>
 
   <div *ngIf="showWebsiteChatbotSidebar && showHeaderAndAside"
-       class="website-chatbot-sidebar fixed left-16 top-16 bottom-0 w-64 bg-gray-200 border-r border-gray-200 shadow-xl z-30"
-       [ngClass]="sidebarAnimationClass">
+    class="website-chatbot-sidebar fixed left-16 top-16 bottom-0 w-64 bg-white border-r border-gray-200 shadow-xl z-30"
+    [ngClass]="sidebarAnimationClass">
     <div class="p-6 h-full flex flex-col">
       <div class="flex items-center justify-between mb-6">
         <div>
@@ -137,16 +488,17 @@
           <p class="text-sm text-gray-600">Manage your Chatbot settings for website.</p>
         </div>
         <button mat-icon-button
-                class="!w-8 !h-8 !text-gray-400 hover:!text-gray-600 hover:!bg-gray-100 transition-colors"
-                (click)="closeWebsiteChatbotSidebar()" aria-label="Close sidebar">
+          class="!w-8 !h-8 !text-gray-400 hover:!text-gray-600 hover:!bg-gray-100 transition-colors"
+          (click)="closeWebsiteChatbotSidebar()" aria-label="Close sidebar">
           <mat-icon class="text-lg">close</mat-icon>
         </button>
       </div>
 
       <div class="flex-1">
         <div class="flex flex-col gap-2">
-          <button class="sidebar-menu-item flex items-center gap-3 p-3 rounded-lg bg-blue-50 text-blue-600 font-medium hover:bg-blue-100 transition-all duration-200"
-                  (click)="onSidebarNavClick('publish', $event)" aria-label="Publish Bot">
+          <button
+            class="sidebar-menu-item flex items-center gap-3 p-3 rounded-lg bg-blue-50 text-blue-600 font-medium hover:bg-blue-100 transition-all duration-200"
+            (click)="onSidebarNavClick('publish', $event)" aria-label="Publish Bot">
             <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
               <mat-icon class="!w-5 !h-5 text-blue-600">cloud_upload</mat-icon>
             </div>
@@ -156,8 +508,9 @@
             </div>
           </button>
 
-          <button class="sidebar-menu-item flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
-                  (click)="onSidebarNavClick('menu', $event)" aria-label="Chatbot Menu">
+          <button
+            class="sidebar-menu-item flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
+            (click)="onSidebarNavClick('menu', $event)" aria-label="Chatbot Menu">
             <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
               <mat-icon class="!w-5 !h-5 text-gray-600">menu_book</mat-icon>
             </div>
@@ -165,8 +518,9 @@
             <mat-icon class="!w-4 !h-4 text-gray-400 ml-auto">chevron_right</mat-icon>
           </button>
 
-          <button class="sidebar-menu-item flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
-                  (click)="onSidebarNavClick('branding', $event)" aria-label="Branding">
+          <button
+            class="sidebar-menu-item flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
+            (click)="onSidebarNavClick('branding', $event)" aria-label="Branding">
             <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
               <mat-icon class="!w-5 !h-5 text-gray-600">brush</mat-icon>
             </div>
@@ -174,8 +528,9 @@
             <mat-icon class="!w-4 !h-4 text-gray-400 ml-auto">chevron_right</mat-icon>
           </button>
 
-          <button class="sidebar-menu-item flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
-                  (click)="onSidebarNavClick('settings', $event)" aria-label="Advance Settings">
+          <button
+            class="sidebar-menu-item flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
+            (click)="onSidebarNavClick('settings', $event)" aria-label="Advance Settings">
             <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
               <mat-icon class="!w-5 !h-5 text-gray-600">settings</mat-icon>
             </div>
@@ -183,8 +538,9 @@
             <mat-icon class="!w-4 !h-4 text-gray-400 ml-auto">chevron_right</mat-icon>
           </button>
 
-          <button class="sidebar-menu-item flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
-                  (click)="onSidebarNavClick('messaging', $event)" aria-label="Page Messaging">
+          <button
+            class="sidebar-menu-item flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
+            (click)="onSidebarNavClick('messaging', $event)" aria-label="Page Messaging">
             <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
               <mat-icon class="!w-5 !h-5 text-gray-600">article</mat-icon>
             </div>
@@ -208,11 +564,8 @@
     </div>
   </div>
 
-  <main class="transition-all duration-300"
-        [class.mt-10]="showHeaderAndAside"
-        [class.ml-16]="showHeaderAndAside"
-        [class.ml-80]="showWebsiteChatbotSidebar && showHeaderAndAside"
-        >
+  <main class="transition-all duration-300" [class.mt-16]="showHeaderAndAside" [class.ml-16]="showHeaderAndAside"
+    [class.ml-80]="showWebsiteChatbotSidebar && showHeaderAndAside">
     <router-outlet></router-outlet>
   </main>
 </div>
