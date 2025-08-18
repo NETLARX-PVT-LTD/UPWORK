@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+   "proto:gen": "protoc -I=../proto --ts_out=./src/app/proto-gen ../proto/*.proto"
   },
   "private": true,
   "dependencies": {
