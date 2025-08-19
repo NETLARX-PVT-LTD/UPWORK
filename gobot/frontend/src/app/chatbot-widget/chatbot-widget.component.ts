@@ -1,10 +1,12 @@
-// Enhanced chatbot-widget.component.ts with Direct Menu Integration
+// Enhanced chatbot-widget.component.ts with proper branding integration
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ChatbotMenuService } from '../shared/services/chatbot-menu.service';
 import { MenuButton } from '../models/menu-button.model';
+import { BrandingService, BrandingSettings } from '../shared/services/branding.service';
+import { Subscription } from 'rxjs';
 
 interface Message {
   id: string;
@@ -23,7 +25,18 @@ interface Message {
 })
 export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
+  private brandingSubscription: Subscription | undefined;
 
+  // Add default values to prevent undefined errors
+  secondaryColor: string = '#ffffff';
+  // Add after existing properties
+selectedAvatar: any = null; // Current selected avatar from branding
+showChatAvatarAsWidget: boolean = true; // Whether to show avatar as widget icon
+// Add new properties
+botImage: string | null = null;
+profileImage: string | null = null;
+// Add this property
+hasBotImage: boolean = false;
   isLandingPage: boolean = false;
   isMinimized: boolean = true;
   isSending: boolean = false;
@@ -36,11 +49,11 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
   showHeaderMenu: boolean = false;
   isDarkMode: boolean = false;
   
-  // Bot menu properties (now only for "show all" functionality)
+  // Bot menu properties
   showBotMenu: boolean = false;
   currentMenu: MenuButton[] = [];
   menuHistory: { menu: MenuButton[]; title: string }[] = [];
-  botId: string = 'bot-3'; // Your bot ID
+  botId: string = 'bot-3';
 
   // Configuration with defaults
   botName: string = 'Assistant';
@@ -56,11 +69,16 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
 
   constructor(
     private route: ActivatedRoute,
-    private chatbotMenuService: ChatbotMenuService
+    private chatbotMenuService: ChatbotMenuService,
+    private brandingService: BrandingService
   ) { }
 
   ngOnInit() {
     this.isLandingPage = this.route.snapshot.url[0]?.path === 'landing';
+    
+    // Load branding first, then other configs
+    this.loadBrandingSettings();
+    
     if (this.isLandingPage) {
       this.isMinimized = false;
       this.loadLandingConfig();
@@ -68,6 +86,7 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
       this.isMinimized = true;
       this.loadWidgetConfig();
     }
+    
     this.loadMenuConfiguration();
     window.addEventListener('message', this.handleParentMessage.bind(this));
     this.sendMessageToParent({ type: 'chatbot-ready' });
@@ -81,14 +100,81 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
   }
 
   ngOnDestroy() {
+    this.brandingSubscription?.unsubscribe();
     window.removeEventListener('message', this.handleParentMessage.bind(this));
   }
+
+  /**
+   * Load branding settings and subscribe to changes
+   */
+  private loadBrandingSettings(): void {
+    // Subscribe to branding changes
+    this.brandingSubscription = this.brandingService.branding$.subscribe(branding => {
+      if (branding) {
+        this.applyBrandingSettings(branding);
+      }
+    });
+
+    // If no branding is loaded yet, try to load it
+    const currentBranding = this.brandingService.getBranding();
+    if (!currentBranding) {
+      // Set some defaults or wait for branding to be set
+      console.log('No branding settings found, using defaults');
+    }
+  }
   
-  // --- CORE UTILITY METHODS (FIXING YOUR ERRORS) ---
+  /**
+   * Applies branding settings received from the service.
+   */
+  private applyBrandingSettings(branding: BrandingSettings): void {
+    if (branding.botName) this.botName = branding.botName;
+    if (branding.homeMessage) this.welcomeMessage = branding.homeMessage;
+    if (branding.primaryColor) this.primaryColor = branding.primaryColor;
+    if (branding.secondaryColor) this.secondaryColor = branding.secondaryColor;
+     if (branding.botImage) this.botImage = branding.botImage;
+  if (branding.profileImage) this.profileImage = branding.profileImage;
+    
+    // Apply landing page specific settings
+    if (this.isLandingPage) {
+      if (branding.landingTitle) this.landingTitle = branding.landingTitle;
+      if (branding.landingDescription) this.landingDescription = branding.landingDescription;
+    }
+    
+    // Only add welcome message if messages array is empty
+    // This prevents duplicate welcome messages
+    if (this.messages.length === 0 && this.welcomeMessage) {
+      this.addBotMessage(this.welcomeMessage);
+    }
+   // Bot image for profile avatar in chat
+// ADD THESE LINES:
+  if (branding.botImage) {
+    this.botImage = branding.botImage;
+    console.log('Bot image loaded:', this.botImage); // Debug log
+  }
+  // ADD THESE LINES:
+  // Selected avatar for widget icon
+  if (branding.selectedAvatar) {
+    this.selectedAvatar = branding.selectedAvatar;
+  }
+  
+  // Widget icon preference
+  if (branding.showChatAvatarAsWidget !== undefined) {
+    this.showChatAvatarAsWidget = branding.showChatAvatarAsWidget;
+  }
+  }
+
+  /**
+   * Load menu configuration after branding is applied
+   */
+  private loadMenuConfiguration(): void {
+    this.chatbotMenuService.getMenuConfiguration(this.botId).subscribe(config => {
+      this.currentMenu = config.buttons;
+      // Don't add welcome message here since it's handled in branding
+    });
+  }
   
   /**
    * Generates a unique ID for a chat message.
-   * This fixes the "Property 'generateMessageId' does not exist" error.
    */
   generateMessageId(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -96,7 +182,6 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
 
   /**
    * Formats a Date object or timestamp into a human-readable time string (HH:MM).
-   * This fixes the "Property 'formatTime' does not exist" error.
    */
   formatTime(timestamp: Date): string {
     const date = new Date(timestamp);
@@ -107,25 +192,23 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
 
   /**
    * Darkens a hex color by a specified amount.
-   * This fixes the "Property 'darkenColor' does not exist" error.
    */
   darkenColor(color: string, amount: number): string {
     const hex = color.replace(/^#/, '');
     const num = parseInt(hex, 16);
     let r = (num >> 16) - amount;
-    let b = ((num >> 8) & 0x00FF) - amount;
-    let g = (num & 0x0000FF) - amount;
+    let g = ((num >> 8) & 0x00FF) - amount;
+    let b = (num & 0x0000FF) - amount;
     
     r = Math.max(0, r);
-    b = Math.max(0, b);
     g = Math.max(0, g);
+    b = Math.max(0, b);
     
-    return `#${(g | (b << 8) | (r << 16)).toString(16).padStart(6, '0')}`;
+    return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
   }
 
   /**
    * Scrolls the messages container to the bottom.
-   * This fixes the "Property 'scrollToBottom' does not exist" error.
    */
   scrollToBottom(): void {
     try {
@@ -139,18 +222,11 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
 
   // --- Enhanced Menu Integration ---
 
-  private loadMenuConfiguration(): void {
-    this.chatbotMenuService.getMenuConfiguration(this.botId).subscribe(config => {
-      this.currentMenu = config.buttons;
-      this.addBotMessage(this.welcomeMessage);
-    });
-  }
-
   /**
    * Handle menu button click from header dropdown (closes dropdown after click)
    */
   handleMenuButtonClickFromHeader(button: MenuButton): void {
-    this.closeHeaderMenu(); // Close the header dropdown
+    this.closeHeaderMenu();
     this.handleMenuButtonClick(button);
   }
 
@@ -290,7 +366,7 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
       this.currentMenu = config.buttons;
       this.menuHistory = [];
       this.addBotMessage('Returning to main menu. How can I help you?');
-      this.showBotMenu = false; // Hide bot menu when resetting
+      this.showBotMenu = false;
     });
   }
 
@@ -306,8 +382,8 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
   async sendMessage() {
     if (!this.currentMessage.trim() || this.isSending) return;
     
-    this.showBotMenu = false; // Hide menu when user types
-    this.closeHeaderMenu(); // Close header menu if open
+    this.showBotMenu = false;
+    this.closeHeaderMenu();
     
     const userMessage: Message = { 
       id: this.generateMessageId(), 
@@ -348,10 +424,18 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
 
   loadWidgetConfig() {
     const urlParams = new URLSearchParams(window.location.search);
-    this.botName = urlParams.get('name') || this.botName;
-    this.welcomeMessage = urlParams.get('greeting') || this.welcomeMessage;
+    
+    // Only override branding if URL params are provided
+    // This allows branding service to take precedence
+    const urlBotName = urlParams.get('name');
+    const urlGreeting = urlParams.get('greeting');
+    const urlPrimaryColor = urlParams.get('primaryColor');
+    
+    if (urlBotName && !this.brandingService.getBranding()?.botName) this.botName = urlBotName;
+    if (urlGreeting && !this.brandingService.getBranding()?.homeMessage) this.welcomeMessage = urlGreeting;
+    if (urlPrimaryColor && !this.brandingService.getBranding()?.primaryColor) this.primaryColor = urlPrimaryColor;
+    
     this.inputPlaceholder = urlParams.get('placeholder') || this.inputPlaceholder;
-    this.primaryColor = urlParams.get('primaryColor') || this.primaryColor;
     this.backgroundStyle = urlParams.get('backgroundStyle') || this.backgroundStyle;
     this.position = urlParams.get('position') || this.position;
     this.size = urlParams.get('size') || this.size;
@@ -362,13 +446,21 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
         const config = (window as any).parent.ChatbotConfig;
         this.applyConfigObject(config);
       }
-    } catch (e) { }
+    } catch (e) { 
+      console.log('No parent config found, using defaults');
+    }
   }
 
   loadLandingConfig() {
     const urlParams = new URLSearchParams(window.location.search);
-    this.landingTitle = urlParams.get('title') || this.landingTitle;
-    this.landingDescription = urlParams.get('description') || this.landingDescription;
+    
+    // Similar approach for landing page
+    const urlTitle = urlParams.get('title');
+    const urlDescription = urlParams.get('description');
+    
+    if (urlTitle && !this.brandingService.getBranding()?.landingTitle) this.landingTitle = urlTitle;
+    if (urlDescription && !this.brandingService.getBranding()?.landingDescription) this.landingDescription = urlDescription;
+    
     this.backgroundStyle = urlParams.get('backgroundStyle') || this.backgroundStyle;
     this.primaryColor = urlParams.get('primaryColor') || this.primaryColor;
     this.botName = urlParams.get('name') || this.botName;
@@ -376,10 +468,14 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
   }
 
   applyConfigObject(config: any) {
-    if (config.name) this.botName = config.name;
-    if (config.greeting) this.welcomeMessage = config.greeting;
+    // Only apply if branding service doesn't have these values
+    const currentBranding = this.brandingService.getBranding();
+    
+    if (config.name && !currentBranding?.botName) this.botName = config.name;
+    if (config.greeting && !currentBranding?.homeMessage) this.welcomeMessage = config.greeting;
+    if (config.primaryColor && !currentBranding?.primaryColor) this.primaryColor = config.primaryColor;
+    
     if (config.placeholder) this.inputPlaceholder = config.placeholder;
-    if (config.primaryColor) this.primaryColor = config.primaryColor;
     if (config.position) this.position = config.position;
     if (config.size) this.size = config.size;
     if (config.showBranding !== undefined) this.showBranding = config.showBranding;
@@ -400,6 +496,12 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
         case 'chatbot-maximize':
           this.isMinimized = false;
           this.unreadCount = 0;
+          break;
+        case 'chatbot-update-branding':
+          // Handle real-time branding updates from parent
+          if (event.data.branding) {
+            this.brandingService.saveBranding(event.data.branding);
+          }
           break;
       }
     }
@@ -455,7 +557,7 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
   toggleHeaderMenu(): void {
     this.showHeaderMenu = !this.showHeaderMenu;
     if (this.showHeaderMenu) {
-      this.showBotMenu = false; // Close bot menu when opening header menu
+      this.showBotMenu = false;
     }
   }
 
@@ -466,7 +568,7 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
   toggleBotMenu(): void {
     this.showBotMenu = !this.showBotMenu;
     if (this.showBotMenu) {
-      this.closeHeaderMenu(); // Close header menu when opening bot menu
+      this.closeHeaderMenu();
     }
   }
 
@@ -476,6 +578,10 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
       this.messages = [];
       this.menuHistory = [];
       this.loadMenuConfiguration();
+      // Re-add welcome message after clearing
+      if (this.welcomeMessage) {
+        this.addBotMessage(this.welcomeMessage);
+      }
     }
   }
 
@@ -510,7 +616,6 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
     this.closeHeaderMenu();
     const settingsMessage = 'Settings & Preferences:';
     this.addBotMessage(settingsMessage);
-    // You could handle settings menu logic here, but for this example, the main menu is re-shown.
     this.currentMenu = this.getSettingsMenuButtons();
     this.menuHistory.push({ menu: this.currentMenu, title: 'Settings' });
     this.showBotMenu = true;
@@ -547,10 +652,50 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
 
   private getSettingsMenuButtons(): MenuButton[] {
     return [
-      { id: 'notifications', type: 'action', label: 'Notification Settings', message: 'Notification settings updated! You can now receive alerts for new messages and updates.', metadata: { color: '#6366f1', icon: '🔔' }, isActive: false, order: 1 },
-      { id: 'language', type: 'submenu', label: 'Language', children: [{ id: 'english', type: 'action', label: 'English', message: 'Language set to English.', metadata: { icon: '🇺🇸' }, isActive: false, order: 1 }, { id: 'spanish', type: 'action', label: 'Español', message: 'Idioma configurado a Español.', metadata: { icon: '🇪🇸' }, isActive: false, order: 2 }, { id: 'french', type: 'action', label: 'Français', message: 'Langue définie sur Français.', metadata: { icon: '🇫🇷' }, isActive: false, order: 3 }], metadata: { color: '#10b981', icon: '🌐' }, isActive: false, order: 2 },
-      { id: 'theme', type: 'submenu', label: 'Theme', children: [{ id: 'light', type: 'action', label: 'Light Mode', message: 'Theme set to Light mode.', metadata: { icon: '☀️' }, isActive: false, order: 1 }, { id: 'dark', type: 'action', label: 'Dark Mode', message: 'Theme set to Dark mode.', metadata: { icon: '🌙' }, isActive: false, order: 2 }, { id: 'auto', type: 'action', label: 'Auto', message: 'Theme set to Auto (follows system preference).', metadata: { icon: '🔄' }, isActive: false, order: 3 }], metadata: { color: '#f59e0b', icon: '🎨' }, isActive: false, order: 3 },
-      { id: 'reset', type: 'action', label: 'Reset to Defaults', message: 'Settings reset to defaults.', metadata: { color: '#ef4444', icon: '🔄' }, isActive: false, order: 4 }
+      { 
+        id: 'notifications', 
+        type: 'action', 
+        label: 'Notification Settings', 
+        message: 'Notification settings updated! You can now receive alerts for new messages and updates.', 
+        metadata: { color: '#6366f1', icon: '🔔' }, 
+        isActive: false, 
+        order: 1 
+      },
+      { 
+        id: 'language', 
+        type: 'submenu', 
+        label: 'Language', 
+        children: [
+          { id: 'english', type: 'action', label: 'English', message: 'Language set to English.', metadata: { icon: '🇺🇸' }, isActive: false, order: 1 }, 
+          { id: 'spanish', type: 'action', label: 'Español', message: 'Idioma configurado a Español.', metadata: { icon: '🇪🇸' }, isActive: false, order: 2 }, 
+          { id: 'french', type: 'action', label: 'Français', message: 'Langue définie sur Français.', metadata: { icon: '🇫🇷' }, isActive: false, order: 3 }
+        ], 
+        metadata: { color: '#10b981', icon: '🌐' }, 
+        isActive: false, 
+        order: 2 
+      },
+      { 
+        id: 'theme', 
+        type: 'submenu', 
+        label: 'Theme', 
+        children: [
+          { id: 'light', type: 'action', label: 'Light Mode', message: 'Theme set to Light mode.', metadata: { icon: '☀️' }, isActive: false, order: 1 }, 
+          { id: 'dark', type: 'action', label: 'Dark Mode', message: 'Theme set to Dark mode.', metadata: { icon: '🌙' }, isActive: false, order: 2 }, 
+          { id: 'auto', type: 'action', label: 'Auto', message: 'Theme set to Auto (follows system preference).', metadata: { icon: '🔄' }, isActive: false, order: 3 }
+        ], 
+        metadata: { color: '#f59e0b', icon: '🎨' }, 
+        isActive: false, 
+        order: 3 
+      },
+      { 
+        id: 'reset', 
+        type: 'action', 
+        label: 'Reset to Defaults', 
+        message: 'Settings reset to defaults.', 
+        metadata: { color: '#ef4444', icon: '🔄' }, 
+        isActive: false, 
+        order: 4 
+      }
     ];
   }
 
@@ -564,6 +709,7 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewCheck
     } else if (button.id === 'reset') {
       this.isDarkMode = false;
       document.body.classList.remove('dark-mode');
+      this.brandingService.resetBranding();
       this.loadWidgetConfig();
     }
   }
