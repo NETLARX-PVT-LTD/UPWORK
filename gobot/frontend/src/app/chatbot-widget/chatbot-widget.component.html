@@ -13,9 +13,10 @@
     <div class="max-w-3xl mx-auto -mt-8 relative bg-white rounded-2xl shadow-xl overflow-hidden">
       <div class="chat-header bg-gradient-to-br from-indigo-500 to-purple-700 text-white p-4 flex items-center gap-3"
         [style.background]="'linear-gradient(135deg, ' + primaryColor + ', ' + darkenColor(primaryColor, 20) + ')'">
-        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-xl">
-          <span>🤖</span>
-        </div>
+       <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-xl overflow-hidden">
+  <img *ngIf="botImage" [src]="botImage" class="w-full h-full object-cover rounded-full" alt="Profile Avatar">
+  <span *ngIf="!botImage" class="text-base">🤖</span>
+</div>
         <div class="flex-1">
           <h3 class="m-0 text-lg font-semibold">{{botName}}</h3>
           <span class="text-sm opacity-80">Online</span>
@@ -107,9 +108,10 @@
         <div class="flex gap-3 mb-4 items-end"
           *ngFor="let message of messages"
           [ngClass]="{'flex-row-reverse': message.isUser}">
-          <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-base shrink-0" *ngIf="!message.isUser">
-            <span>🤖</span>
-          </div>
+         <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-base shrink-0 overflow-hidden" *ngIf="!message.isUser">
+  <img *ngIf="botImage" [src]="botImage" class="w-full h-full object-cover rounded-full" alt="Bot Avatar">
+  <span *ngIf="!botImage">🤖</span>
+</div>
 
           <div class="flex-1 max-w-[70%]" [ngClass]="{'text-right': message.isUser}">
             <div class="p-3 rounded-2xl break-words inline-block"
@@ -214,24 +216,43 @@
   <!-- Widget Mode (similar changes applied) -->
   <div class="widget-layout" *ngIf="!isLandingPage">
     <div class="floating-icon"
-      *ngIf="isMinimized"
-      (click)="toggleMinimize()"
-      [style.background-color]="primaryColor"
-      [ngClass]="'position-' + position">
-      <span class="text-2xl">💬</span>
-      <div class="unread-badge" *ngIf="unreadCount > 0">
-        {{unreadCount > 9 ? '9+' : unreadCount}}
-      </div>
-    </div>
+  *ngIf="isMinimized"
+  (click)="toggleMinimize()"
+  [ngClass]="'position-' + position">
+
+  <!-- Use chatbot avatar (selectedAvatar) for widget icon -->
+<div *ngIf="showChatAvatarAsWidget && selectedAvatar" class="w-full h-full rounded-full overflow-hidden flex items-center justify-center"
+  [style.background-color]="primaryColor">
+  <!-- Display avatar icon -->
+  <ng-container [ngSwitch]="selectedAvatar.icon">
+   <img *ngSwitchCase="'chat'" src="assets/icons/chat.png" alt="Chat" class="!w-8 !h-8" />
+<img *ngSwitchCase="'person'" src="assets/icons/chatbot-avatar-1.png" alt="Person" class="!w-8 !h-8" />
+<img *ngSwitchCase="'monitor'" src="assets/icons/chatbot-avatar-2.png" alt="Monitor" class="!w-8 !h-8" />
+<img *ngSwitchCase="'message'" src="assets/icons/chatbot-avatar-4.png" alt="Message" class="!w-8 !h-8" />
+
+    <span *ngSwitchDefault>💬</span>
+  </ng-container>
+</div>
+
+<div *ngIf="!showChatAvatarAsWidget || !selectedAvatar"
+  class="w-full h-full rounded-full flex items-center justify-center text-2xl"
+  [style.background-color]="primaryColor">
+  <span>💬</span>
+</div>
+  <div class="unread-badge" *ngIf="unreadCount > 0">
+    {{ unreadCount > 9 ? '9+' : unreadCount }}
+  </div>
+</div>
 
     <div class="chat-widget"
       *ngIf="!isMinimized"
       [ngClass]="'position-' + position + ' size-' + size">
       <div class="chat-header" [style.background]="'linear-gradient(135deg, ' + primaryColor + ', ' + darkenColor(primaryColor, 20) + ')'">
         <div class="flex items-center gap-3 flex-1">
-          <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-base">
-            <span>🤖</span>
-          </div>
+         <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-base overflow-hidden">
+  <img *ngIf="botImage" [src]="botImage" class="w-full h-full object-cover rounded-full" alt="Bot Avatar">
+  <span *ngIf="!botImage">🤖</span>
+</div>
           <div>
             <h3 class="m-0 text-base font-semibold text-white">{{botName}}</h3>
             <span class="text-xs text-white opacity-80">Online</span>
@@ -321,14 +342,15 @@
         <div class="flex gap-2 mb-4 items-end"
           *ngFor="let message of messages"
           [ngClass]="{'flex-row-reverse': message.isUser}">
-          <div class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs shrink-0" *ngIf="!message.isUser">
-            <span>🤖</span>
-          </div>
+          <div class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs shrink-0 overflow-hidden" *ngIf="!message.isUser">
+  <img *ngIf="botImage" [src]="botImage" class="w-full h-full object-cover rounded-full" alt="Bot Avatar">
+  <span *ngIf="!botImage">🤖</span>
+</div>
 
           <div class="flex-1 max-w-[75%]" [ngClass]="{'text-right': message.isUser}">
             <div class="message-bubble"
               [ngClass]="message.isUser ? 'user-message' : 'bot-message'"
-              [style.background-color]="message.isUser ? primaryColor : ''">
+              [style.background-color]="message.isUser ? primaryColor : secondaryColor">
               <span *ngIf="message.typing" class="typing-indicator">
                 <span class="typing-dot"></span>
                 <span class="typing-dot"></span>

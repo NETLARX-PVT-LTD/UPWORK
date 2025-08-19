@@ -1054,6 +1054,7 @@ body.dark-mode {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   
+  
   &:hover {
     transform: scale(1.1);
     box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
@@ -1083,6 +1084,18 @@ body.dark-mode {
     top: 20px;
     left: 20px;
   }
+   // New styles to handle the image
+  &.has-image {
+    // Override the background color and add padding to make the image visible
+    background-color: transparent !important;
+    padding: 0;
+  }
+}
+
+// Add a new style for the image inside the floating icon
+.floating-icon img {
+  @apply w-full h-full object-cover rounded-full;
+
 }
 
 /* Unread Messages Badge */

@@ -12,6 +12,7 @@ import { InstagramPublisherComponent } from './instagram-publisher/instagram-pub
 import { FacebookPagePublisherComponent } from './facebook-page-publisher/facebook-page-publisher.component';
 import { TelegramBotConnectionComponent } from './telegram-bot-connection/telegram-bot-connection.component';
 import { TwilioSmsConnectionComponent } from './twilio-sms-connection/twilio-sms-connection.component';
+import { BrandingComponent } from './publish-bot/branding/branding.component';
 
 export const routes: Routes = [
   // publish bot on whatsapp
@@ -29,6 +30,8 @@ export const routes: Routes = [
 
   // The route for the embeddable chatbot widget (used in the iframe)
   { path: 'chatbot-widget', component: ChatbotWidgetComponent },
+  // The route for the branding (subtype of website chatbot)
+  { path: 'branding', component: BrandingComponent, data: { title: 'Branding' } },
   { 
     path: 'chatbot-menu',
     component: ChatbotMenuComponent,
