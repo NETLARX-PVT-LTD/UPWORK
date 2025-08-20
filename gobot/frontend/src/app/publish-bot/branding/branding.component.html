@@ -1,14 +1,12 @@
-  <!-- Tutorial Link -->
+<!-- Tutorial Link -->
 <div class="px-6   border-gray-200">
-    <button 
-      class="flex items-center space-x-2 text-red-500 hover:text-red-600"
-      (click)="openTutorial()">
-      <div class="w-8 h-6 bg-transparent rounded-lg border-2 border-red-500 flex items-center justify-center">
-        <i class="fas fa-play text-red-500 text-xs"></i>
-      </div>
-      <span class="text-sm font-medium">Tutorial</span>
-    </button>
-  </div>
+  <button class="flex items-center space-x-2 text-red-500 hover:text-red-600" (click)="openTutorial()">
+    <div class="w-8 h-6 bg-transparent rounded-lg border-2 border-red-500 flex items-center justify-center">
+      <i class="fas fa-play text-red-500 text-xs"></i>
+    </div>
+    <span class="text-sm font-medium">Tutorial</span>
+  </button>
+</div>
 <div class="branding-container">
 
   <!-- Bot Image Section -->
@@ -16,30 +14,16 @@
     <h3 class="section-title">Bot Image</h3>
     <div class="bot-image-container">
       <div class="bot-image-preview">
-        <img 
-          [src]="selectedBotImage || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iMTAwIiBmaWxsPSIjMUExQTFBIi8+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iODAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtZGFzaGFycmF5PSI1IDUiLz4KPHRleHQgeD0iMTAwIiB5PSIxMDUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIj5KQVJWSVMKIDwvdGV4dD4KPC9zdmc+'" 
-          alt="Bot Avatar"
-          class="bot-avatar-image"
-        />
+        <img
+          [src]="selectedBotImage || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iMTAwIiBmaWxsPSIjMUExQTFBIi8+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iODAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtZGFzaGFycmF5PSI1IDUiLz4KPHRleHQgeD0iMTAwIiB5PSIxMDUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIj5KQVJWSVMKIDwvdGV4dD4KPC9zdmc+'"
+          alt="Bot Avatar" class="bot-avatar-image" />
       </div>
     </div>
-    
+
     <div class="file-upload-section">
-      <input 
-        type="file" 
-        id="fileInput" 
-        (change)="onFileSelected($event)" 
-        accept="image/*" 
-        style="display: none;"
-      />
+      <input type="file" id="fileInput" (change)="onFileSelected($event)" accept="image/*" style="display: none;" />
       <div class="file-input-container">
-        <input 
-          type="text" 
-          [value]="selectedFileName" 
-          placeholder="Choose file" 
-          class="file-input"
-          readonly
-        />
+        <input type="text" [value]="selectedFileName" placeholder="Choose file" class="file-input" readonly />
         <button class="browse-btn" (click)="browseFiles()">Browse</button>
       </div>
     </div>
@@ -48,66 +32,44 @@
   <!-- Bot Name Section -->
   <div class="form-section">
     <label class="form-label required">Bot Name</label>
-   <input 
-  type="text" 
-  [(ngModel)]="botName"
-  (ngModelChange)="onInputChange()"
-  class="form-input"
-  placeholder="Enter bot name"
-/>
+    <input type="text" [(ngModel)]="botName" (ngModelChange)="onInputChange()" class="form-input"
+      placeholder="Enter bot name" />
   </div>
 
   <!-- Bot Subheading Section -->
   <div class="form-section">
     <label class="form-label">Bot Subheading</label>
-    <input 
-      type="text" 
-      [(ngModel)]="botSubheading"
-      class="form-input"
-      placeholder="Enter Bot Subheading"
-    />
+    <input type="text" [(ngModel)]="botSubheading" class="form-input" placeholder="Enter Bot Subheading" />
   </div>
 
   <!-- Home Message Section -->
   <div class="form-section">
     <label class="form-label">Home Message (Max: 140 Characters)</label>
-    <textarea 
-      [(ngModel)]="homeMessage"
-      class="form-textarea"
-      placeholder="Enter Home Message"
-      maxlength="140"
-    ></textarea>
+    <textarea [(ngModel)]="homeMessage" class="form-textarea" placeholder="Enter Home Message"
+      maxlength="140"></textarea>
   </div>
 
   <!-- Chatbot Avatar Section -->
   <div class="form-section">
     <h3 class="section-title">Chatbot Avatar</h3>
     <div class="avatar-options">
-      <div 
-        *ngFor="let avatar of avatarOptions"
-        class="avatar-option"
-        [class.selected]="avatar.selected"
-        (click)="selectAvatar(avatar.id)"
-      >
+      <div *ngFor="let avatar of avatarOptions" class="avatar-option" [class.selected]="avatar.selected"
+        (click)="selectAvatar(avatar.id)">
         <div class="avatar-icon">
           <ng-container [ngSwitch]="avatar.icon">
-             <img *ngSwitchCase="'chat'" src="assets/icons/chat.png" alt="Chat" class="w-8 h-8" />
-<img *ngSwitchCase="'person'" src="assets/icons/chatbot-avatar-1.png" alt="Person" class="w-8 h-8" />
-<img *ngSwitchCase="'monitor'" src="assets/icons/chatbot-avatar-2.png" alt="Monitor" class="w-8 h-8" />
-<img *ngSwitchCase="'message'" src="assets/icons/chatbot-avatar-4.png" alt="Message" class="w-8 h-8" />
+            <img *ngSwitchCase="'chat'" src="assets/icons/chat.png" alt="Chat" class="w-8 h-8" />
+            <img *ngSwitchCase="'person'" src="assets/icons/chatbot-avatar-1.png" alt="Person" class="w-8 h-8" />
+            <img *ngSwitchCase="'monitor'" src="assets/icons/chatbot-avatar-2.png" alt="Monitor" class="w-8 h-8" />
+            <img *ngSwitchCase="'message'" src="assets/icons/chatbot-avatar-4.png" alt="Message" class="w-8 h-8" />
 
           </ng-container>
         </div>
       </div>
     </div>
-    
+
     <div class="widget-toggle">
       <label class="toggle-container">
-        <input 
-          type="checkbox" 
-          [(ngModel)]="showChatAvatarAsWidget"
-          class="toggle-input"
-        />
+        <input type="checkbox" [(ngModel)]="showChatAvatarAsWidget" class="toggle-input" />
         <span class="toggle-slider"></span>
         <span class="toggle-label">Show Chat Avatar as Widget Icon</span>
       </label>
@@ -118,13 +80,8 @@
   <div class="form-section">
     <h3 class="section-title">Primary Color</h3>
     <div class="color-options">
-      <div 
-        *ngFor="let color of primaryColors; let i = index"
-        class="color-option"
-        [class.selected]="color.selected"
-        [style.backgroundColor]="color.color"
-        (click)="selectPrimaryColor(i)"
-      ></div>
+      <div *ngFor="let color of primaryColors; let i = index" class="color-option" [class.selected]="color.selected"
+        [style.backgroundColor]="color.color" (click)="selectPrimaryColor(i)"></div>
       <div class="color-option add-color" (click)="addCustomPrimaryColor()">
         <span class="plus-icon">+</span>
       </div>
@@ -135,13 +92,8 @@
   <div class="form-section">
     <h3 class="section-title">Secondary Color</h3>
     <div class="color-options">
-      <div 
-        *ngFor="let color of secondaryColors; let i = index"
-        class="color-option"
-        [class.selected]="color.selected"
-        [style.backgroundColor]="color.color"
-        (click)="selectSecondaryColor(i)"
-      ></div>
+      <div *ngFor="let color of secondaryColors; let i = index" class="color-option" [class.selected]="color.selected"
+        [style.backgroundColor]="color.color" (click)="selectSecondaryColor(i)"></div>
       <div class="color-option add-color" (click)="addCustomSecondaryColor()">
         <span class="plus-icon">+</span>
       </div>
@@ -150,12 +102,12 @@
 
   <!-- Save Button -->
   <!-- Add these buttons in the save section -->
-<div class="save-section">
-  <button class="save-btn" (click)="saveSettings()">Save</button>
-  <!-- <button class="preview-btn" (click)="previewSettings()">Preview</button>
+  <div class="save-section">
+    <button class="save-btn" (click)="saveSettings()">Save</button>
+    <!-- <button class="preview-btn" (click)="previewSettings()">Preview</button>
   <button class="test-btn" (click)="testEmbeddedWidget()">Test Embedded</button>
   <button class="embed-btn" (click)="copyEmbedCode()">Copy Embed Code</button> -->
-</div>
+  </div>
 
   <!-- Color Picker Modal -->
   <div *ngIf="showColorPicker" class="color-picker-overlay" (click)="closeColorPicker()">
@@ -164,47 +116,42 @@
         <!-- Color Spectrum -->
         <div class="color-spectrum">
           <div class="color-row">
-            <div *ngFor="let color of ['#000000', '#333333', '#666666', '#999999', '#CCCCCC', '#FFFFFF', '#FF0000', '#FF6600', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#6600FF', '#FF00FF']" 
-                 class="spectrum-color" 
-                 [style.backgroundColor]="color"
-                 (click)="selectedCustomColor = color; onColorPickerChange({target: {value: color}})"></div>
+            <div
+              *ngFor="let color of ['#000000', '#333333', '#666666', '#999999', '#CCCCCC', '#FFFFFF', '#FF0000', '#FF6600', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#6600FF', '#FF00FF']"
+              class="spectrum-color" [style.backgroundColor]="color"
+              (click)="selectedCustomColor = color; onColorPickerChange({target: {value: color}})"></div>
           </div>
           <div class="color-row">
-            <div *ngFor="let color of ['#FFE6E6', '#FFEFE6', '#FFFFE6', '#E6FFE6', '#E6FFFF', '#E6E6FF', '#F3E6FF', '#FFE6FF', '#FFB3B3', '#FFDFB3', '#FFFFB3', '#B3FFB3', '#B3FFFF', '#B3B3FF', '#E6B3FF', '#FFB3FF']" 
-                 class="spectrum-color" 
-                 [style.backgroundColor]="color"
-                 (click)="selectedCustomColor = color; onColorPickerChange({target: {value: color}})"></div>
+            <div
+              *ngFor="let color of ['#FFE6E6', '#FFEFE6', '#FFFFE6', '#E6FFE6', '#E6FFFF', '#E6E6FF', '#F3E6FF', '#FFE6FF', '#FFB3B3', '#FFDFB3', '#FFFFB3', '#B3FFB3', '#B3FFFF', '#B3B3FF', '#E6B3FF', '#FFB3FF']"
+              class="spectrum-color" [style.backgroundColor]="color"
+              (click)="selectedCustomColor = color; onColorPickerChange({target: {value: color}})"></div>
           </div>
           <div class="color-row">
-            <div *ngFor="let color of ['#FF8080', '#FFBF80', '#FFFF80', '#80FF80', '#80FFFF', '#8080FF', '#D480FF', '#FF80FF', '#FF4D4D', '#FF9F4D', '#FFFF4D', '#4DFF4D', '#4DFFFF', '#4D4DFF', '#C44DFF', '#FF4DFF']" 
-                 class="spectrum-color" 
-                 [style.backgroundColor]="color"
-                 (click)="selectedCustomColor = color; onColorPickerChange({target: {value: color}})"></div>
+            <div
+              *ngFor="let color of ['#FF8080', '#FFBF80', '#FFFF80', '#80FF80', '#80FFFF', '#8080FF', '#D480FF', '#FF80FF', '#FF4D4D', '#FF9F4D', '#FFFF4D', '#4DFF4D', '#4DFFFF', '#4D4DFF', '#C44DFF', '#FF4DFF']"
+              class="spectrum-color" [style.backgroundColor]="color"
+              (click)="selectedCustomColor = color; onColorPickerChange({target: {value: color}})"></div>
           </div>
           <div class="color-row">
-            <div *ngFor="let color of ['#FF1A1A', '#FF7F1A', '#FFFF1A', '#1AFF1A', '#1AFFFF', '#1A1AFF', '#B31AFF', '#FF1AFF', '#E60000', '#E65C00', '#E6E600', '#00E600', '#00E6E6', '#0000E6', '#9900E6', '#E600E6']" 
-                 class="spectrum-color" 
-                 [style.backgroundColor]="color"
-                 (click)="selectedCustomColor = color; onColorPickerChange({target: {value: color}})"></div>
+            <div
+              *ngFor="let color of ['#FF1A1A', '#FF7F1A', '#FFFF1A', '#1AFF1A', '#1AFFFF', '#1A1AFF', '#B31AFF', '#FF1AFF', '#E60000', '#E65C00', '#E6E600', '#00E600', '#00E6E6', '#0000E6', '#9900E6', '#E600E6']"
+              class="spectrum-color" [style.backgroundColor]="color"
+              (click)="selectedCustomColor = color; onColorPickerChange({target: {value: color}})"></div>
           </div>
           <div class="color-row">
-            <div *ngFor="let color of ['#CC0000', '#CC5200', '#CCCC00', '#00CC00', '#00CCCC', '#0000CC', '#8500CC', '#CC00CC', '#B30000', '#B34700', '#B3B300', '#00B300', '#00B3B3', '#0000B3', '#7300B3', '#B300B3']" 
-                 class="spectrum-color" 
-                 [style.backgroundColor]="color"
-                 (click)="selectedCustomColor = color; onColorPickerChange({target: {value: color}})"></div>
+            <div
+              *ngFor="let color of ['#CC0000', '#CC5200', '#CCCC00', '#00CC00', '#00CCCC', '#0000CC', '#8500CC', '#CC00CC', '#B30000', '#B34700', '#B3B300', '#00B300', '#00B3B3', '#0000B3', '#7300B3', '#B300B3']"
+              class="spectrum-color" [style.backgroundColor]="color"
+              (click)="selectedCustomColor = color; onColorPickerChange({target: {value: color}})"></div>
           </div>
         </div>
 
         <!-- Custom Color Input -->
         <div class="custom-color-input">
-          <input type="color" 
-                 [(ngModel)]="selectedCustomColor" 
-                 (change)="onColorPickerChange($event)"
-                 class="color-input">
-          <input type="text" 
-                 [(ngModel)]="selectedCustomColor" 
-                 class="color-hex-input"
-                 placeholder="#FFFFFF">
+          <input type="color" [(ngModel)]="selectedCustomColor" (change)="onColorPickerChange($event)"
+            class="color-input">
+          <input type="text" [(ngModel)]="selectedCustomColor" class="color-hex-input" placeholder="#FFFFFF">
         </div>
 
         <!-- Buttons -->

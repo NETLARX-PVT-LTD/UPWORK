@@ -1,0 +1,202 @@
+.page-messages-container {
+      padding: 20px;
+      background-color: #f5f7fa;
+      min-height: 100vh;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .header h2 {
+      margin: 0;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .bot-selector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bot-selector label {
+      font-weight: 500;
+      color: #666;
+    }
+
+    .form-select {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: white;
+    }
+
+    .tutorial-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      color: #666;
+    }
+
+    .tutorial-icon {
+      font-size: 16px;
+    }
+
+    .create-section {
+      margin-bottom: 20px;
+    }
+
+    .create-btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .create-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .messages-table {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .table-header {
+      display: grid;
+      grid-template-columns: 1fr 120px 100px 150px;
+      background-color: #4a90e2;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+
+    .header-cell {
+      padding: 16px;
+      text-align: left;
+    }
+
+    .table-row {
+      display: grid;
+      grid-template-columns: 1fr 120px 100px 150px;
+      border-bottom: 1px solid #eee;
+      transition: background-color 0.2s;
+    }
+
+    .table-row:hover {
+      background-color: #f8f9fa;
+    }
+
+    .cell {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+    }
+
+    .url-cell {
+      color: #666;
+      font-size: 14px;
+      word-break: break-all;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .type-cell {
+      color: #333;
+      font-weight: 500;
+    }
+
+    .delay-cell {
+      color: #666;
+    }
+
+    .actions-cell {
+      gap: 8px;
+    }
+
+    .action-btn {
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+      font-size: 16px;
+    }
+
+    .action-btn:hover {
+      background-color: #e9ecef;
+    }
+
+    .edit-btn:hover {
+      background-color: #e3f2fd;
+    }
+
+    .delete-btn:hover {
+      background-color: #ffebee;
+    }
+
+    .duplicate-btn:hover {
+      background-color: #f3e5f5;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: white;
+      border-radius: 8px;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      width: 90%;
+    }
+
+    @media (max-width: 768px) {
+      .table-header,
+      .table-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .header-cell,
+      .cell {
+        padding: 8px 16px;
+      }
+
+      .actions-cell {
+        justify-content: center;
+      }
+    }

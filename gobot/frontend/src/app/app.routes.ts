@@ -13,10 +13,20 @@ import { FacebookPagePublisherComponent } from './facebook-page-publisher/facebo
 import { TelegramBotConnectionComponent } from './telegram-bot-connection/telegram-bot-connection.component';
 import { TwilioSmsConnectionComponent } from './twilio-sms-connection/twilio-sms-connection.component';
 import { BrandingComponent } from './publish-bot/branding/branding.component';
+import { AdvancedSettingsComponent } from './publish-bot/advanced-settings/advanced-settings.component';
+import { PageMessageComponent } from './publish-bot/page-message/page-message.component';
+import { PageMessagesListComponent } from './publish-bot/page-messages-list/page-messages-list.component';
+import { Title } from '@angular/platform-browser';
 
 export const routes: Routes = [
   // publish bot on whatsapp
   { path: 'whatsapp-publisher', component: WhatsappPublisherComponent, data: { title: 'Publish Bot' } },
+  // website chatbot advanced settings
+  { path: 'advance-settings', component: AdvancedSettingsComponent, data: { title: 'Advance Settings' } },
+  // create page messaging 
+  { path: 'page-messages', component: PageMessagesListComponent, data: { title: 'Page Messaging' } },
+  { path: 'page-messages/create', component: PageMessageComponent, data: {Title: 'Create Page Message'} },
+  { path: 'page-messages/edit/:id', component: PageMessageComponent },
   // publish bot on instagram
   { path: 'instagram-publisher', component: InstagramPublisherComponent, data: { title: 'Publish Bot' } },
   // publish bot on facebook
