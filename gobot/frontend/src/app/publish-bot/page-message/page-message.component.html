@@ -1,0 +1,185 @@
+<div class="page-message-container">
+  
+
+  <form [formGroup]="pageMessageForm" (ngSubmit)="save()">
+    <!-- URL Section -->
+    <div class="form-section">
+      <label class="form-label required">URL *</label>
+      <div formArrayName="urls">
+        <div *ngFor="let urlControl of urlsArray.controls; let i = index" class="url-input-group">
+          <input 
+            type="text" 
+            [formControlName]="i"
+            class="form-input"
+            [class.error]="isUrlInvalid(i)"
+            placeholder="Enter URL">
+          <button 
+            type="button" 
+            *ngIf="urlsArray.length > 1"
+            (click)="removeUrl(i)"
+            class="remove-btn">
+            ✕
+          </button>
+        </div>
+      </div>
+      <button type="button" (click)="addUrl()" class="add-url-btn">
+        + Add URL
+      </button>
+      <small class="help-text">Add multiple URLs, Press enter after writing URL</small>
+    </div>
+
+    <!-- Trigger Options -->
+    <div class="form-section">
+      <div class="trigger-options">
+        <div class="trigger-option">
+          <div class="toggle-switch" [class.active]="showAfterDelay">
+            <input type="checkbox"
+  [formControlName]="'showAfterDelay'"
+  (change)="onDelayToggle($event)">
+
+            <label for="delayToggle" class="toggle-label">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <span class="toggle-text">Show Message After Delay</span>
+        </div>
+
+        <div class="trigger-option">
+          <div class="toggle-switch" [class.active]="showAfterScroll">
+            <input type="checkbox"
+  [formControlName]="'showAfterScroll'"
+  (change)="onScrollToggle($event)">
+            <label for="scrollToggle" class="toggle-label">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <span class="toggle-text">Show Message After Scroll</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delay Input -->
+    <div class="form-section" *ngIf="showAfterDelay">
+      <label class="form-label required">Delay(Show Message After) *</label>
+      <input 
+        type="number" 
+        formControlName="delay"
+        class="form-input delay-input"
+        [class.error]="isFieldInvalid('delay')"
+        placeholder="5"
+        min="1">
+      <div class="error-message" *ngIf="isFieldInvalid('delay')">
+        Delay is required and must be at least 1 second
+      </div>
+    </div>
+
+    <!-- Message Type Selection -->
+    <div class="form-section">
+      <div class="message-type-tabs">
+        <button 
+          type="button"
+          class="tab-button"
+          [class.active]="messageType === 'text'"
+          (click)="onMessageTypeChange('text')">
+          Text Message
+        </button>
+        <button 
+          type="button"
+          class="tab-button"
+          [class.active]="messageType === 'story'"
+          (click)="onMessageTypeChange('story')">
+          Story
+        </button>
+      </div>
+
+      <!-- Text Message Input -->
+      <div *ngIf="messageType === 'text'" class="message-content">
+        <textarea 
+          formControlName="textMessage"
+          class="form-textarea"
+          [class.error]="isFieldInvalid('textMessage')"
+          placeholder="Enter your text message here..."
+          rows="4">
+        </textarea>
+        <div class="error-message" *ngIf="isFieldInvalid('textMessage')">
+          Text message is required
+        </div>
+      </div>
+
+      <!-- Story Selection -->
+      <div *ngIf="messageType === 'story'" class="message-content">
+        <div class="story-actions">
+          <button type="button" (click)="createNewStory()" class="create-story-btn">
+            + Create Story
+          </button>
+        </div>
+
+        <div class="story-selector">
+          <select 
+            formControlName="selectedStoryId"
+            class="form-select"
+            [class.error]="isFieldInvalid('selectedStoryId')">
+            <option value="">Select a story</option>
+            <option *ngFor="let story of availableStories" [value]="story.id">
+              {{ story.name }}
+            </option>
+          </select>
+          <div class="error-message" *ngIf="isFieldInvalid('selectedStoryId')">
+            Please select a story
+          </div>
+        </div>
+
+        <!-- Story Preview -->
+        <div *ngIf="getSelectedStory()" class="story-preview">
+          <h4>Story Preview: {{ getSelectedStory()?.name }}</h4>
+          <div class="story-blocks">
+            <div *ngFor="let block of getSelectedStory()?.blocks" class="story-block">
+              <div [ngSwitch]="block.type">
+                <div *ngSwitchCase="'text'" class="block-text">
+                  {{ block.content.text }}
+                </div>
+                <div *ngSwitchCase="'image'" class="block-image">
+                  <img [src]="block.content.url" [alt]="block.content.alt">
+                </div>
+                <!-- Add more block types as needed -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rules & Tips -->
+    <div class="rules-tips">
+      <div class="rules-header">
+        <span class="lightbulb">💡</span>
+        <h3>Rules & Tips:</h3>
+      </div>
+      <div class="tip-item">
+        <span class="tip-icon">🔄</span>
+        <span>When adding story, make sure the first block of story response should be text response.</span>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button type="button" (click)="cancel()" class="cancel-btn">
+        Cancel
+      </button>
+      <button type="submit" class="save-btn" [disabled]="pageMessageForm.invalid">
+        Save
+      </button>
+    </div>
+  </form>
+
+  <!-- Story Creator Modal -->
+  <div *ngIf="showStoryCreator" class="modal-overlay">
+    <div class="modal-content">
+     <app-chatbot-flow
+  [story]="newStory"
+  (onSave)="onStoryCreated($event)"
+  (onCancel)="onStoryCreationCanceled()"
+></app-chatbot-flow>
+    </div>
+  </div>
+</div>

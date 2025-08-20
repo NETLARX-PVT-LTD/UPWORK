@@ -1,0 +1,210 @@
+<div class="advanced-settings-container bg-gray-100">
+    
+
+    <div class="settings-content">
+        <!-- Left Column -->
+        <div class="left-column">
+            <!-- Basic Advanced Settings -->
+            <div class="settings-section">
+                <h3>Advance Settings</h3>
+
+                <div class="form-group">
+                    <label>Preferred Language</label>
+                    <select [(ngModel)]="settings.preferredLanguage" class="form-select">
+                        <option *ngFor="let lang of languages" [value]="lang">{{ lang }}</option>
+                    </select>
+                </div>
+
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <div class="toggle-wrapper">
+                            <input type="checkbox" id="openChatbot" [(ngModel)]="settings.openChatbotOnLoad"
+                                class="toggle-checkbox">
+                            <label for="openChatbot" class="toggle-label"></label>
+                        </div>
+                        <span>Open Chatbot on Website Load</span>
+                    </div>
+
+                    <div class="toggle-item">
+                        <div class="toggle-wrapper">
+                            <input type="checkbox" id="hideInput" [(ngModel)]="settings.hideInputFromWebsite"
+                                class="toggle-checkbox">
+                            <label for="hideInput" class="toggle-label"></label>
+                        </div>
+                        <span>Hide Input from Website Chatbot</span>
+                    </div>
+
+                    <div class="toggle-item">
+                        <div class="toggle-wrapper">
+                            <input type="checkbox" id="moveLeft" [(ngModel)]="settings.moveChatbotToLeft"
+                                class="toggle-checkbox">
+                            <label for="moveLeft" class="toggle-label"></label>
+                        </div>
+                        <span>Move chatbot to the left</span>
+                    </div>
+
+                    <div class="toggle-item">
+                        <div class="toggle-wrapper">
+                            <input type="checkbox" id="deleteChat" [(ngModel)]="settings.deleteUserChatPermanently"
+                                class="toggle-checkbox">
+                            <label for="deleteChat" class="toggle-label"></label>
+                        </div>
+                        <span>Delete user chat permanently</span>
+                    </div>
+
+                    <div class="toggle-item">
+                        <div class="toggle-wrapper">
+                            <input type="checkbox" id="humanHelp" [(ngModel)]="settings.humanHelpForm"
+                                class="toggle-checkbox">
+                            <label for="humanHelp" class="toggle-label"></label>
+                        </div>
+                        <span>Human Help Form</span>
+                    </div>
+
+                    <div class="toggle-item">
+                        <div class="toggle-wrapper">
+                            <input type="checkbox" id="startWidget" [(ngModel)]="settings.startChatbotOnWidgetClick"
+                                class="toggle-checkbox">
+                            <label for="startWidget" class="toggle-label"></label>
+                        </div>
+                        <span>Start chatbot conversation on widget click</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Bot Activation Time (In Minutes)</label>
+                    <input type="number" [(ngModel)]="settings.botActivationTime" class="form-control" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label>Lead Collection Form</label>
+                    <select [(ngModel)]="settings.leadCollectionForm" class="form-select">
+                        <option *ngFor="let form of leadCollectionForms" [value]="form">{{ form }}</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Upload Lead Collection Logo</label>
+                    <div class="upload-container">
+                        <div class="upload-placeholder">
+                            <i class="upload-icon">📄</i>
+                        </div>
+                        <button type="button" class="btn-secondary"
+                            onclick="document.getElementById('logoUpload').click()">
+                            Choose file
+                        </button>
+                        <input type="file" id="logoUpload" (change)="uploadLogo($event)" accept="image/*"
+                            style="display: none">
+                        <button type="button" class="btn-browse">Browse</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Custom Size for Chatbot</label>
+                    <div class="slider-container">
+                        <span>{{ settings.chatbotSize }}%</span>
+                        <input type="range" min="50" max="150" [(ngModel)]="settings.chatbotSize"
+                            (input)="onChatbotSizeChange($event)" class="slider">
+
+                    </div>
+                    <button type="button" class="btn-primary" (click)="saveSettings()">Save</button>
+                </div>
+            </div>
+
+            <!-- Mobile Settings -->
+            <div class="settings-section">
+                <h3>Mobile Settings</h3>
+
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <div class="toggle-wrapper">
+                            <input type="checkbox" id="hideMobile" [(ngModel)]="settings.hideChatbotOnMobile"
+                                class="toggle-checkbox">
+                            <label for="hideMobile" class="toggle-label"></label>
+                        </div>
+                        <span>Hide chatbot on mobile</span>
+                    </div>
+
+                    <div class="toggle-item">
+                        <div class="toggle-wrapper">
+                            <input type="checkbox" id="hidePopupMobile"
+                                [(ngModel)]="settings.hideChatbotPopupOnMobileLoad" class="toggle-checkbox">
+                            <label for="hidePopupMobile" class="toggle-label"></label>
+                        </div>
+                        <span>Hide chatbot popup on website load for mobile</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Custom Size for Chatbot</label>
+                    <div class="slider-container">
+                        <span>{{ settings.mobileChatbotSize }}%</span>
+                        <input type="range" min="50" max="150" [(ngModel)]="settings.mobileChatbotSize"
+                            (input)="onMobileChatbotSizeChange($event)" class="slider">
+                    </div>
+                    <button type="button" class="btn-primary" (click)="saveMobileSettings()">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-column">
+            <!-- CSAT Settings -->
+            <div class="settings-section">
+                <h3>CSAT Settings</h3>
+                <div *ngFor="let question of settings.csatQuestions; let i = index">
+                    <div class="form-group">
+                        <label>Question {{ i + 1 }}</label>
+                        <textarea [(ngModel)]="settings.csatQuestions[i]" class="form-textarea"
+                            placeholder="Enter your CSAT question here..." rows="4"></textarea>
+                        <div class="button-group">
+                            <button *ngIf="i > 0" type="button" class="btn-remove" (click)="removeCsatQuestion(i)">
+                                X Remove
+                            </button>
+                            <button *ngIf="i === settings.csatQuestions.length - 1" type="button" class="btn-add"
+                                (click)="addCsatQuestion()">
+                                + Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                 <div class="toggle-item">
+                <div class="toggle-wrapper">
+                    <input type="checkbox" id="enableCsat" [(ngModel)]="settings.csatEnabled" class="toggle-checkbox">
+                    <label for="enableCsat" class="toggle-label"></label>
+                </div>
+                <span>Enable CSAT Settings</span>
+            </div>
+
+            <button type="button" class="btn-primary full-width" (click)="saveCsatSettings()">Save</button>
+            </div>
+
+            
+            <!-- Exclusion Settings -->
+        <div class="settings-section">
+            <h3>Exclusion Settings</h3>
+
+            <div class="form-group">
+                <label>URL Exclusion</label>
+                <textarea [(ngModel)]="urlExclusionText" class="form-textarea"
+                    placeholder="Please enter each URL on a new line" rows="4">
+          </textarea>
+                <small class="helper-text">Allows your chatbot to be excluded from certain URL(s).</small>
+            </div>
+
+            <div class="form-group">
+                <label>IP Exclusion</label>
+                <textarea [(ngModel)]="ipExclusionText" class="form-textarea"
+                    placeholder="Please enter each ip address on a new line" rows="4">
+          </textarea>
+                <small class="helper-text">Works like a Blacklist which allows you to restrict your chatbots for certain
+                    IP Addresses.</small>
+            </div>
+
+            <button type="button" class="btn-primary full-width" (click)="saveExclusionSettings()">Save</button>
+        </div>
+        </div>
+
+        
+    </div>
+</div>

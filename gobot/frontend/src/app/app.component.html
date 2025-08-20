@@ -208,13 +208,13 @@
           </button>
 
           <button
-            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200" (click)="onSidebarNavClick('settings', $event)">
             <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
             <span class="text-sm">Advance Settings</span>
           </button>
 
           <button
-            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200" (click)="onSidebarNavClick('messaging', $event)">
             <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
             <span class="text-sm">Page Messaging</span>
           </button>

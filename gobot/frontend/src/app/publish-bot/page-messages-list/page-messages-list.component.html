@@ -1,0 +1,72 @@
+<div class="page-messages-container">
+     
+
+      <!-- Tutorial Section -->
+      <div class="tutorial-section">
+        <div class="px-6   border-gray-200">
+  <button class="flex items-center space-x-2 text-red-500 hover:text-red-600">
+    <div class="w-8 h-6 bg-transparent rounded-lg border-2 border-red-500 flex items-center justify-center">
+      <i class="fas fa-play text-red-500 text-xs"></i>
+    </div>
+    <span class="text-sm font-medium">Tutorial</span>
+  </button>
+</div>
+      </div>
+
+      <!-- Create Button -->
+      <div class="create-section">
+        <button class="create-btn" (click)="createNewPageMessage()">
+          Create Page Message
+        </button>
+      </div>
+
+      <!-- Messages Table -->
+      <div class="messages-table" *ngIf="pageMessages.length > 0">
+        <div class="table-header">
+          <div class="header-cell url-column">URL</div>
+          <div class="header-cell type-column">TYPE</div>
+          <div class="header-cell delay-column">DELAY</div>
+          <div class="header-cell actions-column">ACTIONS</div>
+        </div>
+
+        <div class="table-row" *ngFor="let message of pageMessages">
+          <div class="cell url-cell" [title]="message.urls[0]">
+            {{ message.urls[0] }}
+          </div>
+          <div class="cell type-cell">
+            {{ message.messageType === 'text' ? 'Message' : 'Story' }}
+          </div>
+          <div class="cell delay-cell">
+            {{ message.delay }} Secs
+          </div>
+          <div class="cell actions-cell">
+            <button class="action-btn edit-btn" (click)="editMessage(message)" title="Edit">
+              ✏️
+            </button>
+            <button class="action-btn delete-btn" (click)="deleteMessage(message.id!)" title="Delete">
+              🗑️
+            </button>
+            <button class="action-btn duplicate-btn" (click)="duplicateMessage(message)" title="Duplicate">
+              📋
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="pageMessages.length === 0">
+        <p>No page messages created yet.</p>
+      </div>
+
+      <!-- Page Message Modal/Form -->
+      <div class="modal-overlay" *ngIf="showPageMessageForm">
+        <div class="modal-content">
+          <app-page-message
+            [existingMessage]="selectedMessage"
+            [availableStories]="availableStories"
+            (onSave)="onMessageSaved($event)"
+            (onCancel)="onMessageCancel()">
+          </app-page-message>
+        </div>
+      </div>
+    </div>

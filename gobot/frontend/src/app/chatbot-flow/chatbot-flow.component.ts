@@ -1,10 +1,10 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, HostListener, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, HostListener, OnDestroy, ChangeDetectorRef, EventEmitter, Input, Output } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, CdkDragEnd, CdkDragStart } from '@angular/cdk/drag-drop';
 import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith, debounceTime } from 'rxjs/operators';
 import { ChatbotBlock, Connection, AvailableMedia, AvailableStory, AvailableForm } from '../models/chatbot-block.model';
-
+import { Story } from '../publish-bot/page-message/page-message.component'; 
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -49,6 +49,25 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('canvasWrapper') canvasWrapper!: ElementRef;
   @ViewChild('canvasContent') canvasContent!: ElementRef;
 
+   // This input is required by the parent component's template
+  @Input() story: Story | null = null; 
+
+  // This output must emit a Story object to match the parent's method
+  @Output() onSave = new EventEmitter<Story>(); 
+
+  // The parent component expects this as well
+  @Output() onCancel = new EventEmitter<void>();
+
+  // A method that would be called inside this component to emit the story
+  // public saveFlow(): void {
+  //   // Logic to create or modify a story
+  //   const createdStory: Story = {
+  //     id: this.story?.id || 'new-id',
+  //     name: this.story?.name || 'New Flow',
+  //     blocks: this.story?.blocks || []
+  //   };
+  //   this.onSave.emit(createdStory);
+  // }
   readonly MIN_VERTICAL_GAP = 80;
 
   allBlocks: ChatbotBlock[] = [

@@ -166,10 +166,10 @@ export class AppComponent implements OnInit, OnDestroy {
         this.router.navigate(['/branding']);
         break;
       case 'settings':
-        this.router.navigate(['/settings']);
+        this.router.navigate(['/advance-settings']);
         break;
       case 'messaging':
-        this.router.navigate(['/messaging']);
+        this.router.navigate(['/page-messages/create']);
         break;
       default:
         this.router.navigate(['/create-story']); // Updated fallback to match your default route
