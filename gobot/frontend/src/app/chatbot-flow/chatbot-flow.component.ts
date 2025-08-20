@@ -18,6 +18,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
+// ✅ --- START: FINAL CORRECTED PROTOBUF IMPORTS ---
+import { TextResponseBlock } from '../proto-gen/text_response_block';
+import { BaseBlock } from '../proto-gen/base_block';
+// ✅ --- END: FINAL CORRECTED PROTOBUF IMPORTS ---
+
 import { UserInputBlockComponent } from './blocks/user-input-block/user-input-block.component';
 import { TextResponseBlockComponent } from './blocks/text-response-block/text-response-block.component';
 import { TypingDelayBlockComponent } from './blocks/typing-delay-block/typing-delay-block.component';
@@ -132,17 +137,47 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       width: 0, height: 0,
       connections: {input:[], output:[]}
     });
+    
+    // --- CALL THE UPDATED TEST FUNCTION ---
+    this.testProtobufLoopback();
+  }
+
+
+  testProtobufLoopback() {
+    console.log("--- Starting NEW Protobuf Local Test (using protobuf-ts) ---");
+
+    // A. CREATE THE ORIGINAL MESSAGE with dummy data
+    const originalMessage = TextResponseBlock.create({
+      base: BaseBlock.create({
+        id: 'test-id-001',
+        name: 'Dummy Text Block'
+      }),
+      content: 'Hello Protobuf!'
+    });
+    
+    console.log("1. Original Object:", originalMessage);
+
+    // B. SERIALIZE the message into a binary format
+    const binaryData = TextResponseBlock.toBinary(originalMessage);
+    console.log("2. Serialized Binary Data:", binaryData);
+
+    // C. DESERIALIZE the binary data back into an object
+    const deserializedMessage = TextResponseBlock.fromBinary(binaryData);
+    console.log("3. Deserialized Object:", deserializedMessage);
+
+    // D. VERIFY the data is the same
+    const testPassed = originalMessage.content === deserializedMessage.content;
+    console.log(`4. Verification -> Test Passed: ${testPassed}`);
+    
+    console.log("--- Test Complete ---");
   }
 
   ngAfterViewInit(): void {
     this.jsPlumbFlowService.initialize(this.canvasContent.nativeElement);
 
-
-    // ✨ START: ADD THIS WHOLE SECTION
     this.jsPlumbFlowService.connectionCreated.subscribe((info: ConnectionInfo) => {
       this.handleConnectionCreated(info);
     });
-
 
     this.jsPlumbFlowService.connectionDeleted.subscribe((info: ConnectionInfo) => {
       this.handleConnectionDeleted(info);
@@ -208,45 +243,29 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isDraggingFromPalette = false;
     this.dropPreviewPosition = null;
   }
-
-  // =================================================================
-  // ==         START: REVISED GLITCH-FREE BLOCK ADDITION V2        ==
-  // =================================================================
-
-  /**
-   * This function now follows a very strict order of operations to prevent visual glitches:
-   * 1. Render block temporarily to measure its dimensions.
-   * 2. Calculate its final position.
-   * 3. Move the block to its final position in the DOM.
-   * 4. CRITICALLY: Initialize the block with jsPlumb *only after* it's in its final place.
-   * 5. Create connections and re-layout downstream blocks.
-   */
+  
   async addBlockToCanvasAtPosition(block: ChatbotBlock, screenX: number, screenY: number): Promise<void> {
     const canvasRect = this.canvasContent.nativeElement.getBoundingClientRect();
     const newBlockId = `${block.type}-${Date.now()}`;
     const dropX = (screenX - canvasRect.left) / this.zoomLevel;
     const dropY = (screenY - canvasRect.top) / this.zoomLevel;
 
-    // Create the block data object
     const newBlock: ChatbotBlock = {
       ...block,
       id: newBlockId,
-      x: dropX, // Use drop point as a temporary position for the initial render
+      x: dropX,
       y: dropY,
       width: 0, height: 0,
       content: block.type === 'textResponse' ? '' : undefined,
       keywordGroups: block.subType === 'keywordGroup' ? [[]] : undefined,
-      // Initialize hidden to avoid any visible transition glitches
       isInitializing: true,
       connections: {input:[], output:[]}
     };
 
-    // Part 1: Initial render for measurement purposes ONLY
     this.canvasBlocks.push(newBlock);
     await this.nextFrame();
     this.updateBlockDimensions(newBlock);
 
-    // Part 2: Determine drop target and calculate final position
     let finalX = newBlock.x;
     let finalY = newBlock.y;
     let connectionToBreak = this.getConnectionByCircularHotspot(dropX, dropY, 0.18, 28, 180) ?? this.getClosestConnectionToPoint(dropX, dropY, 64);
@@ -255,7 +274,6 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     let connectOnDrop = false;
 
     if (connectionToBreak) {
-      // CASE A: Dropped on a connection
       const parentId = connectionToBreak.sourceId.replace('block-', '');
       parentBlockForConnection = this.canvasBlocks.find(b => b.id === parentId);
       childIdForConnection = connectionToBreak.targetId.replace('block-', '');
@@ -267,72 +285,60 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
         connectOnDrop = true;
       }
     } else {
-      // CASE B: Dropped on empty space
       const existingBlocks = this.canvasBlocks.filter(b => b.id !== newBlock.id);
       if (existingBlocks.length === 0) {
-  // This is the FIRST block on an empty canvas.
-  // We approve the drop without needing a parent connection.
-  connectOnDrop = true;
-} else {
-      const hasNoConnections = this.jsPlumbFlowService.getConnections().length === 0;
-
-      if (existingBlocks.length === 1 && hasNoConnections) {
-        // Auto-connect to the single root block
-        parentBlockForConnection = existingBlocks[0];
-        this.updateBlockDimensions(parentBlockForConnection);
-        finalX = (parentBlockForConnection.x + parentBlockForConnection.width / 2) - (newBlock.width / 2);
-        finalY = parentBlockForConnection.y + parentBlockForConnection.height + this.MIN_VERTICAL_GAP;
         connectOnDrop = true;
       } else {
-        // New behavior: if dropped below the last block of the flow, auto-append to the bottom-most tail node
-        const blocksExcludingNew = this.canvasBlocks.filter(b => b.id !== newBlock.id);
-        if (blocksExcludingNew.length > 0) {
-          // Tail nodes are blocks with no outgoing connections
-          const tails = blocksExcludingNew.filter(b => this.jsPlumbFlowService.getConnections({ source: `block-${b.id}` }).length === 0);
-          const bottomMostTail = tails.reduce<ChatbotBlock | null>((acc, curr) => {
-            if (!acc) return curr;
-            const accBottom = acc.y + acc.height;
-            const currBottom = curr.y + curr.height;
-            return currBottom > accBottom ? curr : acc;
-          }, null);
+        const hasNoConnections = this.jsPlumbFlowService.getConnections().length === 0;
 
-          if (bottomMostTail) {
-            this.updateBlockDimensions(bottomMostTail);
-            const bottomY = bottomMostTail.y + bottomMostTail.height;
-            // Only auto-append when the user dropped clearly below the bottom-most block
-            if (dropY > bottomY + 10) {
-              parentBlockForConnection = bottomMostTail;
-              finalX = (bottomMostTail.x + bottomMostTail.width / 2) - (newBlock.width / 2);
-              finalY = bottomMostTail.y + bottomMostTail.height + this.MIN_VERTICAL_GAP;
-              connectOnDrop = true;
+        if (existingBlocks.length === 1 && hasNoConnections) {
+          parentBlockForConnection = existingBlocks[0];
+          this.updateBlockDimensions(parentBlockForConnection);
+          finalX = (parentBlockForConnection.x + parentBlockForConnection.width / 2) - (newBlock.width / 2);
+          finalY = parentBlockForConnection.y + parentBlockForConnection.height + this.MIN_VERTICAL_GAP;
+          connectOnDrop = true;
+        } else {
+          const blocksExcludingNew = this.canvasBlocks.filter(b => b.id !== newBlock.id);
+          if (blocksExcludingNew.length > 0) {
+            const tails = blocksExcludingNew.filter(b => this.jsPlumbFlowService.getConnections({ source: `block-${b.id}` }).length === 0);
+            const bottomMostTail = tails.reduce<ChatbotBlock | null>((acc, curr) => {
+              if (!acc) return curr;
+              const accBottom = acc.y + acc.height;
+              const currBottom = curr.y + curr.height;
+              return currBottom > accBottom ? curr : acc;
+            }, null);
+
+            if (bottomMostTail) {
+              this.updateBlockDimensions(bottomMostTail);
+              const bottomY = bottomMostTail.y + bottomMostTail.height;
+              if (dropY > bottomY + 10) {
+                parentBlockForConnection = bottomMostTail;
+                finalX = (bottomMostTail.x + bottomMostTail.width / 2) - (newBlock.width / 2);
+                finalY = bottomMostTail.y + bottomMostTail.height + this.MIN_VERTICAL_GAP;
+                connectOnDrop = true;
+              }
             }
           }
         }
       }
     }
-  }
 
-    // Part 3: Update the block's data with its final position and move it in the DOM
     newBlock.x = finalX;
     newBlock.y = finalY;
     this.cdr.detectChanges();
     await this.nextFrame();
 
-    // Part 4: Initialize with jsPlumb AFTER it's in its final position
     this.jsPlumbFlowService.setupBlock(`block-${newBlock.id}`);
     this.selectBlock(newBlock);
     this.attachResizeObserver(newBlock);
 
-    // Part 5: Create connections and clean up layout
     if (connectOnDrop && parentBlockForConnection) {
         if (connectionToBreak && childIdForConnection) {
-            // Insert logic: Parent -> New -> Child
             this.jsPlumbFlowService.batch(() => {
                 this.jsPlumbFlowService.deleteJsPlumbConnection(connectionToBreak);
                 this.jsPlumbFlowService.connectBlocks(`block-${parentBlockForConnection!.id}`, `block-${newBlock.id}`);
                 this.jsPlumbFlowService.connectBlocks(`block-${newBlock.id}`, `block-${childIdForConnection}`);
             });
-            // Force immediate revalidation and repaint to avoid delayed bottom connection
             this.jsPlumbFlowService.revalidate(`block-${parentBlockForConnection!.id}`);
             this.jsPlumbFlowService.revalidate(`block-${newBlock.id}`);
             this.jsPlumbFlowService.revalidate(`block-${childIdForConnection}`);
@@ -340,17 +346,14 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
             await this.nextFrame();
             await this.enforceVerticalLayout(newBlock.id);
         } else {
-            // Append logic: Parent -> New
             this.jsPlumbFlowService.connectBlocks(`block-${parentBlockForConnection.id}`, `block-${newBlock.id}`);
             this.jsPlumbFlowService.revalidate(`block-${parentBlockForConnection.id}`);
             this.jsPlumbFlowService.revalidate(`block-${newBlock.id}`);
             this.jsPlumbFlowService.repaintAllConnections();
             await this.nextFrame();
-            // If appending to a tail at the bottom, re-layout from the parent to keep a fixed gap
             await this.enforceVerticalLayout(parentBlockForConnection.id);
         }
     } else if (!connectOnDrop) {
-        // Dropped in an invalid location, so remove the block we added
         this.jsPlumbFlowService.removeBlock(`block-${newBlock.id}`);
         this.canvasBlocks = this.canvasBlocks.filter(b => b.id !== newBlock.id);
         this.closeSidebar();
@@ -358,9 +361,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
     }
 
-    // Part 6: Reveal the block after all repaint/revalidate work
     await this.nextFrame();
-    // Final batch to fully settle DOM before reveal
     this.jsPlumbFlowService.batch(() => {
       this.jsPlumbFlowService.revalidate(`block-${newBlock.id}`);
       this.jsPlumbFlowService.repaintAllConnections();
@@ -403,11 +404,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       this.jsPlumbFlowService.repaintAllConnections();
     }
   }
-
-  // =================================================================
-  // ==           END: REVISED GLITCH-FREE BLOCK ADDITION V2        ==
-  // =================================================================
-
+  
   private distanceToLineSegment(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
     const l2 = (x1 - x2) ** 2 + (y1 - y2) ** 2;
     if (l2 === 0) return Math.hypot(px - x1, py - y1);
@@ -502,7 +499,6 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
         const childBlock = this.canvasBlocks.find(b => b.id === childId);
         if (childBlock) {
           this.updateBlockDimensions(childBlock);
-          // Enforce a fixed vertical gap regardless of parent height changes
           const fixedGap = this.MIN_VERTICAL_GAP;
           childBlock.x = (parentBlock.x + (parentBlock.width / 2)) - (childBlock.width / 2);
           childBlock.y = parentBlock.y + parentBlock.height + fixedGap;
@@ -523,7 +519,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-   onWheel(event: WheelEvent) {
+  onWheel(event: WheelEvent) {
     event.preventDefault(); 
     if (event.ctrlKey) {
       const delta = event.deltaY > 0 ? -this.zoomStep : this.zoomStep;
@@ -562,27 +558,26 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasWrapper.nativeElement.style.cursor = 'default';
   }
 
-duplicateCanvasBlock(block: ChatbotBlock) {
-  const newBlockId = `${block.type}-${Date.now()}-dup`;
-  
-  const newBlock: ChatbotBlock = { 
-    ...block, 
-    id: newBlockId, 
-    x: (block.x || 0) + 40, 
-    y: (block.y || 0) + 40,
-    connections: { input: [], output: [] }
-  };
+  duplicateCanvasBlock(block: ChatbotBlock) {
+    const newBlockId = `${block.type}-${Date.now()}-dup`;
+    
+    const newBlock: ChatbotBlock = { 
+      ...block, 
+      id: newBlockId, 
+      x: (block.x || 0) + 40, 
+      y: (block.y || 0) + 40,
+      connections: { input: [], output: [] }
+    };
 
-  this.canvasBlocks.push(newBlock);
-
-  // This code inside the timeout is necessary
-  setTimeout(() => {
-    this.updateBlockDimensions(newBlock);
-    this.jsPlumbFlowService.setupBlock(`block-${newBlock.id}`);
-    this.selectBlock(newBlock);
-    this.attachResizeObserver(newBlock);
-  }, 80);
-}
+    this.canvasBlocks.push(newBlock);
+    
+    setTimeout(() => {
+      this.updateBlockDimensions(newBlock);
+      this.jsPlumbFlowService.setupBlock(`block-${newBlock.id}`);
+      this.selectBlock(newBlock);
+      this.attachResizeObserver(newBlock);
+    }, 80);
+  }
 
   onBlockUpdated(updatedBlock: ChatbotBlock) {
     const index = this.canvasBlocks.findIndex(b => b.id === updatedBlock.id);
@@ -592,8 +587,6 @@ duplicateCanvasBlock(block: ChatbotBlock) {
       setTimeout(() => {
         this.updateBlockDimensions(updatedBlock);
         this.jsPlumbFlowService.repaintAllConnections();
-        // Intialize quick-reply visual connections whne quick replies are present
-        // Initialize quick-reply visual connections when quick replies are present
         if (updatedBlock.type === 'textResponse' && updatedBlock.quickReplies && updatedBlock.quickReplies.length > 0) {
           this.initializeQuickReplyConnections(updatedBlock);
         }
@@ -615,7 +608,6 @@ duplicateCanvasBlock(block: ChatbotBlock) {
     const el = document.getElementById(elementId);
     if (!el || (typeof (window as any).ResizeObserver === 'undefined')) return;
     const observer = new ResizeObserver(() => {
-      // Debounce layout to avoid jitter while editors animate open/close
       const existingTimer = this.layoutDebounceTimers.get(block.id);
       if (existingTimer) clearTimeout(existingTimer);
       const timer = setTimeout(async () => {
@@ -675,23 +667,13 @@ duplicateCanvasBlock(block: ChatbotBlock) {
       this.addBlockToCanvasAtPosition(blueprint, canvasRect.left + canvasRect.width / 2, canvasRect.top + canvasRect.height / 2);
     }
   }
-
-  // Inside saveFlow()
-
-saveFlow() {
-  const flowData = {
-    // The `blocks` array now contains the complete flow structure,
-    // including the `connections` object within each block.
-    blocks: this.canvasBlocks,
-
-    // ✨ This part is now redundant and can be removed.
-    // connections: this.jsPlumbFlowService.getConnections().map((conn: any) => ({
-    //   sourceId: conn.sourceId.replace('block-', ''),
-    //   targetId: conn.targetId.replace('block-', ''),
-    // })),
-  };
-  console.log('Chatbot flow saved!', flowData);
-}
+  
+  saveFlow() {
+    const flowData = {
+      blocks: this.canvasBlocks,
+    };
+    console.log('Chatbot flow saved!', flowData);
+  }
 
   zoomIn() { this.zoomLevel = Math.min(this.maxZoom, this.zoomLevel + this.zoomStep); this.updateCanvasTransform(); this.jsPlumbFlowService.repaintAllConnections(); }
   zoomOut() { this.zoomLevel = Math.max(this.minZoom, this.zoomLevel - this.zoomStep); this.updateCanvasTransform(); this.jsPlumbFlowService.repaintAllConnections(); }
@@ -709,8 +691,6 @@ saveFlow() {
     this.rightSidebarOpen = true;
     requestAnimationFrame(() => this.jsPlumbFlowService.repaintAllConnections());
     setTimeout(() => this.jsPlumbFlowService.repaintAllConnections(), 320);
-    // Also ensure quick reply connections appear for text responses
-   // Also ensure quick reply connections appear for text responses
     if (block.type === 'textResponse' && block.quickReplies && block.quickReplies.length > 0) {
       setTimeout(() => this.initializeQuickReplyConnections(block), 50);
     }
@@ -730,110 +710,89 @@ saveFlow() {
   getStatusColor(status: string): string { return '#4CAF50'; }
   getTypeColor(type: string): string { return '#F5F5F5'; }
 
-    // Create visual jsPlumb connections for quick-reply synthetic child blocks
   private initializeQuickReplyConnections(parent: ChatbotBlock): void {
     const parentId = `block-${parent.id}`;
     const noQrId = `block-${parent.id}-noqr`;
     const qrId = `block-${parent.id}-qr`;
 
-    // Ensure DOM elements exist before setup
     const ensureEl = (id: string) => !!document.getElementById(id);
     if (!ensureEl(noQrId) || !ensureEl(qrId)) { return; }
 
     this.jsPlumbFlowService.setupBlock(noQrId);
     this.jsPlumbFlowService.setupBlock(qrId);
     
-    // Connect parent to the flow branches
     this.jsPlumbFlowService.connectBlocks(parentId, noQrId);
     this.jsPlumbFlowService.connectBlocks(parentId, qrId);
 
-    // Individual quick replies
     const replies = parent.quickReplies || [];
-    replies.forEach((_, idx) => {
+    replies.forEach((_: any, idx: any) => {
       const replyId = `block-${parent.id}-qr-${idx}`;
       if (ensureEl(replyId)) {
         this.jsPlumbFlowService.setupBlock(replyId);
-        // Connect Quick Replies container to each individual quick reply
         this.jsPlumbFlowService.connectBlocks(qrId, replyId);
       }
     });
-
-    // Repaint after creating connections
+    
     this.jsPlumbFlowService.repaintAllConnections();
     
-    // Force change detection to ensure connection lines are rendered
     setTimeout(() => {
       this.cdr.detectChanges();
     }, 100);
   }
-
-  // Handle connections from quick reply endpoints to other components
+  
   onQuickReplyConnection(sourceBlockId: string, targetBlockId: string): void {
-    // This will be called when user connects from a quick reply endpoint to another component
     console.log(`Quick reply connection: ${sourceBlockId} -> ${targetBlockId}`);
-    // The connection is already established by jsPlumb, just log for now
   }
-
-  // Handle start connection events from quick reply endpoints
+  
   onQuickReplyStartConnection(connectionInfo: {event: MouseEvent, type: string}): void {
     const { event, type } = connectionInfo;
     const parentBlockId = event.target ? (event.target as HTMLElement).closest('.quick-reply-cards-wrapper')?.getAttribute('data-parent-id') : null;
     
     if (parentBlockId) {
       console.log(`Starting connection from quick reply endpoint: ${type} of parent ${parentBlockId}`);
-      // This will allow jsPlumb to handle the connection from the quick reply endpoint
-      // The endpoint is already set up with jsPlumb, so dragging from it will work
+    }
+  }
+  
+  private handleConnectionCreated(info: ConnectionInfo): void {
+    const sourceId = info.sourceId.replace('block-', '');
+    const targetId = info.targetId.replace('block-', '');
+
+    const sourceBlock = this.canvasBlocks.find(b => b.id === sourceId);
+    const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
+    
+    if (sourceBlock && targetBlock) {
+      if (!sourceBlock.connections) sourceBlock.connections = { input: [], output: [] };
+      if (!targetBlock.connections) targetBlock.connections = { input: [], output: [] };
+
+      if (!sourceBlock.connections.output!.includes(targetId)) {
+        sourceBlock.connections.output!.push(targetId);
+      }
+
+      if (!targetBlock.connections.input!.includes(sourceId)) {
+        targetBlock.connections.input!.push(sourceId);
+      }
+
+      console.log(`Connection created: ${sourceId} -> ${targetId}`);
+      this.cdr.detectChanges();
     }
   }
 
-
-// Add these two new functions to your component class
-
-private handleConnectionCreated(info: ConnectionInfo): void {
-  const sourceId = info.sourceId.replace('block-', '');
-  const targetId = info.targetId.replace('block-', '');
-
-  const sourceBlock = this.canvasBlocks.find(b => b.id === sourceId);
-  const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
-  
-  if (sourceBlock && targetBlock) {
-    // Ensure the connections objects exist
-    if (!sourceBlock.connections) sourceBlock.connections = { input: [], output: [] };
-    if (!targetBlock.connections) targetBlock.connections = { input: [], output: [] };
-
-    // Update source block's output
-    if (!sourceBlock.connections.output!.includes(targetId)) {
-      sourceBlock.connections.output!.push(targetId);
+  private handleConnectionDeleted(info: ConnectionInfo): void {
+    const sourceId = info.sourceId.replace('block-', '');
+    const targetId = info.targetId.replace('block-', '');
+    
+    const sourceBlock = this.canvasBlocks.find(b => b.id === sourceId);
+    const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
+    
+    if (sourceBlock && sourceBlock.connections && sourceBlock.connections.output) {
+      sourceBlock.connections.output = sourceBlock.connections.output.filter((id: string) => id !== targetId);
     }
-
-    // Update target block's input
-    if (!targetBlock.connections.input!.includes(sourceId)) {
-      targetBlock.connections.input!.push(sourceId);
+    
+    if (targetBlock && targetBlock.connections && targetBlock.connections.input) {
+      targetBlock.connections.input = targetBlock.connections.input.filter((id: string) => id !== sourceId);
     }
-
-    console.log(`Connection created: ${sourceId} -> ${targetId}`);
+    
+    console.log(`Connection deleted: ${sourceId} -> ${targetId}`);
     this.cdr.detectChanges();
   }
-}
-
-private handleConnectionDeleted(info: ConnectionInfo): void {
-  const sourceId = info.sourceId.replace('block-', '');
-  const targetId = info.targetId.replace('block-', '');
-  
-  const sourceBlock = this.canvasBlocks.find(b => b.id === sourceId);
-  const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
-
-  // Update source block's output
-  if (sourceBlock && sourceBlock.connections && sourceBlock.connections.output) {
-    sourceBlock.connections.output = sourceBlock.connections.output.filter(id => id !== targetId);
-  }
-
-  // Update target block's input
-  if (targetBlock && targetBlock.connections && targetBlock.connections.input) {
-    targetBlock.connections.input = targetBlock.connections.input.filter(id => id !== sourceId);
-  }
-  
-  console.log(`Connection deleted: ${sourceId} -> ${targetId}`);
-  this.cdr.detectChanges();
-}
 }

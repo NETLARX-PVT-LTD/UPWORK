@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-   "proto:gen": "protoc -I=../proto --ts_out=./src/app/proto-gen ../proto/*.proto"
+"proto:gen": "protoc --ts_out ./src/app/proto-gen --proto_path ../proto ../proto/*.proto"
   },
   "private": true,
   "dependencies": {
@@ -24,6 +24,8 @@
     "@ctrl/ngx-emoji-mart": "^9.2.0",
     "@fortawesome/fontawesome-free": "^7.0.0",
     "@jsplumb/browser-ui": "^6.2.10",
+    "@protobuf-ts/plugin": "^2.11.1",
+    "@protobuf-ts/runtime": "^2.11.1",
     "@tailwindcss/postcss": "^4.1.11",
     "jsplumb": "^2.15.6",
     "lucide-angular": "^0.539.0",
