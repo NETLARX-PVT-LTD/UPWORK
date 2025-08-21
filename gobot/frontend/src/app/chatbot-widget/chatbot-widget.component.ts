@@ -7,6 +7,7 @@ import { ChatbotMenuService } from '../shared/services/chatbot-menu.service';
 import { MenuButton } from '../models/menu-button.model';
 import { BrandingService, BrandingSettings } from '../shared/services/branding.service';
 import { Subscription } from 'rxjs';
+import { PageMessageService } from '../shared/services/page-message.service';
 
 interface Message {
   id: string;
@@ -14,6 +15,7 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
   typing?: boolean;
+   isPageTriggered?: boolean; 
 }
 
 @Component({
@@ -26,7 +28,10 @@ interface Message {
 export class ChatbotWidgetComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
   private brandingSubscription: Subscription | undefined;
-
+// Page messaging properties
+  private pageMessageSubscription: Subscription | undefined;
+  currentPageUrl: string = '';
+  pageTitle: string = '';
   // Add default values to prevent undefined errors
   secondaryColor: string = '#ffffff';
   // Add after existing properties
@@ -70,7 +75,8 @@ hasBotImage: boolean = false;
   constructor(
     private route: ActivatedRoute,
     private chatbotMenuService: ChatbotMenuService,
-    private brandingService: BrandingService
+    private brandingService: BrandingService,
+     private pageMessageService: PageMessageService
   ) { }
 
   ngOnInit() {
@@ -87,9 +93,15 @@ hasBotImage: boolean = false;
       this.loadWidgetConfig();
     }
     
+    // Subscribe to page message service
+    this.subscribeToPageMessages();
+    
+    // Setup page message handling
+    this.setupPageMessageHandling();
     this.loadMenuConfiguration();
     window.addEventListener('message', this.handleParentMessage.bind(this));
     this.sendMessageToParent({ type: 'chatbot-ready' });
+    
   }
 
   ngAfterViewChecked() {
@@ -100,6 +112,7 @@ hasBotImage: boolean = false;
   }
 
   ngOnDestroy() {
+     this.pageMessageSubscription?.unsubscribe();
     this.brandingSubscription?.unsubscribe();
     window.removeEventListener('message', this.handleParentMessage.bind(this));
   }
@@ -481,30 +494,356 @@ hasBotImage: boolean = false;
     if (config.showBranding !== undefined) this.showBranding = config.showBranding;
   }
 
-  handleParentMessage(event: MessageEvent) {
-    if (event.data && typeof event.data === 'object') {
-      switch (event.data.type) {
-        case 'chatbot-toggle':
-          this.toggleMinimize();
-          break;
-        case 'chatbot-send-message':
-          this.receiveExternalMessage(event.data.message);
-          break;
-        case 'chatbot-minimize':
-          this.isMinimized = true;
-          break;
-        case 'chatbot-maximize':
-          this.isMinimized = false;
-          this.unreadCount = 0;
-          break;
-        case 'chatbot-update-branding':
-          // Handle real-time branding updates from parent
-          if (event.data.branding) {
-            this.brandingService.saveBranding(event.data.branding);
-          }
-          break;
-      }
+  /**
+   * Subscribe to page messages from the service
+   */
+  // private subscribeToPageMessages(): void {
+  //   this.pageMessageSubscription = this.pageMessageService.pageMessages$.subscribe(
+  //     messages => {
+  //       console.log('Page messages updated:', messages);
+  //       // Send updated messages to parent if needed
+  //       this.sendMessageToParent({
+  //         type: 'page-messages-updated',
+  //         messages: messages
+  //       });
+  //     }
+  //   );
+  // }
+
+ /**
+   * Setup page message handling from parent window
+   */
+  private setupPageMessageHandling(): void {
+    // Correctly add the event listener using the class method
+    window.addEventListener('message', this.handleParentMessage.bind(this));
+    this.sendMessageToParent({ type: 'chatbot-ready' });
+  }
+
+  /**
+   * Handle incoming messages from the parent window.
+   * This method is now a proper class method, outside of setupPageMessageHandling.
+   */
+// Add this to your handleParentMessage method in chatbot-widget.component.ts
+
+private handleParentMessage(event: MessageEvent): void {
+  if (event.data && typeof event.data === 'object') {
+    switch (event.data.type) {
+      case 'chatbot-toggle':
+        this.toggleMinimize();
+        break;
+      case 'chatbot-send-message':
+        this.receiveExternalMessage(event.data.message);
+        break;
+      case 'chatbot-minimize':
+        this.isMinimized = true;
+        break;
+      case 'page-message':
+        this.handlePageMessage(event.data);
+        break;
+      case 'page-data':
+        this.handlePageData(event.data);
+        break;
+      case 'chatbot-request-page-data':
+        this.sendPageDataToParent();
+        break;
+      case 'chatbot-maximize':
+        this.isMinimized = false;
+        this.unreadCount = 0;
+        setTimeout(() => {
+          this.shouldScrollToBottom = true;
+        }, 100);
+        break;
+      case 'chatbot-update-branding':
+        if (event.data.branding) {
+          this.brandingService.saveBranding(event.data.branding);
+        }
+        break;
+      // ADD THESE NEW CASES:
+      case 'request-bot-info':
+        this.sendBotInfoToParent();
+        break;
+      case 'request-page-messages':
+        this.sendPageMessagesToParent(event.data.currentUrl);
+        break;
     }
+  }
+}
+
+// ADD THESE NEW METHODS:
+/**
+ * Send bot information to parent window for notification cards
+ */
+private sendBotInfoToParent(): void {
+  this.sendMessageToParent({
+    type: 'bot-info-response',
+    botName: this.botName,
+    botAvatar: this.getBotAvatar(),
+    botImage: this.botImage,
+    primaryColor: this.primaryColor
+  });
+}
+
+/**
+ * Get bot avatar for notifications - prioritize based on settings
+ */
+private getBotAvatar(): string | null {
+  if (this.showChatAvatarAsWidget && this.selectedAvatar) {
+    if (this.selectedAvatar.type === 'upload' && this.selectedAvatar.file) {
+      return this.selectedAvatar.file;
+    }
+  }
+  
+  if (this.botImage) {
+    return this.botImage;
+  }
+  
+  if (this.profileImage) {
+    return this.profileImage;
+  }
+  
+  return null;
+}
+
+/**
+ * Send current page messages to parent window
+ */
+private sendPageMessagesToParent(currentUrl?: string): void {
+  // Get all page messages from the service
+  const allMessages = this.pageMessageService.getPageMessages();
+  
+  this.sendMessageToParent({
+    type: 'page-messages-response',
+    messages: allMessages,
+    currentUrl: currentUrl || window.location.href,
+    timestamp: new Date().toISOString()
+  });
+}
+
+/**
+ * Enhanced page message subscription to notify embed script of updates
+ */
+private subscribeToPageMessages(): void {
+  this.pageMessageSubscription = this.pageMessageService.pageMessages$.subscribe(
+    messages => {
+      console.log('Page messages updated:', messages);
+      
+      // Update localStorage for embed script
+      localStorage.setItem('pageMessages', JSON.stringify(messages));
+      
+      // Send updated messages to parent window
+      this.sendMessageToParent({
+        type: 'page-messages-updated',
+        messages: messages,
+        timestamp: new Date().toISOString()
+      });
+    }
+  );
+}
+
+
+/**
+   * Handle incoming page message from embed script
+   */
+  private handlePageMessage(data: any): void {
+    if (!data.message) return;
+    
+    console.log('Received page message:', data);
+    
+    // Show the widget if it's minimized
+    if (this.isMinimized) {
+      this.isMinimized = false;
+      this.unreadCount = 0;
+    }
+    
+    // Add the page message as a bot message
+    this.addBotMessage(data.message, true);
+    
+    // Add a follow-up message to provide context
+    setTimeout(() => {
+      this.addBotMessage("This message was triggered by your activity on this page. How can I help you further?");
+    }, 1000);
+  }
+
+  /**
+   * Handle page data from parent window
+   */
+  private handlePageData(data: any): void {
+    this.currentPageUrl = data.url || '';
+    this.pageTitle = data.title || '';
+    
+    console.log('Received page data:', {
+      url: this.currentPageUrl,
+      title: this.pageTitle,
+      pageMessages: data.pageMessages
+    });
+  }
+
+  /**
+   * Send page data to parent window
+   */
+  private sendPageDataToParent(): void {
+    // Get current page messages that match the current URL
+    const currentMessages = this.pageMessageService.getPageMessages();
+    
+    this.sendMessageToParent({
+      type: 'page-data-response',
+      messages: currentMessages,
+      totalCount: currentMessages.length
+    });
+  }
+
+  /**
+   * Enhanced addBotMessage with page message support
+   */
+  private addBotMessage(text: string, isPageTriggered: boolean = false): void {
+    const message: Message = {
+      id: this.generateMessageId(),
+      text: text,
+      isUser: false,
+      timestamp: new Date(),
+      isPageTriggered: isPageTriggered // Add this flag to track page-triggered messages
+    };
+    
+    this.messages.push(message);
+    this.shouldScrollToBottom = true;
+    
+    // Don't count page-triggered messages as unread when widget is minimized
+    if (this.isMinimized && !this.isLandingPage && !isPageTriggered) {
+      this.unreadCount++;
+      // Send notification to parent about unread messages
+      this.sendMessageToParent({ 
+        type: 'chatbot-notification', 
+        count: this.unreadCount 
+      });
+    }
+  }
+
+  /**
+   * Method to manually trigger page messages (for testing)
+   */
+  public triggerPageMessagesForUrl(url: string): void {
+    const messages = this.pageMessageService.getPageMessages();
+    const matchingMessages = this.filterMessagesForUrl(messages, url);
+    
+    matchingMessages.forEach(message => {
+      let messageText = '';
+      
+      if (message.messageType === 'text' && message.textMessage) {
+        messageText = message.textMessage;
+      } else if (message.messageType === 'story' && message.selectedStory) {
+        messageText = this.convertStoryToText(message.selectedStory);
+      }
+      
+      if (messageText) {
+        setTimeout(() => {
+          this.addBotMessage(messageText, true);
+        }, (message.delay || 0) * 1000);
+      }
+    });
+  }
+
+  /**
+   * Filter messages that match the given URL
+   */
+  private filterMessagesForUrl(messages: any[], url: string): any[] {
+    return messages.filter(message => {
+      return message.urls.some((messageUrl: string) => {
+        // Handle different URL matching patterns
+        if (messageUrl === '*') return true; // Wildcard matches all
+        if (messageUrl.endsWith('*')) {
+          const prefix = messageUrl.slice(0, -1);
+          return url.startsWith(prefix);
+        }
+        if (messageUrl.includes('*')) {
+          const pattern = messageUrl.replace(/\*/g, '.*');
+          const regex = new RegExp(pattern);
+          return regex.test(url);
+        }
+        return url === messageUrl || url.includes(messageUrl);
+      });
+    });
+  }
+
+  /**
+   * Convert story to text message
+   */
+  private convertStoryToText(story: any): string {
+    if (!story || !story.blocks) return story.name || 'Story content';
+    
+    const textBlocks = story.blocks
+      .filter((block: any) => block.type === 'text' && block.content && block.content.text)
+      .map((block: any) => block.content.text);
+    
+    return textBlocks.length > 0 ? textBlocks.join(' ') : story.name || 'Story content';
+  }
+
+  /**
+   * Enhanced clear chat to handle page messages
+   */
+  clearChat(): void {
+    this.closeHeaderMenu();
+    if (confirm('Are you sure you want to clear the chat? This action cannot be undone.')) {
+      this.messages = [];
+      this.menuHistory = [];
+      this.loadMenuConfiguration();
+      
+      // Re-add welcome message after clearing
+      if (this.welcomeMessage) {
+        this.addBotMessage(this.welcomeMessage);
+      }
+      
+      // Notify parent that chat was cleared
+      this.sendMessageToParent({ 
+        type: 'chat-cleared',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Enhanced download chat to include page message context
+   */
+  downloadChat(): void {
+    this.closeHeaderMenu();
+    try {
+      const chatData = this.prepareChatForDownloadWithPageContext();
+      const blob = new Blob([chatData], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `chat-history-${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      this.addBotMessage('Chat history downloaded successfully!');
+    } catch (error) {
+      console.error('Error downloading chat:', error);
+      this.addBotMessage('Sorry, there was an error downloading the chat history.');
+    }
+  }
+
+  /**
+   * Enhanced chat download with page context
+   */
+  private prepareChatForDownloadWithPageContext(): string {
+    let chatText = `Chat History - ${new Date().toLocaleString()}\n`;
+    chatText += `Bot: ${this.botName}\n`;
+    chatText += `Page URL: ${this.currentPageUrl || 'Unknown'}\n`;
+    chatText += `Page Title: ${this.pageTitle || 'Unknown'}\n`;
+    chatText += '='.repeat(50) + '\n\n';
+    
+    this.messages.forEach((message) => {
+      if (!message.typing) {
+        const sender = message.isUser ? 'You' : this.botName;
+        const time = this.formatTime(message.timestamp);
+        const pageTriggered = (message as any).isPageTriggered ? ' [Page Triggered]' : '';
+        chatText += `[${time}] ${sender}${pageTriggered}: ${message.text}\n`;
+        chatText += '\n';
+      }
+    });
+    
+    return chatText;
   }
 
   sendMessageToParent(data: any) {
@@ -572,38 +911,38 @@ hasBotImage: boolean = false;
     }
   }
 
-  clearChat(): void {
-    this.closeHeaderMenu();
-    if (confirm('Are you sure you want to clear the chat? This action cannot be undone.')) {
-      this.messages = [];
-      this.menuHistory = [];
-      this.loadMenuConfiguration();
-      // Re-add welcome message after clearing
-      if (this.welcomeMessage) {
-        this.addBotMessage(this.welcomeMessage);
-      }
-    }
-  }
+  // clearChat(): void {
+  //   this.closeHeaderMenu();
+  //   if (confirm('Are you sure you want to clear the chat? This action cannot be undone.')) {
+  //     this.messages = [];
+  //     this.menuHistory = [];
+  //     this.loadMenuConfiguration();
+  //     // Re-add welcome message after clearing
+  //     if (this.welcomeMessage) {
+  //       this.addBotMessage(this.welcomeMessage);
+  //     }
+  //   }
+  // }
 
-  downloadChat(): void {
-    this.closeHeaderMenu();
-    try {
-      const chatData = this.prepareChatForDownload();
-      const blob = new Blob([chatData], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `chat-history-${new Date().toISOString().split('T')[0]}.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      this.addBotMessage('Chat history downloaded successfully!');
-    } catch (error) {
-      console.error('Error downloading chat:', error);
-      this.addBotMessage('Sorry, there was an error downloading the chat history.');
-    }
-  }
+  // downloadChat(): void {
+  //   this.closeHeaderMenu();
+  //   try {
+  //     const chatData = this.prepareChatForDownload();
+  //     const blob = new Blob([chatData], { type: 'text/plain' });
+  //     const url = window.URL.createObjectURL(blob);
+  //     const link = document.createElement('a');
+  //     link.href = url;
+  //     link.download = `chat-history-${new Date().toISOString().split('T')[0]}.txt`;
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
+  //     window.URL.revokeObjectURL(url);
+  //     this.addBotMessage('Chat history downloaded successfully!');
+  //   } catch (error) {
+  //     console.error('Error downloading chat:', error);
+  //     this.addBotMessage('Sorry, there was an error downloading the chat history.');
+  //   }
+  // }
 
   toggleDarkMode(): void {
     this.closeHeaderMenu();
@@ -636,19 +975,19 @@ hasBotImage: boolean = false;
     return chatText;
   }
 
-  private addBotMessage(text: string): void {
-    const message: Message = {
-      id: this.generateMessageId(),
-      text: text,
-      isUser: false,
-      timestamp: new Date()
-    };
-    this.messages.push(message);
-    this.shouldScrollToBottom = true;
-    if (this.isMinimized && !this.isLandingPage) {
-      this.unreadCount++;
-    }
-  }
+  // private addBotMessage(text: string): void {
+  //   const message: Message = {
+  //     id: this.generateMessageId(),
+  //     text: text,
+  //     isUser: false,
+  //     timestamp: new Date()
+  //   };
+  //   this.messages.push(message);
+  //   this.shouldScrollToBottom = true;
+  //   if (this.isMinimized && !this.isLandingPage) {
+  //     this.unreadCount++;
+  //   }
+  // }
 
   private getSettingsMenuButtons(): MenuButton[] {
     return [
