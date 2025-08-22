@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDbContext<BotDbContext>(options =>
     // Uncomment this if you want SQL Server
-    options.UseSqlServer(builder.Configuration.GetConnectionString("BootsifyConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("BootsifyConnection"))
 
     // OR Uncomment this if you want InMemory
     // options.UseInMemoryDatabase("BotDb");

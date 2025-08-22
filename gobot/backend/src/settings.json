@@ -1,0 +1,25 @@
+{
+  "PreferredLanguage": "English",
+  "OpenChatbotOnLoad": true,
+  "HideInputFromWebsite": true,
+  "MoveChatbotToLeft": true,
+  "DeleteUserChatPermanently": true,
+  "HumanHelpForm": true,
+  "StartChatbotOnWidgetClick": true,
+  "BotActivationTime": 1,
+  "LeadCollectionForm": "Name and Email Form",
+  "ChatbotSize": 83,
+  "MobileChatbotSize": 64,
+  "HideChatbotOnMobile": true,
+  "HideChatbotPopupOnMobileLoad": true,
+  "CsatEnabled": true,
+  "CsatQuestions": [
+    "how are you ?"
+  ],
+  "UrlExclusions": [
+    "string"
+  ],
+  "IpExclusions": [
+    "string"
+  ]
+}
