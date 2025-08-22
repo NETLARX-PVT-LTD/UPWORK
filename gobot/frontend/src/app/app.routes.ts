@@ -17,10 +17,13 @@ import { AdvancedSettingsComponent } from './publish-bot/advanced-settings/advan
 import { PageMessageComponent } from './publish-bot/page-message/page-message.component';
 import { PageMessagesListComponent } from './publish-bot/page-messages-list/page-messages-list.component';
 import { Title } from '@angular/platform-browser';
+import { PartnerDashboardComponent } from './partner-dashboard/partner-dashboard.component';
 
 export const routes: Routes = [
   // publish bot on whatsapp
   { path: 'whatsapp-publisher', component: WhatsappPublisherComponent, data: { title: 'Publish Bot' } },
+  // Partner dashboard route
+  { path: 'partner-dashboard', component: PartnerDashboardComponent },
   // website chatbot advanced settings
   { path: 'advance-settings', component: AdvancedSettingsComponent, data: { title: 'Advance Settings' } },
   // create page messaging 

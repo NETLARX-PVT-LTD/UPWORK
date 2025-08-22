@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment'; // <-- Corrected path to use a path alias
 
 interface AdvancedSettings {
   preferredLanguage: string;
@@ -17,24 +19,25 @@ interface AdvancedSettings {
   hideChatbotOnMobile: boolean;
   hideChatbotPopupOnMobileLoad: boolean;
   csatEnabled: boolean;
-  csatQuestions: string[]; 
+  csatQuestions: string[];
   urlExclusions: string[];
   ipExclusions: string[];
 }
 
 @Component({
   selector: 'app-advanced-settings',
-  standalone:true,
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    HttpClientModule
   ],
   templateUrl: './advanced-settings.component.html',
   styleUrls: ['./advanced-settings.component.scss']
 })
 export class AdvancedSettingsComponent implements OnInit {
-  
+
   settings: AdvancedSettings = {
     preferredLanguage: 'English',
     openChatbotOnLoad: true,
@@ -57,7 +60,7 @@ export class AdvancedSettingsComponent implements OnInit {
 
   languages = [
     'English',
-    'Spanish', 
+    'Spanish',
     'French',
     'German',
     'Italian',
@@ -79,75 +82,87 @@ export class AdvancedSettingsComponent implements OnInit {
   urlExclusionText = '';
   ipExclusionText = '';
 
-  constructor() { }
+  private readonly apiUrl = `${environment.apiUrl}/Settings`; // <-- Use the environment variable
+
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this.loadSettings();
   }
 
   loadSettings(): void {
-    // Load settings from your service/API
-    console.log('Loading settings...');
+    this.http.get<AdvancedSettings>(this.apiUrl).subscribe({
+      next: (data) => {
+        // Map the received data to your settings object
+        this.settings = data;
+        // Convert array data back to text for the textareas
+        this.urlExclusionText = this.settings.urlExclusions.join('\n');
+        this.ipExclusionText = this.settings.ipExclusions.join('\n');
+        console.log('Settings loaded:', this.settings);
+      },
+      error: (error) => {
+        console.error('Error loading settings:', error);
+      }
+    });
   }
 
-// Corrected Component Method
-onChatbotSizeChange(event: Event): void {
-  const target = event.target as HTMLInputElement;
-  this.settings.chatbotSize = Number(target.value); // Use Number() for a clean conversion
-}
+  onChatbotSizeChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.settings.chatbotSize = Number(target.value);
+  }
 
-// Corrected Component Method for mobile size
-onMobileChatbotSizeChange(event: Event): void {
-  const target = event.target as HTMLInputElement;
-  this.settings.mobileChatbotSize = Number(target.value);
-}
+  onMobileChatbotSizeChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.settings.mobileChatbotSize = Number(target.value);
+  }
 
   addCsatQuestion(): void {
-  // Add a new, empty question to the array
-  this.settings.csatQuestions.push('');
-  console.log('New CSAT question field added.');
-}
+    this.settings.csatQuestions.push('');
+    console.log('New CSAT question field added.');
+  }
 
-removeCsatQuestion(index: number): void {
-  // Remove the question at the specified index
-  this.settings.csatQuestions.splice(index, 1);
-  console.log('CSAT question removed at index:', index);
-}
+  removeCsatQuestion(index: number): void {
+    this.settings.csatQuestions.splice(index, 1);
+    console.log('CSAT question removed at index:', index);
+  }
 
+  // A single save method to be called by all "Save" buttons in the HTML
   saveSettings(): void {
-    // Parse URL and IP exclusions
+    // Parse URL and IP exclusions from the textareas
     this.settings.urlExclusions = this.urlExclusionText
       .split('\n')
       .map(url => url.trim())
       .filter(url => url.length > 0);
-    
+
     this.settings.ipExclusions = this.ipExclusionText
       .split('\n')
       .map(ip => ip.trim())
       .filter(ip => ip.length > 0);
+      
+    // Filter out any empty strings from the CSAT questions array
+    this.settings.csatQuestions = this.settings.csatQuestions.filter(q => q.length > 0);
 
-    console.log('Saving settings:', this.settings);
-    // Call your service to save settings
-    this.saveToService();
+    this.http.post(this.apiUrl, this.settings).subscribe({
+      next: (response) => {
+        console.log('Settings saved successfully!', response);
+      },
+      error: (error) => {
+        console.error('Error saving settings:', error);
+      }
+    });
   }
-
+  
+  // These helper methods are no longer needed, as they now call the main saveSettings()
   saveMobileSettings(): void {
-    console.log('Saving mobile settings...');
-    this.saveToService();
+    this.saveSettings();
   }
 
   saveCsatSettings(): void {
-    console.log('Saving CSAT settings...');
-    this.saveToService();
+    this.saveSettings();
   }
 
   saveExclusionSettings(): void {
     this.saveSettings();
-  }
-
-  private saveToService(): void {
-    // Implement your service call here
-    // this.settingsService.updateSettings(this.settings).subscribe(...);
   }
 
   uploadLogo(event: any): void {

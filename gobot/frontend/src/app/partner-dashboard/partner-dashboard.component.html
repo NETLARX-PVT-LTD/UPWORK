@@ -1,0 +1,413 @@
+<div class="partner-dashboard">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>Partner Dashboard</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item" (click)="setCurrentPage('whitelabel')" [class.active]="currentPage === 'whitelabel'">
+        <i class="icon-settings">⚙</i>
+        <span>Whitelabel Settings</span>
+      </a>
+      <a  class="nav-item" (click)="setCurrentPage('email')" [class.active]="currentPage === 'email'">
+        <i class="icon-email">✉</i>
+        <span>Email Settings</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" class="back-link">
+        <i class="icon-arrow-left">←</i>
+        <span>Back to Botsify</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="content-header">
+      <div class="hamburger-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="user-welcome">
+        Welcome, {{ userName }} ▼
+      </div>
+    </div>
+
+    <div class="dashboard-content">
+      <!-- WHITELABEL SETTINGS CONTENT -->
+      <div *ngIf="currentPage === 'whitelabel'" class="left-content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1>Whitelabel Settings - Dashboard</h1>
+        </div>
+
+        <!-- Steps Navigation -->
+        <div class="steps-navigation">
+          <button class="step" 
+                 [class.active]="currentStep === 1" 
+                 (click)="setCurrentStep(1)">
+            Step 1 - Fields
+          </button>
+          <button class="step" 
+                 [class.active]="currentStep === 2" 
+                 (click)="setCurrentStep(2)">
+            Step 2 - Settings
+          </button>
+          <button class="step" 
+                 [class.active]="currentStep === 3" 
+                 (click)="setCurrentStep(3)">
+            Step 3 - SSL
+          </button>
+        </div>
+
+        <div class="form-container">
+          <form [formGroup]="whitelabelForm" (ngSubmit)="onSubmit()" class="whitelabel-form">
+            
+            <!-- Step 1: Fields -->
+            <div *ngIf="currentStep === 1" class="step-content">
+              <div class="form-group">
+                <label for="companyName">Company Name*</label>
+                <input 
+                  type="text" 
+                  id="companyName" 
+                  formControlName="companyName"
+                  class="form-control"
+                  placeholder="Enter company name">
+                <div *ngIf="whitelabelForm.get('companyName')?.errors?.['required'] && whitelabelForm.get('companyName')?.touched" 
+                     class="error-message">
+                  Company name is required
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="maskUrl">Mask URL*</label>
+                <input 
+                  type="text" 
+                  id="maskUrl" 
+                  formControlName="maskUrl"
+                  class="form-control"
+                  placeholder="Enter mask URL">
+                <div *ngIf="whitelabelForm.get('maskUrl')?.errors?.['required'] && whitelabelForm.get('maskUrl')?.touched" 
+                     class="error-message">
+                  Mask URL is required
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="logo">Logo*</label>
+                <div class="file-upload">
+                  <input 
+                    type="file" 
+                    id="logo" 
+                    (change)="onFileSelect($event)"
+                    accept="image/*"
+                    class="file-input">
+                  <label for="logo" class="file-label">
+                    <span class="file-button">Choose File</span>
+                    <span class="file-name">{{ selectedFileName || 'No file chosen' }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Primary Color</label>
+                <div class="color-options">
+                  <div *ngFor="let color of primaryColors" 
+                       class="color-option"
+                       [class.selected]="whitelabelForm.get('primaryColor')?.value === color.value"
+                       (click)="selectColor('primaryColor', color.value)"
+                       [style.background-color]="color.value">
+                  </div>
+                  <div class="color-option add-color" (click)="showColorPicker('primary')">
+                    <span>+</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Secondary Color</label>
+                <div class="color-options">
+                  <div *ngFor="let color of secondaryColors" 
+                       class="color-option"
+                       [class.selected]="whitelabelForm.get('secondaryColor')?.value === color.value"
+                       (click)="selectColor('secondaryColor', color.value)"
+                       [style.background-color]="color.value">
+                  </div>
+                  <div class="color-option add-color" (click)="showColorPicker('secondary')">
+                    <span>+</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" 
+                        class="btn btn-save"
+                        [disabled]="whitelabelForm.invalid">
+                  Save
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2: Settings -->
+            <div *ngIf="currentStep === 2" class="step-content">
+              <div class="settings-content">
+                <h3>Whitelabel Settings</h3>
+                
+                <div class="cname-info">
+                  <div class="cname-title">Add Following CNAME Record</div>
+                  <div class="cname-details">
+                    <div><span class="cname-label">CNAME :</span> <span class="cname-value">{{ getMaskUrl() }}</span></div>
+                    <div><span class="cname-label">value :</span> <span class="cname-value">whitelabel.botsifymail.com</span></div>
+                  </div>
+                  
+                  <div class="white-label-url">
+                    <div class="url-label">White Label URL</div>
+                    <a href="#" class="url-link">{{ getMaskUrl() }}</a>
+                  </div>
+                </div>
+
+                <div class="button-group">
+                  <button type="button" class="btn btn-test" (click)="testDomain()">
+                    Test Domain
+                  </button>
+                  <button type="button" class="btn btn-help" (click)="getHelp()">
+                    Get Help
+                  </button>
+                  <button type="button" class="btn btn-reset" (click)="resetSettings()">
+                    Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: SSL -->
+            <div *ngIf="currentStep === 3" class="step-content">
+              <div class="ssl-content">
+                <h3>WhiteLabel Settings</h3>
+                
+                <div class="ssl-info">
+                  <div class="ssl-title">Add Following CNAME Record</div>
+                  <div class="ssl-details">
+                    <div class="ssl-cname">
+                      <div><span class="label">CNAME :</span> <span class="value">{{ getMaskUrl() }}</span></div>
+                      <div><span class="label">VALUE :</span> <span class="value">whitelabel.botsifymail.com</span></div>
+                    </div>
+                    
+                    <div class="url-info">
+                      <div class="url-label">White Label URL</div>
+                      <a href="#" class="url-link">{{ getMaskUrl() }}</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ssl-actions">
+                  <button type="button" class="btn-install-ssl" (click)="installSSL()">
+                    Install SSL
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+      <!-- EMAIL SETTINGS CONTENT -->
+      <div *ngIf="currentPage === 'email'" class="left-content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1>Email Settings - Dashboard</h1>
+        </div>
+
+        <!-- Warning Message -->
+        <div class="warning-banner">
+          <div class="warning-content">
+            <i class="warning-icon">⚠️</i>
+            <span>Before filling out the information make sure it works with </span>
+            <a href="#" class="smtp-link">smtper.net</a>
+          </div>
+        </div>
+
+        <!-- Email Settings Form -->
+        <div class="form-container">
+          <form [formGroup]="emailForm" (ngSubmit)="onEmailSubmit()" class="email-form">
+            
+            <div class="form-group">
+              <label for="senderName">Sender Name<span class="required">*</span></label>
+              <input 
+                type="text" 
+                id="senderName" 
+                formControlName="senderName"
+                class="form-control"
+                [class.invalid]="isEmailFieldInvalid('senderName')"
+                (blur)="onEmailFieldBlur('senderName')"
+                placeholder="Enter the Sender Name">
+              <div *ngIf="isEmailFieldInvalid('senderName')" class="error-message">
+                {{ getEmailFieldError('senderName') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="securityProtocol">Security Protocol<span class="required">*</span></label>
+              <select 
+                id="securityProtocol" 
+                formControlName="securityProtocol"
+                class="form-control"
+                [class.invalid]="isEmailFieldInvalid('securityProtocol')"
+                (blur)="onEmailFieldBlur('securityProtocol')">
+                <option value="TLS">TLS</option>
+                <option value="SSL">SSL</option>
+                <option value="STARTTLS">STARTTLS</option>
+                <option value="None">None</option>
+              </select>
+              <div *ngIf="isEmailFieldInvalid('securityProtocol')" class="error-message">
+                {{ getEmailFieldError('securityProtocol') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="smtpHost">SMTP Host<span class="required">*</span></label>
+              <input 
+                type="text" 
+                id="smtpHost" 
+                formControlName="smtpHost"
+                class="form-control"
+                [class.invalid]="isEmailFieldInvalid('smtpHost')"
+                (blur)="onEmailFieldBlur('smtpHost')"
+                placeholder="Enter you SMTP Host">
+              <div *ngIf="isEmailFieldInvalid('smtpHost')" class="error-message">
+                {{ getEmailFieldError('smtpHost') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="smtpPort">SMTP Port<span class="required">*</span></label>
+              <input 
+                type="text" 
+                id="smtpPort" 
+                formControlName="smtpPort"
+                class="form-control"
+                [class.invalid]="isEmailFieldInvalid('smtpPort')"
+                (blur)="onEmailFieldBlur('smtpPort')"
+                placeholder="587">
+              <div *ngIf="isEmailFieldInvalid('smtpPort')" class="error-message">
+                {{ getEmailFieldError('smtpPort') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="smtpUsername">SMTP Username<span class="required">*</span></label>
+              <input 
+                type="text" 
+                id="smtpUsername" 
+                formControlName="smtpUsername"
+                class="form-control"
+                [class.invalid]="isEmailFieldInvalid('smtpUsername')"
+                (blur)="onEmailFieldBlur('smtpUsername')"
+                placeholder="Enter the Username">
+              <div *ngIf="isEmailFieldInvalid('smtpUsername')" class="error-message">
+                {{ getEmailFieldError('smtpUsername') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="smtpEmail">SMTP Email<span class="required">*</span></label>
+              <input 
+                type="email" 
+                id="smtpEmail" 
+                formControlName="smtpEmail"
+                class="form-control"
+                [class.invalid]="isEmailFieldInvalid('smtpEmail')"
+                (blur)="onEmailFieldBlur('smtpEmail')"
+                placeholder="info@email.com">
+              <div *ngIf="isEmailFieldInvalid('smtpEmail')" class="error-message">
+                {{ getEmailFieldError('smtpEmail') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="smtpPassword">SMTP Password<span class="required">*</span></label>
+              <div class="password-field">
+                <input 
+                  [type]="showPassword ? 'text' : 'password'"
+                  id="smtpPassword" 
+                  formControlName="smtpPassword"
+                  class="form-control"
+                  [class.invalid]="isEmailFieldInvalid('smtpPassword')"
+                  (blur)="onEmailFieldBlur('smtpPassword')"
+                  placeholder="Enter your password">
+                <button 
+                  type="button" 
+                  class="password-toggle"
+                  (click)="togglePasswordVisibility()">
+                  <i>{{ showPassword ? '👁️' : '👁️‍🗨️' }}</i>
+                </button>
+              </div>
+              <div *ngIf="isEmailFieldInvalid('smtpPassword')" class="error-message">
+                {{ getEmailFieldError('smtpPassword') }}
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button 
+                type="submit" 
+                class="btn btn-save"
+                [disabled]="emailForm.invalid || isLoading">
+                <span *ngIf="isLoading" class="spinner"></span>
+                {{ isLoading ? 'Saving...' : 'Save' }}
+              </button>
+              
+              <button 
+                type="button" 
+                class="btn btn-test"
+                [disabled]="emailForm.invalid || isLoading"
+                (click)="testEmailConnection()">
+                <span *ngIf="isLoading" class="spinner"></span>
+                {{ isLoading ? 'Testing...' : 'Test Connection' }}
+              </button>
+              
+              <button 
+                type="button" 
+                class="btn btn-reset"
+                (click)="resetEmailForm()">
+                Reset
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+      <!-- Tutorial Section -->
+      <div class="tutorial-section">
+        <div class="tutorial-card">
+          <h3 *ngIf="currentPage === 'whitelabel'">How to configure your Whitelabel Portal</h3>
+          <h3 *ngIf="currentPage === 'email'">How to configure your Whitelabel Email Settings</h3>
+          
+          <div class="video-placeholder" (click)="playVideo()">
+            <div class="video-logo">b</div>
+            <div class="play-button">▶</div>
+            <p *ngIf="currentPage === 'whitelabel'">How to Setup Whitelabel Setting Through Partner Dashboard</p>
+            <p *ngIf="currentPage === 'email'">How to Set up a Whitelabel Client Email Settings</p>
+            <small *ngIf="currentPage === 'whitelabel'">Lesson 40: How to S...</small>
+            <small *ngIf="currentPage === 'email'">Lesson 45: How to S...</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Color Picker Modal -->
+  <div *ngIf="showColorPickerModal" class="color-picker-modal" (click)="closeColorPicker()">
+    <div class="color-picker-content" (click)="$event.stopPropagation()">
+      <h3>Choose Color</h3>
+      <input type="color" [(ngModel)]="customColor">
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closeColorPicker()">Cancel</button>
+        <button class="btn btn-primary" (click)="addCustomColor()">Add Color</button>
+      </div>
+    </div>
+  </div>
+</div>

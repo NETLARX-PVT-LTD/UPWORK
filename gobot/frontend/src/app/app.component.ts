@@ -67,7 +67,7 @@ export class AppComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe((event: NavigationEnd) => {
       const url = event.urlAfterRedirects;
-      this.showHeaderAndAside = !url.includes('/create-story') && !url.includes('/chatbot-widget') && !url.startsWith('/landing/');
+      this.showHeaderAndAside = !url.includes('/create-story') && !url.includes('/chatbot-widget') && !url.includes('/partner-dashboard')  && !url.startsWith('/landing/');
       console.log('Current route:', url);
       console.log('Show header and aside:', this.showHeaderAndAside);
     });
@@ -241,4 +241,8 @@ export class AppComponent implements OnInit, OnDestroy {
         this.router.navigate(['/twilio-sms']);
     }
   }
+
+  navigateToPartnerDashboard(): void {
+  this.router.navigate(['/partner-dashboard']);
+}
 }
