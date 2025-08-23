@@ -18,6 +18,8 @@ import { PageMessageComponent } from './publish-bot/page-message/page-message.co
 import { PageMessagesListComponent } from './publish-bot/page-messages-list/page-messages-list.component';
 import { Title } from '@angular/platform-browser';
 import { PartnerDashboardComponent } from './partner-dashboard/partner-dashboard.component';
+import { FormsListComponent } from './forms-list/forms-list.component';
+import { FormEditorComponent } from './forms-list/form-editor/form-editor.component';
 
 export const routes: Routes = [
   // publish bot on whatsapp
@@ -41,6 +43,10 @@ export const routes: Routes = [
   // The main route for the publishing dashboard
   { path: 'publish-bot', component: PublishBotComponent,data: { title: 'Publish Bot' }  },
 
+  // manage conversational forms 
+   { path: 'forms', component: FormsListComponent, data: { title: 'Manage Conversational Forms' } },
+  { path: 'forms/create', component: FormEditorComponent,data: { title: 'Create A Form' } },
+  { path: 'forms/edit/:id', component: FormEditorComponent,data: { title: 'Edit Chatbot Form' } },
   // The route for the embeddable chatbot widget (used in the iframe)
   { path: 'chatbot-widget', component: ChatbotWidgetComponent },
   // The route for the branding (subtype of website chatbot)

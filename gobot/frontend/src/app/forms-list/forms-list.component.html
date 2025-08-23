@@ -1,0 +1,118 @@
+<div class="forms-container p-5 bg-gray-100 min-h-screen font-sans">
+  <div class="header flex justify-between items-center mb-8">
+    <div class="tutorial-section">
+      <div class="px-6 border-gray-200">
+        <button class="flex items-center space-x-2 text-red-500 hover:text-red-600">
+          <div class="w-8 h-6 bg-transparent rounded-lg border-2 border-red-500 flex items-center justify-center">
+            <i class="fas fa-play text-red-500 text-xs"></i>
+          </div>
+          <span class="text-sm font-medium">Tutorial</span>
+        </button>
+      </div>
+    </div>
+    <div class="header-controls flex items-center gap-4">
+      <div class="search-container relative flex">
+        <input 
+          type="text" 
+          placeholder="Search..." 
+          [(ngModel)]="searchTerm"
+          class="search-input p-2 bg-white border border-gray-300 rounded-l-md border-r-0 w-56 text-sm">
+        <button class="search-btn p-2 bg-blue-500 text-white border border-indigo-500 rounded-r-md cursor-pointer">     <i class="fas fa-search text-sm"></i></button>
+      </div>
+      <button 
+        class="create-btn bg-blue-500 text-white border-none px-5 py-3 rounded-md text-sm font-medium cursor-pointer hover:bg-indigo-600" 
+        (click)="createNewForm()">
+        Create Conversational Form
+      </button>
+    </div>
+  </div>
+
+  <div class="forms-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-8">
+    <div *ngFor="let form of filteredForms" class="form-card bg-[#bae7ff] rounded-lg p-5 shadow-sm border border-gray-200">
+      <div class="form-header flex justify-between items-start mb-2">
+        <h3 class="text-lg font-semibold text-gray-800">{{ form.name }}</h3>
+        <div class="form-actions flex gap-2">
+          <button 
+    class="p-1 rounded-md opacity-70 hover:opacity-100 hover:bg-gray-100 transition-opacity" 
+    (click)="copiedForm(form)" 
+    [title]="copiedFormId === form.id ? copiedStatus : 'Copy'">
+    <i class="fas fa-clipboard text-gray-600"></i>
+  </button>
+        </div>
+      </div>
+      
+      <div class="form-date text-xs text-gray-500 mb-2">{{ form.dateCreated }}</div>
+      
+      <div class="responses-badge inline-block bg-blue-500 text-white px-3 py-1 rounded-lg text-xs font-medium mb-4">
+        {{ form.responses }} Responses
+      </div>
+      
+      <div class="form-fields border-t border-gray-200 pt-4">
+        <span class="fields-label text-xs font-medium text-gray-500">Fields:</span>
+        <div class="field-tags flex flex-wrap gap-2 mt-2">
+          <span *ngFor="let field of form.fields" class="field-tag bg-transparent text-gray-700 px-2 py-1 border border-blue-500 rounded-full text-xs">
+            {{ field.label }}
+          </span>
+        </div>
+      </div>
+      <div class="flex gap-2">
+                            <button class="p-1 rounded-md opacity-70 hover:opacity-100 hover:bg-gray-100 transition-opacity"  (click)="editForm(form.id)" title="Edit">
+                                <i class="fas fa-edit text-gray-600"></i>
+                            </button>
+                            <button class="p-1 rounded-md opacity-70 hover:opacity-100 hover:bg-gray-100 transition-opacity"  (click)="deleteForm(form.id)" title="Delete">
+                                <i class="fas fa-trash text-gray-600"></i>
+                            </button>
+                            <button class="p-1 rounded-md opacity-70 hover:opacity-100 hover:bg-gray-100 transition-opacity" 
+  (click)="openDuplicateModal(form)" title="Clone Block">
+  <i class="fas fa-copy text-gray-600"></i>
+</button>
+                        </div>
+    </div>
+  </div>
+
+   <!-- Pagination -->
+        <div class="flex justify-between items-center bg-transparent p-4 rounded-lg shadow-sm">
+            <div class="flex items-center gap-2 text-sm text-gray-500">
+                <select id="recordsSelect" class="p-1 border border-gray-300 rounded-md" onchange="updateRecordsPerPage()">
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span>Records per page</span>
+            </div>
+            <div class="text-sm text-gray-500" id="paginationInfo">
+                Showing 3 of 3 results
+            </div>
+            <div class="flex gap-1">
+                <button class="p-2 border border-gray-300 bg-white rounded-md hover:bg-gray-100" onclick="previousPage()">
+                    <i class="fas fa-chevron-left text-sm"></i>
+                </button>
+                <button class="p-2 border border-indigo-500 bg-indigo-500 text-white rounded-md" onclick="goToPage(1)">1</button>
+                <button class="p-2 border border-gray-300 bg-white rounded-md hover:bg-gray-100" onclick="nextPage()">
+                    <i class="fas fa-chevron-right text-sm"></i>
+                </button>
+            </div>
+        </div>
+</div>
+
+<div *ngIf="showCloneModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+  <div class="relative bg-white p-5 rounded-lg shadow-xl w-96">
+    <div class="flex flex-col items-center">
+      <div class="bg-gray-100 rounded-full p-3 mb-4">
+        <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2m-4 0V3m0 2h-1m1 0h1m-1 2V5m0 0h1m-1 0h1m-1 2V5m0 0h-1m1 0h1m-1 2V5m0 0h-1m1 0h1m-1 2V5m0 0h-1m1 0h1m-1 2V5m0 0h-1m1 0h1m-1 2V5m0 0h-1m1 0h1"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-medium text-gray-900 mb-2">Clone Form</h3>
+      <p class="text-center text-sm text-gray-500 mb-6">Are you sure you want to clone this form?</p>
+      <div class="flex space-x-4">
+        <button (click)="closeModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+          Cancel
+        </button>
+        <button (click)="confirmDuplicate()" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+          Clone
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
