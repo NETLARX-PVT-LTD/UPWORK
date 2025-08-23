@@ -49,12 +49,14 @@
         </button>
       <div class="flex flex-col gap-4">
 
-        <button mat-icon-button
-          class="sidebar-nav-button !w-10 !h-10 !rounded-lg !bg-blue-700 !text-white hover:!bg-blue-500 transition-all duration-200"
-          aria-label="Dashboard">
+       <!-- Main Chatbot AI Sidebar Button (New) -->
+        <button mat-icon-button (click)="onChatbotAIClick()" matTooltip="Chatbot AI"
+          class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200"
+          aria-label="grid_view">
           <mat-icon class="text-lg">grid_view</mat-icon>
         </button>
-        <button mat-icon-button
+       
+        <button mat-icon-button (click)="onChatbotAIClick()" matTooltip="Analytics"
           class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200"
           aria-label="Schedule">
           <mat-icon class="text-lg">schedule</mat-icon>
@@ -569,6 +571,40 @@
       </div>
     </div>
   </div>
+  <!-- Chatbot AI Sidebar (New) -->
+    <aside *ngIf="showChatbotAISidebar" class="fixed top-16 bottom-0 left-16 z-20 w-65 bg-gray-100 shadow-xl p-2 flex flex-col space-y-6 sidebar-slide-in">
+      
+      <!-- Top Section -->
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center space-x-2">
+          <mat-icon svgIcon="psychology" class="text-blue-600 text-3xl"></mat-icon>
+          <div>
+            <h2 class="text-lg font-bold text-gray-800">Chatbot AI</h2>
+            <p class="text-xs text-gray-500">Everything you need to build an awesome AI Chatbot.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Navigation Menu -->
+      <div class="flex-1 space-y-2">
+        <a (click)="onSidebarNavClick('story', $event)" class="flex items-center p-3 rounded-lg hover:bg-blue-100 hover:text-blue-600 transition-colors duration-200 cursor-pointer">
+          <mat-icon svgIcon="book" class="mr-3"></mat-icon>
+          <span>Story</span>
+        </a>
+        <a (click)="onSidebarNavClick('ai-assistants', $event)" class="flex items-center p-3 rounded-lg hover:bg-blue-100 hover:text-blue-600 transition-colors duration-200 cursor-pointer">
+          <mat-icon svgIcon="emoji_objects" class="mr-3"></mat-icon>
+          <span>AI Assistants</span>
+        </a>
+        <a (click)="onSidebarNavClick('blocks', $event)" class="flex items-center p-3 rounded-lg hover:bg-blue-100 hover:text-blue-600 transition-colors duration-200 cursor-pointer">
+          <mat-icon svgIcon="widgets" class="mr-3"></mat-icon>
+          <span>Chatbot AI Blocks</span>
+        </a>
+        <a (click)="onSidebarNavClick('forms', $event)" class="flex items-center p-3 rounded-lg hover:bg-blue-100 hover:text-blue-600 transition-colors duration-200 cursor-pointer">
+          <mat-icon svgIcon="edit_note" class="mr-3"></mat-icon>
+          <span>Conversational Forms</span>
+        </a>
+      </div>
+    </aside>
 
   <main class="transition-all duration-300 bg-gray-100" [class.mt-16]="showHeaderAndAside" [class.ml-16]="showHeaderAndAside"
     [class.ml-80]="showWebsiteChatbotSidebar && showHeaderAndAside">
