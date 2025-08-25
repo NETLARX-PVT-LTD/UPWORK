@@ -1,0 +1,138 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 p-4">
+  <div class="w-full mx-auto">
+    <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+      <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold">AI Assistants</h1>
+        <div class="flex gap-2">
+          <button class="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded text-sm">
+            Agentic Platform
+          </button>
+          <button class="bg-green-500 hover:bg-green-700 px-4 py-2 rounded text-sm">
+            Partner Portal
+          </button>
+        </div>
+      </div>
+
+      <!-- Show video card only when no assistants exist -->
+      <div *ngIf="assistants.length === 0" class="p-8 text-center">
+        <!-- Video Placeholder -->
+        <div class="mb-6 relative">
+          <div class="bg-gray-200 rounded-lg p-8 max-w-lg mx-auto">
+            <div class="bg-blue-100 p-6 rounded-lg mb-4">
+              <div class="flex items-center justify-center mb-4">
+                <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center">
+                  <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+              </div>
+              <h3 class="text-xl font-semibold mb-2">How to integrate AI Assistant in Botsify</h3>
+              <p class="text-gray-600 text-sm">Watch tutorial</p>
+            </div>
+            <button class="bg-gray-800 text-white px-4 py-2 rounded text-sm">
+              MORE VIDEOS
+            </button>
+          </div>
+        </div>
+
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Create your first AI Assistant</h2>
+        <p class="text-gray-600 mb-8 max-w-2xl mx-auto">
+          Create your AI Assistant to integrate into a chatbot, helping users 
+          with tasks, answering questions, and improving efficiency. Click the 
+          button below to create your first AI Assistant.
+        </p>
+
+        <div class="flex gap-4 justify-center">
+          <button 
+            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium"
+            (click)="goBack()">
+            Go back
+          </button>
+          <button 
+            class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium"
+            (click)="navigateToCreateAssistant()">
+            Create AI Assistant
+          </button>
+        </div>
+      </div>
+
+      <!-- Show assistant list when assistants exist -->
+      <div *ngIf="assistants.length > 0" class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <span class="text-sm text-gray-600">Tutorial</span>
+          </div>
+          <button 
+            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium"
+            (click)="navigateToCreateAssistant()">
+            Create New
+          </button>
+        </div>
+
+        <!-- Assistants Table -->
+        <div class="bg-white rounded-lg overflow-hidden border">
+          <div class="bg-blue-500 text-white p-4 grid grid-cols-6 gap-4 font-medium">
+            <div>NAME</div>
+            <div>PLATFORM</div>
+            <div>MODEL</div>
+            <div>SOURCE</div>
+            <div>CREATED AT</div>
+            <div>ACTION</div>
+          </div>
+          
+          <div *ngFor="let assistant of assistants; let i = index" 
+               class="p-4 grid grid-cols-6 gap-4 border-b border-gray-200 hover:bg-gray-50">
+            <div class="font-medium">{{ assistant.name }}</div>
+            <div class="text-gray-600">{{ assistant.platform | titlecase }}</div>
+            <div class="text-gray-600">{{ assistant.model }}</div>
+            <div class="text-gray-600">{{ assistant.source | titlecase }}</div>
+            <div class="text-gray-600">{{ assistant.createdAt | date:'yyyy-MM-dd HH:mm' }}</div>
+            <div class="flex gap-2">
+              <button 
+                class="text-blue-600 hover:text-blue-800"
+                (click)="editAssistant(assistant)"
+                title="Edit">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+              <button 
+                class="text-red-600 hover:text-red-800"
+                (click)="deleteAssistant(i)"
+                title="Delete">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex justify-between items-center mt-4">
+          <div class="flex items-center gap-2">
+            <select class="border border-gray-300 rounded px-3 py-1">
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+            <span class="text-sm text-gray-600">Records per page</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-600">Showing {{ assistants.length }} of {{ assistants.length }} results</span>
+            <div class="flex gap-1">
+              <button class="px-2 py-1 border border-gray-300 rounded text-sm">«</button>
+              <button class="px-2 py-1 bg-blue-500 text-white rounded text-sm">1</button>
+              <button class="px-2 py-1 border border-gray-300 rounded text-sm">»</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

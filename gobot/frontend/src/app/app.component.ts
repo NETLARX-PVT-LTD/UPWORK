@@ -209,10 +209,10 @@ export class AppComponent implements OnInit, OnDestroy {
         this.router.navigate(['/ai-assistants']);
         break;
       case 'blocks':
-        this.router.navigate(['/chatbot-blocks']);
+        this.router.navigate(['/media-blocks']);
         break;
       case 'forms':
-        this.router.navigate(['/conversational-forms']);
+        this.router.navigate(['/forms']);
         break;
       default:
         this.router.navigate(['/create-story']); // Updated fallback to match your default route
