@@ -20,8 +20,14 @@ import { Title } from '@angular/platform-browser';
 import { PartnerDashboardComponent } from './partner-dashboard/partner-dashboard.component';
 import { FormsListComponent } from './forms-list/forms-list.component';
 import { FormEditorComponent } from './forms-list/form-editor/form-editor.component';
+import { AiAssistantListComponent } from './ai-assistant-list/ai-assistant-list.component';
+import { CreateAssistantComponent } from './ai-assistant-list/create-assistant/create-assistant.component';
 
 export const routes: Routes = [
+// AI Assistants routes
+   { path: 'assistants', component: AiAssistantListComponent,data: { title: 'AI Assistants' } },
+  { path: 'assistants/create', component: CreateAssistantComponent,data: { title: 'Manage AI Assistant' } },
+  { path: 'assistants/edit/:id', component: CreateAssistantComponent,data: { title: 'Manage AI Assistant' } },
   // publish bot on whatsapp
   { path: 'whatsapp-publisher', component: WhatsappPublisherComponent, data: { title: 'Publish Bot' } },
   // Partner dashboard route

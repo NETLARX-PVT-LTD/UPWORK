@@ -1,0 +1,70 @@
+<div>
+      <div class="flex justify-between items-center mb-6">
+        <div class="flex gap-4">
+          <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-medium">
+            Manage Files
+          </button>
+          <button 
+            class="border border-green-500 text-green-500 hover:bg-green-50 px-4 py-2 rounded font-medium"
+            (click)="triggerFileUpload()">
+            Upload File
+          </button>
+        </div>
+      </div>
+      
+      <!-- Files Table -->
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="bg-blue-600 text-white">
+          <div class="grid grid-cols-3 gap-4 p-4 font-medium">
+            <div>FILE</div>
+            <div>STATUS</div>
+            <div>ACTION</div>
+          </div>
+        </div>
+        <div class="p-8 text-center text-gray-500" *ngIf="files().length === 0">
+          <div class="text-lg font-medium mb-2">No File Uploaded</div>
+          <p>Upload some files to get started with document training</p>
+        </div>
+        <div *ngFor="let file of files()" class="border-b border-gray-200 hover:bg-gray-50">
+          <div class="grid grid-cols-3 gap-4 p-4 items-center">
+            <div>
+              <div class="font-medium">{{ file.name }}</div>
+              <div class="text-sm text-gray-500">{{ file.size }}</div>
+            </div>
+            <div>
+              <span 
+                class="px-2 py-1 rounded-full text-xs font-medium"
+                [class.bg-green-100]="file.status === 'uploaded'"
+                [class.text-green-800]="file.status === 'uploaded'"
+                [class.bg-yellow-100]="file.status === 'processing'"
+                [class.text-yellow-800]="file.status === 'processing'"
+                [class.bg-red-100]="file.status === 'failed'"
+                [class.text-red-800]="file.status === 'failed'">
+                {{ file.status | titlecase }}
+              </span>
+            </div>
+            <div class="flex gap-2">
+              <button 
+                class="text-blue-600 hover:text-blue-800 font-medium"
+                (click)="downloadFile(file.id)">
+                Download
+              </button>
+              <button 
+                class="text-red-600 hover:text-red-800 font-medium"
+                (click)="deleteFile(file.id)">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Hidden file input -->
+      <input 
+        type="file"
+        #fileInput
+        class="hidden"
+        multiple
+        accept=".pdf,.doc,.docx,.txt"
+        (change)="onFilesSelected($event)">
+    </div>
