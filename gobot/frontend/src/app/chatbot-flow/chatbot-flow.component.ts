@@ -18,10 +18,19 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
-// ✅ --- START: FINAL CORRECTED PROTOBUF IMPORTS ---
+
+// ✅ --- START: PROTOBUF IMPORTS ---
 import { TextResponseBlock } from '../proto-gen/text_response_block';
 import { BaseBlock } from '../proto-gen/base_block';
-// ✅ --- END: FINAL CORRECTED PROTOBUF IMPORTS ---
+import { MediaBlock, ImageSlide, MediaType } from '../proto-gen/media_block';
+import { Button } from '../proto-gen/button';
+import { UserInputBlock, UserInputSubType, KeywordGroup } from '../proto-gen/user_input_block';
+import { ConversationalFormBlock } from '../proto-gen/conversational_form_block';
+import { TypingDelayBlock } from '../proto-gen/typing_delay_block';
+import { JsonApiBlock } from '../proto-gen/json_api_block';
+import { Button as ProtoButton } from '../proto-gen/button';
+// ✅ --- END: PROTOBUF IMPORTS ---
+
 
 import { UserInputBlockComponent } from './blocks/user-input-block/user-input-block.component';
 import { TextResponseBlockComponent } from './blocks/text-response-block/text-response-block.component';
@@ -33,6 +42,58 @@ import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-
 import { QuickReplyFlowComponent } from './blocks/quick-reply-flow/quick-reply-flow.component';
 import { JarvishBlockComponent } from './blocks/jarvish-block/jarvish-block.component';
 import { JsPlumbFlowService, ConnectionInfo } from './services/jsplumb-flow.service';
+
+
+// / ✅ --- START: TWO-WAY TRANSLATION FUNCTIONS ---
+function mapStringToUserInputSubType(subTypeString: string): UserInputSubType {
+  const lowerCaseSubType = subTypeString?.toLowerCase();
+  if (['phrase', 'keywordgroup', 'anything', 'text'].includes(lowerCaseSubType)) {
+    return UserInputSubType.TEXT;
+  }
+  switch (lowerCaseSubType) {
+    case 'number': return UserInputSubType.NUMBER;
+    case 'email': return UserInputSubType.EMAIL;
+    case 'phone': return UserInputSubType.PHONE;
+    default: return UserInputSubType.UNSPECIFIED;
+  }
+}
+
+function mapUserInputSubTypeToString(subTypeEnum: UserInputSubType): string {
+  switch (subTypeEnum) {
+    case UserInputSubType.TEXT: return 'text';
+    case UserInputSubType.NUMBER: return 'number';
+    case UserInputSubType.EMAIL: return 'email';
+    case UserInputSubType.PHONE: return 'phone';
+    default: return 'unspecified';
+  }
+}
+
+function mapStringToMediaType(mediaTypeString: string): MediaType {
+  switch (mediaTypeString?.toLowerCase()) {
+    case 'text': return MediaType.TEXT;
+    case 'image': return MediaType.IMAGE;
+    case 'video': return MediaType.VIDEO;
+    default: return MediaType.UNSPECIFIED;
+  }
+}
+
+function mapMediaTypeToString(mediaTypeEnum: MediaType): string {
+  switch (mediaTypeEnum) {
+    case MediaType.TEXT: return 'text';
+    case MediaType.IMAGE: return 'image';
+    case MediaType.VIDEO: return 'video';
+    default: return 'unspecified';
+  }
+}
+
+function mapButtons(buttons: any[]): ProtoButton[] {
+  return (buttons || []).map(btn => ({
+    ...btn,
+    type: btn.type || ''
+  }));
+}
+// ✅ --- END: TWO-WAY TRANSLATION FUNCTIONS ---
+
 
 type NearestConnectionPoint = { blockId: string, x: number, y: number };
 
@@ -176,17 +237,17 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     
     console.log("1. Original Object:", originalMessage);
 
-    // B. SERIALIZE the message into a binary format
-    const binaryData = TextResponseBlock.toBinary(originalMessage);
-    console.log("2. Serialized Binary Data:", binaryData);
+    // // B. SERIALIZE the message into a binary format
+    // const binaryData = TextResponseBlock.toBinary(originalMessage);
+    // console.log("2. Serialized Binary Data:", binaryData);
 
     // C. DESERIALIZE the binary data back into an object
-    const deserializedMessage = TextResponseBlock.fromBinary(binaryData);
-    console.log("3. Deserialized Object:", deserializedMessage);
+    // const deserializedMessage = TextResponseBlock.fromBinary(binaryData);
+    // console.log("3. Deserialized Object:", deserializedMessage);
 
     // D. VERIFY the data is the same
-    const testPassed = originalMessage.content === deserializedMessage.content;
-    console.log(`4. Verification -> Test Passed: ${testPassed}`);
+    // const testPassed = originalMessage.content === deserializedMessage.content;
+    // console.log(`4. Verification -> Test Passed: ${testPassed}`);
     
     console.log("--- Test Complete ---");
   }
@@ -687,11 +748,109 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
   
+// ✅ --- STEP 4: TRANSLATE AND SAVE THE ENTIRE FLOW ---
   saveFlow() {
-    const flowData = {
-      blocks: this.canvasBlocks,
-    };
-    console.log('Chatbot flow saved!', flowData);
+    console.log("--- Preparing to save flow. Translating all blocks to Protobuf format... ---");
+
+    const protoPayloads = this.canvasBlocks.map(block => {
+      let payload: any;
+      switch (block.type) {
+
+        case 'userInput':
+          payload = UserInputBlock.create({
+            type: block.type,
+            subType: mapStringToUserInputSubType(block.subType || ''),
+            keywords: block.keywords || [],
+            keywordGroups: (block.keywordGroups || []).map(g => ({ keywords: g })),
+            phraseText: block.phraseText || '',
+            customMessage: block.customMessage || '',
+            datastoreVariable: block.datastoreVariable || ''
+          });
+          break;
+
+        case 'mediaBlock':
+          payload = MediaBlock.create({
+            type: block.type,
+            mediaId: block.mediaId || '',
+            mediaType: mapStringToMediaType(block.mediaType || ''),
+            singleImageUrl: block.singleImageUrl || '',
+            videoUrl: block.videoUrl || '',
+            audioUrl: block.audioUrl || '',
+            fileUrl: block.fileUrl || '',
+            slides: block.slides || [],
+            mediaName: block.mediaName || '',
+            buttons: mapButtons(block.buttons || [])
+          });
+          break;
+
+        case 'textResponse':
+          payload = TextResponseBlock.create({
+            content: block.content || '',
+            alternateResponses: block.alternateResponses || [],
+            quickReplies: mapButtons(block.quickReplies || [])
+          });
+          break;
+
+        case 'conversationalForm':
+          payload = ConversationalFormBlock.create({
+            type: block.type,
+            formId: block.formId || '',
+            formName: block.formName || '',
+            webhookUrl: block.webhookUrl || '',
+            sendEmailNotification: block.sendEmailNotification || false,
+            notificationEmail: block.notificationEmail || '',
+            formFields: block.formFields || [],
+            showAsInlineForm: block.showAsInlineForm || false,
+            renderFormResponses: block.renderFormResponses || false,
+            allowMultipleSubmission: block.allowMultipleSubmission || false,
+            multipleSubmissionMessage: block.multipleSubmissionMessage || '',
+            allowExitForm: block.allowExitForm || false,
+            exitFormMessage: block.exitFormMessage || '',
+            successResponseType: block.successResponseType || '',
+            successRedirectStoryId: block.successRedirectStoryId || '',
+            validateEmail: block.validateEmail || false,
+            validatePhone: block.validatePhone || false,
+            spamProtection: block.spamProtection || false,
+            requireCompletion: block.requireCompletion || false,
+            successMessage: block.successMessage || '',
+            redirectUrl: block.redirectUrl || ''
+          });
+          break;
+
+        case 'typingDelay':
+          payload = TypingDelayBlock.create({
+            delaySeconds: block.delaySeconds || 0
+          });
+          break;
+
+        case 'jsonApi':
+          payload = JsonApiBlock.create({
+            type: block.type,
+            apiEndpoint: block.apiEndpoint || '',
+            requestType: block.requestType || '',
+            apiHeaders: block.apiHeaders || []
+          });
+          break;
+
+        case 'linkStory':
+          payload = { 
+            type: 'linkStory',
+            linkedStoryId: block.storyId || ''
+          };
+          break;
+
+        default:
+          payload = { id: block.id, type: block.type, error: "Unknown block type for proto conversion" };
+          break;
+      }
+      return payload;
+    });
+
+    console.log("✅ Flow translated. Ready to send to C# backend:", protoPayloads);
+    //
+    // FINAL STEP: Make the actual API call to your C# backend here
+    // this.http.post('YOUR_API_ENDPOINT', { blocks: protoPayloads }).subscribe(...);
+    //
   }
 
   zoomIn() { this.zoomLevel = Math.min(this.maxZoom, this.zoomLevel + this.zoomStep); this.updateCanvasTransform(); this.jsPlumbFlowService.repaintAllConnections(); }
