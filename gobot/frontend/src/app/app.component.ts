@@ -206,7 +206,7 @@ export class AppComponent implements OnInit, OnDestroy {
         this.router.navigate(['/create-story']);
         break;
       case 'ai-assistants':
-        this.router.navigate(['/ai-assistants']);
+        this.router.navigate(['/assistants']);
         break;
       case 'blocks':
         this.router.navigate(['/media-blocks']);
