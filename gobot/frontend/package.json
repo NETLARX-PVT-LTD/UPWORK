@@ -27,6 +27,7 @@
     "@protobuf-ts/plugin": "^2.11.1",
     "@protobuf-ts/runtime": "^2.11.1",
     "@tailwindcss/postcss": "^4.1.11",
+    "chart.js": "^4.5.0",
     "jsplumb": "^2.15.6",
     "lucide-angular": "^0.539.0",
     "rxjs": "~7.8.0",

@@ -1,0 +1,207 @@
+<div class="analytics-dashboard">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1>Chatbot Analytics</h1>
+        <div class="header-controls">
+            <div class="date-picker">
+                <input type="date" [(ngModel)]="startDate" />
+                <span>-</span>
+                <input type="date" [(ngModel)]="endDate" />
+            </div>
+            <button class="export-btn">
+                <i class="icon-download"></i>
+                Export Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Key Metrics Row -->
+    <div class="metrics-row">
+        <div class="metric-card">
+            <div class="metric-icon">
+                <i class="icon-users"></i>
+            </div>
+            <div class="metric-content">
+                <h3>Chatbot users</h3>
+                <div class="metric-value">{{ analyticsData.chatbotUsers }}</div>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon">
+                <i class="icon-help"></i>
+            </div>
+            <div class="metric-content">
+                <h3>Human help requested</h3>
+                <div class="metric-value">{{ analyticsData.humanHelpRequested }}</div>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon">
+                <i class="icon-message-in"></i>
+            </div>
+            <div class="metric-content">
+                <h3>Incoming messages</h3>
+                <div class="metric-value">{{ analyticsData.incomingMessages }}</div>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon">
+                <i class="icon-message-out"></i>
+            </div>
+            <div class="metric-content">
+                <h3>Outgoing messages</h3>
+                <div class="metric-value">{{ analyticsData.outgoingMessages }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-row">
+        <!-- Daily Users Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Users daily report</h3>
+                <div class="chart-filters">
+                    <button [class.active]="dailyFilter === 'Day'" (click)="setDailyFilter('Day')">Day</button>
+                    <button [class.active]="dailyFilter === 'Hour'" (click)="setDailyFilter('Hour')">Hour</button>
+                </div>
+            </div>
+            <canvas #dailyUsersChart></canvas>
+        </div>
+
+        <!-- Platform Users Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Platform report</h3>
+                <div class="chart-filters">
+    <button [class.active]="platformFilter === 'platform'" (click)="setPlatformFilter('platform')">Platform</button>
+    <button [class.active]="platformFilter === 'country'" (click)="setPlatformFilter('country')">Country</button>
+    <button [class.active]="platformFilter === 'state'" (click)="setPlatformFilter('state')">State</button>
+    <button [class.active]="platformFilter === 'city'" (click)="setPlatformFilter('city')">City</button>
+</div>
+            </div>
+            <div class="platform-chart-wrapper">
+                <canvas #platformChart></canvas>
+                <div class="platform-legend">
+ <div class="legend-item" *ngFor="let item of getFilteredPlatformData()">
+  <span class="legend-color" [style.background-color]="getPlatformColor(item.system || '')"></span>
+  <span class="legend-label">{{ item.system || item.platform || item.country || item.state || item.city }}</span>
+  <span class="legend-value">{{ item.count }}</span>
+</div>
+</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Report Chart -->
+    <div class="charts-row">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Users report (2 of 5)</h3>
+            </div>
+            <canvas #usersReportChart></canvas>
+        </div>
+
+        <!-- Platform Specific Users Pie Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Platform specific users</h3>
+            </div>
+            <div class="pie-chart-wrapper">
+                <canvas #platformPieChart></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables Row -->
+    <div class="tables-row">
+        <!-- Top Messages -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3>Top 5 Messages</h3>
+                <button class="download-btn">⬇</button>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>MESSAGE</th>
+                        <th>COUNT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let message of analyticsData.topMessages">
+                        <td>{{ message.message }}</td>
+                        <td>{{ message.count }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Top CTAs -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3>Top 5 CTAs</h3>
+                <div class="table-filters">
+                    <button [class.active]="ctaFilter === 'Buttons'" (click)="setCTAFilter('Buttons')">Buttons</button>
+                    <button [class.active]="ctaFilter === 'Quick Replies'" (click)="setCTAFilter('Quick Replies')">Quick
+                        Replies</button>
+                </div>
+                <button class="download-btn">⬇</button>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>BUTTON TITLE</th>
+                        <th>COUNT</th>
+                        <th>INITIATED</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let cta of analyticsData.topCTAs">
+                        <td>{{ cta.buttonTitle }}</td>
+                        <td>{{ cta.count }}</td>
+                        <td>{{ cta.initiated || '' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bottom Tables Row -->
+    <div class="tables-row">
+        <!-- Top Stories -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3>Top 5 Stories</h3>
+                <button class="download-btn">⬇</button>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>MESSAGE</th>
+                        <th>COUNT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let story of analyticsData.topStories">
+                        <td>{{ story.message }}</td>
+                        <td>{{ story.count }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- CSAT Feedbacks -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3>Last 5 CSAT feedbacks</h3>
+            </div>
+            <div class="no-data">
+                <p>No data to display</p>
+            </div>
+        </div>
+    </div>
+</div>
