@@ -6,6 +6,7 @@ export interface ChatbotBlock {
   name: string;
   icon: string;
   type: BlockType;
+   storyId?: string; 
   imageUrl?: string;
   status: 'active' | 'error' | 'new' | 'disabled' | 'normal';
   x: number; // X-coordinate on the canvas
