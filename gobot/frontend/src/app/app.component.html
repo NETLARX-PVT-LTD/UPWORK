@@ -1,7 +1,7 @@
 <div class="app-container">
   <!-- The header is now hidden for '/create-story' and '/chatbot-widget' paths -->
   <header class="app-header fixed top-0 left-16 right-0 bg-gray-100  h-16 flex items-center justify-between px-6 z-50"
-    *ngIf="showHeaderAndAside">
+    *ngIf="showHeader">
     <div class="flex items-center gap-4">
       <div class="flex items-center gap-3">
         <!-- <mat-icon class="text-red-500 text-2xl">play_circle_outline</mat-icon> -->
@@ -40,7 +40,7 @@
 
   <!-- The aside sidebar is now hidden for '/create-story' and '/chatbot-widget' paths -->
   <aside class="fixed left-0 top-0 bottom-0 w-16 bg-blue-600 flex flex-col items-center py-4 z-40"
-    *ngIf="showHeaderAndAside">
+    *ngIf="showAside">
     <div class="flex flex-col gap-24">
        <button mat-icon-button
           class="sidebar-nav-button !w-10 !h-10 !rounded-lg !bg-blue-500 shadow-lg !text-white hover:!bg-blue-500 transition-all duration-200"
@@ -483,10 +483,10 @@
   </div>
 
   <!-- The chatbot sidebar is also hidden for '/create-story' and '/chatbot-widget' paths -->
-  <div *ngIf="showWebsiteChatbotSidebar && showHeaderAndAside" class="fixed inset-0 z-20 bg-black bg-opacity-25"
+  <div *ngIf="showWebsiteChatbotSidebar && showHeader && showAside" class="fixed inset-0 z-20 bg-black bg-opacity-25"
     (click)="closeWebsiteChatbotSidebar()"></div>
 
-  <div *ngIf="showWebsiteChatbotSidebar && showHeaderAndAside"
+  <div *ngIf="showWebsiteChatbotSidebar && showHeader && showAside"
     class="website-chatbot-sidebar fixed left-16 top-16 bottom-0 w-64 bg-white border-r border-gray-200 shadow-xl z-30"
     [ngClass]="sidebarAnimationClass">
     <div class="p-6 h-full flex flex-col">
@@ -606,8 +606,8 @@
       </div>
     </aside>
 
-  <main class="transition-all duration-300 bg-gray-100" [class.mt-16]="showHeaderAndAside" [class.ml-16]="showHeaderAndAside"
-    [class.ml-80]="showWebsiteChatbotSidebar && showHeaderAndAside">
+  <main class="transition-all duration-300 bg-gray-100" [class.mt-16]="showHeader" [class.ml-16]="showAside"
+    [class.ml-80]="showWebsiteChatbotSidebar && showAside">
     
     <router-outlet></router-outlet>
   </main>

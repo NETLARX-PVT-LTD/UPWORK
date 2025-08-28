@@ -12,7 +12,7 @@ export interface AnalyticsData {
   topMessages: { message: string; count: number; percentage: number }[];
   topCTAs: { buttonTitle: string; count: number; initiated?: string; type: 'button' | 'quick_reply' }[];
   topStories: { message: string; count: number; flowName: string }[];
- platformUsers: { platform: string; percentage: number; count: number }[];
+  platformUsers: { platform: string; percentage: number; count: number }[];
   countryUsers: { country: string; percentage: number; count: number }[];
   stateUsers: { state: string; percentage: number; count: number }[];
   cityUsers: { city: string; percentage: number; count: number }[];
@@ -55,7 +55,7 @@ export class ChatbotAnalyticsService {
       topStories: [],
       platformUsers: [],
       countryUsers: [],
-       systemUsers: [], 
+      systemUsers: [], 
       stateUsers: [],
       cityUsers: [],
       usersByTime: [],
@@ -77,20 +77,20 @@ export class ChatbotAnalyticsService {
   }
 
   // Add a new method to generate mock system user data
-private generateSystemUsers(): any[] {
-  const systems = [
-    { system: 'Windows 10', count: Math.floor(Math.random() * 500) + 100 },
-    { system: 'Mac', count: Math.floor(Math.random() * 300) + 50 },
-    { system: 'Android', count: Math.floor(Math.random() * 200) + 30 },
-    { system: 'iOS', count: Math.floor(Math.random() * 150) + 20 }
-  ];
+  private generateSystemUsers(): any[] {
+    const systems = [
+      { system: 'Windows 10', count: Math.floor(Math.random() * 500) + 100 },
+      { system: 'Mac', count: Math.floor(Math.random() * 300) + 50 },
+      { system: 'Android', count: Math.floor(Math.random() * 200) + 30 },
+      { system: 'iOS', count: Math.floor(Math.random() * 150) + 20 }
+    ];
 
-  const total = systems.reduce((sum, p) => sum + p.count, 0);
-  return systems.map(p => ({
-    ...p,
-    percentage: Math.round((p.count / total) * 100)
-  }));
-}
+    const total = systems.reduce((sum, p) => sum + p.count, 0);
+    return systems.map(p => ({
+      ...p,
+      percentage: Math.round((p.count / total) * 100)
+    }));
+  }
 
   // Update analytics data and notify subscribers
   updateAnalyticsData(dateRange: DateRange): void {
@@ -253,7 +253,10 @@ private generateSystemUsers(): any[] {
       { buttonTitle: 'Learn More', type: 'button' as const },
       { buttonTitle: 'Contact Us', type: 'quick_reply' as const },
       { buttonTitle: 'View Pricing', type: 'button' as const },
-      { buttonTitle: 'Book Demo', type: 'quick_reply' as const }
+      { buttonTitle: 'Book Demo', type: 'quick_reply' as const },
+      { buttonTitle: 'Help', type: 'quick_reply' as const },
+      { buttonTitle: 'Yes', type: 'quick_reply' as const },
+      { buttonTitle: 'No', type: 'quick_reply' as const }
     ];
     
     return ctas.map(cta => ({
