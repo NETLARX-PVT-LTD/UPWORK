@@ -2,8 +2,9 @@
 using BotsifySchemaTest.Hubs;
 using BotsifySchemaTest.Models;
 using BotsifySchemaTest.Services;
+using GoBootBackend.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
+//using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -18,13 +19,12 @@ namespace BotsifySchemaTest.Controllers
     public class ComponentsController : ControllerBase
     {
         private readonly BotDbContext _db;
-        private readonly IHubContext<StoryHub> _hubContext;
+        //private readonly IHubContext<StoryHub> _hubContext;
         private readonly ILogger<ComponentsController> _logger;
 
-        public ComponentsController(BotDbContext db, IHubContext<StoryHub> hubContext, ILogger<ComponentsController> logger)
+        public ComponentsController(BotDbContext db, ILogger<ComponentsController> logger)
         {
             _db = db;
-            _hubContext = hubContext;
             _logger = logger;
         }
 
@@ -63,6 +63,7 @@ namespace BotsifySchemaTest.Controllers
                     return BadRequest(ModelState);
                 }
 
+                _logger.LogWarning("Invalid component model received for StoryId: {StoryId}", storyId);
                 var session = StorySessionManager.GetStory(storyId);
                 var componentId = Guid.NewGuid();
 
@@ -77,6 +78,10 @@ namespace BotsifySchemaTest.Controllers
                         FromComponentId = componentId,
                         CreatedDate = DateTime.UtcNow
                     });
+
+                    var story = session.Story;
+                    story.Name = compType;
+                    story.ID = storyId;
 
                     session.Story.RootBlockConnectionId = connId;
                     _logger.LogInformation("Root connection created for StoryId: {StoryId}", storyId);
@@ -126,7 +131,7 @@ namespace BotsifySchemaTest.Controllers
                 .LastOrDefault();
         }
 
-        [HttpPost("AddUserInputPhrase")]
+        [HttpPost("AddUserInputPhrase/{storyId}")]
         public IActionResult AddUserInputPhrase(int storyId, [FromBody] UserInputPhrase model)
         {
             return AddComponent(storyId, model, ComponentTypes.UserInputPhrase,
@@ -163,6 +168,20 @@ namespace BotsifySchemaTest.Controllers
             }
         }
 
+        [HttpPost("AddTypingDelay")]
+        public async Task<IActionResult> AddTypingDelay(int storyId, [FromBody] TypingDelay model)
+        {
+            return AddComponent(storyId, model, ComponentTypes.TypingDelay,
+                 g => StorySessionManager.GetStory(storyId).TypingDelays.Add(g));
+        }
+
+
+        [HttpPost("AddLinkStory")]
+        public async Task<IActionResult> AddLinkStory(int storyId, [FromBody] LinkStory model)
+        {
+            return AddComponent(storyId, model, ComponentTypes.LinkStory,
+                 g => StorySessionManager.GetStory(storyId).LinkStories.Add(g));
+        }
         [HttpPost("SaveStoryToDb")]
         public async Task<IActionResult> SaveStoryToDb([FromBody] StorySessionData session)
         {
@@ -195,7 +214,17 @@ namespace BotsifySchemaTest.Controllers
                         {
                             story.RootBlockConnectionId = firstConnection.ID;
                             _db.Stories.Update(story);
-                            _logger.LogInformation("Updated root connection for StoryId: {StoryId}", story.ID);
+                            _logger.LogInformation("Updated root connection for existing StoryId: {StoryId}", story.ID);
+                        }
+                        else if (session.Story != null)
+                        {
+                            session.Story.RootBlockConnectionId = firstConnection.ID;
+                            _db.Stories.Add(session.Story);
+                            _logger.LogInformation("New story created with RootBlockConnectionId: {RootId}", firstConnection.ID);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("No story found in DB and no session.Story provided.");
                         }
                     }
                 }
@@ -206,8 +235,14 @@ namespace BotsifySchemaTest.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while saving story session to DB");
-                return StatusCode(500, new { error = ex.Message });
+                var innerMessage = ex.InnerException?.Message ?? "No inner exception";
+                _logger.LogError(ex, "Error occurred while saving story session to DB. Inner: {Inner}", innerMessage);
+
+                return StatusCode(500, new
+                {
+                    error = ex.Message,
+                    inner = innerMessage
+                });
             }
         }
     }

@@ -35,10 +35,12 @@ namespace BotsifySchemaTest.Controllers
 
                 _logger.LogInformation("Fetching story schema for StoryId: {StoryId}", storyId);
 
-                var result = new List<object>();
+                var result = new List<object>(); 
+                var story = _context.Stories.FirstOrDefault(s => s.ID == storyId);
+
 
                 var connection = await _context.Connection
-                    .FirstOrDefaultAsync(c => c.StoryId == storyId);
+                    .FirstOrDefaultAsync(c => c.ID == story.RootBlockConnectionId);
 
                 if (connection == null)
                 {
@@ -81,7 +83,24 @@ namespace BotsifySchemaTest.Controllers
                         nextId = data.ToComponentId;
                         _logger.LogDebug("Fetched UserInputTypeAnything ID: {Id}", currentId);
                     }
-
+                    else if (currentType == ComponentTypes.TypingDelay)
+                    {
+                        var data = await _context.TypingDelay.FirstOrDefaultAsync(td => td.ID == currentId);
+                        if (data == null) break;
+                        result.Add(data);
+                        nextType = data.ToComponentType;
+                        nextId = data.ToComponentId;
+                        _logger.LogDebug("Fetched typingDelay ID : ", currentId);
+                    }
+                    else if(currentType == ComponentTypes.LinkStory)
+                    {
+                        var data = await _context.LinkStory.FirstOrDefaultAsync(u => u.ID == currentId);
+                        if (data == null) break;
+                        result.Add(data);
+                        nextType = data.ToComponentType;
+                        nextId = data.ToComponentId;
+                        _logger.LogDebug("Fetched LinkStory ID: {Id}", currentId);
+                    }
                     if (string.IsNullOrEmpty(nextType) || nextId == null)
                         break;
 
