@@ -1,4 +1,5 @@
 ﻿using BotsifySchemaTest.Models;
+using GoBootBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BotsifySchemaTest.Db
@@ -12,6 +13,15 @@ namespace BotsifySchemaTest.Db
         public DbSet<UserInputKeyword> UserInputKeyword { get; set; }
         public DbSet<UserInputTypeAnything> UserInputTypeAnything { get; set; }
         public DbSet<Connection> Connection { get; set; }
+        public DbSet<TypingDelay> TypingDelay { get; set; }
+
+        public DbSet<ConversationalForm> ConversationalForm { get; set; }
+
+        public DbSet<JsonAPI> JsonAPI { get; set; }
+
+        public DbSet<TextResponse> TextResponse { get; set; }
+
+        public DbSet<LinkStory> LinkStory { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -20,6 +30,15 @@ namespace BotsifySchemaTest.Db
             modelBuilder.Entity<UserInputKeyword>().ToTable("UserInputKeyword");
             modelBuilder.Entity<UserInputTypeAnything>().ToTable("UserInputTypeAnything");
             modelBuilder.Entity<Connection>().ToTable("Connection");
+            modelBuilder.Entity<JsonAPI>().ToTable("JsonAPI");
+            modelBuilder.Entity<LinkStory>().ToTable("LinkStory");
+            modelBuilder.Entity<ConversationalForm>().ToTable("CoversationalForm");
+            modelBuilder.Entity<TextResponse>().ToTable("TextResponse");
+            modelBuilder.Entity<TypingDelay>().ToTable("TypingDelay");
+            modelBuilder.Entity<TextResponse>(entity =>
+            {
+                entity.OwnsMany(tr => tr.QuickReplies);
+            });
 
             base.OnModelCreating(modelBuilder);
         }

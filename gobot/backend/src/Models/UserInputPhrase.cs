@@ -10,6 +10,5 @@ namespace BotsifySchemaTest.Models
 
         public string? json { get; set; }
 
-     
     }
 }
