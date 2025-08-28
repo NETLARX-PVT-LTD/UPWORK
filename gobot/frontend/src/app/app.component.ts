@@ -8,7 +8,7 @@ import { Subject } from 'rxjs';
 // Import the necessary Angular Material modules
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip'; // Added for tooltip
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-root',
@@ -18,7 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip'; // Added for toolt
     RouterOutlet,
     MatIconModule,
     MatButtonModule,
-    MatTooltipModule, // Added to imports
+    MatTooltipModule,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -34,20 +34,19 @@ export class AppComponent implements OnInit, OnDestroy {
   showSMSSidebar = false;
   showWebsiteChatbotSidebar: boolean = false;
   
-  // New property for the main "Chatbot AI" sidebar
   showChatbotAISidebar: boolean = false;
 
   private leaveTimer: any;
   private destroy$ = new Subject<void>();
   sidebarAnimationClass: string = '';
 
-  // New property to control visibility
-  showHeaderAndAside: boolean = true;
+  // New properties to control visibility
+  showHeader: boolean = true;
+  showAside: boolean = true;
 
   constructor(private router: Router, private activatedRoute: ActivatedRoute) {}
 
   ngOnInit() {
-    // Listen to router events to update the heading on navigation
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       map(() => this.activatedRoute),
@@ -66,15 +65,27 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Updated subscription to check the current URL path.
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       takeUntil(this.destroy$)
     ).subscribe((event: NavigationEnd) => {
       const url = event.urlAfterRedirects;
-      this.showHeaderAndAside = !url.includes('/create-story') && !url.includes('/chatbot-widget') && !url.includes('/partner-dashboard') && !url.startsWith('/landing/');
+
+      // Paths where BOTH header and aside should be hidden
+      const noHeaderAndAsidePaths = ['/create-story', '/chatbot-widget', '/partner-dashboard'];
+      
+      // Paths where ONLY the header should be hidden
+      const noHeaderOnlyPaths = ['/live-chat'];
+      
+      // Set showHeader to true if the URL does NOT include any of the header-hiding paths
+      this.showHeader = !noHeaderOnlyPaths.some(path => url.includes(path)) && !noHeaderAndAsidePaths.some(path => url.includes(path)) && !url.startsWith('/landing/');
+      
+      // Set showAside to true if the URL does NOT include any of the aside-hiding paths
+      this.showAside = !noHeaderAndAsidePaths.some(path => url.includes(path)) && !url.startsWith('/landing/');
+      
       console.log('Current route:', url);
-      console.log('Show header and aside:', this.showHeaderAndAside);
+      console.log('Show header:', this.showHeader);
+      console.log('Show aside:', this.showAside);
     });
   }
 
@@ -91,7 +102,6 @@ export class AppComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     this.showSocialMediaCard = false;
     
-    // Close all sidebars except the social media ones
     this.closeAllSidebars();
     
     switch(platform) {
@@ -116,11 +126,6 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Closes all sidebars, with an option to keep the main chatbot AI sidebar open.
-   * This is a utility method to clean up the UI state.
-   * @param keepChatbotAISidebarOpen Optional boolean to prevent closing the main sidebar.
-   */
   closeAllSidebars(keepChatbotAISidebarOpen: boolean = false) {
     this.showWebsiteSidebar = false;
     this.showWhatsAppSidebar = false;
@@ -136,15 +141,8 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
   
-  /**
-   * Handles the click event for the main "Chatbot AI" icon.
-   * This method ensures all other sidebars are closed before the main
-   * chatbot sidebar is toggled.
-   */
   onChatbotAIClick() {
-    // First, close all other sidebars.
     this.closeAllSidebars(true); 
-    // Then, toggle the main chatbot AI sidebar.
     this.showChatbotAISidebar = !this.showChatbotAISidebar;
   }
 
@@ -158,10 +156,9 @@ export class AppComponent implements OnInit, OnDestroy {
   onMouseLeave() {
     this.leaveTimer = setTimeout(() => {
       this.showSocialMediaCard = false;
-    }, 500); // Increased delay for better UX
+    }, 500); 
   }
 
-  // Fix for social media card mouse events
   onSocialCardMouseEnter() {
     if (this.leaveTimer) {
       clearTimeout(this.leaveTimer);
@@ -182,16 +179,15 @@ export class AppComponent implements OnInit, OnDestroy {
     }, 200);
   }
 
-  // UPDATED METHOD to navigate using the router with integrated routes
   onSidebarNavClick(item: string, event: Event) {
     event.preventDefault();
-    this.closeAllSidebars(true); // Close all sidebars on navigation
+    this.closeAllSidebars(true);
     switch (item) {
       case 'publish':
         this.router.navigate(['/publish-bot']);
         break;
       case 'menu':
-        this.router.navigate(['/chatbot-menu']); // Navigate to the chatbot menu page
+        this.router.navigate(['/chatbot-menu']);
         break;
       case 'branding':
         this.router.navigate(['/branding']);
@@ -215,11 +211,10 @@ export class AppComponent implements OnInit, OnDestroy {
         this.router.navigate(['/forms']);
         break;
       default:
-        this.router.navigate(['/create-story']); // Updated fallback to match your default route
+        this.router.navigate(['/create-story']);
     }
   }
 
-  // New methods for handling platform-specific sidebar navigation
   onWhatsAppSidebarNavClick(item: string, event: Event) {
     event.preventDefault();
     this.closeAllSidebars(true);
@@ -227,7 +222,6 @@ export class AppComponent implements OnInit, OnDestroy {
       case 'publish':
         this.router.navigate(['/whatsapp-publisher']);
         break;
-      // Add other WhatsApp-specific routes as needed
       default:
         this.router.navigate(['/whatsapp-publisher']);
     }
@@ -240,7 +234,6 @@ export class AppComponent implements OnInit, OnDestroy {
       case 'publish':
         this.router.navigate(['/instagram-publisher']);
         break;
-      // Add other Instagram-specific routes as needed
       default:
         this.router.navigate(['/instagram-publisher']);
     }
@@ -253,7 +246,6 @@ export class AppComponent implements OnInit, OnDestroy {
       case 'publish':
         this.router.navigate(['/facebook-publisher']);
         break;
-      // Add other Messenger-specific routes as needed
       default:
         this.router.navigate(['/facebook-publisher']);
     }
@@ -266,7 +258,6 @@ export class AppComponent implements OnInit, OnDestroy {
       case 'publish':
         this.router.navigate(['/connect-to-telegram']);
         break;
-      // Add other Telegram-specific routes as needed
       default:
         this.router.navigate(['/connect-to-telegram']);
     }
@@ -279,7 +270,6 @@ export class AppComponent implements OnInit, OnDestroy {
       case 'publish':
         this.router.navigate(['/twilio-sms']);
         break;
-      // Add other SMS-specific routes as needed
       default:
         this.router.navigate(['/twilio-sms']);
     }

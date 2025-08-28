@@ -63,10 +63,33 @@
         <!-- Daily Users Chart -->
         <div class="chart-container">
             <div class="chart-header">
-                <h3>Users daily report</h3>
-                <div class="chart-filters">
-                    <button [class.active]="dailyFilter === 'Day'" (click)="setDailyFilter('Day')">Day</button>
-                    <button [class.active]="dailyFilter === 'Hour'" (click)="setDailyFilter('Hour')">Hour</button>
+                <h3>Users {{ dailyFilter === 'Day' ? 'daily' : 'hourly' }} report</h3>
+                <div class="chart-controls">
+                    <div class="chart-filters">
+                        <button [class.active]="dailyFilter === 'Day'" (click)="setDailyFilter('Day')">Day</button>
+                        <button [class.active]="dailyFilter === 'Hour'" (click)="setDailyFilter('Hour')">Hour</button>
+                    </div>
+                    <div class="chart-menu" [class.active]="showDailyChartMenu">
+                        <button class="menu-toggle" (click)="toggleDailyChartMenu()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="12" cy="5" r="1"></circle>
+                                <circle cx="12" cy="19" r="1"></circle>
+                            </svg>
+                        </button>
+                        <div class="menu-dropdown" *ngIf="showDailyChartMenu">
+                            <button (click)="downloadSVG('daily-users')">
+                                <span>Download SVG</span>
+                            </button>
+                            <button (click)="downloadPNG('daily-users')">
+                                <span>Download PNG</span>
+                            </button>
+                            <button (click)="downloadCSV('daily-users')">
+                                <span>Download CSV</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <canvas #dailyUsersChart></canvas>
@@ -76,22 +99,52 @@
         <div class="chart-container">
             <div class="chart-header">
                 <h3>Platform report</h3>
-                <div class="chart-filters">
-    <button [class.active]="platformFilter === 'platform'" (click)="setPlatformFilter('platform')">Platform</button>
-    <button [class.active]="platformFilter === 'country'" (click)="setPlatformFilter('country')">Country</button>
-    <button [class.active]="platformFilter === 'state'" (click)="setPlatformFilter('state')">State</button>
-    <button [class.active]="platformFilter === 'city'" (click)="setPlatformFilter('city')">City</button>
-</div>
+                <div class="chart-controls">
+                    <div class="chart-filters">
+                        <button [class.active]="platformFilter === 'platform'"
+                            (click)="setPlatformFilter('platform')">Platform</button>
+                        <button [class.active]="platformFilter === 'country'"
+                            (click)="setPlatformFilter('country')">Country</button>
+                        <button [class.active]="platformFilter === 'state'"
+                            (click)="setPlatformFilter('state')">State</button>
+                        <button [class.active]="platformFilter === 'city'"
+                            (click)="setPlatformFilter('city')">City</button>
+                    </div>
+                    <div class="chart-menu" [class.active]="showPlatformChartMenu">
+                        <button class="menu-toggle" (click)="togglePlatformChartMenu()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="12" cy="5" r="1"></circle>
+                                <circle cx="12" cy="19" r="1"></circle>
+                            </svg>
+                        </button>
+                        <div class="menu-dropdown" *ngIf="showPlatformChartMenu">
+                            <button (click)="downloadSVG('platform')">
+                                <span>Download SVG</span>
+                            </button>
+                            <button (click)="downloadPNG('platform')">
+                                <span>Download PNG</span>
+                            </button>
+                            <button (click)="downloadCSV('platform')">
+                                <span>Download CSV</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="platform-chart-wrapper">
                 <canvas #platformChart></canvas>
                 <div class="platform-legend">
- <div class="legend-item" *ngFor="let item of getFilteredPlatformData()">
-  <span class="legend-color" [style.background-color]="getPlatformColor(item.system || '')"></span>
-  <span class="legend-label">{{ item.system || item.platform || item.country || item.state || item.city }}</span>
-  <span class="legend-value">{{ item.count }}</span>
-</div>
-</div>
+                    <div class="legend-title">Users by {{ platformFilter }}</div>
+                    <div class="legend-item" *ngFor="let item of getFilteredPlatformData()">
+                        <span class="legend-color"
+                            [style.background-color]="getPlatformColor(item.system || item.platform || '')"></span>
+                        <span class="legend-label">{{ item.system || item.platform || item.country || item.state ||
+                            item.city }}</span>
+                        <span class="legend-value">{{ item.count }}</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -101,6 +154,29 @@
         <div class="chart-container">
             <div class="chart-header">
                 <h3>Users report (2 of 5)</h3>
+                <div class="chart-controls">
+                    <div class="chart-menu" [class.active]="showUsersReportMenu">
+                        <button class="menu-toggle" (click)="toggleUsersReportMenu()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="12" cy="5" r="1"></circle>
+                                <circle cx="12" cy="19" r="1"></circle>
+                            </svg>
+                        </button>
+                        <div class="menu-dropdown" *ngIf="showUsersReportMenu">
+                            <button (click)="downloadSVG('users-report')">
+                                <span>Download SVG</span>
+                            </button>
+                            <button (click)="downloadPNG('users-report')">
+                                <span>Download PNG</span>
+                            </button>
+                            <button (click)="downloadCSV('users-report')">
+                                <span>Download CSV</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <canvas #usersReportChart></canvas>
         </div>
@@ -109,6 +185,29 @@
         <div class="chart-container">
             <div class="chart-header">
                 <h3>Platform specific users</h3>
+                <div class="chart-controls">
+                    <div class="chart-menu" [class.active]="showPlatformPieMenu">
+                        <button class="menu-toggle" (click)="togglePlatformPieMenu()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="12" cy="5" r="1"></circle>
+                                <circle cx="12" cy="19" r="1"></circle>
+                            </svg>
+                        </button>
+                        <div class="menu-dropdown" *ngIf="showPlatformPieMenu">
+                            <button (click)="downloadSVG('platform-pie')">
+                                <span>Download SVG</span>
+                            </button>
+                            <button (click)="downloadPNG('platform-pie')">
+                                <span>Download PNG</span>
+                            </button>
+                            <button (click)="downloadCSV('platform-pie')">
+                                <span>Download CSV</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="pie-chart-wrapper">
                 <canvas #platformPieChart></canvas>
@@ -122,7 +221,15 @@
         <div class="table-container">
             <div class="table-header">
                 <h3>Top 5 Messages</h3>
-                <button class="download-btn">⬇</button>
+                <button class="download-btn" (click)="downloadMessagesData()" title="Download CSV">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m3 16 4 4 4-4" />
+                        <path d="M7 20V4" />
+                        <rect x="15" y="4" width="4" height="6" ry="2" />
+                        <path d="M17 20v-6h-2" />
+                        <path d="M15 20h4" />
+                    </svg>
+                </button>
             </div>
             <table class="data-table">
                 <thead>
@@ -142,32 +249,40 @@
 
         <!-- Top CTAs -->
         <div class="table-container">
-            <div class="table-header">
-                <h3>Top 5 CTAs</h3>
-                <div class="table-filters">
-                    <button [class.active]="ctaFilter === 'Buttons'" (click)="setCTAFilter('Buttons')">Buttons</button>
-                    <button [class.active]="ctaFilter === 'Quick Replies'" (click)="setCTAFilter('Quick Replies')">Quick
-                        Replies</button>
-                </div>
-                <button class="download-btn">⬇</button>
-            </div>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>BUTTON TITLE</th>
-                        <th>COUNT</th>
-                        <th>INITIATED</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let cta of analyticsData.topCTAs">
-                        <td>{{ cta.buttonTitle }}</td>
-                        <td>{{ cta.count }}</td>
-                        <td>{{ cta.initiated || '' }}</td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="table-header">
+        <h3>Top 5 CTAs</h3>
+        <div class="table-filters">
+            <button [class.active]="ctaFilter === 'Buttons'" (click)="setCTAFilter('Buttons')">Buttons</button>
+            <button [class.active]="ctaFilter === 'Quick Replies'" (click)="setCTAFilter('Quick Replies')">Quick Replies</button>
         </div>
+        <button class="download-btn" (click)="downloadCTAsData()" title="Download CSV">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m3 16 4 4 4-4"/>
+                <path d="M7 20V4"/>
+                <rect x="15" y="4" width="4" height="6" ry="2"/>
+                <path d="M17 20v-6h-2"/>
+                <path d="M15 20h4"/>
+            </svg>
+        </button>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th *ngIf="ctaFilter === 'Buttons'">BUTTON TITLE</th>
+                <th *ngIf="ctaFilter === 'Quick Replies'">MESSAGE</th>
+                <th>COUNT</th>
+                <th *ngIf="ctaFilter === 'Buttons'">INITIATED</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let cta of getFilteredCTAs()">
+                <td>{{ cta.buttonTitle }}</td>
+                <td>{{ cta.count }}</td>
+                <td *ngIf="ctaFilter === 'Buttons'">{{ cta.initiated || '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>                            
     </div>
 
     <!-- Bottom Tables Row -->
@@ -176,7 +291,15 @@
         <div class="table-container">
             <div class="table-header">
                 <h3>Top 5 Stories</h3>
-                <button class="download-btn">⬇</button>
+                <button class="download-btn" (click)="downloadStoriesData()" title="Download CSV">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m3 16 4 4 4-4" />
+                        <path d="M7 20V4" />
+                        <rect x="15" y="4" width="4" height="6" ry="2" />
+                        <path d="M17 20v-6h-2" />
+                        <path d="M15 20h4" />
+                    </svg>
+                </button>
             </div>
             <table class="data-table">
                 <thead>

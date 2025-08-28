@@ -23,10 +23,13 @@ import { FormEditorComponent } from './forms-list/form-editor/form-editor.compon
 import { AiAssistantListComponent } from './ai-assistant-list/ai-assistant-list.component';
 import { CreateAssistantComponent } from './ai-assistant-list/create-assistant/create-assistant.component';
 import { ChatbotAnalyticsComponent } from './chatbot-analytics/chatbot-analytics.component';
+import { LiveChatComponent } from './live-chat/live-chat.component';
 
 export const routes: Routes = [
   // Analytics
   { path: 'chatbot-analytics', component: ChatbotAnalyticsComponent,data: { title: 'Chatbot Analytics' } },
+  // live chat
+  { path: 'live-chat', component: LiveChatComponent },
 // AI Assistants routes
    { path: 'assistants', component: AiAssistantListComponent,data: { title: 'AI Assistants' } },
   { path: 'assistants/create', component: CreateAssistantComponent,data: { title: 'Manage AI Assistant' } },
