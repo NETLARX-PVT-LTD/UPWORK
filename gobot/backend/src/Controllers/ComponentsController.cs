@@ -196,6 +196,111 @@ namespace BotsifySchemaTest.Controllers
             return AddComponent(storyId, model, ComponentTypes.ConversationalForm,
                  g => StorySessionManager.GetStory(storyId).ConversationalForms.Add(g));
         }
+
+        [HttpGet("GetTypingDelay")]
+        public async Task<IActionResult> GetTypingDelay(int storyId)
+        {
+            var story = await _db.TypingDelay.FirstOrDefaultAsync(s => s.StoryId == storyId);
+
+            if (story == null)
+            {
+                return NotFound($"No typing delay found for StoryId {storyId}");
+            }
+
+            return Ok(story);
+        }
+
+        [HttpGet("GetLinkStory")]
+        public async Task<IActionResult> GetLinkStory(int storyId)
+        {
+            var LinkStories = await _db.LinkStory.FirstOrDefaultAsync(s => s.StoryId == storyId);
+
+            if (LinkStories == null)
+            {
+                return NotFound($"No LinkStory found for StoryId {storyId}");
+            }
+
+            return Ok(LinkStories);
+        }
+
+        [HttpGet("GetConversationalForm")]
+        public async Task<IActionResult> GetConversationalForm(int storyId)
+        {
+            var ConversationalForms = await _db.ConversationalForm.FirstOrDefaultAsync(s => s.StoryId == storyId);
+
+            if (ConversationalForms == null)
+            {
+                return NotFound($"No LinkStory found for StoryId {storyId}");
+            }
+
+            return Ok(ConversationalForms);
+        }
+
+        [HttpGet("GetTextReponse")]
+        public async Task<IActionResult> GetTextReponse(int storyId)
+        {
+            var TextResponses = await _db.TextResponse.FirstOrDefaultAsync(s => s.StoryId == storyId);
+
+            if (TextResponses == null)
+            {
+                return NotFound($"No LinkStory found for StoryId {storyId}");
+            }
+
+            return Ok(TextResponses);
+        }
+
+        [HttpGet("GetJsonApi")]
+        public async Task<IActionResult> GetJsonApi(int storyId)
+        {
+            var jsonAPIs = await _db.JsonAPI.FirstOrDefaultAsync(s => s.StoryId == storyId);
+
+            if (jsonAPIs == null)
+            {
+                return NotFound($"No LinkStory found for StoryId {storyId}");
+            }
+
+            return Ok(jsonAPIs);
+        }
+
+        [HttpGet("GetUserInputKeyword")]
+        public async Task<IActionResult> GetUserInputKeyword(int storyId)
+        {
+            var userInputKeywordss = await _db.UserInputKeyword.FirstOrDefaultAsync(s => s.StoryId == storyId);
+
+            if (userInputKeywordss == null)
+            {
+                return NotFound($"No LinkStory found for StoryId {storyId}");
+            }
+
+            return Ok(userInputKeywordss);
+        }
+
+        [HttpGet("GetUserInputAnything")]
+        public async Task<IActionResult> GetUserInputAnything(int storyId)
+        {
+            var userInputTypeAnything = await _db.UserInputTypeAnything.FirstOrDefaultAsync(s => s.StoryId == storyId);
+
+            if (userInputTypeAnything == null)
+            {
+                return NotFound($"No LinkStory found for StoryId {storyId}");
+            }
+
+            return Ok(userInputTypeAnything);
+        }
+
+        [HttpGet("GetUserInputPhrases")]
+        public async Task<IActionResult> GetUserInputPhrases(int storyId)
+        {
+            var UserInputPhrases = await _db.UserInputPhrase.FirstOrDefaultAsync(s => s.StoryId == storyId);
+
+            if (UserInputPhrases == null)
+            {
+                return NotFound($"No LinkStory found for StoryId {storyId}");
+            }
+
+            return Ok(UserInputPhrases);
+        }
+
         [HttpPost("SaveStoryToDb")]
         public async Task<IActionResult> SaveStoryToDb([FromBody] StorySessionData session)
         {
