@@ -182,6 +182,20 @@ namespace BotsifySchemaTest.Controllers
             return AddComponent(storyId, model, ComponentTypes.LinkStory,
                  g => StorySessionManager.GetStory(storyId).LinkStories.Add(g));
         }
+
+        [HttpPost("AddJsonApi")]
+        public async Task<IActionResult> AddJsonApi(int storyId, [FromBody] JsonAPI model)
+        {
+            return AddComponent(storyId, model, ComponentTypes.JsonAPI,
+                 g => StorySessionManager.GetStory(storyId).JsonAPIs.Add(g));
+        }
+
+        [HttpPost("AddConversationalform")]
+        public async Task<IActionResult> AddConversationalForm(int storyId, [FromBody] ConversationalForm model)
+        {
+            return AddComponent(storyId, model, ComponentTypes.ConversationalForm,
+                 g => StorySessionManager.GetStory(storyId).ConversationalForms.Add(g));
+        }
         [HttpPost("SaveStoryToDb")]
         public async Task<IActionResult> SaveStoryToDb([FromBody] StorySessionData session)
         {
@@ -227,6 +241,36 @@ namespace BotsifySchemaTest.Controllers
                             _logger.LogWarning("No story found in DB and no session.Story provided.");
                         }
                     }
+                }
+
+                if(session.TextResponses != null)
+                {
+                    _db.TextResponse.AddRange(session.TextResponses);
+                }
+
+                if(session.ConversationalForms != null)
+                {
+                    _db.ConversationalForm.AddRange(session.ConversationalForms);
+                }
+
+                if(session.TypingDelays != null)
+                {
+                    _db.TypingDelay.AddRange(session.TypingDelays);
+                }
+
+                if(session.LinkStories != null)
+                {
+                    _db.LinkStory.AddRange(session.LinkStories);
+                }
+
+                if(session.TextResponses != null)
+                {
+                    _db.TextResponse.AddRange(session.TextResponses);
+                }
+
+                if(session.JsonAPIs != null)
+                {
+                    _db.JsonAPI.AddRange(session.JsonAPIs);
                 }
 
                 await _db.SaveChangesAsync();
