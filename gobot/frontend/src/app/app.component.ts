@@ -210,6 +210,12 @@ export class AppComponent implements OnInit, OnDestroy {
       case 'forms':
         this.router.navigate(['/forms']);
         break;
+        case 'chats':
+        this.router.navigate(['/live-chat']);
+        break;
+        case 'analytics':
+        this.router.navigate(['/chatbot-analytics']);
+        break;
       default:
         this.router.navigate(['/create-story']);
     }

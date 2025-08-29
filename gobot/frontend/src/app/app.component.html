@@ -56,12 +56,12 @@
           <mat-icon class="text-lg">grid_view</mat-icon>
         </button>
        
-        <button mat-icon-button (click)="onChatbotAIClick()" matTooltip="Analytics"
+        <button mat-icon-button (click)="onSidebarNavClick('analytics', $event)" matTooltip="Analytics"
           class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200"
           aria-label="Schedule">
           <mat-icon class="text-lg">schedule</mat-icon>
         </button>
-        <button mat-icon-button
+        <button mat-icon-button  (click)="onSidebarNavClick('chats', $event)" matTooltip="Live Chat"
           class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200"
           aria-label="Chat">
           <mat-icon class="text-lg">chat</mat-icon>
