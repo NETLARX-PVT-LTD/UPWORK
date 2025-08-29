@@ -24,6 +24,7 @@ import { AiAssistantListComponent } from './ai-assistant-list/ai-assistant-list.
 import { CreateAssistantComponent } from './ai-assistant-list/create-assistant/create-assistant.component';
 import { ChatbotAnalyticsComponent } from './chatbot-analytics/chatbot-analytics.component';
 import { LiveChatComponent } from './live-chat/live-chat.component';
+import { ManageBotStoriesComponent } from './chatbot-flow/manage-bot-stories/manage-bot-stories.component';
 
 export const routes: Routes = [
   // Analytics
@@ -88,7 +89,7 @@ export const routes: Routes = [
   },
   // Route for your Create Story page
   { path: 'create-story', component: ChatbotFlowComponent },
-
+{ path: 'manage-stories', component: ManageBotStoriesComponent,data: { title: 'Manage Bot Stories' } },
   // A default route to redirect to the 'create-story' page
   { path: '', redirectTo: '/create-story', pathMatch: 'full' },
 ];

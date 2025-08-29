@@ -4,7 +4,7 @@ import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith, debounceTime } from 'rxjs/operators';
 import { ChatbotBlock, Connection, AvailableMedia, AvailableStory, AvailableForm } from '../models/chatbot-block.model';
-import { Story } from '../publish-bot/page-message/page-message.component'; 
+import { Story } from '../publish-bot/page-message/page-message.component';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -17,7 +17,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-
+import { StoryService } from '../shared/services/story.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 // ✅ --- START: PROTOBUF IMPORTS ---
 import { TextResponseBlock } from '../proto-gen/text_response_block';
@@ -42,6 +43,7 @@ import { JsonApiIntegrationBlockComponent } from './blocks/json-api-integration-
 import { QuickReplyFlowComponent } from './blocks/quick-reply-flow/quick-reply-flow.component';
 import { JarvishBlockComponent } from './blocks/jarvish-block/jarvish-block.component';
 import { JsPlumbFlowService, ConnectionInfo } from './services/jsplumb-flow.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 // / ✅ --- START: TWO-WAY TRANSLATION FUNCTIONS ---
@@ -106,7 +108,7 @@ type NearestConnectionPoint = { blockId: string, x: number, y: number };
     MatButtonToggleModule, MatTooltipModule, MatSelectModule, MatCheckboxModule,
     UserInputBlockComponent, TextResponseBlockComponent, TypingDelayBlockComponent,
     MediaBlockComponent, LinkStoryBlockComponent, ConversationalFormBlockComponent,
-    JsonApiIntegrationBlockComponent, JarvishBlockComponent,QuickReplyFlowComponent
+    JsonApiIntegrationBlockComponent, JarvishBlockComponent, QuickReplyFlowComponent
   ],
   templateUrl: './chatbot-flow.component.html',
   styleUrls: ['./chatbot-flow.component.scss']
@@ -115,14 +117,14 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('canvasWrapper') canvasWrapper!: ElementRef;
   @ViewChild('canvasContent') canvasContent!: ElementRef;
 
-   // This input is required by the parent component's template
-  @Input() story: Story | null = null; 
+  // This input is required by the parent component's template
+  @Input() story: Story | null = null;
 
   // This output must emit a Story object to match the parent's method
-  @Output() onSave = new EventEmitter<Story>(); 
+  @Output() onSave = new EventEmitter<Story>();
 
   // The parent component expects this as well
-  @Output() onCancel = new EventEmitter<void>();
+  // @Output() onCancel = new EventEmitter<void>();
 
   // A method that would be called inside this component to emit the story
   // public saveFlow(): void {
@@ -166,7 +168,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     { id: 'form-1', name: 'Contact Us Form' },
     { id: 'form-2', name: 'Feedback Survey' },
     { id: 'form-3', name: 'Support Ticket' },
-    { id : 'form-4', name:'Aishwary'}
+    { id: 'form-4', name: 'Aishwary' }
   ];
 
   availableStories: AvailableStory[] = [
@@ -174,7 +176,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     { id: 'story-2', name: '(Hii),' },
     { id: 'story-3', name: 'Report Incident' },
     { id: 'story-4', name: 'Process for setting up shop' },
-    { id : 'Aishwary', name : 'Aishwary'}
+    { id: 'Aishwary', name: 'Aishwary' }
   ];
 
   zoomLevel: number = 1.0;
@@ -193,15 +195,20 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
   dropPreviewPosition: { x: number, y: number } | null = null;
   isDraggingBlock = false;
   draggedBlockId: string | null = null;
-  
+
   isJarvisVisible: boolean = false;
   private resizeObservers: Map<string, ResizeObserver> = new Map();
   private layoutDebounceTimers: Map<string, any> = new Map();
-  
+  // snackBar: any;
+
   constructor(
     private jsPlumbFlowService: JsPlumbFlowService,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    private storyService: StoryService,
+    private router: Router,
+    private route: ActivatedRoute, 
+    private snackBar: MatSnackBar
+    ) { }
 
   ngOnInit(): void {
     this.filteredBlocks$ = this.searchControl.valueChanges.pipe(
@@ -215,9 +222,33 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       x: 600, y: 100, subType: 'keywordGroup', content: 'Hello 👋',
       keywordGroups: [['Hello', 'Hi']], description: 'Define keywords that trigger the conversations',
       width: 0, height: 0,
-      connections: {input:[], output:[]}
+      connections: { input: [], output: [] }
     });
-    
+
+    // Check if we're editing an existing story
+    this.route.queryParams.subscribe(params => {
+      if (params['storyId']) {
+        this.loadExistingStory(params['storyId']);
+      }
+    });
+  }
+
+  private loadExistingStory(storyId: string): void {
+    const story = this.storyService.getStoryById(storyId);
+    if (story && story.blocks) {
+      // Load the blocks into your canvas
+      this.canvasBlocks = story.blocks;
+
+      // Re-setup the canvas
+      setTimeout(() => {
+        this.canvasBlocks.forEach(block => {
+          this.updateBlockDimensions(block);
+          this.jsPlumbFlowService.setupBlock(`block-${block.id}`);
+          this.attachResizeObserver(block);
+        });
+      }, 80);
+    }
+
     // --- CALL THE UPDATED TEST FUNCTION ---
     this.testProtobufLoopback();
   }
@@ -234,7 +265,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       }),
       content: 'Hello Protobuf!'
     });
-    
+
     console.log("1. Original Object:", originalMessage);
 
     // // B. SERIALIZE the message into a binary format
@@ -248,7 +279,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     // D. VERIFY the data is the same
     // const testPassed = originalMessage.content === deserializedMessage.content;
     // console.log(`4. Verification -> Test Passed: ${testPassed}`);
-    
+
     console.log("--- Test Complete ---");
   }
 
@@ -277,7 +308,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.jsPlumbFlowService.blockDragEnded.subscribe(() => {
-        this.onJsPlumbDragEnded();
+      this.onJsPlumbDragEnded();
     });
 
     this.updateCanvasTransform();
@@ -323,7 +354,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isDraggingFromPalette = false;
     this.dropPreviewPosition = null;
   }
-  
+
   async addBlockToCanvasAtPosition(block: ChatbotBlock, screenX: number, screenY: number): Promise<void> {
     const canvasRect = this.canvasContent.nativeElement.getBoundingClientRect();
     const newBlockId = `${block.type}-${Date.now()}`;
@@ -339,7 +370,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       content: block.type === 'textResponse' ? '' : undefined,
       keywordGroups: block.subType === 'keywordGroup' ? [[]] : undefined,
       isInitializing: true,
-      connections: {input:[], output:[]}
+      connections: { input: [], output: [] }
     };
 
     this.canvasBlocks.push(newBlock);
@@ -413,32 +444,32 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     this.attachResizeObserver(newBlock);
 
     if (connectOnDrop && parentBlockForConnection) {
-        if (connectionToBreak && childIdForConnection) {
-            this.jsPlumbFlowService.batch(() => {
-                this.jsPlumbFlowService.deleteJsPlumbConnection(connectionToBreak);
-                this.jsPlumbFlowService.connectBlocks(`block-${parentBlockForConnection!.id}`, `block-${newBlock.id}`);
-                this.jsPlumbFlowService.connectBlocks(`block-${newBlock.id}`, `block-${childIdForConnection}`);
-            });
-            this.jsPlumbFlowService.revalidate(`block-${parentBlockForConnection!.id}`);
-            this.jsPlumbFlowService.revalidate(`block-${newBlock.id}`);
-            this.jsPlumbFlowService.revalidate(`block-${childIdForConnection}`);
-            this.jsPlumbFlowService.repaintAllConnections();
-            await this.nextFrame();
-            await this.enforceVerticalLayout(newBlock.id);
-        } else {
-            this.jsPlumbFlowService.connectBlocks(`block-${parentBlockForConnection.id}`, `block-${newBlock.id}`);
-            this.jsPlumbFlowService.revalidate(`block-${parentBlockForConnection.id}`);
-            this.jsPlumbFlowService.revalidate(`block-${newBlock.id}`);
-            this.jsPlumbFlowService.repaintAllConnections();
-            await this.nextFrame();
-            await this.enforceVerticalLayout(parentBlockForConnection.id);
-        }
+      if (connectionToBreak && childIdForConnection) {
+        this.jsPlumbFlowService.batch(() => {
+          this.jsPlumbFlowService.deleteJsPlumbConnection(connectionToBreak);
+          this.jsPlumbFlowService.connectBlocks(`block-${parentBlockForConnection!.id}`, `block-${newBlock.id}`);
+          this.jsPlumbFlowService.connectBlocks(`block-${newBlock.id}`, `block-${childIdForConnection}`);
+        });
+        this.jsPlumbFlowService.revalidate(`block-${parentBlockForConnection!.id}`);
+        this.jsPlumbFlowService.revalidate(`block-${newBlock.id}`);
+        this.jsPlumbFlowService.revalidate(`block-${childIdForConnection}`);
+        this.jsPlumbFlowService.repaintAllConnections();
+        await this.nextFrame();
+        await this.enforceVerticalLayout(newBlock.id);
+      } else {
+        this.jsPlumbFlowService.connectBlocks(`block-${parentBlockForConnection.id}`, `block-${newBlock.id}`);
+        this.jsPlumbFlowService.revalidate(`block-${parentBlockForConnection.id}`);
+        this.jsPlumbFlowService.revalidate(`block-${newBlock.id}`);
+        this.jsPlumbFlowService.repaintAllConnections();
+        await this.nextFrame();
+        await this.enforceVerticalLayout(parentBlockForConnection.id);
+      }
     } else if (!connectOnDrop) {
-        this.jsPlumbFlowService.removeBlock(`block-${newBlock.id}`);
-        this.canvasBlocks = this.canvasBlocks.filter(b => b.id !== newBlock.id);
-        this.closeSidebar();
-        this.cdr.detectChanges();
-        return;
+      this.jsPlumbFlowService.removeBlock(`block-${newBlock.id}`);
+      this.canvasBlocks = this.canvasBlocks.filter(b => b.id !== newBlock.id);
+      this.closeSidebar();
+      this.cdr.detectChanges();
+      return;
     }
 
     await this.nextFrame();
@@ -484,7 +515,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       this.jsPlumbFlowService.repaintAllConnections();
     }
   }
-  
+
   private distanceToLineSegment(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
     const l2 = (x1 - x2) ** 2 + (y1 - y2) ** 2;
     if (l2 === 0) return Math.hypot(px - x1, py - y1);
@@ -504,7 +535,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       const sourceBlock = this.canvasBlocks.find(b => b.id === conn.sourceId.replace('block-', ''));
       const targetBlock = this.canvasBlocks.find(b => b.id === conn.targetId.replace('block-', ''));
       if (!sourceBlock || !targetBlock) continue;
-      
+
       this.updateBlockDimensions(sourceBlock);
       this.updateBlockDimensions(targetBlock);
 
@@ -529,29 +560,29 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     let bestDist = Infinity;
 
     for (const conn of allConnections) {
-        const sourceBlock = this.canvasBlocks.find(b => b.id === conn.sourceId.replace('block-', ''));
-        const targetBlock = this.canvasBlocks.find(b => b.id === conn.targetId.replace('block-', ''));
-        if (!sourceBlock || !targetBlock) continue;
+      const sourceBlock = this.canvasBlocks.find(b => b.id === conn.sourceId.replace('block-', ''));
+      const targetBlock = this.canvasBlocks.find(b => b.id === conn.targetId.replace('block-', ''));
+      if (!sourceBlock || !targetBlock) continue;
 
-        this.updateBlockDimensions(sourceBlock);
-        this.updateBlockDimensions(targetBlock);
+      this.updateBlockDimensions(sourceBlock);
+      this.updateBlockDimensions(targetBlock);
 
-        const x1 = sourceBlock.x + (sourceBlock.width / 2);
-        const y1 = sourceBlock.y + sourceBlock.height;
-        const x2 = targetBlock.x + (targetBlock.width / 2);
-        const y2 = targetBlock.y;
+      const x1 = sourceBlock.x + (sourceBlock.width / 2);
+      const y1 = sourceBlock.y + sourceBlock.height;
+      const x2 = targetBlock.x + (targetBlock.width / 2);
+      const y2 = targetBlock.y;
 
-        const midX = (x1 + x2) / 2;
-        const midY = (y1 + y2) / 2;
-        const length = Math.hypot(x2 - x1, y2 - y1);
+      const midX = (x1 + x2) / 2;
+      const midY = (y1 + y2) / 2;
+      const length = Math.hypot(x2 - x1, y2 - y1);
 
-        const radius = Math.max(minRadiusPx / this.zoomLevel, Math.min(maxRadiusPx / this.zoomLevel, length * radiusFactor));
+      const radius = Math.max(minRadiusPx / this.zoomLevel, Math.min(maxRadiusPx / this.zoomLevel, length * radiusFactor));
 
-        const dist = Math.hypot(x - midX, y - midY);
-        if (dist <= radius && dist < bestDist) {
-            bestDist = dist;
-            best = conn;
-        }
+      const dist = Math.hypot(x - midX, y - midY);
+      if (dist <= radius && dist < bestDist) {
+        bestDist = dist;
+        best = conn;
+      }
     }
     return best;
   }
@@ -600,7 +631,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onWheel(event: WheelEvent) {
-    event.preventDefault(); 
+    event.preventDefault();
     if (event.ctrlKey) {
       const delta = event.deltaY > 0 ? -this.zoomStep : this.zoomStep;
       this.zoomLevel = parseFloat(Math.max(this.minZoom, Math.min(this.maxZoom, this.zoomLevel + delta)).toFixed(2));
@@ -640,17 +671,17 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
 
   duplicateCanvasBlock(block: ChatbotBlock) {
     const newBlockId = `${block.type}-${Date.now()}-dup`;
-    
-    const newBlock: ChatbotBlock = { 
-      ...block, 
-      id: newBlockId, 
-      x: (block.x || 0) + 40, 
+
+    const newBlock: ChatbotBlock = {
+      ...block,
+      id: newBlockId,
+      x: (block.x || 0) + 40,
       y: (block.y || 0) + 40,
       connections: { input: [], output: [] }
     };
 
     this.canvasBlocks.push(newBlock);
-    
+
     setTimeout(() => {
       this.updateBlockDimensions(newBlock);
       this.jsPlumbFlowService.setupBlock(`block-${newBlock.id}`);
@@ -676,9 +707,9 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateBlockDimensions(block: ChatbotBlock) {
     const blockElement = document.getElementById(`block-${block.id}`);
-    if (blockElement) { 
-      block.width = blockElement.offsetWidth; 
-      block.height = blockElement.offsetHeight; 
+    if (blockElement) {
+      block.width = blockElement.offsetWidth;
+      block.height = blockElement.offsetHeight;
     }
   }
 
@@ -708,10 +739,10 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     const obs = this.resizeObservers.get(blockId);
     const el = document.getElementById(`block-${blockId}`);
     if (obs && el) {
-      try { obs.unobserve(el); } catch {}
+      try { obs.unobserve(el); } catch { }
     }
     if (obs) {
-      try { obs.disconnect(); } catch {}
+      try { obs.disconnect(); } catch { }
     }
     this.resizeObservers.delete(blockId);
   }
@@ -720,9 +751,9 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     this.resizeObservers.forEach((obs, id) => {
       const el = document.getElementById(`block-${id}`);
       if (el) {
-        try { obs.unobserve(el); } catch {}
+        try { obs.unobserve(el); } catch { }
       }
-      try { obs.disconnect(); } catch {}
+      try { obs.disconnect(); } catch { }
     });
     this.resizeObservers.clear();
   }
@@ -747,9 +778,16 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       this.addBlockToCanvasAtPosition(blueprint, canvasRect.left + canvasRect.width / 2, canvasRect.top + canvasRect.height / 2);
     }
   }
-  
-// ✅ --- STEP 4: TRANSLATE AND SAVE THE ENTIRE FLOW ---
+
+  // ✅ --- STEP 4: TRANSLATE AND SAVE THE ENTIRE FLOW ---
   saveFlow() {
+    // Validation
+    if (this.canvasBlocks.length === 0) {
+      this.snackBar.open('Please add at least one block to your story.', 'Close', {
+        duration: 3000
+      });
+      return;
+    }
     console.log("--- Preparing to save flow. Translating all blocks to Protobuf format... ---");
 
     const protoPayloads = this.canvasBlocks.map(block => {
@@ -833,7 +871,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
           break;
 
         case 'linkStory':
-          payload = { 
+          payload = {
             type: 'linkStory',
             linkedStoryId: block.storyId || ''
           };
@@ -846,19 +884,46 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       return payload;
     });
 
-    console.log("✅ Flow translated. Ready to send to C# backend:", protoPayloads);
-    //
-    // FINAL STEP: Make the actual API call to your C# backend here
-    // this.http.post('YOUR_API_ENDPOINT', { blocks: protoPayloads }).subscribe(...);
-    //
+
+
+    // Prepare flow data
+    const flowData = {
+      canvasBlocks: this.canvasBlocks,
+      connections: this.connections,
+      protoPayloads: protoPayloads
+    };
+
+    try {
+      // Create story using the service
+      const createdStory = this.storyService.createStoryFromFlow(flowData);
+
+      console.log('✅ Story created successfully:', createdStory);
+
+      // Show success message
+      this.snackBar.open(`Story "${createdStory.name}" created successfully!`, 'Close', {
+        duration: 3000,
+        panelClass: ['success-snackbar']
+      });
+
+      // Navigate back to manage stories
+      this.router.navigate(['/manage-stories']);
+
+    } catch (error) {
+      console.error('❌ Error creating story:', error);
+      this.snackBar.open('Error creating story. Please try again.', 'Close', {
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    }
   }
+
 
   zoomIn() { this.zoomLevel = Math.min(this.maxZoom, this.zoomLevel + this.zoomStep); this.updateCanvasTransform(); this.jsPlumbFlowService.repaintAllConnections(); }
   zoomOut() { this.zoomLevel = Math.max(this.minZoom, this.zoomLevel - this.zoomStep); this.updateCanvasTransform(); this.jsPlumbFlowService.repaintAllConnections(); }
   resetZoom() { this.zoomLevel = 1.0; this.panOffsetX = 0; this.panOffsetY = 0; this.updateCanvasTransform(); this.jsPlumbFlowService.repaintAllConnections(); }
-  
+
   scrollCanvas(direction: 'up' | 'down'): void {
-    const scrollAmount = 150; 
+    const scrollAmount = 150;
     this.panOffsetY += (direction === 'down' ? -scrollAmount : scrollAmount);
     this.updateCanvasTransform();
     this.jsPlumbFlowService.repaintAllConnections();
@@ -873,10 +938,10 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => this.initializeQuickReplyConnections(block), 50);
     }
   }
-  
-  closeSidebar() { 
-    this.rightSidebarOpen = false; 
-    this.selectedBlock = null; 
+
+  closeSidebar() {
+    this.rightSidebarOpen = false;
+    this.selectedBlock = null;
     requestAnimationFrame(() => this.jsPlumbFlowService.repaintAllConnections());
     setTimeout(() => this.jsPlumbFlowService.repaintAllConnections(), 320);
   }
@@ -898,7 +963,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.jsPlumbFlowService.setupBlock(noQrId);
     this.jsPlumbFlowService.setupBlock(qrId);
-    
+
     this.jsPlumbFlowService.connectBlocks(parentId, noQrId);
     this.jsPlumbFlowService.connectBlocks(parentId, qrId);
 
@@ -910,34 +975,34 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
         this.jsPlumbFlowService.connectBlocks(qrId, replyId);
       }
     });
-    
+
     this.jsPlumbFlowService.repaintAllConnections();
-    
+
     setTimeout(() => {
       this.cdr.detectChanges();
     }, 100);
   }
-  
+
   onQuickReplyConnection(sourceBlockId: string, targetBlockId: string): void {
     console.log(`Quick reply connection: ${sourceBlockId} -> ${targetBlockId}`);
   }
-  
-  onQuickReplyStartConnection(connectionInfo: {event: MouseEvent, type: string}): void {
+
+  onQuickReplyStartConnection(connectionInfo: { event: MouseEvent, type: string }): void {
     const { event, type } = connectionInfo;
     const parentBlockId = event.target ? (event.target as HTMLElement).closest('.quick-reply-cards-wrapper')?.getAttribute('data-parent-id') : null;
-    
+
     if (parentBlockId) {
       console.log(`Starting connection from quick reply endpoint: ${type} of parent ${parentBlockId}`);
     }
   }
-  
+
   private handleConnectionCreated(info: ConnectionInfo): void {
     const sourceId = info.sourceId.replace('block-', '');
     const targetId = info.targetId.replace('block-', '');
 
     const sourceBlock = this.canvasBlocks.find(b => b.id === sourceId);
     const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
-    
+
     if (sourceBlock && targetBlock) {
       if (!sourceBlock.connections) sourceBlock.connections = { input: [], output: [] };
       if (!targetBlock.connections) targetBlock.connections = { input: [], output: [] };
@@ -958,19 +1023,22 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
   private handleConnectionDeleted(info: ConnectionInfo): void {
     const sourceId = info.sourceId.replace('block-', '');
     const targetId = info.targetId.replace('block-', '');
-    
+
     const sourceBlock = this.canvasBlocks.find(b => b.id === sourceId);
     const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
-    
+
     if (sourceBlock && sourceBlock.connections && sourceBlock.connections.output) {
       sourceBlock.connections.output = sourceBlock.connections.output.filter((id: string) => id !== targetId);
     }
-    
+
     if (targetBlock && targetBlock.connections && targetBlock.connections.input) {
       targetBlock.connections.input = targetBlock.connections.input.filter((id: string) => id !== sourceId);
     }
-    
+
     console.log(`Connection deleted: ${sourceId} -> ${targetId}`);
     this.cdr.detectChanges();
+  }
+  onCancel(): void {
+    this.router.navigate(['/manage-stories']);
   }
 }

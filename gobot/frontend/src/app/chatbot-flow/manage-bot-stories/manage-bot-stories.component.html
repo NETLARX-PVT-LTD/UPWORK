@@ -1,0 +1,400 @@
+<div class="manage-stories-container">
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Left Sidebar -->
+    <div class="left-sidebar">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        class="create-story-btn"
+        (click)="navigateToCreateStory()">
+        Create a story
+      </button>
+
+      <div class="search-container">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Search..." [(ngModel)]="searchTerm" (input)="filterStories()">
+        </mat-form-field>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-item" [class.active]="selectedFilter === 'all'">
+          <button mat-button (click)="setFilter('all')" class="filter-btn">
+            <mat-icon>folder</mat-icon>
+            All ({{ stories.length }})
+          </button>
+        </div>
+        <div class="filter-item" [class.active]="selectedFilter === 'get-started'">
+          <button mat-button (click)="setFilter('get-started')" class="filter-btn">
+            <mat-icon>play_arrow</mat-icon>
+            Get started ({{ getStartedCount }})
+          </button>
+        </div>
+        <div class="filter-item" [class.active]="selectedFilter === 'default'">
+          <button mat-button (click)="setFilter('default')" class="filter-btn">
+            <mat-icon>settings</mat-icon>
+            Default messages ({{ defaultMessagesCount }})
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stories Grid -->
+    <div class="stories-content">
+      <div class="stories-header">
+        <div class="tutorial-badge">
+          <mat-icon class="play-icon">play_circle_filled</mat-icon>
+          <span>Tutorial</span>
+        </div>
+        <div class="stories-count">
+          Showing {{ filteredStories.length }} of {{ stories.length }} story(ies).
+        </div>
+      </div>
+
+      <div class="stories-grid">
+        <div 
+          *ngFor="let story of filteredStories" 
+          class="story-card"
+          [class.keyword-combination]="story.keywords && story.keywords.length > 0"
+          [class.deactivated]="story.isDeactivated">
+          
+          <div class="story-header">
+            <h3 class="story-title">{{ story.name }}</h3>
+            <div class="story-date">{{ story.createdDate }}</div>
+          </div>
+
+          <div class="story-content" *ngIf="story.keywords && story.keywords.length > 0">
+            <div class="keywords-container">
+              <mat-chip-listbox class="keywords-list">
+                <mat-chip 
+                  *ngFor="let keyword of story.keywords" 
+                  class="keyword-chip">
+                  {{ keyword }}
+                </mat-chip>
+              </mat-chip-listbox>
+            </div>
+          </div>
+
+          <div class="story-actions">
+            <button mat-icon-button class="edit-btn" (click)="editStory(story)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button class="delete-btn" (click)="deleteStory(story)">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button mat-icon-button [matMenuTriggerFor]="customStoryMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+
+            <!-- Custom Menu Card -->
+            <mat-menu #customStoryMenu="matMenu" class="custom-story-menu">
+    <div class="custom-menu-card">
+      <button mat-menu-item *ngIf="story.isDeactivated" (click)="activateStory(story)">
+        <mat-icon>play_circle</mat-icon>
+        Activate Story
+      </button>
+
+      <ng-container *ngIf="!story.isDeactivated">
+        <!-- <button mat-menu-item (click)="editStory(story)">
+          <mat-icon>edit</mat-icon>
+          Edit Story
+        </button>
+        <button mat-menu-item (click)="duplicateStory(story)">
+          <mat-icon>content_copy</mat-icon>
+          Duplicate Story
+        </button>
+        <button mat-menu-item (click)="exportStory(story)">
+          <mat-icon>cloud_download</mat-icon>
+          Export Story
+        </button> -->
+        <button mat-menu-item (click)="copyPayload(story)">
+          <mat-icon>content_copy</mat-icon>
+          Copy Payload
+        </button>
+        <button mat-menu-item (click)="cloneStory(story)">
+          <mat-icon>file_copy</mat-icon>
+          Clone Story
+        </button>
+        <button mat-menu-item (click)="deactivateStory(story)">
+          <mat-icon>pause_circle</mat-icon>
+          Deactivate Story
+        </button>
+        
+        <button mat-menu-item *ngIf="!story.isInConnedResponses" (click)="addToConnedResponses(story)">
+          <mat-icon>add_circle</mat-icon>
+          Add story to Conned Responses
+        </button>
+        <button mat-menu-item *ngIf="story.isInConnedResponses" (click)="removeFromConnedResponses(story)">
+          <mat-icon>remove_circle</mat-icon>
+          Remove story from Conned Responses
+        </button>
+        
+        <button mat-menu-item *ngIf="story.category !== 'get-started'" (click)="setAsGetStarted(story)">
+          <mat-icon>play_arrow</mat-icon>
+          Set as Get Started
+        </button>
+        <button mat-menu-item *ngIf="story.category === 'get-started'" (click)="removeFromGetStarted(story)">
+          <mat-icon>remove_circle</mat-icon>
+          Remove From Get Started
+        </button>
+        
+        <button mat-menu-item *ngIf="story.category !== 'default'" (click)="setAsDefaultMessage(story)">
+          <mat-icon>settings</mat-icon>
+          Set as Default Message
+        </button>
+        <button mat-menu-item *ngIf="story.category === 'default'" (click)="removeFromDefaultMessage(story)">
+          <mat-icon>remove_circle</mat-icon>
+          Remove From Default Message
+        </button>
+      </ng-container>
+    </div>
+  </mat-menu>
+
+            <!-- Original Menu for Duplicate and Export -->
+            <mat-menu #storyMenu="matMenu">
+              <button mat-menu-item (click)="duplicateStory(story)">
+                <mat-icon>content_copy</mat-icon>
+                Duplicate
+              </button>
+              <button mat-menu-item (click)="exportStory(story)">
+                <mat-icon>download</mat-icon>
+                Export
+              </button>
+            </mat-menu>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="filteredStories.length === 0" class="empty-state">
+          <mat-icon class="empty-icon">story</mat-icon>
+          <h3>No stories found</h3>
+          <p>Create your first story to get started</p>
+          <button mat-raised-button color="primary" (click)="navigateToCreateStory()">
+            Create Story
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add to Conned Responses Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showAddToConnedModal" (click)="closeAddToConnedModal()">
+    <div class="confirmation-modal" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeAddToConnedModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+      
+      <div class="modal-content">
+        <div class="warning-icon">
+          <mat-icon>warning</mat-icon>
+        </div>
+        <h2>Are you sure?</h2>
+        <p class="modal-subtitle">This story will be added for live chat. Agents will be able to send it directly without typing a response.</p>
+        
+        <div class="modal-actions">
+          <button mat-raised-button color="primary" (click)="confirmAddToConnedResponses()">
+            Yes
+          </button>
+          <button mat-raised-button (click)="closeAddToConnedModal()">
+            No
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remove from Conned Responses Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showRemoveFromConnedModal" (click)="closeRemoveFromConnedModal()">
+    <div class="confirmation-modal" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeRemoveFromConnedModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+      
+      <div class="modal-content">
+        <div class="warning-icon">
+          <mat-icon>warning</mat-icon>
+        </div>
+        <h2>Are you sure?</h2>
+        <p class="modal-subtitle">Are you sure you want to remove this story from fix reply?</p>
+        
+        <div class="modal-actions">
+          <button mat-raised-button color="primary" (click)="confirmRemoveFromConnedResponses()">
+            Yes
+          </button>
+          <button mat-raised-button (click)="closeRemoveFromConnedModal()">
+            No
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deactivate Story Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showDeactivateModal" (click)="closeDeactivateModal()">
+    <div class="confirmation-modal" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeDeactivateModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+      
+      <div class="modal-content">
+        <div class="warning-icon">
+          <mat-icon>warning</mat-icon>
+        </div>
+        <h2>Are you sure?</h2>
+        <p class="modal-subtitle">If you deactivate this story, it will no longer work in your chatbot. Other chatbot flows that include or depend on this story might also stop working. Are you sure you still want to deactivate the story?</p>
+        
+        <div class="modal-actions">
+          <button mat-raised-button color="primary" (click)="confirmDeactivateStory()">
+            Yes
+          </button>
+          <button mat-raised-button (click)="closeDeactivateModal()">
+            No
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activate Story Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showActivateModal" (click)="closeActivateModal()">
+    <div class="confirmation-modal" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeActivateModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+      
+      <div class="modal-content">
+        <div class="warning-icon">
+          <mat-icon>warning</mat-icon>
+        </div>
+        <h2>Are you sure?</h2>
+        <p class="modal-subtitle">If you activate this story, it will be accessible to your user. Make sure you haven't created another story with the same search criteria so that it doesn't collide with other stories you might have created.</p>
+        
+        <div class="modal-actions">
+          <button mat-raised-button color="primary" (click)="confirmActivateStory()">
+            Yes
+          </button>
+          <button mat-raised-button (click)="closeActivateModal()">
+            No
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Set as Get Started Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showSetAsStartedModal" (click)="closeSetAsStartedModal()">
+    <div class="confirmation-modal" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeSetAsStartedModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+      
+      <div class="modal-content">
+        <div class="warning-icon">
+          <mat-icon>warning</mat-icon>
+        </div>
+        <h2>Are you sure you want to set this story as Get Started?</h2>
+        
+        <div class="modal-actions">
+          <button mat-raised-button color="primary" (click)="confirmSetAsGetStarted()">
+            Yes
+          </button>
+          <button mat-raised-button (click)="closeSetAsStartedModal()">
+            No
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remove From Get Started Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showRemoveFromStartedModal" (click)="closeRemoveFromStartedModal()">
+    <div class="confirmation-modal" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeRemoveFromStartedModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+      
+      <div class="modal-content">
+        <div class="warning-icon">
+          <mat-icon>warning</mat-icon>
+        </div>
+        <h2>Removing a story as Get Started!</h2>
+        <p class="modal-subtitle">Are you sure you want to remove this story as Get Started?</p>
+        
+        <div class="modal-actions">
+          <button mat-raised-button color="primary" (click)="confirmRemoveFromGetStarted()">
+            Yes
+          </button>
+          <button mat-raised-button (click)="closeRemoveFromStartedModal()">
+            No
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Set as Default Message Modal -->
+  <div class="modal-overlay" *ngIf="showSetAsDefaultModal" (click)="closeSetAsDefaultModal()">
+    <div class="confirmation-modal" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeSetAsDefaultModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+      
+      <div class="modal-content">
+        <div class="warning-icon">
+          <mat-icon>warning</mat-icon>
+        </div>
+        <h2>Are you sure you want to set this story as the Default Message?</h2>
+        <p class="modal-subtitle">This will be sent when the bot is unable to reply to a query <mat-icon class="info-icon">info</mat-icon></p>
+        
+        <div class="dropdown-container">
+          <mat-form-field appearance="outline" class="message-type-select">
+            <mat-select [(value)]="selectedMessageType">
+              <mat-option value="All">All</mat-option>
+              <mat-option value="Text">Text</mat-option>
+              <mat-option value="Video">Video</mat-option>
+              <mat-option value="Image">Image</mat-option>
+              <mat-option value="File">File</mat-option>
+              <mat-option value="Audio">Audio</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        
+        <div class="modal-actions">
+          <button mat-raised-button color="primary" (click)="confirmSetAsDefaultMessage()">
+            Yes
+          </button>
+          <button mat-raised-button (click)="closeSetAsDefaultModal()">
+            No
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remove From Default Message Modal -->
+  <div class="modal-overlay" *ngIf="showRemoveFromDefaultModal" (click)="closeRemoveFromDefaultModal()">
+    <div class="confirmation-modal" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeRemoveFromDefaultModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+      
+      <div class="modal-content">
+        <div class="warning-icon">
+          <mat-icon>warning</mat-icon>
+        </div>
+        <h2>Removing a story as Default Message!</h2>
+        <p class="modal-subtitle">Are you sure you want to remove this story as Default Message?</p>
+        
+        <div class="modal-actions">
+          <button mat-raised-button color="primary" (click)="confirmRemoveFromDefaultMessage()">
+            Yes
+          </button>
+          <button mat-raised-button (click)="closeRemoveFromDefaultModal()">
+            No
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
