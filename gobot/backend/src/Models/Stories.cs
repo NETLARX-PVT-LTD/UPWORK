@@ -5,8 +5,6 @@ namespace BotsifySchemaTest.Models
 {
     public class Stories
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
         [Required]

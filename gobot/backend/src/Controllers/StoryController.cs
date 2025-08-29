@@ -101,6 +101,33 @@ namespace BotsifySchemaTest.Controllers
                         nextId = data.ToComponentId;
                         _logger.LogDebug("Fetched LinkStory ID: {Id}", currentId);
                     }
+                    else if(currentType == ComponentTypes.JsonAPI)
+                    {
+                        var data = await _context.JsonAPI.FirstOrDefaultAsync(u => u.ID == currentId);
+                        if (data == null) break;
+                        result.Add(data);
+                        nextType = data.ToComponentType;
+                        nextId = data.ToComponentId;
+                        _logger.LogDebug("Fetched LinkStory ID: {Id}", currentId);
+                    } 
+                    else if(currentType == ComponentTypes.ConversationalForm)
+                    {
+                        var data = await _context.ConversationalForm.FirstOrDefaultAsync(u => u.ID == currentId);
+                        if (data == null) break;
+                        result.Add(data);
+                        nextType = data.ToComponentType;
+                        nextId = data.ToComponentId;
+                        _logger.LogDebug("Fetched LinkStory ID: {Id}", currentId);
+                    } 
+                    else if(currentType == ComponentTypes.TextResponse)
+                    {
+                        var data = await _context.TextResponse.FirstOrDefaultAsync(u => u.ID == currentId);
+                        if (data == null) break;
+                        result.Add(data);
+                        nextType = data.ToComponentType;
+                        nextId = data.ToComponentId;
+                        _logger.LogDebug("Fetched LinkStory ID: {Id}", currentId);
+                    }
                     if (string.IsNullOrEmpty(nextType) || nextId == null)
                         break;
 
