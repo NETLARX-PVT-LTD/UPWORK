@@ -6,13 +6,13 @@
 
 namespace Netlarx.Products.Gobot
 {
-    using BotsifySchemaTest.Db;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Netlarx.Products.Gobot.Db;
     using Netlarx.Products.Gobot.Interface;
     using Netlarx.Products.Gobot.Services;
 
