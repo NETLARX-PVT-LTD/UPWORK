@@ -1,3 +1,15 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Netlarx.Products.Gobot.Controllers;
+using Netlarx.Products.Gobot.Db;
+using Netlarx.Products.Gobot.Models;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xunit;
+
 namespace gobotUnitTest
 {
     public class UnitTest1
