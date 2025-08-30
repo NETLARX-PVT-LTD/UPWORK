@@ -199,7 +199,7 @@ export class AppComponent implements OnInit, OnDestroy {
         this.router.navigate(['/page-messages/create']);
         break;
       case 'story':
-        this.router.navigate(['/create-story']);
+        this.router.navigate(['/manage-stories']);
         break;
       case 'ai-assistants':
         this.router.navigate(['/assistants']);
@@ -215,6 +215,9 @@ export class AppComponent implements OnInit, OnDestroy {
         break;
         case 'analytics':
         this.router.navigate(['/chatbot-analytics']);
+        break;
+        case 'users':
+        this.router.navigate(['/users']);
         break;
       default:
         this.router.navigate(['/create-story']);

@@ -200,6 +200,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
   private resizeObservers: Map<string, ResizeObserver> = new Map();
   private layoutDebounceTimers: Map<string, any> = new Map();
   // snackBar: any;
+  public isEditMode = false;
 
   constructor(
     private jsPlumbFlowService: JsPlumbFlowService,
@@ -229,29 +230,112 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     this.route.queryParams.subscribe(params => {
       if (params['storyId']) {
         this.loadExistingStory(params['storyId']);
+         this.isEditMode = true;
       }
     });
   }
 
-  private loadExistingStory(storyId: string): void {
-    const story = this.storyService.getStoryById(storyId);
-    if (story && story.blocks) {
-      // Load the blocks into your canvas
-      this.canvasBlocks = story.blocks;
+ private loadExistingStory(storyId: string): void {
+  const story = this.storyService.getStoryById(storyId);
+  if (story && story.blocks) {
+    // Clear existing blocks first
+    this.canvasBlocks = [];
+    
+    // Load the blocks into your canvas
+    this.canvasBlocks = [...story.blocks];
 
-      // Re-setup the canvas
+    // Re-setup the canvas and restore connections
+    setTimeout(() => {
+      // First, setup all blocks
+      this.canvasBlocks.forEach(block => {
+        this.updateBlockDimensions(block);
+        this.jsPlumbFlowService.setupBlock(`block-${block.id}`);
+        this.attachResizeObserver(block);
+      });
+
+      // Then restore connections after a short delay
       setTimeout(() => {
-        this.canvasBlocks.forEach(block => {
-          this.updateBlockDimensions(block);
-          this.jsPlumbFlowService.setupBlock(`block-${block.id}`);
-          this.attachResizeObserver(block);
-        });
-      }, 80);
-    }
-
-    // --- CALL THE UPDATED TEST FUNCTION ---
-    this.testProtobufLoopback();
+        this.restoreConnections(story.connections || []);
+      }, 150);
+      
+    }, 100);
   }
+
+  // Call the test function
+  this.testProtobufLoopback();
+}
+
+private restoreConnections(connections: any[]): void {
+  if (!connections || connections.length === 0) {
+    console.log('No connections to restore');
+    return;
+  }
+
+  console.log('Restoring connections:', connections);
+
+  // Batch the connection restoration for better performance
+  this.jsPlumbFlowService.batch(() => {
+    connections.forEach(conn => {
+      try {
+        // Ensure the source and target elements exist
+        const sourceElement = document.getElementById(conn.sourceId);
+        const targetElement = document.getElementById(conn.targetId);
+        
+        if (sourceElement && targetElement) {
+          this.jsPlumbFlowService.connectBlocks(conn.sourceId, conn.targetId);
+          console.log(`Restored connection: ${conn.sourceId} -> ${conn.targetId}`);
+        } else {
+          console.warn(`Cannot restore connection ${conn.sourceId} -> ${conn.targetId}: Elements not found`);
+        }
+      } catch (error) {
+        console.error(`Error restoring connection ${conn.sourceId} -> ${conn.targetId}:`, error);
+      }
+    });
+
+    // Repaint all connections after restoration
+    this.jsPlumbFlowService.repaintAllConnections();
+  });
+
+  // Update block connections data
+  this.updateBlockConnectionsFromJsPlumb();
+}
+
+private updateBlockConnectionsFromJsPlumb(): void {
+  // Update the block connection data to match the restored JSPlumb connections
+  const jsPlumbConnections = this.jsPlumbFlowService.getConnections();
+  
+  // Reset all block connections first
+  this.canvasBlocks.forEach(block => {
+    if (!block.connections) {
+      block.connections = { input: [], output: [] };
+    } else {
+      block.connections.input = [];
+      block.connections.output = [];
+    }
+  });
+
+  // Populate connections from JSPlumb
+  jsPlumbConnections.forEach(conn => {
+    const sourceId = conn.sourceId.replace('block-', '');
+    const targetId = conn.targetId.replace('block-', '');
+    
+    const sourceBlock = this.canvasBlocks.find(b => b.id === sourceId);
+    const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
+    
+    if (sourceBlock && targetBlock) {
+      if (!sourceBlock.connections) sourceBlock.connections = { input: [], output: [] };
+      if (!targetBlock.connections) targetBlock.connections = { input: [], output: [] };
+      
+      if (!sourceBlock.connections.output!.includes(targetId)) {
+        sourceBlock.connections.output!.push(targetId);
+      }
+      
+      if (!targetBlock.connections.input!.includes(sourceId)) {
+        targetBlock.connections.input!.push(sourceId);
+      }
+    }
+  });
+}
 
 
   testProtobufLoopback() {
@@ -780,15 +864,23 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // ✅ --- STEP 4: TRANSLATE AND SAVE THE ENTIRE FLOW ---
-  saveFlow() {
-    // Validation
-    if (this.canvasBlocks.length === 0) {
-      this.snackBar.open('Please add at least one block to your story.', 'Close', {
-        duration: 3000
-      });
-      return;
-    }
-    console.log("--- Preparing to save flow. Translating all blocks to Protobuf format... ---");
+ saveFlow() {
+  // Validation
+  if (this.canvasBlocks.length === 0) {
+    this.snackBar.open('Please add at least one block to your story.', 'Close', {
+      duration: 3000
+    });
+    return;
+  }
+
+  console.log("--- Preparing to save flow. Translating all blocks to Protobuf format... ---");
+
+  // GET CURRENT CONNECTIONS FROM JSPLUMB
+  const currentConnections = this.jsPlumbFlowService.getConnections().map(conn => ({
+    sourceId: conn.sourceId,
+    targetId: conn.targetId,
+    // Add any other connection properties you need
+  }));
 
     const protoPayloads = this.canvasBlocks.map(block => {
       let payload: any;
@@ -886,36 +978,36 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
 
-    // Prepare flow data
-    const flowData = {
-      canvasBlocks: this.canvasBlocks,
-      connections: this.connections,
-      protoPayloads: protoPayloads
-    };
+    // Prepare flow data WITH CONNECTIONS
+  const flowData = {
+    canvasBlocks: this.canvasBlocks,
+    connections: currentConnections, // Include current connections
+    protoPayloads: protoPayloads
+  };
 
-    try {
-      // Create story using the service
-      const createdStory = this.storyService.createStoryFromFlow(flowData);
+  try {
+    // Create story using the service
+    const createdStory = this.storyService.createStoryFromFlow(flowData);
 
-      console.log('✅ Story created successfully:', createdStory);
+    console.log('✅ Story created successfully:', createdStory);
 
-      // Show success message
-      this.snackBar.open(`Story "${createdStory.name}" created successfully!`, 'Close', {
-        duration: 3000,
-        panelClass: ['success-snackbar']
-      });
+    // Show success message
+    this.snackBar.open(`Story "${createdStory.name}" created successfully!`, 'Close', {
+      duration: 3000,
+      panelClass: ['success-snackbar']
+    });
 
-      // Navigate back to manage stories
-      this.router.navigate(['/manage-stories']);
+    // Navigate back to manage stories
+    this.router.navigate(['/manage-stories']);
 
-    } catch (error) {
-      console.error('❌ Error creating story:', error);
-      this.snackBar.open('Error creating story. Please try again.', 'Close', {
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
-    }
+  } catch (error) {
+    console.error('❌ Error creating story:', error);
+    this.snackBar.open('Error creating story. Please try again.', 'Close', {
+      duration: 5000,
+      panelClass: ['error-snackbar']
+    });
   }
+}
 
 
   zoomIn() { this.zoomLevel = Math.min(this.maxZoom, this.zoomLevel + this.zoomStep); this.updateCanvasTransform(); this.jsPlumbFlowService.repaintAllConnections(); }

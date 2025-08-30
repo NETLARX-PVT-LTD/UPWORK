@@ -18,7 +18,7 @@ export interface Story {
   createdDate: string;
   keywords?: string[];
   blocks?: any[];
-  
+  connections?: any[];
   category?: 'get-started' | 'default' | 'normal';
   isInConnedResponses?: boolean; // New property to track if story is in conned responses
   isDeactivated?: boolean; // New property to track if story is deactivated
