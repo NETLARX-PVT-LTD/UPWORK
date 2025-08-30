@@ -1,57 +1,53 @@
-using BotsifySchemaTest.Db;
-using BotsifySchemaTest.Hubs;
-using BotsifySchemaTest.Services;
-using GoBootBackend.Interface;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using System;
+using System.Threading.Tasks;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-builder.Services.AddDbContext<BotDbContext>(options =>
-    // Uncomment this if you want SQL Server
-    options.UseSqlServer(builder.Configuration.GetConnectionString("BootsifyConnection"))
-
-    // OR Uncomment this if you want InMemory
-    // options.UseInMemoryDatabase("BotDb");
-);
-
-builder.Services.AddScoped<IBotDbContext>(provider => provider.GetRequiredService<BotDbContext>());
-
-builder.Services.AddScoped<StorySessionManager>(p =>
+namespace Netlarx.Products.Gobot
 {
-    return new StorySessionManager();
-});
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAngularApp", policy =>
+    public class Program
     {
-        policy.WithOrigins("http://localhost:4200") 
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-//builder.Services.AddSignalR();
+        public static async Task Main(string[] args)
+        {
+            try
+            {
+                var host = CreateHostBuilder(args).Build();
+                await host.RunAsync();
+            }
+            catch (Exception ex)
+            {
+                Environment.Exit(1);
+            }
+        }
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+                .UseContentRoot(AppContext.BaseDirectory)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    // Additional configuration can be set up here if needed
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    var endpoint = "";
+                    webBuilder.UseUrls(endpoint);
 
-var app = builder.Build();
+                    if (OperatingSystem.IsWindows())
+                    {
+                        webBuilder.ConfigureKestrel(options =>
+                        {
+                            options.ConfigureHttpsDefaults(httpsOptions =>
+                            {
+                                httpsOptions.AllowAnyClientCertificate();
+                            });
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+                            options.Limits.MaxRequestBodySize = null;
+                        });
+                    }
+
+                    webBuilder.UseStartup<Startup>();
+                });
+        }
+    }
 }
-
-app.UseHttpsRedirection();
-app.UseCors("AllowAngularApp");
-app.UseAuthorization();
-
-app.MapControllers();
-//app.MapHub<StoryHub>("/storyHub");
-app.Run();
