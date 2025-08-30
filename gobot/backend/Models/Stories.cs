@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace BotsifySchemaTest.Models
 {
@@ -11,7 +12,5 @@ namespace BotsifySchemaTest.Models
 
         public Guid RootBlockConnectionId { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-
-
     }
 }
