@@ -22,16 +22,16 @@ namespace BotsifySchemaTest.Services
         public Stories Story { get; set; } = new();
     }
 
-    public static class StorySessionManager
+    public class StorySessionManager
     {
-        private static ConcurrentDictionary<int, StorySessionData> _stories = new();
+        private ConcurrentDictionary<int, StorySessionData> _stories = new();
 
-        public static StorySessionData GetStory(int storyId)
+        public StorySessionData GetStory(int storyId)
         {
             return _stories.GetOrAdd(storyId, new StorySessionData());
         }
 
-        public static void ClearStory(int storyId)
+        public void ClearStory(int storyId)
         {
             _stories.TryRemove(storyId, out _);
         }

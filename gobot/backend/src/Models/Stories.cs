@@ -13,5 +13,7 @@ namespace BotsifySchemaTest.Models
         public Guid RootBlockConnectionId { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
+        // Navigation property for related TypingDelays
+        public ICollection<TypingDelay> TypingDelays { get; set; } = new List<TypingDelay>();
     }
 }

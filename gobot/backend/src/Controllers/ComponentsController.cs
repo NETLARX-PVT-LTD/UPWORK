@@ -3,6 +3,7 @@ using BotsifySchemaTest.Hubs;
 using BotsifySchemaTest.Models;
 using BotsifySchemaTest.Services;
 using GoBootBackend.Models;
+using GoBootBackend.Interface;
 using Microsoft.AspNetCore.Mvc;
 //using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -18,14 +19,17 @@ namespace BotsifySchemaTest.Controllers
     [Route("api/[controller]")]
     public class ComponentsController : ControllerBase
     {
-        private readonly BotDbContext _db;
+        private readonly IBotDbContext _db;
         //private readonly IHubContext<StoryHub> _hubContext;
         private readonly ILogger<ComponentsController> _logger;
 
-        public ComponentsController(BotDbContext db, ILogger<ComponentsController> logger)
+        private readonly StorySessionManager manager;
+
+        public ComponentsController(IBotDbContext db, ILogger<ComponentsController> logger, StorySessionManager manager)
         {
             _db = db;
             _logger = logger;
+            this.manager = manager;
         }
 
         [HttpPost("AddStory")]
@@ -40,7 +44,7 @@ namespace BotsifySchemaTest.Controllers
                 }
 
                 model.CreatedDate = DateTime.UtcNow;
-                _db.Stories.Add(model);
+                _db.addStory(model);
                 await _db.SaveChangesAsync();
 
                 _logger.LogInformation("Story created with ID: {StoryId}", model.ID);
@@ -64,7 +68,7 @@ namespace BotsifySchemaTest.Controllers
                 }
 
                 _logger.LogWarning("Invalid component model received for StoryId: {StoryId}", storyId);
-                var session = StorySessionManager.GetStory(storyId);
+                var session = manager.GetStory(storyId);
                 var componentId = Guid.NewGuid();
 
                 if (session.Connections.Count == 0)
@@ -135,21 +139,21 @@ namespace BotsifySchemaTest.Controllers
         public IActionResult AddUserInputPhrase(int storyId, [FromBody] UserInputPhrase model)
         {
             return AddComponent(storyId, model, ComponentTypes.UserInputPhrase,
-                m => StorySessionManager.GetStory(storyId).Phrases.Add(m));
+                m => manager.GetStory(storyId).Phrases.Add(m));
         }
 
         [HttpPost("AddUserInputKeyword")]
         public IActionResult AddUserInputKeyword(int storyId, [FromBody] UserInputKeyword model)
         {
             return AddComponent(storyId, model, ComponentTypes.UserInputKeyword,
-                 g => StorySessionManager.GetStory(storyId).Keywords.Add(g));
+                 g => manager.GetStory(storyId).Keywords.Add(g));
         }
 
         [HttpPost("AddUserInputAnything")]
         public IActionResult AddUserInputAnything(int storyId, [FromBody] UserInputTypeAnything model)
         {
             return AddComponent(storyId, model, ComponentTypes.UserInputTypeAnything,
-                  g => StorySessionManager.GetStory(storyId).Anythings.Add(g));
+                  g => manager.GetStory(storyId).Anythings.Add(g));
         }
 
         [HttpGet("AllStories")]
@@ -169,46 +173,54 @@ namespace BotsifySchemaTest.Controllers
         }
 
         [HttpPost("AddTypingDelay")]
-        public async Task<IActionResult> AddTypingDelay(int storyId, [FromBody] TypingDelay model)
+        public IActionResult AddTypingDelay(int storyId, [FromBody] TypingDelay model)
         {
             return AddComponent(storyId, model, ComponentTypes.TypingDelay,
-                 g => StorySessionManager.GetStory(storyId).TypingDelays.Add(g));
+                 g => manager.GetStory(storyId).TypingDelays.Add(g));
         }
 
 
         [HttpPost("AddLinkStory")]
-        public async Task<IActionResult> AddLinkStory(int storyId, [FromBody] LinkStory model)
+        public IActionResult AddLinkStory(int storyId, [FromBody] LinkStory model)
         {
             return AddComponent(storyId, model, ComponentTypes.LinkStory,
-                 g => StorySessionManager.GetStory(storyId).LinkStories.Add(g));
+                 g => manager.GetStory(storyId).LinkStories.Add(g));
         }
 
         [HttpPost("AddJsonApi")]
-        public async Task<IActionResult> AddJsonApi(int storyId, [FromBody] JsonAPI model)
+        public IActionResult AddJsonApi(int storyId, [FromBody] JsonAPI model)
         {
             return AddComponent(storyId, model, ComponentTypes.JsonAPI,
-                 g => StorySessionManager.GetStory(storyId).JsonAPIs.Add(g));
+                 g => manager.GetStory(storyId).JsonAPIs.Add(g));
         }
 
         [HttpPost("AddConversationalform")]
-        public async Task<IActionResult> AddConversationalForm(int storyId, [FromBody] ConversationalForm model)
+        public IActionResult AddConversationalForm(int storyId, [FromBody] ConversationalForm model)
         {
             return AddComponent(storyId, model, ComponentTypes.ConversationalForm,
-                 g => StorySessionManager.GetStory(storyId).ConversationalForms.Add(g));
+                 g => manager.GetStory(storyId).ConversationalForms.Add(g));
         }
 
-        [HttpGet("GetTypingDelay")]
+        [HttpPost("AddTextReponse")]
+        public IActionResult AddTextResponse(int storyId, [FromBody] TextResponse model)
+        {
+            return AddComponent(storyId, model, ComponentTypes.TextResponse,
+                 g => manager.GetStory(storyId).TextResponses.Add(g));
+        }
+
+        [HttpGet("GetTypingDelay/{storyId}")]
         public async Task<IActionResult> GetTypingDelay(int storyId)
         {
-            var story = await _db.TypingDelay.FirstOrDefaultAsync(s => s.StoryId == storyId);
+            var typingDelays = await _db.allTypingDelay(storyId);
 
-            if (story == null)
+            if (typingDelays == null || typingDelays.Count == 0)
             {
-                return NotFound($"No typing delay found for StoryId {storyId}");
+                return NotFound($"No typing delays found for StoryId {storyId}");
             }
 
-            return Ok(story);
+            return Ok(typingDelays);
         }
+
 
         [HttpGet("GetLinkStory")]
         public async Task<IActionResult> GetLinkStory(int storyId)
@@ -299,6 +311,186 @@ namespace BotsifySchemaTest.Controllers
             }
 
             return Ok(UserInputPhrases);
+        }
+
+        [HttpPost("UpdateStoryToDB")]
+        public async Task<IActionResult> UpdateStoryToDB([FromBody] StorySessionData session)
+        {
+            try
+            {
+                if (session == null)
+                {
+                    _logger.LogWarning("Invalid session data received for update");
+                    return BadRequest("Invalid data");
+                }
+
+                // ✅ Update Phrases
+                if (session.Phrases != null && session.Phrases.Any())
+                {
+                    foreach (var phrase in session.Phrases)
+                    {
+                        var existing = await _db.UserInputPhrase
+                            .FirstOrDefaultAsync(p => p.ID == phrase.ID);
+
+                        if (existing != null)
+                            _db.EntryAll(phrase,existing);
+                        else
+                            _db.UserInputPhrase.Add(phrase); // fallback if not found
+                    }
+                }
+
+                // ✅ Update Keywords
+                if (session.Keywords != null && session.Keywords.Any())
+                {
+                    foreach (var keyword in session.Keywords)
+                    {
+                        var existing = await _db.UserInputKeyword
+                            .FirstOrDefaultAsync(k => k.ID == keyword.ID);
+
+                        if (existing != null)
+                            _db.EntryAll(keyword,existing);
+                        else
+                            _db.UserInputKeyword.Add(keyword);
+                    }
+                }
+
+                // ✅ Update Anythings
+                if (session.Anythings != null && session.Anythings.Any())
+                {
+                    foreach (var any in session.Anythings)
+                    {
+                        var existing = await _db.UserInputTypeAnything
+                            .FirstOrDefaultAsync(a => a.ID == any.ID);
+
+                        if (existing != null)
+                            _db.EntryAll(any,existing);
+                        else
+                            _db.UserInputTypeAnything.Add(any);
+                    }
+                }
+
+                // ✅ Update Connections & Story
+                if (session.Connections != null && session.Connections.Any())
+                {
+                    foreach (var conn in session.Connections)
+                    {
+                        var existing = await _db.Connection
+                            .FirstOrDefaultAsync(c => c.ID == conn.ID);
+
+                        if (existing != null)
+                            _db.EntryAll(conn,existing);
+                        else
+                            _db.Connection.Add(conn);
+                    }
+
+                    var firstConnection = session.Connections.FirstOrDefault();
+                    if (firstConnection != null)
+                    {
+                        var story = await _db.Stories.FirstOrDefaultAsync(s => s.ID == firstConnection.StoryId);
+                        if (story != null)
+                        {
+                            story.RootBlockConnectionId = firstConnection.ID;
+                            _db.Stories.Update(story);
+                        }
+                        else if (session.Story != null)
+                        {
+                            session.Story.RootBlockConnectionId = firstConnection.ID;
+                            _db.Stories.Add(session.Story);
+                        }
+                    }
+                }
+
+                // ✅ Update TextResponses
+                if (session.TextResponses != null && session.TextResponses.Any())
+                {
+                    foreach (var tr in session.TextResponses)
+                    {
+                        var existing = await _db.TextResponse
+                            .FirstOrDefaultAsync(t => t.ID == tr.ID);
+
+                        if (existing != null)
+                            _db.EntryAll(tr, existing);
+                        else
+                            _db.TextResponse.Add(tr);
+                    }
+                }
+
+                // ✅ Update ConversationalForms
+                if (session.ConversationalForms != null && session.ConversationalForms.Any())
+                {
+                    foreach (var cf in session.ConversationalForms)
+                    {
+                        var existing = await _db.ConversationalForm
+                            .FirstOrDefaultAsync(c => c.ID == cf.ID);
+
+                        if (existing != null)
+                            _db.EntryAll(cf,existing);
+                        else
+                            _db.ConversationalForm.Add(cf);
+                    }
+                }
+
+                // ✅ Update TypingDelays
+                if (session.TypingDelays != null && session.TypingDelays.Any())
+                {
+                    foreach (var td in session.TypingDelays)
+                    {
+                        var existing = await _db.TypingDelay
+                            .FirstOrDefaultAsync(t => t.ID == td.ID);
+
+                        if (existing != null)
+                            _db.EntryAll(td, existing);
+                        else
+                            _db.TypingDelay.Add(td);
+                    }
+                }
+
+                // ✅ Update LinkStories
+                if (session.LinkStories != null && session.LinkStories.Any())
+                {
+                    foreach (var ls in session.LinkStories)
+                    {
+                        var existing = await _db.LinkStory
+                            .FirstOrDefaultAsync(l => l.ID == ls.ID);
+
+                        if (existing != null)
+                            _db.EntryAll(ls,existing);
+                        else
+                            _db.LinkStory.Add(ls);
+                    }
+                }
+
+                // ✅ Update JsonAPIs
+                if (session.JsonAPIs != null && session.JsonAPIs.Any())
+                {
+                    foreach (var api in session.JsonAPIs)
+                    {
+                        var existing = await _db.JsonAPI
+                            .FirstOrDefaultAsync(j => j.ID == api.ID);
+
+                        if (existing != null)
+                            _db.EntryAll(api,existing);
+                        else
+                            _db.JsonAPI.Add(api);
+                    }
+                }
+
+                await _db.SaveChangesAsync();
+                _logger.LogInformation("Session updated successfully in DB");
+
+                return Ok(new { message = "Story updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                var innerMessage = ex.InnerException?.Message ?? "No inner exception";
+                _logger.LogError(ex, "Error occurred while updating story session. Inner: {Inner}", innerMessage);
+
+                return StatusCode(500, new
+                {
+                    error = ex.Message,
+                    inner = innerMessage
+                });
+            }
         }
 
         [HttpPost("SaveStoryToDb")]

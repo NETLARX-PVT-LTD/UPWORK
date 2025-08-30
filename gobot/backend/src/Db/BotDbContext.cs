@@ -1,10 +1,11 @@
 ﻿using BotsifySchemaTest.Models;
 using GoBootBackend.Models;
 using Microsoft.EntityFrameworkCore;
+using GoBootBackend.Interface;
 
 namespace BotsifySchemaTest.Db
 {
-    public class BotDbContext : DbContext
+    public class BotDbContext : DbContext, IBotDbContext
     {
         public BotDbContext(DbContextOptions<BotDbContext> options) : base(options) { }
 
@@ -22,6 +23,61 @@ namespace BotsifySchemaTest.Db
         public DbSet<TextResponse> TextResponse { get; set; }
 
         public DbSet<LinkStory> LinkStory { get; set; }
+
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        public int SaveChanges()
+        {
+            return base.SaveChanges();
+        }
+
+        public void addStory(Stories model)
+        {
+            this.Stories.Add(model);
+        }
+
+        public void EntryAll<T>(T entity, T existing) where T : class
+        {
+            if (entity == null || existing == null)
+                throw new ArgumentNullException("Entity or Existing entity is null.");
+
+            var entry = this.Entry(existing);
+            entry.CurrentValues.SetValues(entity);
+        }
+
+        public async Task<List<TypingDelay>> allTypingDelay(int storyId)
+        {
+            return await this.TypingDelay
+                .Where(td => td.StoryId == storyId)   // ✅ filter by FK
+                .ToListAsync();
+        }
+        public void addConnection(Connection connection)
+        {
+            this.Connection.Add(connection);
+        }
+
+        public void addUserInputPhrase(UserInputPhrase phrase)
+        {
+            this.UserInputPhrase.AddRange(phrase);
+        }
+
+        public void addUserInputKeyword(UserInputKeyword keyword)
+        {
+            this.UserInputKeyword.AddRange(keyword);
+        }
+
+        public void addUserInputAnything(UserInputTypeAnything anything)
+        {
+            this.UserInputTypeAnything.AddRange(anything);
+        }
+
+        public void addTypingDelay(TypingDelay delay)
+        {
+            this.TypingDelay.AddRange(delay);
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

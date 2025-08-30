@@ -1,5 +1,7 @@
 using BotsifySchemaTest.Db;
 using BotsifySchemaTest.Hubs;
+using BotsifySchemaTest.Services;
+using GoBootBackend.Interface;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +16,13 @@ builder.Services.AddDbContext<BotDbContext>(options =>
     // OR Uncomment this if you want InMemory
     // options.UseInMemoryDatabase("BotDb");
 );
+
+builder.Services.AddScoped<IBotDbContext>(provider => provider.GetRequiredService<BotDbContext>());
+
+builder.Services.AddScoped<StorySessionManager>(p =>
+{
+    return new StorySessionManager();
+});
 
 builder.Services.AddCors(options =>
 {
