@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GoBootBackend.Migrations
 {
     /// <inheritdoc />
-    public partial class intialsetup : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -131,22 +131,6 @@ namespace GoBootBackend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TypingDelay",
-                columns: table => new
-                {
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    StoryId = table.Column<int>(type: "int", nullable: false),
-                    delaySeconds = table.Column<double>(type: "float", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ToComponentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ToComponentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TypingDelay", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "UserInputKeyword",
                 columns: table => new
                 {
@@ -232,6 +216,28 @@ namespace GoBootBackend.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TypingDelay",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StoryId = table.Column<int>(type: "int", nullable: false),
+                    DelaySeconds = table.Column<double>(type: "float", nullable: false),
+                    StoriesID = table.Column<int>(type: "int", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ToComponentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ToComponentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TypingDelay", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_TypingDelay_Stories_StoriesID",
+                        column: x => x.StoriesID,
+                        principalTable: "Stories",
+                        principalColumn: "ID");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "QuickReply",
                 columns: table => new
                 {
@@ -306,6 +312,11 @@ namespace GoBootBackend.Migrations
                 name: "IX_QuickReply_TextResponseID",
                 table: "QuickReply",
                 column: "TextResponseID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TypingDelay_StoriesID",
+                table: "TypingDelay",
+                column: "StoriesID");
         }
 
         /// <inheritdoc />
@@ -325,9 +336,6 @@ namespace GoBootBackend.Migrations
 
             migrationBuilder.DropTable(
                 name: "QuickReply");
-
-            migrationBuilder.DropTable(
-                name: "Stories");
 
             migrationBuilder.DropTable(
                 name: "TypingDelay");
@@ -352,6 +360,9 @@ namespace GoBootBackend.Migrations
 
             migrationBuilder.DropTable(
                 name: "TextResponse");
+
+            migrationBuilder.DropTable(
+                name: "Stories");
         }
     }
 }

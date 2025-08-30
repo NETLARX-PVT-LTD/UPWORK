@@ -1,5 +1,6 @@
 ﻿using BotsifySchemaTest.Db;
 using BotsifySchemaTest.Models;
+using GoBootBackend.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,10 +14,10 @@ namespace BotsifySchemaTest.Controllers
     [Route("api/[controller]")]
     public class StoryController : ControllerBase
     {
-        private readonly BotDbContext _context;
+        private readonly IBotDbContext _context;
         private readonly ILogger<StoryController> _logger;
 
-        public StoryController(BotDbContext context, ILogger<StoryController> logger)
+        public StoryController(IBotDbContext context, ILogger<StoryController> logger)
         {
             _context = context;
             _logger = logger;
@@ -35,9 +36,8 @@ namespace BotsifySchemaTest.Controllers
 
                 _logger.LogInformation("Fetching story schema for StoryId: {StoryId}", storyId);
 
-                var result = new List<object>(); 
+                var result = new List<object>();
                 var story = _context.Stories.FirstOrDefault(s => s.ID == storyId);
-
 
                 var connection = await _context.Connection
                     .FirstOrDefaultAsync(c => c.ID == story.RootBlockConnectionId);

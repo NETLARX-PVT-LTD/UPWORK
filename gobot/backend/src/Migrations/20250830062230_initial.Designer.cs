@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoBootBackend.Migrations
 {
     [DbContext(typeof(BotDbContext))]
-    [Migration("20250828103109_intial-setup")]
-    partial class intialsetup
+    [Migration("20250830062230_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,132 +25,7 @@ namespace GoBootBackend.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("BotsifySchemaTest.Models.Connection", b =>
-                {
-                    b.Property<Guid>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("FromComponentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("FromComponentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("StoryId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Connection", (string)null);
-                });
-
-            modelBuilder.Entity("BotsifySchemaTest.Models.Stories", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("RootBlockConnectionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Stories", (string)null);
-                });
-
-            modelBuilder.Entity("BotsifySchemaTest.Models.UserInputKeyword", b =>
-                {
-                    b.Property<Guid>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("StoryId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("ToComponentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ToComponentType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("json")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("UserInputKeyword", (string)null);
-                });
-
-            modelBuilder.Entity("BotsifySchemaTest.Models.UserInputPhrase", b =>
-                {
-                    b.Property<Guid>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("StoryId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("ToComponentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ToComponentType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("json")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("UserInputPhrase", (string)null);
-                });
-
-            modelBuilder.Entity("BotsifySchemaTest.Models.UserInputTypeAnything", b =>
-                {
-                    b.Property<Guid>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("StoryId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("ToComponentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ToComponentType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("json")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("UserInputTypeAnything", (string)null);
-                });
-
-            modelBuilder.Entity("GoBootBackend.Models.ApiHeader", b =>
+            modelBuilder.Entity("BotsifySchemaTest.Models.ApiHeader", b =>
                 {
                     b.Property<int>("jsonId")
                         .ValueGeneratedOnAdd()
@@ -176,7 +51,31 @@ namespace GoBootBackend.Migrations
                     b.ToTable("ApiHeader");
                 });
 
-            modelBuilder.Entity("GoBootBackend.Models.ConversationalForm", b =>
+            modelBuilder.Entity("BotsifySchemaTest.Models.Connection", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("FromComponentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FromComponentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StoryId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Connection", (string)null);
+                });
+
+            modelBuilder.Entity("BotsifySchemaTest.Models.ConversationalForm", b =>
                 {
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
@@ -270,7 +169,7 @@ namespace GoBootBackend.Migrations
                     b.ToTable("CoversationalForm", (string)null);
                 });
 
-            modelBuilder.Entity("GoBootBackend.Models.FormField", b =>
+            modelBuilder.Entity("BotsifySchemaTest.Models.FormField", b =>
                 {
                     b.Property<int>("FormFieldId")
                         .ValueGeneratedOnAdd()
@@ -316,7 +215,7 @@ namespace GoBootBackend.Migrations
                     b.ToTable("FormField");
                 });
 
-            modelBuilder.Entity("GoBootBackend.Models.FormField+Validation", b =>
+            modelBuilder.Entity("BotsifySchemaTest.Models.FormField+Validation", b =>
                 {
                     b.Property<int>("validationId")
                         .ValueGeneratedOnAdd()
@@ -345,7 +244,7 @@ namespace GoBootBackend.Migrations
                     b.ToTable("Validation");
                 });
 
-            modelBuilder.Entity("GoBootBackend.Models.JsonAPI", b =>
+            modelBuilder.Entity("BotsifySchemaTest.Models.JsonAPI", b =>
                 {
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
@@ -380,7 +279,7 @@ namespace GoBootBackend.Migrations
                     b.ToTable("JsonAPI", (string)null);
                 });
 
-            modelBuilder.Entity("GoBootBackend.Models.LinkStory", b =>
+            modelBuilder.Entity("BotsifySchemaTest.Models.LinkStory", b =>
                 {
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
@@ -415,7 +314,30 @@ namespace GoBootBackend.Migrations
                     b.ToTable("LinkStory", (string)null);
                 });
 
-            modelBuilder.Entity("GoBootBackend.Models.TextResponse", b =>
+            modelBuilder.Entity("BotsifySchemaTest.Models.Stories", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RootBlockConnectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Stories", (string)null);
+                });
+
+            modelBuilder.Entity("BotsifySchemaTest.Models.TextResponse", b =>
                 {
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
@@ -450,7 +372,38 @@ namespace GoBootBackend.Migrations
                     b.ToTable("TextResponse", (string)null);
                 });
 
-            modelBuilder.Entity("GoBootBackend.Models.TypingDelay", b =>
+            modelBuilder.Entity("BotsifySchemaTest.Models.TypingDelay", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("DelaySeconds")
+                        .HasColumnType("float");
+
+                    b.Property<int?>("StoriesID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StoryId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ToComponentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ToComponentType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("StoriesID");
+
+                    b.ToTable("TypingDelay", (string)null);
+                });
+
+            modelBuilder.Entity("BotsifySchemaTest.Models.UserInputKeyword", b =>
                 {
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
@@ -468,28 +421,80 @@ namespace GoBootBackend.Migrations
                     b.Property<string>("ToComponentType")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("delaySeconds")
-                        .HasColumnType("float");
+                    b.Property<string>("json")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 
-                    b.ToTable("TypingDelay", (string)null);
+                    b.ToTable("UserInputKeyword", (string)null);
                 });
 
-            modelBuilder.Entity("GoBootBackend.Models.ApiHeader", b =>
+            modelBuilder.Entity("BotsifySchemaTest.Models.UserInputPhrase", b =>
                 {
-                    b.HasOne("GoBootBackend.Models.JsonAPI", null)
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("StoryId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ToComponentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ToComponentType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("json")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("UserInputPhrase", (string)null);
+                });
+
+            modelBuilder.Entity("BotsifySchemaTest.Models.UserInputTypeAnything", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("StoryId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ToComponentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ToComponentType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("json")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("UserInputTypeAnything", (string)null);
+                });
+
+            modelBuilder.Entity("BotsifySchemaTest.Models.ApiHeader", b =>
+                {
+                    b.HasOne("BotsifySchemaTest.Models.JsonAPI", null)
                         .WithMany("ApiHeaders")
                         .HasForeignKey("JsonAPIID");
                 });
 
-            modelBuilder.Entity("GoBootBackend.Models.FormField", b =>
+            modelBuilder.Entity("BotsifySchemaTest.Models.FormField", b =>
                 {
-                    b.HasOne("GoBootBackend.Models.ConversationalForm", null)
+                    b.HasOne("BotsifySchemaTest.Models.ConversationalForm", null)
                         .WithMany("FormFields")
                         .HasForeignKey("ConversationalFormID");
 
-                    b.HasOne("GoBootBackend.Models.FormField+Validation", "Rules")
+                    b.HasOne("BotsifySchemaTest.Models.FormField+Validation", "Rules")
                         .WithMany()
                         .HasForeignKey("RulesvalidationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -498,9 +503,9 @@ namespace GoBootBackend.Migrations
                     b.Navigation("Rules");
                 });
 
-            modelBuilder.Entity("GoBootBackend.Models.TextResponse", b =>
+            modelBuilder.Entity("BotsifySchemaTest.Models.TextResponse", b =>
                 {
-                    b.OwnsMany("GoBootBackend.Models.QuickReply", "QuickReplies", b1 =>
+                    b.OwnsMany("BotsifySchemaTest.Models.QuickReply", "QuickReplies", b1 =>
                         {
                             b1.Property<int>("TestReponseId")
                                 .ValueGeneratedOnAdd()
@@ -544,14 +549,26 @@ namespace GoBootBackend.Migrations
                     b.Navigation("QuickReplies");
                 });
 
-            modelBuilder.Entity("GoBootBackend.Models.ConversationalForm", b =>
+            modelBuilder.Entity("BotsifySchemaTest.Models.TypingDelay", b =>
+                {
+                    b.HasOne("BotsifySchemaTest.Models.Stories", null)
+                        .WithMany("TypingDelays")
+                        .HasForeignKey("StoriesID");
+                });
+
+            modelBuilder.Entity("BotsifySchemaTest.Models.ConversationalForm", b =>
                 {
                     b.Navigation("FormFields");
                 });
 
-            modelBuilder.Entity("GoBootBackend.Models.JsonAPI", b =>
+            modelBuilder.Entity("BotsifySchemaTest.Models.JsonAPI", b =>
                 {
                     b.Navigation("ApiHeaders");
+                });
+
+            modelBuilder.Entity("BotsifySchemaTest.Models.Stories", b =>
+                {
+                    b.Navigation("TypingDelays");
                 });
 #pragma warning restore 612, 618
         }
