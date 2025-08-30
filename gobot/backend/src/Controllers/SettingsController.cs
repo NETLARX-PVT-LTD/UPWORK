@@ -1,11 +1,17 @@
-﻿using GoBootBackend.Models;
-using GoBootBackend.Models;
-using Microsoft.AspNetCore.Mvc;
-using System.IO;
-using System.Text.Json;
+﻿// ---------------------------------------------------------------------
+// <copyright file="School.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
-namespace GoBootBackend.Controllers
+namespace Netlarx.Products.Gobot.Controllers
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Netlarx.Products.Gobot.Models;
+    using System;
+    using System.IO;
+    using System.Text.Json;
+
     [ApiController]
     [Route("api/[controller]")]
     public class SettingsController : ControllerBase

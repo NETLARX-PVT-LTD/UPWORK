@@ -1,5 +1,5 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="UserInputTypeAnything.cs" company="Netlarx">
+// <copyright file="QuickReply.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
@@ -8,11 +8,13 @@ namespace Netlarx.Products.Gobot.Models
 {
     using System.ComponentModel.DataAnnotations;
 
-    public class UserInputTypeAnything : BaseComponent
+    public class QuickReply : BaseComponent
     {
-        [Required]
-        public int StoryId { get; set; }
+        [Key]
+        public int TestReponseId { get; set; }
 
-        public string? json { get; set; }
+        public string Title { get; set; }
+
+        public string Value { get; set; }
     }
 }

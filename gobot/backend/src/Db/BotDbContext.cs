@@ -1,15 +1,20 @@
-﻿using BotsifySchemaTest.Models;
-using GoBootBackend.Models;
-using Microsoft.EntityFrameworkCore;
-using GoBootBackend.Interface;
-using System.Threading.Tasks;
-using System.Threading;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// ---------------------------------------------------------------------
+// <copyright file="School.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
-namespace BotsifySchemaTest.Db
+namespace Netlarx.Products.Gobot.Db
 {
+    using Microsoft.EntityFrameworkCore;
+    using System.Threading.Tasks;
+    using System.Threading;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Netlarx.Products.Gobot.Interface;
+    using Netlarx.Products.Gobot.Models;
+
     public class BotDbContext : DbContext, IBotDbContext
     {
         public BotDbContext(DbContextOptions<BotDbContext> options) : base(options) { }

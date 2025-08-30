@@ -1,19 +1,24 @@
-﻿using BotsifySchemaTest.Controllers;
-using BotsifySchemaTest.Db;
-using BotsifySchemaTest.Models;
-using GoBootBackend.Interface;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Moq;
-using Moq.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// ---------------------------------------------------------------------
+// <copyright file="StudentControllerTest.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
-namespace GoBotTesting
+namespace Netlarx.Products.Gobot.UnitTest
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Logging;
+    using Moq;
+    using Moq.EntityFrameworkCore;
+    using Netlarx.Products.Gobot.Controllers;
+    using Netlarx.Products.Gobot.Interface;
+    using Netlarx.Products.Gobot.Models;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Xunit;
+
     public class StudentControllerTest
     {
         private readonly StoryController _stController;

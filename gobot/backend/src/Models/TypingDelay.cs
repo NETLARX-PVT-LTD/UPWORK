@@ -1,8 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿// ---------------------------------------------------------------------
+// <copyright file="TypingDelay.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
-namespace BotsifySchemaTest.Models
+namespace Netlarx.Products.Gobot.Models
 {
+    using System.ComponentModel.DataAnnotations;
+
     public class TypingDelay : BaseComponent
     {
         [Required]

@@ -1,8 +1,14 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using System.Threading.Tasks;
+﻿// ---------------------------------------------------------------------
+// <copyright file="School.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
-namespace BotsifySchemaTest.Hubs
+namespace Netlarx.Products.Gobot.Hubs
 {
+    using Microsoft.AspNetCore.SignalR;
+    using System.Threading.Tasks;
+
     public class StoryHub : Hub
     {
         public async Task JoinStory(int storyId)

@@ -1,10 +1,16 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Threading.Tasks;
+// ---------------------------------------------------------------------
+// <copyright file="Program.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
 namespace Netlarx.Products.Gobot
 {
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.Hosting;
+    using System;
+    using System.Threading.Tasks;
+
     public class Program
     {
         public static async Task Main(string[] args)

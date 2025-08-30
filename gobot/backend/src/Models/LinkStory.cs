@@ -1,7 +1,12 @@
-﻿using BotsifySchemaTest.Models;
+﻿// ---------------------------------------------------------------------
+// <copyright file="School.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
+
 using System.ComponentModel.DataAnnotations;
 
-namespace BotsifySchemaTest.Models
+namespace Netlarx.Products.Gobot.Models
 {
     public class LinkStory : BaseComponent
     {
