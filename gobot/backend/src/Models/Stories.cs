@@ -1,10 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿// ---------------------------------------------------------------------
+// <copyright file="Stories.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
-namespace BotsifySchemaTest.Models
+namespace Netlarx.Products.Gobot.Models
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+
     public class Stories
     {
         public int ID { get; set; }
@@ -13,9 +18,9 @@ namespace BotsifySchemaTest.Models
         public string? Name { get; set; }
 
         public Guid RootBlockConnectionId { get; set; }
+
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
-        // Navigation property for related TypingDelays
         public ICollection<TypingDelay> TypingDelays { get; set; } = new List<TypingDelay>();
     }
 }

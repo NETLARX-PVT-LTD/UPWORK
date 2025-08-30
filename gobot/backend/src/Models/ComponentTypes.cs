@@ -1,4 +1,10 @@
-﻿namespace BotsifySchemaTest.Models
+﻿// ---------------------------------------------------------------------
+// <copyright file="School.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
+
+namespace Netlarx.Products.Gobot.Models
 {
     public static class ComponentTypes
     {

@@ -1,6 +1,12 @@
-﻿using System.Collections.Generic;
+﻿// ---------------------------------------------------------------------
+// <copyright file="School.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
-namespace GoBootBackend.Models
+using System.Collections.Generic;
+
+namespace Netlarx.Products.Gobot.Models
 {
     public class AdvancedSettings
     {

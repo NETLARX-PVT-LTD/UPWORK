@@ -1,11 +1,17 @@
-﻿using BotsifySchemaTest.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+﻿// ---------------------------------------------------------------------
+// <copyright file="School.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
-namespace GoBootBackend.Interface
+namespace Netlarx.Products.Gobot.Interface
 {
+    using Microsoft.EntityFrameworkCore;
+    using Netlarx.Products.Gobot.Models;
+    using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
+
     public interface IBotDbContext
     {
         DbSet<Stories> Stories { get; set; }

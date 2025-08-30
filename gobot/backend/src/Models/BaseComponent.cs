@@ -1,6 +1,12 @@
-﻿using System;
+﻿// ---------------------------------------------------------------------
+// <copyright file="School.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
-namespace BotsifySchemaTest.Models
+using System;
+
+namespace Netlarx.Products.Gobot.Models
 {
     public abstract class BaseComponent
     {

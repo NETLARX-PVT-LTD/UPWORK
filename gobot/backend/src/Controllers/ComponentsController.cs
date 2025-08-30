@@ -1,20 +1,22 @@
-﻿using BotsifySchemaTest.Db;
-using BotsifySchemaTest.Hubs;
-using BotsifySchemaTest.Models;
-using BotsifySchemaTest.Services;
-using GoBootBackend.Models;
-using GoBootBackend.Interface;
-using Microsoft.AspNetCore.Mvc;
-//using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// ---------------------------------------------------------------------
+// <copyright file="School.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
-namespace BotsifySchemaTest.Controllers
+namespace Netlarx.Products.Gobot.Controllers
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
+    using Netlarx.Products.Gobot.Interface;
+    using Netlarx.Products.Gobot.Models;
+    using Netlarx.Products.Gobot.Services;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+
     [ApiController]
     [Route("api/[controller]")]
     public class ComponentsController : ControllerBase
