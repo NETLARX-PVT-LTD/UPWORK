@@ -25,12 +25,15 @@ import { CreateAssistantComponent } from './ai-assistant-list/create-assistant/c
 import { ChatbotAnalyticsComponent } from './chatbot-analytics/chatbot-analytics.component';
 import { LiveChatComponent } from './live-chat/live-chat.component';
 import { ManageBotStoriesComponent } from './chatbot-flow/manage-bot-stories/manage-bot-stories.component';
+import { UserListComponent } from './user-list/user-list.component';
 
 export const routes: Routes = [
   // Analytics
   { path: 'chatbot-analytics', component: ChatbotAnalyticsComponent,data: { title: 'Chatbot Analytics' } },
   // live chat
   { path: 'live-chat', component: LiveChatComponent },
+  // users list
+  { path: 'users', component: UserListComponent,data: { title: 'Users List' } },
 // AI Assistants routes
    { path: 'assistants', component: AiAssistantListComponent,data: { title: 'AI Assistants' } },
   { path: 'assistants/create', component: CreateAssistantComponent,data: { title: 'Manage AI Assistant' } },

@@ -1,6 +1,9 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UserService } from '../shared/services/user.service';
+import { Subscription } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 
 interface ChatUser {
   id: string;
@@ -48,7 +51,11 @@ interface UserAttribute {
 export class LiveChatComponent implements OnInit, AfterViewChecked {
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
   @ViewChild('fileInput') fileInput!: ElementRef;
-
+private subscription: Subscription = new Subscription();
+constructor(
+    private userService: UserService,
+    private route: ActivatedRoute
+  ) {}
   // Modal states
   showTranslateModal: boolean = false;
   translateLanguage: string = 'English';
@@ -84,9 +91,32 @@ showAddMessageInput: boolean = false;
 
   private shouldScroll = false;
 
-  ngOnInit() {
-    this.initializeData();
-    this.filterUsers();
+   ngOnInit() {
+    // Subscribe to users from the service
+    this.subscription.add(
+      this.userService.getUsers().subscribe(users => {
+        this.users = users;
+        this.filterUsers();
+      })
+    );
+
+    // Check if we have a userId from query params (from user list navigation)
+    this.subscription.add(
+      this.route.queryParams.subscribe(params => {
+        if (params['userId']) {
+          const user = this.userService.getUserById(params['userId']);
+          if (user) {
+            this.selectUser(user);
+          }
+        }
+      })
+    );
+
+    this.initializeData(); // Keep your existing message initialization
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   ngAfterViewChecked() {
@@ -280,33 +310,29 @@ showAddMessageInput: boolean = false;
   }
 
   // User Selection
-  selectUser(user: ChatUser) {
+   selectUser(user: ChatUser) {
     this.selectedUser = user;
     this.currentMessages = this.messages[user.id] || [];
-    user.unreadCount = 0;
+    
+    // Reset unread count in service
+    this.userService.resetUnreadCount(user.id);
+    
     this.shouldScroll = true;
   }
 
   // Chat Actions
-  closeChat() {
+   closeChat() {
     if (this.selectedUser) {
-      this.selectedUser.status = 'closed';
-      const userIndex = this.users.findIndex(u => u.id === this.selectedUser?.id);
-      if (userIndex !== -1) {
-        this.users[userIndex].status = 'closed';
-      }
+      this.userService.updateUserStatus(this.selectedUser.id, 'closed');
       this.selectedUser = null;
       this.filterUsers();
     }
   }
 
+  // Modified reopenChat to update service
   reopenChat(): void {
     if (this.selectedUser) {
-      this.selectedUser.status = 'open';
-      const userIndex = this.users.findIndex(u => u.id === this.selectedUser?.id);
-      if (userIndex !== -1) {
-        this.users[userIndex].status = 'open';
-      }
+      this.userService.updateUserStatus(this.selectedUser.id, 'open');
       this.filterUsers();
     }
   }
@@ -320,7 +346,7 @@ showAddMessageInput: boolean = false;
       userId: this.selectedUser.id,
       message: this.newMessage.trim(),
       timestamp: new Date(),
-      isFromUser: false, // Agent's message
+      isFromUser: false,
       type: 'text'
     };
 
@@ -330,8 +356,10 @@ showAddMessageInput: boolean = false;
 
     this.messages[this.selectedUser.id].push(message);
     this.currentMessages = this.messages[this.selectedUser.id];
-    this.selectedUser.lastMessage = this.newMessage.trim();
-    this.selectedUser.timestamp = new Date();
+    
+    // Update last message in service
+    this.userService.updateLastMessage(this.selectedUser.id, this.newMessage.trim());
+    
     this.newMessage = '';
     this.shouldScroll = true;
   }
@@ -456,16 +484,12 @@ showAddMessageInput: boolean = false;
     }
   }
 
-  deleteChat(): void {
+ deleteChat(): void {
     if (this.selectedUser && confirm(`Are you sure you want to delete the chat with ${this.selectedUser.name}?`)) {
-      console.log(`Deleting chat with user: ${this.selectedUser.name}`);
-      
-      this.users = this.users.filter(user => user.id !== this.selectedUser?.id);
+      this.userService.deleteUser(this.selectedUser.id);
       delete this.messages[this.selectedUser.id];
       this.selectedUser = null;
       this.currentMessages = [];
-      this.filterUsers();
-      
       this.showSuccessNotification('Chat deleted successfully!');
     }
   }

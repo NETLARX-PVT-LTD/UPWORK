@@ -8,6 +8,7 @@ export interface Story {
   keywords?: string[];
   blocks?: any[];
   description?: string;
+  connections?: any;
 }
 
 @Injectable({
@@ -138,36 +139,37 @@ export class StoryService {
     return duplicatedStory;
   }
 
-  // Method to extract story data from your create-story flow
-  createStoryFromFlow(flowData: any): Story {
-    // Extract keywords from the first userInput block with keywordGroups
-    const keywords: string[] = [];
-    if (flowData.canvasBlocks) {
-      flowData.canvasBlocks.forEach((block: any) => {
-        if (block.type === 'userInput' && block.keywordGroups) {
-          block.keywordGroups.forEach((group: string[]) => {
-            keywords.push(...group);
-          });
-        }
-      });
-    }
-
-    // Create story name based on first block content or default
-    let storyName = 'New Story';
-    if (keywords.length > 0) {
-      storyName = 'Keyword combination';
-    } else if (flowData.canvasBlocks && flowData.canvasBlocks.length > 0) {
-      const firstBlock = flowData.canvasBlocks[0];
-      if (firstBlock.content) {
-        storyName = firstBlock.content.substring(0, 30) + (firstBlock.content.length > 30 ? '...' : '');
+ // Method to extract story data from your create-story flow
+createStoryFromFlow(flowData: any): Story {
+  // Extract keywords from the first userInput block with keywordGroups
+  const keywords: string[] = [];
+  if (flowData.canvasBlocks) {
+    flowData.canvasBlocks.forEach((block: any) => {
+      if (block.type === 'userInput' && block.keywordGroups) {
+        block.keywordGroups.forEach((group: string[]) => {
+          keywords.push(...group);
+        });
       }
-    }
-
-    return this.addStory({
-      name: storyName,
-      keywords: keywords.length > 0 ? keywords : undefined,
-      blocks: flowData.canvasBlocks || [],
-      description: `Story created with ${flowData.canvasBlocks?.length || 0} blocks`
     });
   }
+
+  // Create story name based on first block content or default
+  let storyName = 'New Story';
+  if (keywords.length > 0) {
+    storyName = 'Keyword combination';
+  } else if (flowData.canvasBlocks && flowData.canvasBlocks.length > 0) {
+    const firstBlock = flowData.canvasBlocks[0];
+    if (firstBlock.content) {
+      storyName = firstBlock.content.substring(0, 30) + (firstBlock.content.length > 30 ? '...' : '');
+    }
+  }
+
+  return this.addStory({
+    name: storyName,
+    keywords: keywords.length > 0 ? keywords : undefined,
+    blocks: flowData.canvasBlocks || [],
+    connections: flowData.connections || [], // Store connections data
+    description: `Story created with ${flowData.canvasBlocks?.length || 0} blocks`
+  });
+}
 }

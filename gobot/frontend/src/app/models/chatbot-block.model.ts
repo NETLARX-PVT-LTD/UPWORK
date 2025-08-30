@@ -139,6 +139,8 @@ export type UserInputSubType = 'phrase' | 'keywordGroup' | 'anything';
 
 // Define the structure for connections between blocks
 export interface Connection {
+  sourceId: any;
+  targetId: any;
   id: string;
   fromBlockId: string;
   toBlockId: string;
