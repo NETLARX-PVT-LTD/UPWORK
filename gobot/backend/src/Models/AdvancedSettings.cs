@@ -1,4 +1,6 @@
-﻿namespace GoBootBackend.Models
+﻿using System.Collections.Generic;
+
+namespace GoBootBackend.Models
 {
     public class AdvancedSettings
     {

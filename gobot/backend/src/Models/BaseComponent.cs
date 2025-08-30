@@ -1,4 +1,6 @@
-﻿namespace BotsifySchemaTest.Models
+﻿using System;
+
+namespace BotsifySchemaTest.Models
 {
     public abstract class BaseComponent
     {
