@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace GoBootBackend.Migrations
+namespace Gobot.Migrations
 {
     /// <inheritdoc />
     public partial class initial : Migration

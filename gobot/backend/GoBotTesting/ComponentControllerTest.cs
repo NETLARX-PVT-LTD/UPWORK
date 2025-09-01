@@ -6,6 +6,7 @@
 
 namespace Netlarx.Products.Gobot.UnitTest
 {
+    using Chatbot;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using Moq;
@@ -25,6 +26,7 @@ namespace Netlarx.Products.Gobot.UnitTest
         private readonly ComponentsController _controller;
         private readonly Mock<IBotDbContext> _db; // Mocked DbContext
         private readonly Mock<StorySessionManager> storysessionmanager;
+        TypingDelayBlock typingDelayBlock = new TypingDelayBlock();
 
         public ComponentControllerTest()
         {
@@ -194,19 +196,19 @@ namespace Netlarx.Products.Gobot.UnitTest
             _db.Setup(x => x.addStory(It.IsAny<Stories>()));
             _db.Setup(x => x.SaveChanges()).Returns(1);
 
-            var model = new TypingDelay
-            {
-                StoryId = storyId,
-                DelaySeconds = 2
-            };
+            //var model = new TypingDelay
+            //{
+            //    StoryId = storyId,
+            //    DelaySeconds = 2
+            //};
 
-            //TypingDelayBlock block = new TypingDelayBlock();
+            TypingDelayBlock block = new TypingDelayBlock();
 
-            //block.DelaySeconds = 1;
-            //block.Type = "typingDelay";
+            block.DelaySeconds = 1;
+            block.Type = "typingDelay";
 
             // Act
-            var result = _controller.AddTypingDelay(storyId, model);
+            var result = _controller.AddTypingDelay(storyId, block);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -399,5 +401,7 @@ namespace Netlarx.Products.Gobot.UnitTest
             var returnValue = Assert.IsAssignableFrom<IEnumerable<TypingDelay>>(okResult.Value);
             Assert.Equal(2, returnValue.Count());
         }
+
+        
     }
 }
