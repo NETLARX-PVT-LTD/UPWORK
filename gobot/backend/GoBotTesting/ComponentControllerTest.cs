@@ -95,9 +95,13 @@ namespace Netlarx.Products.Gobot.UnitTest
             {
                 json = "Hello, how are you?"   // example property
             };
+            UserInputBlock userInputBlock = new UserInputBlock();
+            userInputBlock.CustomMessage = "Hey i am doing work on C#";
+            userInputBlock.Type = "UserInput";
+            userInputBlock.SubType = UserInputSubType.Text;
 
             // Act
-            var result = _controller.AddUserInputPhrase(storyId, model);
+            var result = _controller.AddUserInputPhrase(storyId, userInputBlock);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -124,14 +128,20 @@ namespace Netlarx.Products.Gobot.UnitTest
             _db.Setup(x => x.addStory(It.IsAny<Stories>()));
             _db.Setup(x => x.SaveChanges()).Returns(1);
 
-            var model = new UserInputKeyword
-            {
-                StoryId = storyId,
-                json = "Hello, Namste"
-            };
+            //var model = new UserInputKeyword
+            //{
+            //    StoryId = storyId,
+            //    json = "Hello, Namste"
+            //};
+            List<String> list = new List<string>();
+            list.Add("Hii");
+            list.Add("hello");
+            UserInputBlock userInputBlock = new UserInputBlock();
+            userInputBlock.Type = "UserInput";
+            userInputBlock.SubType = UserInputSubType.Text;
             // Act
 
-            var result = _controller.AddUserInputKeyword(storyId, model);
+            var result = _controller.AddUserInputKeyword(storyId, userInputBlock);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -158,19 +168,20 @@ namespace Netlarx.Products.Gobot.UnitTest
             _db.Setup(x => x.addStory(It.IsAny<Stories>()));
             _db.Setup(x => x.SaveChanges()).Returns(1);
 
-            var model = new UserInputTypeAnything
-            {
-                StoryId = storyId,
-                json = "Hey i am doing work on C#"
-            };
+            //var model = new UserInputTypeAnything
+            //{
+            //    StoryId = storyId,
+            //    json = "Hey i am doing work on C#"
+            //};
             //List<String> list = new List<string>();
             //list.Add("Hii");
             //list.Add("hello");
-            //UserInputBlock userInputBlock = new UserInputBlock();
-            //userInputBlock.Type = "UserInput";
-            //userInputBlock.SubType = UserInputSubType.Text;
+            UserInputBlock userInputBlock = new UserInputBlock();
+            userInputBlock.CustomMessage = "Hey i am doing work on C#";
+            userInputBlock.Type = "UserInput";
+            userInputBlock.SubType = UserInputSubType.Text;
             // Act
-            var result = _controller.AddUserInputAnything(storyId, model);
+            var result = _controller.AddUserInputAnything(storyId, userInputBlock);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);

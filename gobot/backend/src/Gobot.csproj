@@ -24,6 +24,9 @@
 	  <Protobuf Include="..\..\Proto\json_api_block.proto" GrpcServices="None">
 		  <Link>Proto\json_api_block.proto</Link>
 	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\user_input_block.proto" GrpcServices="None">
+		  <Link>Proto\user_input_block.proto</Link>
+	  </Protobuf>
   </ItemGroup>
 
 </Project>
