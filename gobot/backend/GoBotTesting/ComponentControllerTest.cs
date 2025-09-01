@@ -245,20 +245,20 @@ namespace Netlarx.Products.Gobot.UnitTest
             _db.Setup(x => x.addStory(It.IsAny<Stories>()));
             _db.Setup(x => x.SaveChanges()).Returns(1);
 
-            var model = new LinkStory
-            {
-                StoryId = storyId,
-                LinkStoryId = "4",
-                LinkStoryName = "Ashutosh"
-            };
+            //var model = new LinkStory
+            //{
+            //    StoryId = storyId,
+            //    LinkStoryId = "4",
+            //    LinkStoryName = "Ashutosh"
+            //};
 
-            //TypingDelayBlock block = new TypingDelayBlock();
+            LinkStoryBlock block = new LinkStoryBlock();
 
-            //block.DelaySeconds = 1;
-            //block.Type = "typingDelay";
-
+            block.LinkStoryName = "Ashutosh";
+            block.Type = "linkStory";
+            block.LinkStoryId = "123";
             // Act
-            var result = _controller.AddLinkStory(storyId, model);
+            var result = _controller.AddLinkStory(storyId, block);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -321,21 +321,31 @@ namespace Netlarx.Products.Gobot.UnitTest
             _db.Setup(x => x.addStory(It.IsAny<Stories>()));
             _db.Setup(x => x.SaveChanges()).Returns(1);
 
-            var model = new JsonAPI
+            //var model = new JsonAPI
+            //{
+            //    StoryId = storyId,
+            //    ApiEndpoint = "https://localhost:4200",
+            //    RequestType = "Post",
+            //    //ApiHeaders = new List<ApiHeader>()
+            //};
+
+            //JsonApiBlock block = new JsonApiBlock();
+            var block = new JsonApiBlock
             {
                 StoryId = storyId,
+                Type = "jsonApi",
                 ApiEndpoint = "https://localhost:4200",
-                RequestType = "Post",
-                ApiHeaders = new List<ApiHeader>()
+                RequestType = "POST",
+                ApiHeaders =
+            {
+                new ApiHeaderr { JsonId = 101, HeaderKey = "Authorization", HeaderValue = "Bearer token" },
+                new ApiHeaderr { JsonId = 102, HeaderKey = "Content-Type", HeaderValue = "application/json" }
+            }
             };
 
-            //TypingDelayBlock block = new TypingDelayBlock();
-
-            //block.DelaySeconds = 1;
-            //block.Type = "typingDelay";
 
             // Act
-            var result = _controller.AddJsonApi(storyId, model);
+            var result = _controller.AddJsonApi(storyId, block);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -361,19 +371,20 @@ namespace Netlarx.Products.Gobot.UnitTest
             _db.Setup(x => x.addStory(It.IsAny<Stories>()));
             _db.Setup(x => x.SaveChanges()).Returns(1);
 
-            var model = new TextResponse
-            {
-                StoryId = storyId,
-                Content = "Done"
-            };
+            //var model = new TextResponse
+            //{
+            //    StoryId = storyId,
+            //    Content = "Done"
+            //};
 
-            //TypingDelayBlock block = new TypingDelayBlock();
+            TextResponseBlock block = new TextResponseBlock();
 
-            //block.DelaySeconds = 1;
-            //block.Type = "typingDelay";
+            //block. = storyId;
+            block.Type = "textResponse";
+            block.Content = "Done";
 
             // Act
-            var result = _controller.AddTextResponse(storyId, model);
+            var result = _controller.AddTextResponse(storyId, block);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
