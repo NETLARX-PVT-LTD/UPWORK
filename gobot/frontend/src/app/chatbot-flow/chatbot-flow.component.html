@@ -145,6 +145,14 @@
                   (blockUpdated)="onBlockUpdated($event)" (selectBlock)="selectBlock($event)"
                   (removeBlock)="removeCanvasBlock($event)" (duplicateBlock)="duplicateCanvasBlock($event)"
                   (editBlock)="editCanvasBlock($event)"></app-typing-delay-block>
+                
+                <app-json-api-integration-block *ngSwitchCase="'jsonApi'" [block]="block" 
+                  [isSelected]="selectedBlock?.id === block.id" [isSidebarOpen]="rightSidebarOpen"
+                  (blockUpdated)="onBlockUpdated($event)" (selectBlock)="selectBlock($event)" 
+                  (removeBlock)="removeCanvasBlock($event)" (duplicateBlock)="duplicateCanvasBlock($event)"
+                  (editBlock)="editCanvasBlock($event)">
+                </app-json-api-integration-block>
+
               </ng-container>
             </div>
 
@@ -162,6 +170,7 @@
       </div>
     </div>
 
+    <!-- RIGHT SIDEBAR -->
     <div class="right-sidebar" [class.open]="rightSidebarOpen" *ngIf="selectedBlock">
       <div class="right-sidebar-header">
         <div class="sidebar-title">
@@ -194,10 +203,30 @@
           <app-conversational-form-block *ngSwitchCase="'conversationalForm'" [block]="selectedBlock"
             [isSelected]="true" [isSidebarOpen]="true" [availableForms]="availableForms"
             (blockUpdated)="onBlockUpdated($event)"></app-conversational-form-block>
-
-          <app-typing-delay-block *ngSwitchCase="'typingDelay'" [block]="selectedBlock" [isSelected]="true"
-            [isSidebarOpen]="true" (blockUpdated)="onBlockUpdated($event)"></app-typing-delay-block>
           
+          <!-- START: TYPING DELAY BLOCK WITH TEST BUTTON -->
+          <ng-container *ngSwitchCase="'typingDelay'">
+            <app-typing-delay-block 
+              [block]="selectedBlock" 
+              [isSelected]="true"
+              [isSidebarOpen]="true" 
+              (blockUpdated)="onBlockUpdated($event)">
+            </app-typing-delay-block>
+            
+            <div style="padding: 0 20px 20px 20px; margin-top: 10px;">
+              <button 
+                  mat-raised-button 
+                  color="accent" 
+                  (click)="testAddTypingDelayProto(selectedBlock!)"
+                  style="width: 100%;"
+              >
+                  Test This Typing Delay
+              </button>
+            </div>
+          </ng-container>
+          <!-- END: TYPING DELAY BLOCK WITH TEST BUTTON -->
+
+          <!-- START: JSON API BLOCK WITH TEST BUTTON -->
           <ng-container *ngSwitchCase="'jsonApi'">
             <app-json-api-integration-block 
               [block]="selectedBlock" 
@@ -206,11 +235,17 @@
             </app-json-api-integration-block>
 
             <div style="padding: 0 20px 20px 20px; margin-top: 10px;">
-              <button mat-raised-button color="accent" (click)="testAddJsonApi(selectedBlock)" style="width: 100%;">
-                Test This Component
+              <button 
+                  mat-raised-button 
+                  color="accent" 
+                  (click)="testAddJsonApi(selectedBlock!)"
+                  style="width: 100%;"
+              >
+                  Test This JSON API Block
               </button>
             </div>
           </ng-container>
+          <!-- END: JSON API BLOCK WITH TEST BUTTON -->
 
         </ng-container>
       </div>
@@ -246,3 +281,4 @@
 
   </button>
 </div>
+

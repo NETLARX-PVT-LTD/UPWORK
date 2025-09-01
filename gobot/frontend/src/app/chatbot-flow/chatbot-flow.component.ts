@@ -1170,5 +1170,35 @@ testAddJsonApi(block: ChatbotBlock  ): void {
 }
 
 
+testAddTypingDelayProto(block: ChatbotBlock): void {
+  // First, check if the selected block is the correct type.
+  if (block.type !== 'typingDelay') {
+    console.error("This test is only for Typing Delay blocks.");
+    return;
+  }
+
+  console.log("🧪--- Testing AddTypingDelay (Protobuf-as-JSON) ---🧪");
+  
+  const testStoryId = 1; // The story this component will belong to.
+
+  // --- THIS IS THE ONLY PART THAT CHANGES ---
+  // We use the official TypingDelayBlock "form" to create the payload.
+  const typingDelayPayload = TypingDelayBlock.create({
+      // Your .proto file for TypingDelayBlock likely has a "delaySeconds" field.
+      delaySeconds: block.delaySeconds || 1 // Use the value from the block, or default to 1
+  });
+  
+  // The API call itself is a standard REST POST request to the correct endpoint.
+  const apiUrl = `/api/components/AddTypingDelay?storyId=${testStoryId}`;
+
+  this.http.post(apiUrl, typingDelayPayload).subscribe({
+    next: (response) => {
+      console.log(`✅ SUCCESS! The TypingDelay (Proto-JSON) request worked:`, response);
+    },
+    error: (err) => {
+      console.error(`❌ ERROR: The request failed.`, err);
+    }
+  });
+}
 
 }
