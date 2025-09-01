@@ -7,6 +7,7 @@
 namespace Netlarx.Products.Gobot.Controllers
 {
     using Chatbot;
+    using Gobot;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
@@ -29,9 +30,7 @@ namespace Netlarx.Products.Gobot.Controllers
         private readonly StorySessionManager manager;
 
         TypingDelayBlock typingdelayblock = new TypingDelayBlock();
-        JsonApiBlock jsonapiblock = new JsonApiBlock();
-
-
+        UserInputBlock userInputBlock = new UserInputBlock();
         public ComponentsController(IBotDbContext db, ILogger<ComponentsController> logger, StorySessionManager manager)
         {
             _db = db;
@@ -143,22 +142,37 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddUserInputPhrase/{storyId}")]
-        public IActionResult AddUserInputPhrase(int storyId, [FromBody] UserInputPhrase model)
+        public IActionResult AddUserInputPhrase(int storyId, [FromBody] UserInputBlock block)
         {
+            var model = new Models.UserInputPhrase
+            {
+                StoryId = storyId,
+                json = block.CustomMessage
+            };
             return AddComponent(storyId, model, ComponentTypes.UserInputPhrase,
                 m => manager.GetStory(storyId).Phrases.Add(m));
         }
 
         [HttpPost("AddUserInputKeyword")]
-        public IActionResult AddUserInputKeyword(int storyId, [FromBody] UserInputKeyword model)
+        public IActionResult AddUserInputKeyword(int storyId, [FromBody] UserInputBlock block)
         {
+            var model = new Models.UserInputKeyword
+            {
+                StoryId = storyId,
+                json = block.Keywords.ToString()
+            };
             return AddComponent(storyId, model, ComponentTypes.UserInputKeyword,
                  g => manager.GetStory(storyId).Keywords.Add(g));
         }
 
         [HttpPost("AddUserInputAnything")]
-        public IActionResult AddUserInputAnything(int storyId, [FromBody] UserInputTypeAnything model)
+        public IActionResult AddUserInputAnything(int storyId, [FromBody] UserInputBlock block)
         {
+            var model = new Models.UserInputTypeAnything
+            {
+                StoryId = storyId,
+                json = block.CustomMessage
+            };
             return AddComponent(storyId, model, ComponentTypes.UserInputTypeAnything,
                   g => manager.GetStory(storyId).Anythings.Add(g));
         }
@@ -201,14 +215,14 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddJsonApi")]
-        public IActionResult AddJsonApi(int storyId, [FromBody] JsonApiBlock block)
+        public IActionResult AddJsonApi(int storyId, [FromBody] JsonAPI model)
         {
-            var model = new Models.JsonAPI
-            {
-                ApiEndpoint = block.ApiEndpoint,
-                RequestType = block.RequestType,
-                ApiHeaders  = block.ApiHeaders
-            };
+            //var model = new Models.JsonAPI
+            //{
+            //    ApiEndpoint = block.ApiEndpoint,
+            //    RequestType = block.RequestType,
+            //    ApiHeaders  = block.ApiHeaders
+            //};
             return AddComponent(storyId, model, ComponentTypes.JsonAPI,
                  g => manager.GetStory(storyId).JsonAPIs.Add(g));
         }
