@@ -6,6 +6,7 @@
 
 namespace Netlarx.Products.Gobot.Controllers
 {
+    using Chatbot;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
@@ -26,6 +27,10 @@ namespace Netlarx.Products.Gobot.Controllers
         private readonly ILogger<ComponentsController> _logger;
 
         private readonly StorySessionManager manager;
+
+        TypingDelayBlock typingdelayblock = new TypingDelayBlock();
+        JsonApiBlock jsonapiblock = new JsonApiBlock();
+
 
         public ComponentsController(IBotDbContext db, ILogger<ComponentsController> logger, StorySessionManager manager)
         {
@@ -175,8 +180,14 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddTypingDelay")]
-        public IActionResult AddTypingDelay(int storyId, [FromBody] TypingDelay model)
+        public IActionResult AddTypingDelay(int storyId, [FromBody] TypingDelayBlock typingDelay)
         {
+            var model = new Models.TypingDelay
+            {
+                DelaySeconds = typingDelay.DelaySeconds,
+                StoryId = storyId
+            };
+
             return AddComponent(storyId, model, ComponentTypes.TypingDelay,
                  g => manager.GetStory(storyId).TypingDelays.Add(g));
         }
@@ -190,8 +201,14 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddJsonApi")]
-        public IActionResult AddJsonApi(int storyId, [FromBody] JsonAPI model)
+        public IActionResult AddJsonApi(int storyId, [FromBody] JsonApiBlock block)
         {
+            var model = new Models.JsonAPI
+            {
+                ApiEndpoint = block.ApiEndpoint,
+                RequestType = block.RequestType,
+                ApiHeaders  = block.ApiHeaders
+            };
             return AddComponent(storyId, model, ComponentTypes.JsonAPI,
                  g => manager.GetStory(storyId).JsonAPIs.Add(g));
         }

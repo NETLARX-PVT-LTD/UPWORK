@@ -16,9 +16,14 @@ namespace Netlarx.Products.Gobot
     using Netlarx.Products.Gobot.Interface;
     using Netlarx.Products.Gobot.Services;
 
-    public class Startup(IConfiguration configuration)
+    public class Startup
     {
-        private readonly IConfiguration configuration = configuration;
+        private readonly IConfiguration _configuration;
+
+        public Startup(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -26,7 +31,7 @@ namespace Netlarx.Products.Gobot
             services.AddControllers();
 
             services.AddDbContext<BotDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("BootsifyConnection"))
+                options.UseSqlServer(_configuration.GetConnectionString("BootsifyConnection"))
             );
 
             services.AddScoped<IBotDbContext>(provider => provider.GetRequiredService<BotDbContext>());
@@ -53,9 +58,11 @@ namespace Netlarx.Products.Gobot
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
             app.UseHttpsRedirection();
             app.UseCors("AllowAngularApp");
             app.UseAuthorization();
+            app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
@@ -63,4 +70,5 @@ namespace Netlarx.Products.Gobot
             });
         }
     }
+
 }

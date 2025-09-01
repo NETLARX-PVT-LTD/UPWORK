@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36121.58
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoBootBackend", "GoBootBackend.csproj", "{772B0847-602E-45BF-9B4B-D10BD085062E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoBotTesting", "..\GoBotTesting\GoBotTesting.csproj", "{57180E5E-C060-46E9-8E7C-D68BB728F18B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gobot", "Gobot.csproj", "{AB88B592-D2CF-F5A1-66B0-53FB9FACBDCA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{772B0847-602E-45BF-9B4B-D10BD085062E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{772B0847-602E-45BF-9B4B-D10BD085062E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{772B0847-602E-45BF-9B4B-D10BD085062E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{772B0847-602E-45BF-9B4B-D10BD085062E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{57180E5E-C060-46E9-8E7C-D68BB728F18B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{57180E5E-C060-46E9-8E7C-D68BB728F18B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57180E5E-C060-46E9-8E7C-D68BB728F18B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57180E5E-C060-46E9-8E7C-D68BB728F18B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB88B592-D2CF-F5A1-66B0-53FB9FACBDCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB88B592-D2CF-F5A1-66B0-53FB9FACBDCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB88B592-D2CF-F5A1-66B0-53FB9FACBDCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB88B592-D2CF-F5A1-66B0-53FB9FACBDCA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
