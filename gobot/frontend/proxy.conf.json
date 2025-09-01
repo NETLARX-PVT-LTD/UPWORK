@@ -1,12 +1,7 @@
 {
-  "/chatbot-widget/*": {
-    "target": "http://localhost:4200",
-    "secure": true,
-    "changeOrigin": true,
-    "headers": {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
-    }
+  "/api": {
+    "target": "https://localhost:7221",
+    "secure": false,
+    "changeOrigin": true
   }
 }

@@ -19,6 +19,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { StoryService } from '../shared/services/story.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 // ✅ --- START: PROTOBUF IMPORTS ---
 import { TextResponseBlock } from '../proto-gen/text_response_block';
@@ -208,7 +209,8 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     private storyService: StoryService,
     private router: Router,
     private route: ActivatedRoute, 
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+     private http: HttpClient 
     ) { }
 
   ngOnInit(): void {
@@ -1133,4 +1135,40 @@ private updateBlockConnectionsFromJsPlumb(): void {
   onCancel(): void {
     this.router.navigate(['/manage-stories']);
   }
+
+  // chatbot-flow.component.ts
+
+testAddJsonApi(block: ChatbotBlock  ): void {
+  if (!block) {
+    // Handle the case where the block is null, maybe return or log an error
+    console.error("Test button clicked but no block was selected.");
+    return; 
+  }
+  const testStoryId = 1;
+
+  // THIS IS THE FIX. We add the storyId to the payload.
+  const jsonApiPayload = {
+    storyId: testStoryId, // 👈 THE FIX IS HERE
+        type: 'jsonApi',
+    apiEndpoint: block.apiEndpoint || 'https://test.api/data',
+    requestType: block.requestType || 'GET',
+    apiHeaders: block.apiHeaders || []
+  };
+  
+  // This URL is correct. It will be forwarded by the proxy.
+  const apiUrl = `/api/components/AddJsonApi?storyId=${testStoryId}`;
+
+  this.http.post(apiUrl, jsonApiPayload).subscribe({
+    next: (response) => {
+      console.log(`✅ SUCCESS! The request worked:`, response);
+    },
+    error: (err) => {
+      // This error is now coming from your C# server, which is good!
+      console.error(`❌ ERROR: The request failed.`, err);
+    }
+  });
+}
+
+
+
 }

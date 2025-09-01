@@ -4,16 +4,12 @@
       <h2>{{ isEditMode ? 'Edit Story' : 'Create Story' }}</h2>
     </div>
     <div class="header-actions">
-
-
-      <div class="header-actions">
-        <button mat-button (click)="onCancel()" class="cancel-button">
-          Cancel
-        </button>
-        <button mat-raised-button color="primary" class="save-button" (click)="saveFlow()">
-          Save
-        </button>
-      </div>
+      <button mat-button (click)="onCancel()" class="cancel-button">
+        Cancel
+      </button>
+      <button mat-raised-button color="primary" class="save-button" (click)="saveFlow()">
+        Save
+      </button>
     </div>
   </div>
 
@@ -89,8 +85,6 @@
         [style.cursor]="isPanning ? 'grabbing' : 'default'" (wheel)="onWheel($event)">
         <div class="drop-zone-indicator" [class.visible]="isDraggingFromPalette">
           <div class="drop-zone-content">
-            <!-- <mat-icon class="drop-zone-icon">add_circle_outline</mat-icon> -->
-            <!-- <span class="drop-zone-text">Drop block here to add to canvas</span> -->
           </div>
         </div>
 
@@ -151,12 +145,6 @@
                   (blockUpdated)="onBlockUpdated($event)" (selectBlock)="selectBlock($event)"
                   (removeBlock)="removeCanvasBlock($event)" (duplicateBlock)="duplicateCanvasBlock($event)"
                   (editBlock)="editCanvasBlock($event)"></app-typing-delay-block>
-
-                <app-json-api-integration-block *ngSwitchDefault [block]="block"
-                  [isSelected]="selectedBlock?.id === block.id" [isSidebarOpen]="rightSidebarOpen"
-                  (blockUpdated)="onBlockUpdated($event)" (selectBlock)="selectBlock($event)"
-                  (removeBlock)="removeCanvasBlock($event)" (duplicateBlock)="duplicateCanvasBlock($event)"
-                  (editBlock)="editCanvasBlock($event)"></app-json-api-integration-block>
               </ng-container>
             </div>
 
@@ -164,7 +152,6 @@
               [class.hidden]="block.type !== 'textResponse' || !block.quickReplies || block.quickReplies.length === 0"
               [style.left.px]="(block.x || 0) - 120" [style.top.px]="(block.y || 0) + (block.height || 0) + 10"
               [attr.data-parent-id]="block.id">
-              <!-- vertical connector from the Text Response block to the quick replies group -->
               <div class="qr-parent-connector" [style.left.px]="120 + (block.width ? (block.width / 2) : 160)"
                 [style.top.px]="0" [style.height.px]="30"></div>
               <app-quick-reply-flow [quickReplies]="block.quickReplies || []" [parentBlockId]="block.id"
@@ -210,9 +197,21 @@
 
           <app-typing-delay-block *ngSwitchCase="'typingDelay'" [block]="selectedBlock" [isSelected]="true"
             [isSidebarOpen]="true" (blockUpdated)="onBlockUpdated($event)"></app-typing-delay-block>
+          
+          <ng-container *ngSwitchCase="'jsonApi'">
+            <app-json-api-integration-block 
+              [block]="selectedBlock" 
+              [isSelected]="true"
+              (blockUpdated)="onBlockUpdated($event)">
+            </app-json-api-integration-block>
 
-          <app-json-api-integration-block *ngIf="selectedBlock.type === 'jsonApi'" [block]="selectedBlock"
-            [isSelected]="true" (blockUpdated)="onBlockUpdated($event)"></app-json-api-integration-block>
+            <div style="padding: 0 20px 20px 20px; margin-top: 10px;">
+              <button mat-raised-button color="accent" (click)="testAddJsonApi(selectedBlock)" style="width: 100%;">
+                Test This Component
+              </button>
+            </div>
+          </ng-container>
+
         </ng-container>
       </div>
     </div>
@@ -226,7 +225,6 @@
     class="absolute right-10 bottom-8 w-14 h-14 flex items-center justify-center bg-[#2563eb] rounded-full shadow-lg cursor-pointer z-[100000] overflow-hidden"
     (click)="toggleJarvis()">
 
-    <!-- Message Icon (skews & hides) -->
     <svg *ngIf="!isJarvisVisible" version="1.0" xmlns="http://www.w3.org/2000/svg" width="34" height="34"
       viewBox="0 0 96 96" fill="white" class="skew-down-fade">
       <g transform="translate(0,96) scale(0.1,-0.1)" stroke="none">
@@ -239,7 +237,6 @@
       </g>
     </svg>
 
-    <!-- Cross Icon (rotates in) -->
     <svg *ngIf="isJarvisVisible" xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 17 17"
       fill="white" class="rotate-in">
       <path
