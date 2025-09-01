@@ -21,11 +21,20 @@
 	  <Protobuf Include="..\..\Proto\typing_delay_block.proto" GrpcServices="None">
 		  <Link>Proto\typing_delay_block.proto</Link>
 	  </Protobuf>
-	  <Protobuf Include="..\..\Proto\json_api_block.proto" GrpcServices="None">
-		  <Link>Proto\json_api_block.proto</Link>
+	  <Protobuf Include="..\..\Proto\link_story_block.proto" GrpcServices="None">
+		  <Link>Proto\link_story_block.proto</Link>
 	  </Protobuf>
 	  <Protobuf Include="..\..\Proto\user_input_block.proto" GrpcServices="None">
 		  <Link>Proto\user_input_block.proto</Link>
+	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\json_api_block.proto" GrpcServices="None">
+		  <Link>Proto\json_api_block.proto</Link>
+	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\button.proto" GrpcServices="None">
+		  <Link>Proto\button.proto</Link>
+	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\text_response_block.proto" GrpcServices="None">
+		  <Link>Proto\text_response_block.proto</Link>
 	  </Protobuf>
   </ItemGroup>
 

@@ -17,6 +17,7 @@ namespace Netlarx.Products.Gobot.Controllers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection.PortableExecutable;
     using System.Threading.Tasks;
 
     [ApiController]
@@ -31,6 +32,10 @@ namespace Netlarx.Products.Gobot.Controllers
 
         TypingDelayBlock typingdelayblock = new TypingDelayBlock();
         UserInputBlock userInputBlock = new UserInputBlock();
+        LinkStoryBlock linkStoryBlock = new LinkStoryBlock();
+        JsonApiBlock JsonApiBlock = new JsonApiBlock();
+        TextResponseBlock textResponseBlock = new TextResponseBlock();
+        Button btn = new Button();
         public ComponentsController(IBotDbContext db, ILogger<ComponentsController> logger, StorySessionManager manager)
         {
             _db = db;
@@ -208,21 +213,34 @@ namespace Netlarx.Products.Gobot.Controllers
 
 
         [HttpPost("AddLinkStory")]
-        public IActionResult AddLinkStory(int storyId, [FromBody] LinkStory model)
+        public IActionResult AddLinkStory(int storyId, [FromBody] LinkStoryBlock block)
         {
+            var model = new Models.LinkStory
+            {
+                StoryId = storyId,
+                LinkStoryId = block.LinkStoryId,
+                LinkStoryName = block.LinkStoryName
+            };
             return AddComponent(storyId, model, ComponentTypes.LinkStory,
                  g => manager.GetStory(storyId).LinkStories.Add(g));
         }
 
         [HttpPost("AddJsonApi")]
-        public IActionResult AddJsonApi(int storyId, [FromBody] JsonAPI model)
+        public IActionResult AddJsonApi(int storyId, [FromBody] JsonApiBlock block)
         {
-            //var model = new Models.JsonAPI
-            //{
-            //    ApiEndpoint = block.ApiEndpoint,
-            //    RequestType = block.RequestType,
-            //    ApiHeaders  = block.ApiHeaders
-            //};
+            var model = new Models.JsonAPI
+            {
+                ApiEndpoint = block.ApiEndpoint,
+                RequestType = block.RequestType,
+                ApiHeaders = block.ApiHeaders
+                            .Select(h => new Models.ApiHeader
+                            {
+                                jsonId = h.JsonId,
+                                Key = h.HeaderKey ?? string.Empty,
+                                Value = h.HeaderValue ?? string.Empty
+                            })
+                            .ToList()
+            };
             return AddComponent(storyId, model, ComponentTypes.JsonAPI,
                  g => manager.GetStory(storyId).JsonAPIs.Add(g));
         }
@@ -235,8 +253,14 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddTextReponse")]
-        public IActionResult AddTextResponse(int storyId, [FromBody] TextResponse model)
+        public IActionResult AddTextResponse(int storyId, [FromBody] TextResponseBlock block)
         {
+            var model = new Models.TextResponse
+            {
+                StoryId = storyId,
+                Type = block.Type,
+                Content = block.Content
+            };
             return AddComponent(storyId, model, ComponentTypes.TextResponse,
                  g => manager.GetStory(storyId).TextResponses.Add(g));
         }
@@ -253,7 +277,6 @@ namespace Netlarx.Products.Gobot.Controllers
 
             return Ok(typingDelays);
         }
-
 
         [HttpGet("GetLinkStory")]
         public async Task<IActionResult> GetLinkStory(int storyId)
