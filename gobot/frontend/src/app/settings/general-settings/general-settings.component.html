@@ -1,0 +1,115 @@
+<div class="min-h-screen bg-gray-100 font-sans text-gray-800">
+
+  
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 p-4 md:p-8 max-w-7xl mx-auto">
+    
+    <div class="md:col-span-2 bg-white rounded-2xl p-6 md:p-8 shadow-xl">
+      <form [formGroup]="settingsForm" (ngSubmit)="onSave()">
+        
+        <div class="mb-6">
+          <label class="block mb-2 font-semibold text-gray-700">Turn Chatbot Off</label>
+          <div class="relative">
+            <select formControlName="turnChatbotOff" class="w-full p-3 border-2 border-slate-200 rounded-lg text-base appearance-none bg-white focus:outline-none focus:border-blue-500 cursor-pointer">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 text-sm">▼</div>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="block mb-2 font-semibold text-gray-700">Send chat transcript via email</label>
+          <div class="flex gap-2">
+            <input 
+              type="email" 
+              [(ngModel)]="newEmail" 
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Enter Email"
+              class="flex-1 p-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-500"
+              (keyup.enter)="addEmail()"
+            >
+            <button type="button" class="bg-blue-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-600 transition-colors" (click)="addEmail()">Add</button>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-2" *ngIf="emailList.length > 0">
+            <span *ngFor="let email of emailList; let i = index" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
+              {{email}}
+              <button type="button" (click)="removeEmail(i)" class="text-blue-700 hover:text-white hover:bg-blue-700 rounded-full w-4 h-4 flex items-center justify-center p-0 text-xs transition-colors">×</button>
+            </span>
+          </div>
+          <small class="block mt-2 text-gray-500">Note: Send chat transcription to multiple emails, press enter to add email.</small>
+        </div>
+
+        <div class="mb-6">
+          <label class="block mb-2 font-semibold text-gray-700">Bot Inactive webhook</label>
+          <input 
+            type="url" 
+            formControlName="botInactiveWebhook"
+            placeholder="https://yourwebsite.com/webhook"
+            class="w-full p-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-500"
+          >
+          <small class="block mt-2 text-gray-500">This webhook will trigger when your bot becomes inactive due to human help</small>
+        </div>
+
+        <div class="mb-6">
+          <label class="block mb-2 font-semibold text-gray-700">Message Webhook</label>
+          <input 
+            type="url" 
+            formControlName="messageWebhook"
+            placeholder="https://yourwebsite.com/webhook"
+            class="w-full p-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-500"
+          >
+          <small class="block mt-2 text-gray-500">This webhook (POST Request) will trigger whenever a user sends a message to the chatbot</small>
+        </div>
+
+        <div class="mb-6">
+          <label class="block mb-2 font-semibold text-gray-700">Bot Auto Translation</label>
+          <div class="relative">
+            <select formControlName="autoTranslation" class="w-full p-3 border-2 border-slate-200 rounded-lg text-base appearance-none bg-white focus:outline-none focus:border-blue-500 cursor-pointer">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 text-sm">▼</div>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full p-4 bg-blue-500 text-white rounded-lg font-bold text-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" [disabled]="!settingsForm.valid">
+          Save
+        </button>
+      </form>
+    </div>
+
+    <div class="md:col-span-1 flex flex-col gap-8">
+      <div class="bg-white rounded-2xl p-6 md:p-8 text-center shadow-xl">
+        <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-3xl shadow-lg">
+          <i class="icon-api">🔑</i>
+        </div>
+        <h3 class="text-xl font-semibold mb-4 text-gray-700">API Key</h3>
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            [value]="maskedApiKey" 
+            readonly
+            class="flex-1 p-3 border-2 border-slate-200 rounded-lg bg-slate-100 font-mono text-sm"
+          >
+          <button 
+            type="button" 
+            class="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors"
+            (click)="copyApiKey()"
+            title="Copy API Key"
+          >
+            📋
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 md:p-8 text-center shadow-xl">
+        <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-3xl shadow-lg">
+          <i class="icon-bell">🔔</i>
+        </div>
+        <h3 class="text-xl font-semibold mb-4 text-gray-700">Enable Notifications</h3>
+        <button class="bg-green-500 text-white font-medium w-full py-3 px-6 rounded-lg hover:bg-green-600 transition-colors">Manage Users</button>
+      </div>
+    </div>
+  </div>
+</div>
