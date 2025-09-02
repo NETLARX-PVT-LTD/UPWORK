@@ -71,11 +71,11 @@
           aria-label="People">
           <mat-icon class="text-lg">people</mat-icon>
         </button>
-        <button mat-icon-button
-          class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200"
-          aria-label="Settings">
-          <mat-icon class="text-lg">settings</mat-icon>
-        </button>
+        <button mat-icon-button (click)="onSettingsClick()" matTooltip="Settings"
+    class="sidebar-nav-button !w-10 !h-10 !rounded-lg !text-blue-200 hover:!bg-blue-500 hover:!text-white transition-all duration-200"
+    aria-label="Settings">
+    <mat-icon class="text-lg">settings</mat-icon>
+  </button>
 
         <div class="relative" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
           <button mat-icon-button
@@ -572,7 +572,7 @@
     </div>
   </div>
   <!-- Chatbot AI Sidebar (New) -->
-    <aside *ngIf="showChatbotAISidebar" class="fixed top-16 bottom-0 left-16 z-20 w-65 bg-gray-100 shadow-xl p-2 flex flex-col space-y-6 sidebar-slide-in">
+    <aside *ngIf="showChatbotAISidebar" (click)="closeAllSidebars()" class="fixed top-16 bottom-0 left-16 z-20 w-65 bg-gray-100 shadow-xl p-2 flex flex-col space-y-6 sidebar-slide-in">
       
       <!-- Top Section -->
       <div class="flex justify-between items-center mb-4">
@@ -605,6 +605,48 @@
         </a>
       </div>
     </aside>
+
+    <!-- settings sidebar -->
+     <div *ngIf="showSettingsSidebar" class="fixed inset-1 z-20 bg-transparent" (click)="closeAllSidebars()"></div>
+
+<div *ngIf="showSettingsSidebar"
+  class="fixed left-16 top-16 bottom-0 w-64 bg-[#ecefff] border-r border-gray-200 shadow-xl z-30 sidebar-slide-in">
+  <div class="p-4 h-full flex flex-col">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-800 mb-1">Settings</h2>
+        <p class="text-sm text-gray-500">Everything related to managing your chatbot settings.</p>
+      </div>
+      <button mat-icon-button class="!w-6 !h-6 !text-gray-400 hover:!text-gray-600 transition-colors"
+         (click)="closeAllSidebars()">
+        <mat-icon class="text-base">close</mat-icon>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto">
+      <div class="flex flex-col gap-1">
+        <button
+          class="flex items-center gap-3 p-3 rounded-lg bg-gray-50 text-gray-700 hover:bg-gray-100 transition-all duration-200" 
+          (click)="onSidebarNavClick('general-settings', $event)">
+          <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+          <span class="text-sm font-medium">General Settings</span>
+        </button>
+        <button
+          class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200"
+          (click)="onSidebarNavClick('manage-team', $event)">
+          <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+          <span class="text-sm">Manage Team</span>
+        </button>
+         <button
+          class="flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200"
+          (click)="onSidebarNavClick('offline-hours', $event)">
+          <div class="w-2 h-2 rounded-full border-2 border-gray-500 bg-gray-100"></div>
+          <span class="text-sm">Manage Offline Hours</span>
+        </button>
+        </div>
+    </div>
+  </div>
+</div>
 
   <main class="transition-all duration-300 bg-gray-100" [class.mt-16]="showHeader" [class.ml-16]="showAside"
     [class.ml-80]="showWebsiteChatbotSidebar && showAside">
