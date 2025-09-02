@@ -3,12 +3,13 @@ syntax = "proto3";
 package chatbot;
 
 message FormField {
-  string name = 1;
-  string type = 2;
-  bool required = 3;
-  string promptPhrase = 4;
-  repeated string options = 5;
-  string optionsText = 6;
+  int32 FormFieldId = 1;
+  string name = 2;
+  string type = 3;
+  bool required = 4;
+  string promptPhrase = 5;
+  repeated string options = 6;
+  string optionsText = 7;
 
   message Validation {
     int32 minLength = 1;
