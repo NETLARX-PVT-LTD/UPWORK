@@ -1,0 +1,363 @@
+ .settings-container {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo-circle {
+      width: 40px;
+      height: 40px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .logo-circle::before {
+      content: "⚙️";
+    }
+
+    h1 {
+      color: white;
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .bot-selector {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .bot-selector select {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      padding: 0.5rem 2rem 0.5rem 1rem;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .bot-selector select option {
+      background: #333;
+      color: white;
+    }
+
+    .chevron-down {
+      position: absolute;
+      right: 0.5rem;
+      pointer-events: none;
+    }
+
+    .chevron-down::before {
+      content: "▼";
+      color: white;
+      font-size: 12px;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn-agentic, .btn-partner, .btn-profile {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-agentic {
+      background: #4285f4;
+      color: white;
+    }
+
+    .btn-partner {
+      background: #34a853;
+      color: white;
+    }
+
+    .btn-profile {
+      background: #ea4335;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .settings-form {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 2rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-input, .email-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    .form-input:focus, .email-input:focus {
+      outline: none;
+      border-color: #4285f4;
+    }
+
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select-wrapper select {
+      width: 100%;
+      padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: white;
+      cursor: pointer;
+      appearance: none;
+    }
+
+    .select-wrapper .chevron-down::before {
+      color: #666;
+    }
+
+    .email-input-container {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .email-input {
+      flex: 1;
+    }
+
+    .add-email-btn {
+      padding: 0.75rem 1rem;
+      background: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.3s ease;
+    }
+
+    .add-email-btn:hover {
+      background: #3367d6;
+    }
+
+    .email-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .email-tag {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 0.25rem 0.5rem;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .remove-tag {
+      background: none;
+      border: none;
+      color: #1976d2;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      padding: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .remove-tag:hover {
+      background: #1976d2;
+      color: white;
+    }
+
+    .helper-text {
+      color: #666;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      display: block;
+    }
+
+    .save-btn {
+      width: 100%;
+      padding: 1rem;
+      background: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .save-btn:hover:not(:disabled) {
+      background: #3367d6;
+    }
+
+    .save-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .api-section, .notifications-section {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .api-icon, .notification-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 24px;
+    }
+
+    .api-icon::before {
+      content: "🔑";
+    }
+
+    .notification-icon::before {
+      content: "🔔";
+    }
+
+    .api-section h3, .notifications-section h3 {
+      margin: 0 0 1rem 0;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .api-key-display {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .api-key-input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      background: #f8f9fa;
+      font-family: monospace;
+      font-size: 0.875rem;
+    }
+
+    .copy-btn {
+      padding: 0.5rem;
+      background: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .copy-btn:hover {
+      background: #3367d6;
+    }
+
+    .manage-users-btn {
+      background: #34a853;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.3s ease;
+    }
+
+    .manage-users-btn:hover {
+      background: #2d8f47;
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+      }
+      
+      .header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+      }
+      
+      .header-left, .header-right {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }

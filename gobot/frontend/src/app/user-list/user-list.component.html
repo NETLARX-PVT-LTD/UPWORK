@@ -241,23 +241,24 @@
               />
             </td>
             <td class="px-4 py-3">
-              <div class="flex items-center gap-3">
-                <img 
-                  [src]="user.avatar || getDefaultAvatar()" 
-                  [alt]="user.name"
-                  class="w-10 h-10 rounded-full object-cover"
-                />
-                <div>
-                  <div class="font-medium text-gray-900">{{ user.name }}</div>
-                  <button 
-                    class="text-xs text-blue-600 hover:underline"
-                    (click)="showUserAttributes(user)"
-                  >
-                    Show Attributes
-                  </button>
-                </div>
-              </div>
-            </td>
+  <div class="flex items-center gap-3">
+    <img 
+      [src]="user.avatar || getDefaultAvatar()" 
+      [alt]="user.name"
+      class="w-10 h-10 rounded-full object-cover"
+    />
+    <div>
+      <div class="font-medium text-gray-900">{{ user.name }}</div>
+      <button 
+        *ngIf="userHasAttributes(user)"
+        class="text-xs text-blue-600 hover:underline"
+        (click)="showUserAttributes(user)"
+      >
+        Show Attributes
+      </button>
+    </div>
+  </div>
+</td>
             <td class="px-4 py-3 text-gray-600">{{ user.locale || '-' }}</td>
             <td class="px-4 py-3 text-gray-600">{{ user.source }}</td>
             <td class="px-4 py-3 text-gray-600">{{ formatDate(user.timestamp) }}</td>
@@ -559,103 +560,174 @@
 </div>
 
 <div *ngIf="showUserAttributesModal" class="fixed inset-0 z-50 overflow-y-auto">
-  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" (click)="closeUserAttributesModal()"></div>
-  
-  <div class="flex items-center justify-center min-h-screen p-4">
-    <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full mx-4" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-blue-600 text-white rounded-t-lg">
-        <h3 class="text-lg font-semibold">User Attributes</h3>
-        <button class="text-white hover:text-gray-200 transition-colors" (click)="closeUserAttributesModal()">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-      
-      <div class="p-0">
-               <div *ngIf="selectedUserForAttributes!.attributes!.length > 0; else noAttributes">
-          <div class="bg-blue-600 text-white px-4 py-2 grid grid-cols-12 gap-2 text-sm font-medium">
-            <div class="col-span-4">KEY</div>
-            <div class="col-span-6">VALUE</div>
-            <div class="col-span-2">ACTION</div>
-          </div>
-          
-          <div class="divide-y divide-gray-200">
-                        <div *ngFor="let attribute of selectedUserForAttributes?.attributes; let i = index"
-                 class="px-4 py-3 grid grid-cols-12 gap-2 items-center hover:bg-gray-50 text-sm">
-              <div class="col-span-4 text-gray-900 font-medium">{{ attribute.key }}</div>
-              <div class="col-span-6 text-gray-600">{{ attribute.value }}</div>
-              <div class="col-span-2 flex gap-1">
-                <button class="p-1 text-red-600 hover:text-red-800 transition-colors"
-                        (click)="deleteAttribute(selectedUserForAttributes!, i)" title="Delete">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3,6 5,6 21,6"></polyline>
-                    <path d="M19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <ng-template #noAttributes>
-          <div class="text-center py-8">
-            <p class="text-gray-500">This user has no attributes assigned yet.</p>
-          </div>
-        </ng-template>
-      </div>
-    </div>
-  </div>
+  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" (click)="closeUserAttributesModal()"></div>
+  
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full mx-4" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-blue-600 text-white rounded-t-lg">
+        <h3 class="text-lg font-semibold">User Attributes</h3>
+        <button class="text-white hover:text-gray-200 transition-colors" (click)="closeUserAttributesModal()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="p-0">
+        <div *ngIf="selectedUserForAttributes && selectedUserForAttributes.attributes && selectedUserForAttributes.attributes.length > 0; else noAttributes">
+          <div class="bg-blue-600 text-white px-4 py-2 grid grid-cols-12 gap-2 text-sm font-medium">
+            <div class="col-span-4">KEY</div>
+            <div class="col-span-6">VALUE</div>
+            <div class="col-span-2">ACTION</div>
+          </div>
+          
+          <div class="divide-y divide-gray-200">
+            <div *ngFor="let attribute of selectedUserForAttributes.attributes; let i = index"
+                 class="px-4 py-3 hover:bg-gray-50 text-sm">
+              
+              <!-- Normal View -->
+              <div *ngIf="editingAttributeIndex !== i" class="grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-4 text-gray-900 font-medium">{{ attribute.key }}</div>
+                <div class="col-span-6 text-gray-600">{{ attribute.value }}</div>
+                <div class="col-span-2 flex gap-1">
+                  <button class="p-1 text-blue-600 hover:text-blue-800 transition-colors"
+                          (click)="startEditAttribute(i, attribute)" title="Edit">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                  </button>
+                  <button class="p-1 text-red-600 hover:text-red-800 transition-colors"
+                          (click)="deleteAttribute(selectedUserForAttributes!, i)" title="Delete">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3,6 5,6 21,6"></polyline>
+                      <path d="M19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Edit View -->
+              <div *ngIf="editingAttributeIndex === i">
+                <div class="grid grid-cols-12 gap-2 items-start mb-2">
+                  <div class="col-span-4">
+                    <input type="text" 
+                           class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                           [(ngModel)]="editingAttributeKey" />
+                  </div>
+                  <div class="col-span-6">
+                    <input type="text" 
+                           class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                           [(ngModel)]="editingAttributeValue" />
+                  </div>
+                  <div class="col-span-2 flex gap-1">
+                    <button class="p-1 text-green-600 hover:text-green-800 transition-colors"
+                            (click)="saveEditAttribute()" title="Save">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20,6 9,17 4,12"></polyline>
+                      </svg>
+                    </button>
+                    <button class="p-1 text-gray-600 hover:text-gray-800 transition-colors"
+                            (click)="cancelEditAttribute()" title="Cancel">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <div *ngIf="editAttributeError" class="col-span-12 mt-2">
+                  <p class="text-xs text-red-600">{{ editAttributeError }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <ng-template #noAttributes>
+          <div class="text-center py-8">
+            <p class="text-gray-500">This user has no attributes assigned yet.</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div *ngIf="showAddAttributeModal" class="fixed inset-0 z-50 overflow-y-auto">
-  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" (click)="closeAddAttributeModal()"></div>
-  
-  <div class="flex items-center justify-center min-h-screen p-4">
-    <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between p-6 border-b border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-900">Add User Attribute</h3>
-        <button class="text-gray-400 hover:text-gray-600 transition-colors" (click)="closeAddAttributeModal()">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-      
-      <div class="p-6">
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Attribute Key</label>
-          <input type="text" placeholder="Enter attribute key" 
-                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                 [(ngModel)]="newAttributeKey" />
-        </div>
-        
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Attribute Value</label>
-          <input type="text" placeholder="Enter attribute value"
-                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                 [(ngModel)]="newAttributeValue" />
-        </div>
-        
-        <div *ngIf="addAttributeError" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p class="text-sm text-red-800">{{ addAttributeError }}</p>
-        </div>
-        
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <p class="text-sm text-blue-800">
-            <span class="font-medium">Note:</span> This attribute will be added to {{ selectedUsers.length }} selected user{{ selectedUsers.length > 1 ? 's' : '' }}.
-          </p>
-        </div>
-      </div>
-      
-      <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
-        <button class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                (click)="closeAddAttributeModal()">Cancel</button>
-        <button class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                (click)="saveUserAttribute()">Save Attribute</button>
-      </div>
-    </div>
-  </div>
+  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" (click)="closeAddAttributeModal()"></div>
+  
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between p-6 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">Add User Attribute</h3>
+        <button class="text-gray-400 hover:text-gray-600 transition-colors" (click)="closeAddAttributeModal()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="p-6">
+        <div *ngFor="let row of attributeRows; let i = index" class="mb-4 p-4 border border-gray-200 rounded-lg">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-medium text-gray-700">Attribute {{ i + 1 }}</span>
+            <div class="flex gap-2">
+              <button 
+                *ngIf="i === attributeRows.length - 1"
+                class="p-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                (click)="addAttributeRow()"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+              <button 
+                *ngIf="attributeRows.length > 1"
+                class="p-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                (click)="removeAttributeRow(i)"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div class="mb-2">
+            <input type="text" placeholder="Enter attribute key" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                   [(ngModel)]="row.key" />
+          </div>
+          
+          <div>
+            <input type="text" placeholder="Enter attribute value"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                   [(ngModel)]="row.value" />
+          </div>
+        </div>
+        
+        <div *ngIf="addAttributeError" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p class="text-sm text-red-800">{{ addAttributeError }}</p>
+        </div>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p class="text-sm text-blue-800">
+            <span class="font-medium">Note:</span> These attributes will be added to {{ selectedUsers.length }} selected user{{ selectedUsers.length > 1 ? 's' : '' }}.
+          </p>
+        </div>
+      </div>
+      
+      <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+        <button class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                (click)="closeAddAttributeModal()">Cancel</button>
+        <button class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                (click)="saveUserAttribute()">Save Attributes</button>
+      </div>
+    </div>
+  </div>
 </div>

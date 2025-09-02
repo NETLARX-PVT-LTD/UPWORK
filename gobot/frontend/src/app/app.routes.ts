@@ -26,8 +26,15 @@ import { ChatbotAnalyticsComponent } from './chatbot-analytics/chatbot-analytics
 import { LiveChatComponent } from './live-chat/live-chat.component';
 import { ManageBotStoriesComponent } from './chatbot-flow/manage-bot-stories/manage-bot-stories.component';
 import { UserListComponent } from './user-list/user-list.component';
+import { GeneralSettingsComponent } from './settings/general-settings/general-settings.component';
+import { ManageTeamComponent } from './settings/manage-team/manage-team.component';
+import { ManageOfflineHoursComponent } from './settings/manage-offline-hours/manage-offline-hours.component';
 
 export const routes: Routes = [
+  // settings
+  { path: 'general-settings', component: GeneralSettingsComponent,data: { title: 'General Settings' } },
+    { path: 'manage-team', component: ManageTeamComponent,data: { title: 'Manage Team' } },
+    { path: 'offline-hours', component: ManageOfflineHoursComponent,data: { title: 'Manage Offline Hours' } },
   // Analytics
   { path: 'chatbot-analytics', component: ChatbotAnalyticsComponent,data: { title: 'Chatbot Analytics' } },
   // live chat

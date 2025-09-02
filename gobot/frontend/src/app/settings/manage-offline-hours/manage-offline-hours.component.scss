@@ -1,0 +1,332 @@
+  .manage-offline-hours-container {
+      padding: 20px;
+      background-color: #f5f5f5;
+      min-height: 100vh;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+    }
+
+    .bot-selector {
+      min-width: 150px;
+    }
+
+    .tutorial-section {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      cursor: pointer;
+    }
+
+    .tutorial-icon {
+      color: #f44336;
+      margin-right: 8px;
+    }
+
+    .tutorial-text {
+      color: #f44336;
+      font-weight: 500;
+    }
+
+    .content-wrapper {
+      display: flex;
+      gap: 20px;
+    }
+
+    .left-section {
+      flex: 1;
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .right-section {
+      width: 300px;
+    }
+
+    .time-section {
+      margin-bottom: 30px;
+    }
+
+    .time-row {
+      display: flex;
+      gap: 20px;
+      align-items: end;
+    }
+
+    .time-field {
+      flex: 1;
+    }
+
+    .time-field label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #666;
+    }
+
+    .add-time-btn {
+      width: 56px;
+      height: 56px;
+      background-color: #4CAF50 !important;
+    }
+
+    .days-section {
+      margin-bottom: 30px;
+    }
+
+    .section-label {
+      display: block;
+      margin-bottom: 15px;
+      font-weight: 500;
+      color: #666;
+    }
+
+    .days-grid {
+      display: flex;
+      gap: 8px;
+    }
+
+    .day-chip {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .day-chip.selected {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    .day-chip.unselected {
+      background-color: #e0e0e0;
+      color: #666;
+    }
+
+    .day-chip:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .toggle-section {
+      margin-bottom: 30px;
+    }
+
+    .toggle-item {
+      margin-bottom: 20px;
+    }
+
+    .message-type-section {
+      margin-bottom: 30px;
+    }
+
+    .tab-buttons {
+      display: flex;
+      margin-bottom: 20px;
+    }
+
+    .tab-button {
+      padding: 12px 24px;
+      border: none;
+      background-color: #f5f5f5;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .tab-button.active {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    .tab-button:first-child {
+      border-radius: 4px 0 0 0;
+    }
+
+    .tab-button:last-child {
+      border-radius: 0 4px 0 0;
+    }
+
+    .text-input-wrapper {
+      position: relative;
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    .variable-button {
+      color: #666;
+    }
+
+    .variable-dropdown {
+      position: absolute;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+
+    .variable-dropdown.show {
+      display: block;
+    }
+
+    .variable-search {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .variable-categories {
+      padding: 15px;
+    }
+
+    .category-section {
+      margin-bottom: 20px;
+    }
+
+    .category-title {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .variable-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .variable-chip {
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .variable-chip:hover {
+      background-color: #1976D2;
+      transform: translateY(-1px);
+    }
+
+    .story-selector-wrapper {
+      display: flex;
+      gap: 15px;
+      align-items: end;
+    }
+
+    .create-story-btn {
+      white-space: nowrap;
+      height: 56px;
+    }
+
+    .save-section {
+      text-align: center;
+    }
+
+    .save-btn {
+      background-color: #2196F3;
+      color: white;
+      padding: 12px 32px;
+      font-size: 16px;
+    }
+
+    .tips-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .tips-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .tips-icon {
+      color: #4CAF50;
+      margin-right: 10px;
+      font-size: 28px;
+    }
+
+    .tips-header h3 {
+      margin: 0;
+      color: #333;
+    }
+
+    .tip-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+
+    .tip-check {
+      color: #4CAF50;
+      margin-right: 10px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .timezone-info {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+
+    .timezone-text {
+      color: #f44336;
+      font-weight: 500;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 999;
+      background: transparent;
+    }
+
+    ::ng-deep .mat-mdc-form-field-appearance-outline .mat-mdc-form-field-outline {
+      color: #ddd;
+    }
+
+    ::ng-deep .mat-mdc-form-field-appearance-outline.mat-focused .mat-mdc-form-field-outline-thick {
+      color: #2196F3;
+    }
+
+    ::ng-deep .mat-mdc-slide-toggle.mat-checked .mat-mdc-slide-toggle-thumb {
+      background-color: #4CAF50;
+    }
+
+    ::ng-deep .mat-mdc-slide-toggle.mat-checked .mat-mdc-slide-toggle-track {
+      background-color: rgba(76, 175, 80, 0.3);
+    }
