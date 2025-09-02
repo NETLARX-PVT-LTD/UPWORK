@@ -91,14 +91,14 @@ namespace Netlarx.Products.Gobot.UnitTest
             _db.Setup(x => x.addStory(It.IsAny<Stories>()));
             _db.Setup(x => x.SaveChanges()).Returns(1);
 
-            var model = new UserInputPhrase
-            {
-                json = "Hello, how are you?"   // example property
-            };
+            //var model = new UserInputPhrase
+            //{
+            //     = "Hello, how are you?"   // example property
+            //};
             UserInputBlock userInputBlock = new UserInputBlock();
             userInputBlock.CustomMessage = "Hey i am doing work on C#";
             userInputBlock.Type = "UserInput";
-            userInputBlock.SubType = UserInputSubType.Text;
+            userInputBlock.SubType = UserInputSubType.Phrase;
 
             // Act
             var result = _controller.AddUserInputPhrase(storyId, userInputBlock);
@@ -138,7 +138,7 @@ namespace Netlarx.Products.Gobot.UnitTest
             list.Add("hello");
             UserInputBlock userInputBlock = new UserInputBlock();
             userInputBlock.Type = "UserInput";
-            userInputBlock.SubType = UserInputSubType.Text;
+            userInputBlock.SubType = UserInputSubType.Keyword;
             // Act
 
             var result = _controller.AddUserInputKeyword(storyId, userInputBlock);
@@ -179,7 +179,7 @@ namespace Netlarx.Products.Gobot.UnitTest
             UserInputBlock userInputBlock = new UserInputBlock();
             userInputBlock.CustomMessage = "Hey i am doing work on C#";
             userInputBlock.Type = "UserInput";
-            userInputBlock.SubType = UserInputSubType.Text;
+            userInputBlock.SubType = UserInputSubType.Anythin;
             // Act
             var result = _controller.AddUserInputAnything(storyId, userInputBlock);
 

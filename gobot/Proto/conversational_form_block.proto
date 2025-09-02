@@ -19,11 +19,11 @@ message FormField {
     double max = 5;
   }
 
-  Validation validation = 7;
+  Validation validation = 8; // fixed numbering
 }
 
 message ConversationalFormBlock {
-  string type = 1; // "conversationalForm"
+  string type = 1; // always "conversationalForm"
   string formId = 2;
   string formName = 3;
   string webhookUrl = 4;

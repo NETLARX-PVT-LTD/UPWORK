@@ -56,7 +56,7 @@ namespace Netlarx.Products.Gobot.UnitTest
             {
                 ID = Guid.NewGuid(),
                 StoryId = storyId,
-                json = "Hello world",
+                Phrase = "Hello world",
                 ToComponentType = null,
                 ToComponentId = null
             };

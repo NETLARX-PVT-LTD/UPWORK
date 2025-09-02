@@ -1,21 +1,21 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="UserInputTypeAnything.cs" company="Netlarx">
+// <copyright file="Variable.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
 
 namespace Netlarx.Products.Gobot.Models
 {
-    using System.Collections.Generic;
+    using System;
     using System.ComponentModel.DataAnnotations;
 
-    public class UserInputTypeAnything : BaseComponent
+    public class Variable
     {
-        [Required]
-        public int StoryId { get; set; }
+        [Key]
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid UserInputKeywordId { get; set; }
 
-        public string? Anything { get; set; }
-
-        public List<Variable> Variables { get; set; }
+        public string name { get; set; }
+        public string type { get; set; }
     }
 }

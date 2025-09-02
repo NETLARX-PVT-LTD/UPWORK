@@ -12,7 +12,7 @@ using Netlarx.Products.Gobot.Db;
 namespace Gobot.Migrations
 {
     [DbContext(typeof(BotDbContext))]
-    [Migration("20250901085748_initial")]
+    [Migration("20250902110126_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -279,6 +279,26 @@ namespace Gobot.Migrations
                     b.ToTable("JsonAPI", (string)null);
                 });
 
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.KeywordGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.PrimitiveCollection<string>("Keywords")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserInputKeywordId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserInputKeywordId");
+
+                    b.ToTable("KeywordGroup");
+                });
+
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.LinkStory", b =>
                 {
                     b.Property<Guid>("ID")
@@ -412,6 +432,10 @@ namespace Gobot.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.PrimitiveCollection<string>("Keywords")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("StoryId")
                         .HasColumnType("int");
 
@@ -419,9 +443,6 @@ namespace Gobot.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ToComponentType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("json")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
@@ -438,6 +459,9 @@ namespace Gobot.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Phrase")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("StoryId")
                         .HasColumnType("int");
 
@@ -445,9 +469,6 @@ namespace Gobot.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ToComponentType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("json")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
@@ -461,6 +482,9 @@ namespace Gobot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Anything")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
@@ -473,12 +497,43 @@ namespace Gobot.Migrations
                     b.Property<string>("ToComponentType")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("json")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("ID");
 
                     b.ToTable("UserInputTypeAnything", (string)null);
+                });
+
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.Variable", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserInputKeywordId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UserInputPhraseID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UserInputTypeAnythingID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserInputKeywordId");
+
+                    b.HasIndex("UserInputPhraseID");
+
+                    b.HasIndex("UserInputTypeAnythingID");
+
+                    b.ToTable("Variable");
                 });
 
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.ApiHeader", b =>
@@ -501,6 +556,15 @@ namespace Gobot.Migrations
                         .IsRequired();
 
                     b.Navigation("Rules");
+                });
+
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.KeywordGroup", b =>
+                {
+                    b.HasOne("Netlarx.Products.Gobot.Models.UserInputKeyword", null)
+                        .WithMany("KeywordGroup")
+                        .HasForeignKey("UserInputKeywordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.TextResponse", b =>
@@ -556,6 +620,23 @@ namespace Gobot.Migrations
                         .HasForeignKey("StoriesID");
                 });
 
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.Variable", b =>
+                {
+                    b.HasOne("Netlarx.Products.Gobot.Models.UserInputKeyword", null)
+                        .WithMany("Variables")
+                        .HasForeignKey("UserInputKeywordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Netlarx.Products.Gobot.Models.UserInputPhrase", null)
+                        .WithMany("Variables")
+                        .HasForeignKey("UserInputPhraseID");
+
+                    b.HasOne("Netlarx.Products.Gobot.Models.UserInputTypeAnything", null)
+                        .WithMany("Variables")
+                        .HasForeignKey("UserInputTypeAnythingID");
+                });
+
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.ConversationalForm", b =>
                 {
                     b.Navigation("FormFields");
@@ -569,6 +650,23 @@ namespace Gobot.Migrations
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.Stories", b =>
                 {
                     b.Navigation("TypingDelays");
+                });
+
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.UserInputKeyword", b =>
+                {
+                    b.Navigation("KeywordGroup");
+
+                    b.Navigation("Variables");
+                });
+
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.UserInputPhrase", b =>
+                {
+                    b.Navigation("Variables");
+                });
+
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.UserInputTypeAnything", b =>
+                {
+                    b.Navigation("Variables");
                 });
 #pragma warning restore 612, 618
         }

@@ -7,7 +7,6 @@
 namespace Netlarx.Products.Gobot.Controllers
 {
     using Chatbot;
-    using Gobot;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
@@ -152,7 +151,7 @@ namespace Netlarx.Products.Gobot.Controllers
             var model = new Models.UserInputPhrase
             {
                 StoryId = storyId,
-                json = block.CustomMessage
+                Phrase = block.CustomMessage
             };
             return AddComponent(storyId, model, ComponentTypes.UserInputPhrase,
                 m => manager.GetStory(storyId).Phrases.Add(m));
@@ -161,10 +160,28 @@ namespace Netlarx.Products.Gobot.Controllers
         [HttpPost("AddUserInputKeyword")]
         public IActionResult AddUserInputKeyword(int storyId, [FromBody] UserInputBlock block)
         {
+            Guid Id = Guid.NewGuid();
             var model = new Models.UserInputKeyword
             {
+                ID = Id,
                 StoryId = storyId,
-                json = block.Keywords.ToString()
+                Keywords = block.Keywords?.ToList() ?? new List<string>(),
+                KeywordGroup = block.KeywordGroups?
+                        .Select(kg => new Models.KeywordGroup
+                        {
+                            Id = Guid.TryParse(kg.Id, out var guid) ? guid : Guid.NewGuid(),
+                            UserInputKeywordId = Id, // 🔑 set FK properly
+                            Keywords = kg.Keywords?.ToList() ?? new List<string>()
+                        })
+                        .ToList() ?? new List<Models.KeywordGroup>(),
+                Variables = block.AvailableVariables?
+                        .Select(v => new Models.Variable
+                        {
+                            UserInputKeywordId = Id, // 🔑 set FK properly
+                            name = v.Name,
+                            type = v.Type
+                        })
+                        .ToList() ?? new List<Models.Variable>()
             };
             return AddComponent(storyId, model, ComponentTypes.UserInputKeyword,
                  g => manager.GetStory(storyId).Keywords.Add(g));
@@ -176,7 +193,7 @@ namespace Netlarx.Products.Gobot.Controllers
             var model = new Models.UserInputTypeAnything
             {
                 StoryId = storyId,
-                json = block.CustomMessage
+                Anything = block.CustomMessage
             };
             return AddComponent(storyId, model, ComponentTypes.UserInputTypeAnything,
                   g => manager.GetStory(storyId).Anythings.Add(g));
@@ -367,280 +384,6 @@ namespace Netlarx.Products.Gobot.Controllers
             }
 
             return Ok(UserInputPhrases);
-        }
-
-        [HttpPost("UpdateStoryToDB")]
-        public async Task<IActionResult> UpdateStoryToDB([FromBody] StorySessionData session)
-        {
-            try
-            {
-                if (session == null)
-                {
-                    _logger.LogWarning("Invalid session data received for update");
-                    return BadRequest("Invalid data");
-                }
-
-                // ✅ Update Phrases
-                if (session.Phrases != null && session.Phrases.Any())
-                {
-                    foreach (var phrase in session.Phrases)
-                    {
-                        var existing = await _db.UserInputPhrase
-                            .FirstOrDefaultAsync(p => p.ID == phrase.ID);
-
-                        if (existing != null)
-                            _db.EntryAll(phrase,existing);
-                        else
-                            _db.UserInputPhrase.Add(phrase); // fallback if not found
-                    }
-                }
-
-                // ✅ Update Keywords
-                if (session.Keywords != null && session.Keywords.Any())
-                {
-                    foreach (var keyword in session.Keywords)
-                    {
-                        var existing = await _db.UserInputKeyword
-                            .FirstOrDefaultAsync(k => k.ID == keyword.ID);
-
-                        if (existing != null)
-                            _db.EntryAll(keyword,existing);
-                        else
-                            _db.UserInputKeyword.Add(keyword);
-                    }
-                }
-
-                // ✅ Update Anythings
-                if (session.Anythings != null && session.Anythings.Any())
-                {
-                    foreach (var any in session.Anythings)
-                    {
-                        var existing = await _db.UserInputTypeAnything
-                            .FirstOrDefaultAsync(a => a.ID == any.ID);
-
-                        if (existing != null)
-                            _db.EntryAll(any,existing);
-                        else
-                            _db.UserInputTypeAnything.Add(any);
-                    }
-                }
-
-                // ✅ Update Connections & Story
-                if (session.Connections != null && session.Connections.Any())
-                {
-                    foreach (var conn in session.Connections)
-                    {
-                        var existing = await _db.Connection
-                            .FirstOrDefaultAsync(c => c.ID == conn.ID);
-
-                        if (existing != null)
-                            _db.EntryAll(conn,existing);
-                        else
-                            _db.Connection.Add(conn);
-                    }
-
-                    var firstConnection = session.Connections.FirstOrDefault();
-                    if (firstConnection != null)
-                    {
-                        var story = await _db.Stories.FirstOrDefaultAsync(s => s.ID == firstConnection.StoryId);
-                        if (story != null)
-                        {
-                            story.RootBlockConnectionId = firstConnection.ID;
-                            _db.Stories.Update(story);
-                        }
-                        else if (session.Story != null)
-                        {
-                            session.Story.RootBlockConnectionId = firstConnection.ID;
-                            _db.Stories.Add(session.Story);
-                        }
-                    }
-                }
-
-                // ✅ Update TextResponses
-                if (session.TextResponses != null && session.TextResponses.Any())
-                {
-                    foreach (var tr in session.TextResponses)
-                    {
-                        var existing = await _db.TextResponse
-                            .FirstOrDefaultAsync(t => t.ID == tr.ID);
-
-                        if (existing != null)
-                            _db.EntryAll(tr, existing);
-                        else
-                            _db.TextResponse.Add(tr);
-                    }
-                }
-
-                // ✅ Update ConversationalForms
-                if (session.ConversationalForms != null && session.ConversationalForms.Any())
-                {
-                    foreach (var cf in session.ConversationalForms)
-                    {
-                        var existing = await _db.ConversationalForm
-                            .FirstOrDefaultAsync(c => c.ID == cf.ID);
-
-                        if (existing != null)
-                            _db.EntryAll(cf,existing);
-                        else
-                            _db.ConversationalForm.Add(cf);
-                    }
-                }
-
-                // ✅ Update TypingDelays
-                if (session.TypingDelays != null && session.TypingDelays.Any())
-                {
-                    foreach (var td in session.TypingDelays)
-                    {
-                        var existing = await _db.TypingDelay
-                            .FirstOrDefaultAsync(t => t.ID == td.ID);
-
-                        if (existing != null)
-                            _db.EntryAll(td, existing);
-                        else
-                            _db.TypingDelay.Add(td);
-                    }
-                }
-
-                // ✅ Update LinkStories
-                if (session.LinkStories != null && session.LinkStories.Any())
-                {
-                    foreach (var ls in session.LinkStories)
-                    {
-                        var existing = await _db.LinkStory
-                            .FirstOrDefaultAsync(l => l.ID == ls.ID);
-
-                        if (existing != null)
-                            _db.EntryAll(ls,existing);
-                        else
-                            _db.LinkStory.Add(ls);
-                    }
-                }
-
-                // ✅ Update JsonAPIs
-                if (session.JsonAPIs != null && session.JsonAPIs.Any())
-                {
-                    foreach (var api in session.JsonAPIs)
-                    {
-                        var existing = await _db.JsonAPI
-                            .FirstOrDefaultAsync(j => j.ID == api.ID);
-
-                        if (existing != null)
-                            _db.EntryAll(api,existing);
-                        else
-                            _db.JsonAPI.Add(api);
-                    }
-                }
-
-                await _db.SaveChangesAsync();
-                _logger.LogInformation("Session updated successfully in DB");
-
-                return Ok(new { message = "Story updated successfully" });
-            }
-            catch (Exception ex)
-            {
-                var innerMessage = ex.InnerException?.Message ?? "No inner exception";
-                _logger.LogError(ex, "Error occurred while updating story session. Inner: {Inner}", innerMessage);
-
-                return StatusCode(500, new
-                {
-                    error = ex.Message,
-                    inner = innerMessage
-                });
-            }
-        }
-
-        [HttpPost("SaveStoryToDb")]
-        public async Task<IActionResult> SaveStoryToDb([FromBody] StorySessionData session)
-        {
-            try
-            {
-                if (session == null)
-                {
-                    _logger.LogWarning("Invalid session data received");
-                    return BadRequest("Invalid data");
-                }
-
-                if (session.Phrases != null)
-                    _db.UserInputPhrase.AddRange(session.Phrases);
-
-                if (session.Keywords != null)
-                    _db.UserInputKeyword.AddRange(session.Keywords);
-
-                if (session.Anythings != null)
-                    _db.UserInputTypeAnything.AddRange(session.Anythings);
-
-                if (session.Connections != null)
-                {
-                    _db.Connection.AddRange(session.Connections);
-
-                    var firstConnection = session.Connections.FirstOrDefault();
-                    if (firstConnection != null)
-                    {
-                        var story = await _db.Stories.FirstOrDefaultAsync(s => s.ID == firstConnection.StoryId);
-                        if (story != null)
-                        {
-                            story.RootBlockConnectionId = firstConnection.ID;
-                            _db.Stories.Update(story);
-                            _logger.LogInformation("Updated root connection for existing StoryId: {StoryId}", story.ID);
-                        }
-                        else if (session.Story != null)
-                        {
-                            session.Story.RootBlockConnectionId = firstConnection.ID;
-                            _db.Stories.Add(session.Story);
-                            _logger.LogInformation("New story created with RootBlockConnectionId: {RootId}", firstConnection.ID);
-                        }
-                        else
-                        {
-                            _logger.LogWarning("No story found in DB and no session.Story provided.");
-                        }
-                    }
-                }
-
-                if(session.TextResponses != null)
-                {
-                    _db.TextResponse.AddRange(session.TextResponses);
-                }
-
-                if(session.ConversationalForms != null)
-                {
-                    _db.ConversationalForm.AddRange(session.ConversationalForms);
-                }
-
-                if(session.TypingDelays != null)
-                {
-                    _db.TypingDelay.AddRange(session.TypingDelays);
-                }
-
-                if(session.LinkStories != null)
-                {
-                    _db.LinkStory.AddRange(session.LinkStories);
-                }
-
-                if(session.TextResponses != null)
-                {
-                    _db.TextResponse.AddRange(session.TextResponses);
-                }
-
-                if(session.JsonAPIs != null)
-                {
-                    _db.JsonAPI.AddRange(session.JsonAPIs);
-                }
-
-                await _db.SaveChangesAsync();
-                _logger.LogInformation("Session saved to DB successfully");
-                return Ok(new { message = "Story saved to DB" });
-            }
-            catch (Exception ex)
-            {
-                var innerMessage = ex.InnerException?.Message ?? "No inner exception";
-                _logger.LogError(ex, "Error occurred while saving story session to DB. Inner: {Inner}", innerMessage);
-
-                return StatusCode(500, new
-                {
-                    error = ex.Message,
-                    inner = innerMessage
-                });
-            }
         }
     }
 }
