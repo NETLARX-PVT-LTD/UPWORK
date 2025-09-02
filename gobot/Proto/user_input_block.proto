@@ -46,7 +46,7 @@ message Variable {
 
 // User input block definition inside a story
 message UserInputBlock {
-  int32 id = 1;                            // Id of the block
+  string id = 1;                            // Id of the block
   string type = 2;                         // Always "userInput"
   String subType = 3;            // Keyword, Phrase, Anything
   repeated string keywords = 4;            // inline keywords
