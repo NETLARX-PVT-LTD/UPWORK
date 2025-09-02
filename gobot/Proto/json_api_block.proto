@@ -1,12 +1,20 @@
 syntax = "proto3";
 
+
 package chatbot;
 
-import "button.proto";
+// Represents a single header (key-value pair)
+message ApiHeaderr {
+  int32 jsonId = 1;      // Primary key
+  string headerKey = 2;        // Header name
+  string headerValue = 3;      // Header value
+}
 
+// Represents a JSON API configuration
 message JsonApiBlock {
-  string type = 1; // "jsonApi"
-  string apiEndpoint = 2;
-  string requestType = 3; // "GET", "POST", etc.
-  repeated ApiHeader apiHeaders = 4;
+  int32 storyId = 1;                // StoryId (required)
+  string type = 2;                  // "jsonApi"
+  string apiEndpoint = 3;           // API URL
+  string requestType = 4;           // "GET", "POST", etc.
+  repeated ApiHeaderr apiHeaders = 5; // List of headers
 }
