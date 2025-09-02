@@ -136,7 +136,7 @@ namespace Gobot.Migrations
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StoryId = table.Column<int>(type: "int", nullable: false),
-                    json = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Keywords = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ToComponentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ToComponentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
@@ -152,7 +152,7 @@ namespace Gobot.Migrations
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StoryId = table.Column<int>(type: "int", nullable: false),
-                    json = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Phrase = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ToComponentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ToComponentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
@@ -168,7 +168,7 @@ namespace Gobot.Migrations
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StoryId = table.Column<int>(type: "int", nullable: false),
-                    json = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Anything = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ToComponentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ToComponentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
@@ -263,6 +263,57 @@ namespace Gobot.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "KeywordGroup",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserInputKeywordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Keywords = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_KeywordGroup", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_KeywordGroup_UserInputKeyword_UserInputKeywordId",
+                        column: x => x.UserInputKeywordId,
+                        principalTable: "UserInputKeyword",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Variable",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserInputKeywordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserInputPhraseID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UserInputTypeAnythingID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Variable", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Variable_UserInputKeyword_UserInputKeywordId",
+                        column: x => x.UserInputKeywordId,
+                        principalTable: "UserInputKeyword",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Variable_UserInputPhrase_UserInputPhraseID",
+                        column: x => x.UserInputPhraseID,
+                        principalTable: "UserInputPhrase",
+                        principalColumn: "ID");
+                    table.ForeignKey(
+                        name: "FK_Variable_UserInputTypeAnything_UserInputTypeAnythingID",
+                        column: x => x.UserInputTypeAnythingID,
+                        principalTable: "UserInputTypeAnything",
+                        principalColumn: "ID");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FormField",
                 columns: table => new
                 {
@@ -309,6 +360,11 @@ namespace Gobot.Migrations
                 column: "RulesvalidationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_KeywordGroup_UserInputKeywordId",
+                table: "KeywordGroup",
+                column: "UserInputKeywordId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_QuickReply_TextResponseID",
                 table: "QuickReply",
                 column: "TextResponseID");
@@ -317,6 +373,21 @@ namespace Gobot.Migrations
                 name: "IX_TypingDelay_StoriesID",
                 table: "TypingDelay",
                 column: "StoriesID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Variable_UserInputKeywordId",
+                table: "Variable",
+                column: "UserInputKeywordId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Variable_UserInputPhraseID",
+                table: "Variable",
+                column: "UserInputPhraseID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Variable_UserInputTypeAnythingID",
+                table: "Variable",
+                column: "UserInputTypeAnythingID");
         }
 
         /// <inheritdoc />
@@ -332,6 +403,9 @@ namespace Gobot.Migrations
                 name: "FormField");
 
             migrationBuilder.DropTable(
+                name: "KeywordGroup");
+
+            migrationBuilder.DropTable(
                 name: "LinkStory");
 
             migrationBuilder.DropTable(
@@ -341,13 +415,7 @@ namespace Gobot.Migrations
                 name: "TypingDelay");
 
             migrationBuilder.DropTable(
-                name: "UserInputKeyword");
-
-            migrationBuilder.DropTable(
-                name: "UserInputPhrase");
-
-            migrationBuilder.DropTable(
-                name: "UserInputTypeAnything");
+                name: "Variable");
 
             migrationBuilder.DropTable(
                 name: "JsonAPI");
@@ -363,6 +431,15 @@ namespace Gobot.Migrations
 
             migrationBuilder.DropTable(
                 name: "Stories");
+
+            migrationBuilder.DropTable(
+                name: "UserInputKeyword");
+
+            migrationBuilder.DropTable(
+                name: "UserInputPhrase");
+
+            migrationBuilder.DropTable(
+                name: "UserInputTypeAnything");
         }
     }
 }

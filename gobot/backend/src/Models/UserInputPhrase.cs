@@ -4,16 +4,18 @@
 // </copyright>
 // ---------------------------------------------------------------------
 
-using System.ComponentModel.DataAnnotations;
-
 namespace Netlarx.Products.Gobot.Models
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     public class UserInputPhrase : BaseComponent
     {
         [Required]
         public int StoryId { get; set; }
 
-        public string? json { get; set; }
+        public string? Phrase { get; set; }
 
+        public List<Variable> Variables { get; set; }
     }
 }
