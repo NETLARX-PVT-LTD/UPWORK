@@ -48,6 +48,13 @@ interface DateRange {
 export class UserListComponent implements OnInit {
   @Input() users: ChatUser[] = [];
   
+  // Edit functionality
+editingAttributeIndex: number = -1;
+editingAttributeKey = '';
+editingAttributeValue = '';
+editAttributeError = '';
+// Dynamic attribute rows in Add User Attribute modal
+attributeRows: { key: string; value: string }[] = [{ key: '', value: '' }];
   // Filter and search
   searchTerm = '';
   selectedFilter = 'All Users';
@@ -252,6 +259,131 @@ initializeData() {
     this.totalRecords = this.users.length;
   }
   
+  // Add row functionality
+addAttributeRow() {
+  this.attributeRows.push({ key: '', value: '' });
+}
+
+// Remove row functionality
+removeAttributeRow(index: number) {
+  if (this.attributeRows.length > 1) {
+    this.attributeRows.splice(index, 1);
+  }
+}
+
+// Updated save method for multiple attributes
+saveUserAttribute() {
+  // Validate all rows
+  let hasError = false;
+  this.addAttributeError = '';
+  
+  for (let i = 0; i < this.attributeRows.length; i++) {
+    const row = this.attributeRows[i];
+    if (!row.key.trim() && !row.value.trim()) {
+      // Skip empty rows
+      continue;
+    }
+    if (!row.key.trim()) {
+      this.addAttributeError = `Attribute key is required for row ${i + 1}.`;
+      hasError = true;
+      break;
+    }
+    if (!row.value.trim()) {
+      this.addAttributeError = `Attribute value is required for row ${i + 1}.`;
+      hasError = true;
+      break;
+    }
+  }
+  
+  if (hasError) return;
+  
+  // Get valid rows
+  const validRows = this.attributeRows.filter(row => row.key.trim() && row.value.trim());
+  if (validRows.length === 0) {
+    this.addAttributeError = 'At least one attribute is required.';
+    return;
+  }
+  
+  // Save attributes
+  this.users.forEach(user => {
+    if (this.selectedUsers.includes(user.id)) {
+      if (!user.attributes) {
+        user.attributes = [];
+      }
+      
+      validRows.forEach(row => {
+        const existingIndex = user.attributes!.findIndex(attr => attr.key === row.key.trim());
+        if (existingIndex > -1) {
+          user.attributes![existingIndex].value = row.value.trim();
+        } else {
+          user.attributes!.push({ key: row.key.trim(), value: row.value.trim() });
+        }
+      });
+    }
+  });
+  
+  this.successMessage = `Successfully added ${validRows.length} attribute${validRows.length > 1 ? 's' : ''} to ${this.selectedUsers.length} user${this.selectedUsers.length > 1 ? 's' : ''}`;
+  this.showSuccessToast = true;
+  setTimeout(() => { this.showSuccessToast = false; }, 3000);
+  
+  this.closeAddAttributeModal();
+  this.resetSelection();
+  this.applyFilters();
+}
+
+// Updated close method
+closeAddAttributeModal() {
+  this.showAddAttributeModal = false;
+  this.attributeRows = [{ key: '', value: '' }];
+  this.addAttributeError = '';
+}
+
+// Edit attribute functionality
+startEditAttribute(index: number, attribute: UserAttribute) {
+  this.editingAttributeIndex = index;
+  this.editingAttributeKey = attribute.key;
+  this.editingAttributeValue = attribute.value;
+  this.editAttributeError = '';
+}
+
+cancelEditAttribute() {
+  this.editingAttributeIndex = -1;
+  this.editingAttributeKey = '';
+  this.editingAttributeValue = '';
+  this.editAttributeError = '';
+}
+
+saveEditAttribute() {
+  if (!this.editingAttributeKey.trim()) {
+    this.editAttributeError = 'Attribute key is required.';
+    return;
+  }
+  
+  if (!this.editingAttributeValue.trim()) {
+    this.editAttributeError = 'Attribute value is required.';
+    return;
+  }
+  
+  if (this.selectedUserForAttributes && this.selectedUserForAttributes.attributes) {
+    this.selectedUserForAttributes.attributes[this.editingAttributeIndex] = {
+      key: this.editingAttributeKey.trim(),
+      value: this.editingAttributeValue.trim()
+    };
+    
+    this.successMessage = 'Successfully updated attribute';
+    this.showSuccessToast = true;
+    setTimeout(() => { this.showSuccessToast = false; }, 3000);
+    
+    this.cancelEditAttribute();
+    this.applyFilters();
+  }
+}
+
+// Check if user has attributes
+userHasAttributes(user: ChatUser): boolean {
+  return (user.attributes || []).length > 0;
+}
+
   applyFilters() {
     let filtered = [...this.users];
     
@@ -414,50 +546,50 @@ openAddAttributeModal() {
   this.addAttributeError = '';
 }
 
-closeAddAttributeModal() {
-  this.showAddAttributeModal = false;
-  this.newAttributeKey = '';
-  this.newAttributeValue = '';
-  this.addAttributeError = '';
-}
+// closeAddAttributeModal() {
+//   this.showAddAttributeModal = false;
+//   this.newAttributeKey = '';
+//   this.newAttributeValue = '';
+//   this.addAttributeError = '';
+// }
 
-saveUserAttribute() {
-  if (!this.newAttributeKey.trim()) {
-    this.addAttributeError = 'Attribute key is required.';
-    return;
-  }
+// saveUserAttribute() {
+//   if (!this.newAttributeKey.trim()) {
+//     this.addAttributeError = 'Attribute key is required.';
+//     return;
+//   }
   
-  if (!this.newAttributeValue.trim()) {
-    this.addAttributeError = 'Attribute value is required.';
-    return;
-  }
+//   if (!this.newAttributeValue.trim()) {
+//     this.addAttributeError = 'Attribute value is required.';
+//     return;
+//   }
   
-  const attributeKey = this.newAttributeKey.trim();
-  const attributeValue = this.newAttributeValue.trim();
+//   const attributeKey = this.newAttributeKey.trim();
+//   const attributeValue = this.newAttributeValue.trim();
   
-  this.users.forEach(user => {
-    if (this.selectedUsers.includes(user.id)) {
-      if (!user.attributes) {
-        user.attributes = [];
-      }
+//   this.users.forEach(user => {
+//     if (this.selectedUsers.includes(user.id)) {
+//       if (!user.attributes) {
+//         user.attributes = [];
+//       }
       
-      const existingAttributeIndex = user.attributes.findIndex(attr => attr.key === attributeKey);
-      if (existingAttributeIndex > -1) {
-        user.attributes[existingAttributeIndex].value = attributeValue;
-      } else {
-        user.attributes.push({ key: attributeKey, value: attributeValue });
-      }
-    }
-  });
+//       const existingAttributeIndex = user.attributes.findIndex(attr => attr.key === attributeKey);
+//       if (existingAttributeIndex > -1) {
+//         user.attributes[existingAttributeIndex].value = attributeValue;
+//       } else {
+//         user.attributes.push({ key: attributeKey, value: attributeValue });
+//       }
+//     }
+//   });
   
-  this.successMessage = `Successfully added attribute "${attributeKey}" to ${this.selectedUsers.length} user${this.selectedUsers.length > 1 ? 's' : ''}`;
-  this.showSuccessToast = true;
-  setTimeout(() => { this.showSuccessToast = false; }, 3000);
+//   this.successMessage = `Successfully added attribute "${attributeKey}" to ${this.selectedUsers.length} user${this.selectedUsers.length > 1 ? 's' : ''}`;
+//   this.showSuccessToast = true;
+//   setTimeout(() => { this.showSuccessToast = false; }, 3000);
   
-  this.closeAddAttributeModal();
-  this.resetSelection();
-  this.applyFilters();
-}
+//   this.closeAddAttributeModal();
+//   this.resetSelection();
+//   this.applyFilters();
+// }
 
 // Show User Attributes functionality
 showUserAttributes(user: ChatUser) {

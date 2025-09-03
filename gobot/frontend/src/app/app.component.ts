@@ -33,6 +33,7 @@ export class AppComponent implements OnInit, OnDestroy {
   showTelegramSidebar = false;
   showSMSSidebar = false;
   showWebsiteChatbotSidebar: boolean = false;
+  showSettingsSidebar: boolean = false; 
   
   showChatbotAISidebar: boolean = false;
 
@@ -135,6 +136,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.showSMSSidebar = false;
     this.showWebsiteChatbotSidebar = false;
     this.showSocialMediaCard = false;
+    this.showSettingsSidebar = false;
 
     if (!keepChatbotAISidebarOpen) {
       this.showChatbotAISidebar = false;
@@ -219,6 +221,15 @@ export class AppComponent implements OnInit, OnDestroy {
         case 'users':
         this.router.navigate(['/users']);
         break;
+        case 'general-settings':
+        this.router.navigate(['/general-settings']);
+        break;
+         case 'manage-team':
+        this.router.navigate(['/manage-team']);
+        break;
+         case 'offline-hours':
+        this.router.navigate(['/offline-hours']);
+        break;
       default:
         this.router.navigate(['/create-story']);
     }
@@ -286,5 +297,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   navigateToPartnerDashboard(): void {
     this.router.navigate(['/partner-dashboard']);
+  }
+
+   onSettingsClick() {
+    this.closeAllSidebars();
+    this.showSettingsSidebar = true;
   }
 }
