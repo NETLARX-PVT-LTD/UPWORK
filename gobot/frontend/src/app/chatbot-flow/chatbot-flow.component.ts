@@ -1200,5 +1200,81 @@ testAddTypingDelayProto(block: ChatbotBlock): void {
     }
   });
 }
+// in chatbot-flow.component.ts
+
+testAddConversationalForm(block: ChatbotBlock): void {
+  // First, a safety check to make sure a block is actually selected.
+  if (!block || block.type !== 'conversationalForm') {
+    console.error("This test is only for Conversational Form blocks.");
+    return;
+  }
+
+  console.log("🧪--- Testing AddConversationalForm (Detailed Plain JSON) ---🧪");
+  
+  const testStoryId = 1;
+
+  // --- THIS IS THE FIX ---
+  // We now create a detailed JavaScript object that matches the C# 'ConversationalForm' class.
+  const conversationalFormPayload = {
+      // These properties must match the fields in your C# Models.ConversationalForm class
+      storyId: testStoryId,
+      type: 'conversationalForm',
+      formId: block.formId || `form-${Date.now()}`,
+      formName: block.formName || 'Test Form from Angular',
+      webhookUrl: block.webhookUrl || '',
+      sendEmailNotification: block.sendEmailNotification || false,
+      notificationEmail: block.notificationEmail || '',
+      
+      // This is the complex, nested part. We create a sample array.
+      formFields: block.formFields || [
+        {
+          name: 'Full Name',
+          type: 'text',
+          required: true,
+          promptPhrase: 'What is your full name?',
+          rules: {
+            minLength: 2,
+            maxLength: 50
+          }
+        },
+        {
+          name: 'Email Address',
+          type: 'email',
+          required: true,
+          promptPhrase: 'Please provide your email address.',
+          rules: {
+            pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'
+          }
+        }
+      ],
+
+      showAsInlineForm: block.showAsInlineForm || false,
+      renderFormResponses: block.renderFormResponses || false,
+      allowMultipleSubmission: block.allowMultipleSubmission || false,
+      multipleSubmissionMessage: block.multipleSubmissionMessage || '',
+      allowExitForm: block.allowExitForm || false,
+      exitFormMessage: block.exitFormMessage || '',
+      successResponseType: block.successResponseType || 'textMessage',
+      successRedirectStoryId: block.successRedirectStoryId || '',
+      validateEmail: block.validateEmail || true,
+      validatePhone: block.validatePhone || false,
+      spamProtection: block.spamProtection || false,
+      requireCompletion: block.requireCompletion || true,
+      successMessage: block.successMessage || 'Thank you for your submission!',
+      redirectUrl: block.redirectUrl || ''
+  };
+  
+  // The API call itself is a standard REST POST request to the correct endpoint.
+  const apiUrl = `/api/components/AddConversationalform?storyId=${testStoryId}`;
+
+  this.http.post(apiUrl, conversationalFormPayload).subscribe({
+    next: (response) => {
+      console.log(`✅ SUCCESS! The ConversationalForm (Detailed JSON) request worked:`, response);
+    },
+    error: (err) => {
+      console.error(`❌ ERROR: The request failed.`, err);
+    }
+  });
+}
 
 }
