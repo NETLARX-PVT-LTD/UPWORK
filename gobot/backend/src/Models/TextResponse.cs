@@ -6,6 +6,7 @@
 
 namespace Netlarx.Products.Gobot.Models
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
 
@@ -20,6 +21,7 @@ namespace Netlarx.Products.Gobot.Models
 
         public List<string> AlternateResponses { get; set; }
 
-        public List<QuickReply> QuickReplies { get; set; }
+        // Navigation property (One-to-Many relation)
+        //public ICollection<QuickReply> QuickReplies { get; set; } = new List<QuickReply>();
     }
 }

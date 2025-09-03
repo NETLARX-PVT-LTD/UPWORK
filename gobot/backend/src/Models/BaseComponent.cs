@@ -5,11 +5,13 @@
 // ---------------------------------------------------------------------
 
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Netlarx.Products.Gobot.Models
 {
     public abstract class BaseComponent
     {
+        [Key]
         public Guid ID { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public string? ToComponentType { get; set; } 

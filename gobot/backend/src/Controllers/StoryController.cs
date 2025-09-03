@@ -15,17 +15,18 @@ namespace Netlarx.Products.Gobot.Controllers
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Netlarx.Products.Gobot.Services;
 
     [ApiController]
     [Route("api/[controller]")]
     public class StoryController : ControllerBase
     {
-        private readonly IBotDbContext _context;
+        private readonly IBotDbContext _db;
         private readonly ILogger<StoryController> _logger;
 
         public StoryController(IBotDbContext context, ILogger<StoryController> logger)
         {
-            _context = context;
+            _db = context;
             _logger = logger;
         }
 
@@ -43,9 +44,9 @@ namespace Netlarx.Products.Gobot.Controllers
                 _logger.LogInformation("Fetching story schema for StoryId: {StoryId}", storyId);
 
                 var result = new List<object>();
-                var story = _context.Stories.FirstOrDefault(s => s.ID == storyId);
+                var story = _db.Stories.FirstOrDefault(s => s.ID == storyId);
 
-                var connection = await _context.Connection
+                var connection = await _db.Connection
                     .FirstOrDefaultAsync(c => c.ID == story.RootBlockConnectionId);
 
                 if (connection == null)
@@ -64,7 +65,7 @@ namespace Netlarx.Products.Gobot.Controllers
 
                     if (currentType == ComponentTypes.UserInputPhrase)
                     {
-                        var data = await _context.UserInputPhrase.FirstOrDefaultAsync(u => u.ID == currentId);
+                        var data = await _db.UserInputPhrase.FirstOrDefaultAsync(u => u.ID == currentId);
                         if (data == null) break;
                         result.Add(data);
                         nextType = data.ToComponentType;
@@ -73,7 +74,7 @@ namespace Netlarx.Products.Gobot.Controllers
                     }
                     else if (currentType == ComponentTypes.UserInputKeyword)
                     {
-                        var data = await _context.UserInputKeyword.FirstOrDefaultAsync(u => u.ID == currentId);
+                        var data = await _db.UserInputKeyword.FirstOrDefaultAsync(u => u.ID == currentId);
                         if (data == null) break;
                         result.Add(data);
                         nextType = data.ToComponentType;
@@ -82,7 +83,7 @@ namespace Netlarx.Products.Gobot.Controllers
                     }
                     else if (currentType == ComponentTypes.UserInputTypeAnything)
                     {
-                        var data = await _context.UserInputTypeAnything.FirstOrDefaultAsync(u => u.ID == currentId);
+                        var data = await _db.UserInputTypeAnything.FirstOrDefaultAsync(u => u.ID == currentId);
                         if (data == null) break;
                         result.Add(data);
                         nextType = data.ToComponentType;
@@ -91,7 +92,7 @@ namespace Netlarx.Products.Gobot.Controllers
                     }
                     else if (currentType == ComponentTypes.TypingDelay)
                     {
-                        var data = await _context.TypingDelay.FirstOrDefaultAsync(td => td.ID == currentId);
+                        var data = await _db.TypingDelay.FirstOrDefaultAsync(td => td.ID == currentId);
                         if (data == null) break;
                         result.Add(data);
                         nextType = data.ToComponentType;
@@ -100,7 +101,7 @@ namespace Netlarx.Products.Gobot.Controllers
                     }
                     else if(currentType == ComponentTypes.LinkStory)
                     {
-                        var data = await _context.LinkStory.FirstOrDefaultAsync(u => u.ID == currentId);
+                        var data = await _db.LinkStory.FirstOrDefaultAsync(u => u.ID == currentId);
                         if (data == null) break;
                         result.Add(data);
                         nextType = data.ToComponentType;
@@ -109,7 +110,7 @@ namespace Netlarx.Products.Gobot.Controllers
                     }
                     else if(currentType == ComponentTypes.JsonAPI)
                     {
-                        var data = await _context.JsonAPI.FirstOrDefaultAsync(u => u.ID == currentId);
+                        var data = await _db.JsonAPI.FirstOrDefaultAsync(u => u.ID == currentId);
                         if (data == null) break;
                         result.Add(data);
                         nextType = data.ToComponentType;
@@ -118,7 +119,7 @@ namespace Netlarx.Products.Gobot.Controllers
                     } 
                     else if(currentType == ComponentTypes.ConversationalForm)
                     {
-                        var data = await _context.ConversationalForm.FirstOrDefaultAsync(u => u.ID == currentId);
+                        var data = await _db.ConversationalForm.FirstOrDefaultAsync(u => u.ID == currentId);
                         if (data == null) break;
                         result.Add(data);
                         nextType = data.ToComponentType;
@@ -127,7 +128,7 @@ namespace Netlarx.Products.Gobot.Controllers
                     } 
                     else if(currentType == ComponentTypes.TextResponse)
                     {
-                        var data = await _context.TextResponse.FirstOrDefaultAsync(u => u.ID == currentId);
+                        var data = await _db.TextResponse.FirstOrDefaultAsync(u => u.ID == currentId);
                         if (data == null) break;
                         result.Add(data);
                         nextType = data.ToComponentType;
@@ -159,6 +160,334 @@ namespace Netlarx.Products.Gobot.Controllers
                     error = ex.Message
                 });
             }
+        }
+
+        //[HttpPost("SaveStoryToDbb")]
+        //public async Task<ActionResult> SaveStoryToDbb([FromBody] StorySessionData session)
+        //{
+        //    try
+        //    {
+        //        if (session == null)
+        //        {
+        //            _logger.LogWarning("Invalid session data received");
+        //            return BadRequest("Invalid data");
+        //        }
+
+        //        // 1. Save Story first
+        //        if (session.Story == null)
+        //        {
+        //            return BadRequest("Story data is required");
+        //        }
+
+        //        await _db.Stories.AddAsync(session.Story);
+        //        await _db.SaveChangesAsync(); // This will assign Story.Id
+        //        var storyId = session.Story.ID;
+
+
+        //        _logger.LogInformation("Story saved with Id: {StoryId}", storyId);
+
+        //        // Save phrases
+        //        if (session.Phrases != null && session.Phrases.Any())
+        //            _db.UserInputPhrase.AddRange(session.Phrases);
+
+        //        // Save keywords
+        //        if (session.Keywords != null && session.Keywords.Any())
+        //            _db.UserInputKeyword.AddRange(session.Keywords);
+
+        //        // Save "type anything"
+        //        if (session.Anythings != null && session.Anythings.Any())
+        //            _db.UserInputTypeAnything.AddRange(session.Anythings);
+
+        //        // Save connections
+        //        if (session.Connections != null && session.Connections.Any())
+        //        {
+        //            _db.Connection.AddRange(session.Connections);
+
+        //            var firstConnection = session.Connections.FirstOrDefault();
+        //            if (firstConnection != null)
+        //            {
+        //                var story = await _db.Stories
+        //                                     .FirstOrDefaultAsync(s => s.ID == firstConnection.StoryId);
+
+        //                if (story != null)
+        //                {
+        //                    story.RootBlockConnectionId = firstConnection.ID;
+        //                    _db.Stories.Update(story);
+        //                    _logger.LogInformation("Updated root connection for StoryId: {StoryId}", story.ID);
+        //                }
+        //            }
+        //        }
+
+        //        //// Save typing delays
+        //        //if (session.TypingDelays != null && session.TypingDelays.Any())
+        //        //    _db.TypingDelay.AddRange(session.TypingDelays);
+
+        //        //// Save conversational forms
+        //        //if (session.ConversationalForms != null && session.ConversationalForms.Any())
+        //        //    _db.ConversationalForm.AddRange(session.ConversationalForms);
+
+        //        //// Save JSON APIs
+        //        //if (session.JsonAPIs != null && session.JsonAPIs.Any())
+        //        //    _db.JsonAPI.AddRange(session.JsonAPIs);
+
+        //        //// Save text responses
+        //        //if (session.TextResponses != null && session.TextResponses.Any())
+        //        //    _db.TextResponse.AddRange(session.TextResponses);
+
+        //        //// Save linked stories
+        //        //if (session.LinkStories != null && session.LinkStories.Any())
+        //        //    _db.LinkStory.AddRange(session.LinkStories);
+
+        //        // Finally save all
+        //        await _db.SaveChangesAsync();
+        //        _logger.LogInformation("Session saved to DB successfully");
+
+        //        return Ok(new { message = "Story saved to DB" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error occurred while saving story session to DB");
+        //        return StatusCode(500, new { error = ex.Message });
+        //    }
+        //}
+
+        //[HttpPut("UpdateStory")]
+        //public async Task<ActionResult> UpdateStory([FromBody] StorySessionData session)
+        //{
+        //    try
+        //    {
+        //        if (session == null || session.Story == null)
+        //        {
+        //            _logger.LogWarning("Invalid session data received");
+        //            return BadRequest("Invalid data");
+        //        }
+
+        //        // 1. Fetch existing story
+        //        var story = await _db.Stories
+        //                             .FirstOrDefaultAsync(s => s.ID == session.Story.ID);
+
+        //        if (story == null)
+        //            return NotFound($"Story with ID {session.Story.ID} not found");
+
+        //        // 2. Update story fields
+        //        story.Name = session.Story.Name;
+        //        //story.Description = session.Story.Description; // if exists
+        //        _db.Stories.Update(story);
+        //        var storyId = story.ID;
+
+        //        // 3. Update Phrases
+        //        if (session.Phrases != null && session.Phrases.Any())
+        //        {
+        //            foreach (var phrase in session.Phrases)
+        //                phrase.StoryId = storyId;
+
+        //            var existingPhrases = _db.UserInputPhrase.Where(p => p.StoryId == storyId);
+        //            _db.UserInputPhrase.RemoveRange(existingPhrases);
+        //            await _db.UserInputPhrase.AddRangeAsync(session.Phrases);
+        //        }
+
+        //        // 4. Update Keywords
+        //        if (session.Keywords != null && session.Keywords.Any())
+        //        {
+        //            foreach (var keyword in session.Keywords)
+        //                keyword.StoryId = storyId;
+
+        //            var existingKeywords = _db.UserInputKeyword.Where(k => k.StoryId == storyId);
+        //            _db.UserInputKeyword.RemoveRange(existingKeywords);
+        //            await _db.UserInputKeyword.AddRangeAsync(session.Keywords);
+        //        }
+
+        //        // 5. Update Anythings
+        //        if (session.Anythings != null && session.Anythings.Any())
+        //        {
+        //            foreach (var any in session.Anythings)
+        //                any.StoryId = storyId;
+
+        //            var existingAnythings = _db.UserInputTypeAnything.Where(a => a.StoryId == storyId);
+        //            _db.UserInputTypeAnything.RemoveRange(existingAnythings);
+        //            await _db.UserInputTypeAnything.AddRangeAsync(session.Anythings);
+        //        }
+
+        //        // 6. Update Connections
+        //        if (session.Connections != null && session.Connections.Any())
+        //        {
+        //            foreach (var conn in session.Connections)
+        //                conn.StoryId = storyId;
+
+        //            var existingConnections = _db.Connection.Where(c => c.StoryId == storyId);
+        //            _db.Connection.RemoveRange(existingConnections);
+        //            await _db.Connection.AddRangeAsync(session.Connections);
+
+        //            // Update root connection
+        //            var firstConnection = session.Connections.FirstOrDefault();
+        //            if (firstConnection != null)
+        //            {
+        //                story.RootBlockConnectionId = firstConnection.ID;
+        //                _db.Stories.Update(story);
+        //            }
+        //        }
+
+        //        // 7. Update ConversationalForms
+        //        if (session.ConversationalForms != null && session.ConversationalForms.Any())
+        //        {
+        //            foreach (var form in session.ConversationalForms)
+        //                form.StoryId = storyId;
+
+        //            var existingForms = _db.ConversationalForm.Where(f => f.StoryId == storyId);
+        //            _db.ConversationalForm.RemoveRange(existingForms);
+        //            await _db.ConversationalForm.AddRangeAsync(session.ConversationalForms);
+        //        }
+
+        //        // 8. Update TypingDelays
+        //        if (session.TypingDelays != null && session.TypingDelays.Any())
+        //        {
+        //            foreach (var delay in session.TypingDelays)
+        //                delay.StoryId = storyId;
+
+        //            var existingDelays = _db.TypingDelay.Where(t => t.StoryId == storyId);
+        //            _db.TypingDelay.RemoveRange(existingDelays);
+        //            await _db.TypingDelay.AddRangeAsync(session.TypingDelays);
+        //        }
+
+        //        // 9. Update JsonAPIs
+        //        if (session.JsonAPIs != null && session.JsonAPIs.Any())
+        //        {
+        //            foreach (var api in session.JsonAPIs)
+        //                api.StoryId = storyId;
+
+        //            var existingApis = _db.JsonAPI.Where(j => j.StoryId == storyId);
+        //            _db.JsonAPI.RemoveRange(existingApis);
+        //            await _db.JsonAPI.AddRangeAsync(session.JsonAPIs);
+        //        }
+
+        //        // 10. Update TextResponses
+        //        if (session.TextResponses != null && session.TextResponses.Any())
+        //        {
+        //            foreach (var text in session.TextResponses)
+        //                text.StoryId = storyId;
+
+        //            var existingTexts = _db.TextResponse.Where(t => t.StoryId == storyId);
+        //            _db.TextResponse.RemoveRange(existingTexts);
+        //            await _db.TextResponse.AddRangeAsync(session.TextResponses);
+        //        }
+
+        //        // 11. Update LinkStories
+        //        if (session.LinkStories != null && session.LinkStories.Any())
+        //        {
+        //            foreach (var link in session.LinkStories)
+        //                link.StoryId = storyId;
+
+        //            var existingLinks = _db.LinkStory.Where(l => l.StoryId == storyId);
+        //            _db.LinkStory.RemoveRange(existingLinks);
+        //            await _db.LinkStory.AddRangeAsync(session.LinkStories);
+        //        }
+
+        //        // 12. Save all changes
+        //        await _db.SaveChangesAsync();
+
+        //        _logger.LogInformation("Story and all components updated successfully for StoryId: {StoryId}", storyId);
+        //        return Ok(new { message = "Story updated successfully", storyId });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error occurred while updating story session to DB");
+        //        return StatusCode(500, new { error = ex.Message });
+        //    }
+        //}
+
+        //[HttpPost("StorySaveToDB")]
+        //public async Task<IActionResult> StorySaveToDB([FromBody] StorySessionData session)
+        //{
+        //    try
+        //    {
+        //        if (session == null)
+        //        {
+        //            _logger.LogWarning("Invalid session data received");
+        //            return BadRequest("Invalid data");
+        //        }
+
+        //        // 1. Save Story first
+        //        if (session.Story == null)
+        //        {
+        //            return BadRequest("Story data is required");
+        //        }
+
+        //        await _db.Stories.AddAsync(session.Story);
+        //        await _db.SaveChangesAsync(); // This will assign Story.Id
+        //        var storyId = session.Story.ID;
+
+
+        //        _logger.LogInformation("Story saved with Id: {StoryId}", storyId);
+
+        //        // Save phrases
+        //        if (session.Phrases != null && session.Phrases.Any())
+        //            _db.UserInputPhrase.AddRange(session.Phrases);
+
+        //        // Save keywords
+        //        if (session.Keywords != null && session.Keywords.Any())
+        //            _db.UserInputKeyword.AddRange(session.Keywords);
+
+        //        // Save "type anything"
+        //        if (session.Anythings != null && session.Anythings.Any())
+        //            _db.UserInputTypeAnything.AddRange(session.Anythings);
+
+        //        // Save connections
+        //        if (session.Connections != null && session.Connections.Any())
+        //        {
+        //            _db.Connection.AddRange(session.Connections);
+
+        //            var firstConnection = session.Connections.FirstOrDefault();
+        //            if (firstConnection != null)
+        //            {
+        //                var story = await _db.Stories
+        //                                     .FirstOrDefaultAsync(s => s.ID == firstConnection.StoryId);
+
+        //                if (story != null)
+        //                {
+        //                    story.RootBlockConnectionId = firstConnection.ID;
+        //                    _db.Stories.Update(story);
+        //                    _logger.LogInformation("Updated root connection for StoryId: {StoryId}", story.ID);
+        //                }
+        //            }
+        //        }
+
+        //        // Save typing delays
+        //        if (session.TypingDelays != null && session.TypingDelays.Any())
+        //            _db.TypingDelay.AddRange(session.TypingDelays);
+
+        //        // Save conversational forms
+        //        if (session.ConversationalForms != null && session.ConversationalForms.Any())
+        //            _db.ConversationalForm.AddRange(session.ConversationalForms);
+
+        //        // Save JSON APIs
+        //        if (session.JsonAPIs != null && session.JsonAPIs.Any())
+        //            _db.JsonAPI.AddRange(session.JsonAPIs);
+
+        //        // Save text responses
+        //        if (session.TextResponses != null && session.TextResponses.Any())
+        //            _db.TextResponse.AddRange(session.TextResponses);
+
+        //        // Save linked stories
+        //        if (session.LinkStories != null && session.LinkStories.Any())
+        //            _db.LinkStory.AddRange(session.LinkStories);
+
+        //        // Finally save all
+        //        await _db.SaveChangesAsync();
+        //        _logger.LogInformation("Session saved to DB successfully");
+
+        //        return Ok(new { message = "Story saved to DB" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error occurred while saving story session to DB");
+        //        return StatusCode(500, new { error = ex.Message });
+        //    }
+        //}
+
+        [HttpGet("TestApi")]
+        public IActionResult TestApi([FromBody] StoryKaData session)
+        {
+            return Ok(new { message = "OK" });
         }
     }
 }

@@ -35,7 +35,8 @@ namespace Netlarx.Products.Gobot
             );
 
             services.AddScoped<IBotDbContext>(provider => provider.GetRequiredService<BotDbContext>());
-            services.AddScoped<StorySessionManager>();
+            services.AddSingleton<StorySessionManager>();
+            //services.AddSingleton<StorySessionData>();
 
             services.AddCors(options =>
             {

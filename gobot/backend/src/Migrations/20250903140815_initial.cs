@@ -37,15 +37,14 @@ namespace Gobot.Migrations
                     FormName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     WebhookUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SendEmailNotification = table.Column<bool>(type: "bit", nullable: false),
-                    NotificationEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NotificationEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ShowAsInlineForm = table.Column<bool>(type: "bit", nullable: false),
                     RenderFormResponses = table.Column<bool>(type: "bit", nullable: false),
                     AllowMultipleSubmission = table.Column<bool>(type: "bit", nullable: false),
-                    MultipleSubmissionMessage = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MultipleSubmissionMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AllowExitForm = table.Column<bool>(type: "bit", nullable: false),
-                    ExitFormMessage = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SuccessResponseType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SuccessRedirectStoryId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExitFormMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SuccessResponseType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ValidateEmail = table.Column<bool>(type: "bit", nullable: false),
                     ValidatePhone = table.Column<bool>(type: "bit", nullable: false),
                     SpamProtection = table.Column<bool>(type: "bit", nullable: false),
@@ -95,6 +94,20 @@ namespace Gobot.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_LinkStory", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuickReply",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TextResponseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuickReply", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -179,20 +192,27 @@ namespace Gobot.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Validation",
+                name: "FormField",
                 columns: table => new
                 {
-                    validationId = table.Column<int>(type: "int", nullable: false)
+                    FormFieldId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    MinLength = table.Column<int>(type: "int", nullable: false),
-                    MaxLength = table.Column<int>(type: "int", nullable: false),
-                    Pattern = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Min = table.Column<double>(type: "float", nullable: false),
-                    Max = table.Column<double>(type: "float", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Required = table.Column<bool>(type: "bit", nullable: false),
+                    PromptPhrase = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Options = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OptionsText = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConversationalFormID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Validation", x => x.validationId);
+                    table.PrimaryKey("PK_FormField", x => x.FormFieldId);
+                    table.ForeignKey(
+                        name: "FK_FormField_CoversationalForm_ConversationalFormID",
+                        column: x => x.ConversationalFormID,
+                        principalTable: "CoversationalForm",
+                        principalColumn: "ID");
                 });
 
             migrationBuilder.CreateTable(
@@ -235,31 +255,6 @@ namespace Gobot.Migrations
                         column: x => x.StoriesID,
                         principalTable: "Stories",
                         principalColumn: "ID");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "QuickReply",
-                columns: table => new
-                {
-                    TestReponseId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TextResponseID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ToComponentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ToComponentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_QuickReply", x => x.TestReponseId);
-                    table.ForeignKey(
-                        name: "FK_QuickReply_TextResponse_TextResponseID",
-                        column: x => x.TextResponseID,
-                        principalTable: "TextResponse",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -313,37 +308,6 @@ namespace Gobot.Migrations
                         principalColumn: "ID");
                 });
 
-            migrationBuilder.CreateTable(
-                name: "FormField",
-                columns: table => new
-                {
-                    FormFieldId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Required = table.Column<bool>(type: "bit", nullable: false),
-                    PromptPhrase = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Options = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OptionsText = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RulesvalidationId = table.Column<int>(type: "int", nullable: false),
-                    ConversationalFormID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FormField", x => x.FormFieldId);
-                    table.ForeignKey(
-                        name: "FK_FormField_CoversationalForm_ConversationalFormID",
-                        column: x => x.ConversationalFormID,
-                        principalTable: "CoversationalForm",
-                        principalColumn: "ID");
-                    table.ForeignKey(
-                        name: "FK_FormField_Validation_RulesvalidationId",
-                        column: x => x.RulesvalidationId,
-                        principalTable: "Validation",
-                        principalColumn: "validationId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_ApiHeader_JsonAPIID",
                 table: "ApiHeader",
@@ -355,19 +319,9 @@ namespace Gobot.Migrations
                 column: "ConversationalFormID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FormField_RulesvalidationId",
-                table: "FormField",
-                column: "RulesvalidationId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_KeywordGroup_UserInputKeywordId",
                 table: "KeywordGroup",
                 column: "UserInputKeywordId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_QuickReply_TextResponseID",
-                table: "QuickReply",
-                column: "TextResponseID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TypingDelay_StoriesID",
@@ -412,6 +366,9 @@ namespace Gobot.Migrations
                 name: "QuickReply");
 
             migrationBuilder.DropTable(
+                name: "TextResponse");
+
+            migrationBuilder.DropTable(
                 name: "TypingDelay");
 
             migrationBuilder.DropTable(
@@ -422,12 +379,6 @@ namespace Gobot.Migrations
 
             migrationBuilder.DropTable(
                 name: "CoversationalForm");
-
-            migrationBuilder.DropTable(
-                name: "Validation");
-
-            migrationBuilder.DropTable(
-                name: "TextResponse");
 
             migrationBuilder.DropTable(
                 name: "Stories");

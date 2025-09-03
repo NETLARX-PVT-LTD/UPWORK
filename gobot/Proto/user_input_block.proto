@@ -23,7 +23,7 @@ message Variable {
 
 // User input block definition inside a story
 message UserInputBlock {
-  int32 id = 1;                            // Id of the block
+  string id = 1;                            // Id of the block
   string type = 2;                         // Always "userInput"
   UserInputSubType subType = 3;            // Keyword, Phrase, Anything
   repeated string keywords = 4;            // inline keywords
@@ -33,11 +33,7 @@ message UserInputBlock {
   repeated Variable availableVariables = 8;// Use protobuf timestamp instead of DateTime
   string toComponentType = 10;             // Optional reference type
   string toComponentId = 11;               // GUID represented as string
+  string storyId = 12;
 }
 
-// Story model that contains blocks
-message Story {
-  string id = 1;
-  string name = 2;
-  repeated UserInputBlock userInputBlocks = 3;
-}
+

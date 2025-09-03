@@ -19,7 +19,7 @@ namespace Netlarx.Products.Gobot.Models
         public List<string> Keywords { get; set; } = new List<string>();
 
         public List<KeywordGroup>? KeywordGroup { get; set; }
-
+        //public ICollection<KeywordGroup> KeywordGroup { get; set; }
         public List<Variable> Variables { get; set; }
 
     }

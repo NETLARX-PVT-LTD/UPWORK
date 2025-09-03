@@ -35,11 +35,11 @@ namespace Netlarx.Products.Gobot.Controllers
         JsonApiBlock JsonApiBlock = new JsonApiBlock();
         TextResponseBlock textResponseBlock = new TextResponseBlock();
         Button btn = new Button();
-        public ComponentsController(IBotDbContext db, ILogger<ComponentsController> logger, StorySessionManager manager)
+        public ComponentsController(IBotDbContext db, ILogger<ComponentsController> logger, StorySessionManager _manager)
         {
             _db = db;
             _logger = logger;
-            this.manager = manager;
+            manager = _manager;
         }
 
         [HttpPost("AddStory")]
@@ -163,7 +163,6 @@ namespace Netlarx.Products.Gobot.Controllers
             Guid Id = Guid.NewGuid();
             var model = new Models.UserInputKeyword
             {
-                ID = Id,
                 StoryId = storyId,
                 Keywords = block.Keywords?.ToList() ?? new List<string>(),
                 KeywordGroup = block.KeywordGroups?
@@ -183,6 +182,7 @@ namespace Netlarx.Products.Gobot.Controllers
                         })
                         .ToList() ?? new List<Models.Variable>()
             };
+            Console.WriteLine(model);
             return AddComponent(storyId, model, ComponentTypes.UserInputKeyword,
                  g => manager.GetStory(storyId).Keywords.Add(g));
         }
@@ -263,11 +263,49 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddConversationalform")]
-        public IActionResult AddConversationalForm(int storyId, [FromBody] ConversationalForm model)
+        public IActionResult AddConversationalForm(int storyId, [FromBody] ConversationalFormBlock block)
         {
+            var model = new ConversationalForm
+            {
+                StoryId = storyId,
+                Type = block.Type,
+                FormId = block.FormId,
+                FormName = block.FormName,
+                WebhookUrl = block.WebhookUrl,
+                SendEmailNotification = block.SendEmailNotification,
+                NotificationEmail = block.NotificationEmail,
+                ShowAsInlineForm = block.ShowAsInlineForm,
+                RenderFormResponses = block.RenderFormResponses,
+                AllowMultipleSubmission = block.AllowMultipleSubmission,
+                MultipleSubmissionMessage = block.MultipleSubmissionMessage,
+                AllowExitForm = block.AllowExitForm,
+                ExitFormMessage = block.ExitFormMessage,
+                SuccessResponseType = block.SuccessResponseType,
+                //SuccessRedirectStoryId = block.SuccessRedirectStoryId,
+                ValidateEmail = block.ValidateEmail,
+                ValidatePhone = block.ValidatePhone,
+                SpamProtection = block.SpamProtection,
+                RequireCompletion = block.RequireCompletion,
+                SuccessMessage = block.SuccessMessage,
+                RedirectUrl = block.RedirectUrl,
+
+                // Map nested FormFields
+                FormFields = block.FormFields?.Select(f => new FormField
+                {
+                    FormFieldId = f.FormFieldId,
+                    Name = f.Name,
+                    Type = f.Type,
+                    Required = f.Required,
+                    PromptPhrase = f.PromptPhrase,
+                    Options = f.Options?.ToList(),
+                    OptionsText = f.OptionsText
+                }).ToList()
+            };
+
             return AddComponent(storyId, model, ComponentTypes.ConversationalForm,
-                 g => manager.GetStory(storyId).ConversationalForms.Add(g));
+                g => manager.GetStory(storyId).ConversationalForms.Add(g));
         }
+
 
         [HttpPost("AddTextReponse")]
         public IActionResult AddTextResponse(int storyId, [FromBody] TextResponseBlock block)
@@ -328,7 +366,7 @@ namespace Netlarx.Products.Gobot.Controllers
 
             if (TextResponses == null)
             {
-                return NotFound($"No LinkStory found for StoryId {storyId}");
+                return NotFound($"No TextResponse found for StoryId {storyId}");
             }
 
             return Ok(TextResponses);
@@ -385,5 +423,6 @@ namespace Netlarx.Products.Gobot.Controllers
 
             return Ok(UserInputPhrases);
         }
+
     }
 }
