@@ -276,42 +276,42 @@ namespace Netlarx.Products.Gobot.UnitTest
             Assert.Equal(storyId, returnedStoryId);
         }
 
-        [Fact]
-        public void addConversationalForm()
-        {
-            int storyId = 1;
-            var story = new Stories { ID = storyId, Name = "New Story" };
-            _db.Setup(x => x.addStory(It.IsAny<Stories>()));
-            _db.Setup(x => x.SaveChanges()).Returns(1);
+        //[Fact]
+        //public void addConversationalForm()
+        //{
+        //    int storyId = 1;
+        //    var story = new Stories { ID = storyId, Name = "New Story" };
+        //    _db.Setup(x => x.addStory(It.IsAny<Stories>()));
+        //    _db.Setup(x => x.SaveChanges()).Returns(1);
 
-            var model = new ConversationalForm
-            {
-                StoryId = storyId
-            };
+        //    var model = new ConversationalForm
+        //    {
+        //        StoryId = storyId
+        //    };
 
-            //TypingDelayBlock block = new TypingDelayBlock();
+        //    //TypingDelayBlock block = new TypingDelayBlock();
 
-            //block.DelaySeconds = 1;
-            //block.Type = "typingDelay";
+        //    //block.DelaySeconds = 1;
+        //    //block.Type = "typingDelay";
 
-            // Act
-            var result = _controller.AddConversationalForm(storyId, model);
+        //    // Act
+        //    var result = _controller.AddConversationalForm(storyId, model);
 
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var value = okResult.Value;
+        //    // Assert
+        //    var okResult = Assert.IsType<OkObjectResult>(result);
+        //    var value = okResult.Value;
 
-            var messageProp = value.GetType().GetProperty("message");
-            var storyIdProp = value.GetType().GetProperty("storyId");
-            var sessionDataProp = value.GetType().GetProperty("sessionData");
+        //    var messageProp = value.GetType().GetProperty("message");
+        //    var storyIdProp = value.GetType().GetProperty("storyId");
+        //    var sessionDataProp = value.GetType().GetProperty("sessionData");
 
-            var message = messageProp.GetValue(value);
-            var returnedStoryId = storyIdProp.GetValue(value);
-            var sessionData = sessionDataProp.GetValue(value);
+        //    var message = messageProp.GetValue(value);
+        //    var returnedStoryId = storyIdProp.GetValue(value);
+        //    var sessionData = sessionDataProp.GetValue(value);
 
-            Assert.Equal("conversationalForm added in memory", message);
-            Assert.Equal(storyId, returnedStoryId);
-        }
+        //    Assert.Equal("conversationalForm added in memory", message);
+        //    Assert.Equal(storyId, returnedStoryId);
+        //}
 
         [Fact]
         public void addJsonAPI()

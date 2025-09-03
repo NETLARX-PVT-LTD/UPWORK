@@ -6,15 +6,23 @@
 
 namespace Netlarx.Products.Gobot.Models
 {
+    using System;
     using System.ComponentModel.DataAnnotations;
 
-    public class QuickReply : BaseComponent
+    public class QuickReply
     {
         [Key]
-        public int TestReponseId { get; set; }
+        public Guid ID { get; set; }
 
+        [Required]
         public string Title { get; set; }
 
         public string Value { get; set; }
+
+        // Foreign Key
+        public Guid TextResponseId { get; set; }
+
+        //// Navigation property
+        //public TextResponse TextResponse { get; set; }
     }
 }

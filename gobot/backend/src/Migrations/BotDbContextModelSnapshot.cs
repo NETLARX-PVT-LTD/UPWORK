@@ -88,7 +88,6 @@ namespace Gobot.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ExitFormMessage")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FormId")
@@ -100,11 +99,9 @@ namespace Gobot.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MultipleSubmissionMessage")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NotificationEmail")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RedirectUrl")
@@ -133,12 +130,7 @@ namespace Gobot.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SuccessRedirectStoryId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("SuccessResponseType")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ToComponentId")
@@ -182,11 +174,9 @@ namespace Gobot.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.PrimitiveCollection<string>("Options")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OptionsText")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PromptPhrase")
@@ -196,9 +186,6 @@ namespace Gobot.Migrations
                     b.Property<bool>("Required")
                         .HasColumnType("bit");
 
-                    b.Property<int>("RulesvalidationId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -207,38 +194,7 @@ namespace Gobot.Migrations
 
                     b.HasIndex("ConversationalFormID");
 
-                    b.HasIndex("RulesvalidationId");
-
                     b.ToTable("FormField");
-                });
-
-            modelBuilder.Entity("Netlarx.Products.Gobot.Models.FormField+Validation", b =>
-                {
-                    b.Property<int>("validationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("validationId"));
-
-                    b.Property<double>("Max")
-                        .HasColumnType("float");
-
-                    b.Property<int>("MaxLength")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Min")
-                        .HasColumnType("float");
-
-                    b.Property<int>("MinLength")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Pattern")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("validationId");
-
-                    b.ToTable("Validation");
                 });
 
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.JsonAPI", b =>
@@ -329,6 +285,28 @@ namespace Gobot.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("LinkStory", (string)null);
+                });
+
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.QuickReply", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TextResponseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("QuickReply", (string)null);
                 });
 
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.Stories", b =>
@@ -545,14 +523,6 @@ namespace Gobot.Migrations
                     b.HasOne("Netlarx.Products.Gobot.Models.ConversationalForm", null)
                         .WithMany("FormFields")
                         .HasForeignKey("ConversationalFormID");
-
-                    b.HasOne("Netlarx.Products.Gobot.Models.FormField+Validation", "Rules")
-                        .WithMany()
-                        .HasForeignKey("RulesvalidationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Rules");
                 });
 
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.KeywordGroup", b =>
@@ -562,52 +532,6 @@ namespace Gobot.Migrations
                         .HasForeignKey("UserInputKeywordId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Netlarx.Products.Gobot.Models.TextResponse", b =>
-                {
-                    b.OwnsMany("Netlarx.Products.Gobot.Models.QuickReply", "QuickReplies", b1 =>
-                        {
-                            b1.Property<int>("TestReponseId")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("TestReponseId"));
-
-                            b1.Property<DateTime>("CreatedDate")
-                                .HasColumnType("datetime2");
-
-                            b1.Property<Guid>("ID")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<Guid>("TextResponseID")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("Title")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<Guid?>("ToComponentId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("ToComponentType")
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("TestReponseId");
-
-                            b1.HasIndex("TextResponseID");
-
-                            b1.ToTable("QuickReply");
-
-                            b1.WithOwner()
-                                .HasForeignKey("TextResponseID");
-                        });
-
-                    b.Navigation("QuickReplies");
                 });
 
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.TypingDelay", b =>

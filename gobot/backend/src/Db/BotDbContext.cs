@@ -31,6 +31,7 @@ namespace Netlarx.Products.Gobot.Db
         public DbSet<JsonAPI> JsonAPI { get; set; }
 
         public DbSet<TextResponse> TextResponse { get; set; }
+        public DbSet<QuickReply> QuickReplies { get; set; }
 
         public DbSet<LinkStory> LinkStory { get; set; }
 
@@ -99,13 +100,38 @@ namespace Netlarx.Products.Gobot.Db
             modelBuilder.Entity<JsonAPI>().ToTable("JsonAPI");
             modelBuilder.Entity<LinkStory>().ToTable("LinkStory");
             modelBuilder.Entity<ConversationalForm>().ToTable("CoversationalForm");
-            modelBuilder.Entity<TextResponse>().ToTable("TextResponse");
+            //modelBuilder.Entity<TextResponse>().ToTable("TextResponse");
             modelBuilder.Entity<TypingDelay>().ToTable("TypingDelay");
-            modelBuilder.Entity<TextResponse>(entity =>
-            {
-                entity.OwnsMany(tr => tr.QuickReplies);
-            });
+            modelBuilder.Entity<TextResponse>().ToTable("TextResponse");
+            modelBuilder.Entity<QuickReply>().ToTable("QuickReply");
+            // ✅ TextResponse configuration
+            //modelBuilder.Entity<TextResponse>(entity =>
+            //{
+            //    entity.ToTable("TextResponse");
 
+            //    // Primary key comes from BaseComponent (Guid ID)
+            //    entity.HasKey(tr => tr.ID);
+
+            //    // One-to-Many: TextResponse → QuickReplies
+            //    entity.HasMany(tr => tr.QuickReplies)
+            //          .WithOne(qr => qr.TextResponse)
+            //          .HasForeignKey(qr => qr.TextResponseId)   // must match Guid
+            //          .OnDelete(DeleteBehavior.Cascade);
+            //});
+
+            // ✅ QuickReply configuration
+            //modelBuilder.Entity<QuickReply>(entity =>
+            //{
+            //    entity.ToTable("QuickReply");
+
+            //    // Primary key from BaseComponent
+            //    entity.HasKey(qr => qr.ID);
+
+            //    // Foreign key is Guid, matches TextResponse.ID
+            //    entity.HasOne(qr => qr.TextResponse)
+            //          .WithMany(tr => tr.QuickReplies)
+            //          .HasForeignKey(qr => qr.TextResponseId);
+            //});
             base.OnModelCreating(modelBuilder);
         }
     }
