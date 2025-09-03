@@ -200,9 +200,29 @@
             [isSidebarOpen]="true" [availableStories]="availableStories"
             (blockUpdated)="onBlockUpdated($event)"></app-link-story-block>
 
-          <app-conversational-form-block *ngSwitchCase="'conversationalForm'" [block]="selectedBlock"
-            [isSelected]="true" [isSidebarOpen]="true" [availableForms]="availableForms"
-            (blockUpdated)="onBlockUpdated($event)"></app-conversational-form-block>
+          <ng-container *ngSwitchCase="'conversationalForm'">
+    
+    <!-- <app-conversational-form-block
+        [block]="selectedBlock"
+        [isSelected]="true"
+        [isSidebarOpen]="true"
+        [availableForms]="availableForms"
+        (blockUpdated)="onBlockUpdated($event)"
+    ></app-conversational-form-block> -->
+
+    <!-- 👇 ADD THE NEW TEST BUTTON HERE 👇 -->
+    <div style="padding: 0 20px 20px 20px; margin-top: 10px;">
+        <button 
+            mat-raised-button 
+            color="accent" 
+            (click)="testAddConversationalForm(selectedBlock!)"
+            style="width: 100%;"
+        >
+            Test This Conversational Form
+        </button>
+    </div>
+
+</ng-container>
           
           <!-- START: TYPING DELAY BLOCK WITH TEST BUTTON -->
           <ng-container *ngSwitchCase="'typingDelay'">
