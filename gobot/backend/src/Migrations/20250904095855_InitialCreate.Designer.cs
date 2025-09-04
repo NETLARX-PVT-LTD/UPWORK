@@ -12,8 +12,8 @@ using Netlarx.Products.Gobot.Db;
 namespace Gobot.Migrations
 {
     [DbContext(typeof(BotDbContext))]
-    [Migration("20250902110126_initial")]
-    partial class initial
+    [Migration("20250904095855_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

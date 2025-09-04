@@ -6,6 +6,7 @@
 
 namespace Netlarx.Products.Gobot.Models
 {
+    using Chatbot;
     using System.Collections.Generic;
 
     public class StorySessionData
@@ -29,5 +30,8 @@ namespace Netlarx.Products.Gobot.Models
         public List<JsonAPI> JsonAPIs { get; set; } = new();
 
         public Stories Story { get; set; } = new();
+
+        public List<Media> Media { get; set; } = new();
+
     }
 }

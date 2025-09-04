@@ -97,8 +97,7 @@ namespace Netlarx.Products.Gobot.UnitTest
             //};
             UserInputBlock userInputBlock = new UserInputBlock();
             userInputBlock.CustomMessage = "Hey i am doing work on C#";
-            userInputBlock.Type = "UserInput";
-            userInputBlock.SubType = UserInputSubType.Phrase;
+            userInputBlock.Type = ComponentTypes.UserInputPhrase;
 
             // Act
             var result = _controller.AddUserInputPhrase(storyId, userInputBlock);
@@ -138,7 +137,7 @@ namespace Netlarx.Products.Gobot.UnitTest
             list.Add("hello");
             UserInputBlock userInputBlock = new UserInputBlock();
             userInputBlock.Type = "UserInput";
-            userInputBlock.SubType = UserInputSubType.Keyword;
+            userInputBlock.SubType = ComponentTypes.UserInputKeyword; 
             // Act
 
             var result = _controller.AddUserInputKeyword(storyId, userInputBlock);
@@ -179,7 +178,7 @@ namespace Netlarx.Products.Gobot.UnitTest
             UserInputBlock userInputBlock = new UserInputBlock();
             userInputBlock.CustomMessage = "Hey i am doing work on C#";
             userInputBlock.Type = "UserInput";
-            userInputBlock.SubType = UserInputSubType.Anythin;
+            userInputBlock.SubType = ComponentTypes.UserInputTypeAnything;
             // Act
             var result = _controller.AddUserInputAnything(storyId, userInputBlock);
 

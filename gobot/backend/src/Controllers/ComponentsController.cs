@@ -280,7 +280,70 @@ namespace Netlarx.Products.Gobot.Controllers
             };
             return AddComponent(storyId, model, ComponentTypes.TextResponse,
                  g => manager.GetStory(storyId).TextResponses.Add(g));
+
+
         }
+        [HttpPost("AddMediaBlock")]
+        public IActionResult AddMediaBlock(int storyId, [FromBody] MediaBlock block)
+        {
+            // Changed to use your new Models.MediaBlock class
+            var model = new Models.Media
+            {
+                StoryId = storyId,
+                MediaId = block.MediaId,
+                MediaType = (Models.MediaTypeblock)block.MediaType,
+                SingleImageUrl = block.SingleImageUrl,
+                VideoUrl = block.VideoUrl,
+                AudioUrl = block.AudioUrl,
+                FileUrl = block.FileUrl,
+                MediaName = block.MediaName,
+                ButtonTitle = block.ButtonTitle,
+                ButtonTextMessage = block.ButtonTextMessage,
+                ButtonType = block.ButtonType,
+                ButtonLinkedMediaId = block.ButtonLinkedMediaId,
+                ButtonUrl = block.ButtonUrl,
+
+                // Corrected to map to Models.ImageSlideBlock
+                Slides = block.Slides.Select(s => new Models.ImageSlideblock
+                {
+                    Url = s.Url,
+                    Title = s.Title,
+                    Description = s.Description
+                }).ToList(),
+
+                // Corrected to map to Models.ButtonBlock
+                Buttons = block.Buttons.Select(b => new Models.Buttonblock
+                {
+                    // Using ProtoId to store the string ID from the API
+                    ProtoId = b.Id,
+                    Title = b.Title,
+                    Type = b.Type,
+                    Value = b.Value,
+                    TextMessage = b.TextMessage,
+                    LinkedMediaId = b.LinkedMediaId,
+                    Url = b.Url,
+                    PhoneNumber = b.PhoneNumber,
+                    StoryId = b.StoryId,
+                    RssUrl = b.RssUrl,
+                    RssItemCount = b.RssItemCount,
+                    RssButtonText = b.RssButtonText,
+                    // ... mapping all other button properties for completeness ...
+
+                    // Corrected to map to Models.ApiHeaderBlock
+                    ApiHeaders = b.ApiHeaders.Select(h => new Models.ApiHeaderblock
+                    {
+                        Key = h.Key,
+                        Value = h.Value
+                    }).ToList()
+                }).ToList()
+            };
+
+            // Note: You may also need to update ComponentTypes and the StorySessionData collection name
+            return AddComponent(storyId, model, ComponentTypes.Media,
+                g => manager.GetStory(storyId).Media.Add(g));
+        }
+
+
 
         [HttpGet("GetTypingDelay/{storyId}")]
         public async Task<IActionResult> GetTypingDelay(int storyId)
@@ -385,5 +448,7 @@ namespace Netlarx.Products.Gobot.Controllers
 
             return Ok(UserInputPhrases);
         }
+
+        
     }
 }
