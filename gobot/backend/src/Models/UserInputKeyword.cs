@@ -16,11 +16,10 @@ namespace Netlarx.Products.Gobot.Models
         [Required]
         public int StoryId { get; set; }
 
-        public List<string> Keywords { get; set; } = new List<string>();
+        public virtual ICollection<KeywordGroupp>? KeywordGroups { get; set; } = new List<KeywordGroupp>();
 
-        public List<KeywordGroup>? KeywordGroup { get; set; }
-        //public ICollection<KeywordGroup> KeywordGroup { get; set; }
-        public List<Variable> Variables { get; set; }
+        public virtual ICollection<PlainKeyword>? PlainKeywords { get; set; } = new List<PlainKeyword>();
 
+        public virtual ICollection<VariableKeyword>? Variables { get; set; } = new List<VariableKeyword>();
     }
 }

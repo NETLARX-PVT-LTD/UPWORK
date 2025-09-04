@@ -1,5 +1,5 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="UserInputPhrase.cs" company="Netlarx">
+// <copyright file="KeywordGroup.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
@@ -9,13 +9,18 @@ namespace Netlarx.Products.Gobot.Models
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    public class UserInputPhrase : BaseComponent
+    using System.ComponentModel.DataAnnotations.Schema;
+    public class Keyword
     {
+        [Key]
+        public Guid Id { get; set; } = Guid.NewGuid();
+
         [Required]
-        public int StoryId { get; set; }
+        public string Value { get; set; }
 
-        public string? Phrase { get; set; }
+        public Guid KeywordGroupId { get; set; }
 
-        public virtual ICollection<VariablePhrase>? Variables { get; set; } = new List<VariablePhrase>();
+        [ForeignKey(nameof(KeywordGroupId))]
+        public KeywordGroupp KeywordGroup { get; set; }
     }
 }

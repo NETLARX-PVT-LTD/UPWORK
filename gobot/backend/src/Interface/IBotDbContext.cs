@@ -15,9 +15,9 @@ namespace Netlarx.Products.Gobot.Interface
     public interface IBotDbContext
     {
         DbSet<Stories> Stories { get; set; }
-        DbSet<UserInputPhrase> UserInputPhrase { get; set; }
-        DbSet<UserInputKeyword> UserInputKeyword { get; set; }
-        DbSet<UserInputTypeAnything> UserInputTypeAnything { get; set; }
+        DbSet<UserInputPhrase> UserInputPhrases { get; set; }
+        DbSet<UserInputKeyword> UserInputKeywords { get; set; }
+        DbSet<UserInputTypeAnything> UserInputTypeAnythings { get; set; }
         DbSet<Connection> Connection { get; set; }
         DbSet<TypingDelay> TypingDelay { get; set; }
         DbSet<ConversationalForm> ConversationalForm { get; set; }

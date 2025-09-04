@@ -13,9 +13,7 @@ namespace Netlarx.Products.Gobot.Models
     {
         [Required]
         public int StoryId { get; set; }
-
         public string? Anything { get; set; }
-
-        public List<Variable> Variables { get; set; }
+        public virtual ICollection<VariableAnything>? Variables { get; set; } = new List<VariableAnything>();
     }
 }
