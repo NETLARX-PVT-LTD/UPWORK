@@ -15,15 +15,29 @@ namespace Netlarx.Products.Gobot
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run(); // normal run
+            try
+            {
+                var host = CreateHostBuilder(args).Build();
+                host.Run();
+            }
+            catch (Exception ex)
+            {
+                Environment.Exit(1);
+            }
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
                 .UseContentRoot(AppContext.BaseDirectory)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    // Additional configuration can be set up here if needed
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseUrls("https://localhost:7221", "http://localhost:5223");
+                    var endpoint = "https://localhost:7221";
+                    webBuilder.UseUrls(endpoint);
 
                     if (OperatingSystem.IsWindows())
                     {
@@ -33,12 +47,13 @@ namespace Netlarx.Products.Gobot
                             {
                                 httpsOptions.AllowAnyClientCertificate();
                             });
+
                             options.Limits.MaxRequestBodySize = null;
                         });
                     }
 
                     webBuilder.UseStartup<Startup>();
                 });
+        }
     }
-
 }

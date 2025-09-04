@@ -1,30 +1,6 @@
 syntax = "proto3";
 
 package chatbot;
-
-// Supported input types for user input block
-enum UserInputSubType {
-  Keyword = 0;
-  Phrase = 1;
-  Anythin = 2;
-}
-
-// A keyword group, used for keyword-based branching
-message KeywordGroup {
-  string id = 1;                // UUID or unique identifier
-  repeated string keywords = 2; // e.g., ["hello", "hi", "hey"]
-}
-
-// A variable, either system-defined or user-defined
-message Variable {
-  string name = 1;  // e.g., "location", "user_name"
-  string type = 2;  // e.g., "string", "number"
-}
-
-syntax = "proto3";
-
-package chatbot;
-
 // Supported input types for user input block
 enum UserInputSubType {
   Keyword = 0;
@@ -47,14 +23,14 @@ message Variable {
 // User input block definition inside a story
 message UserInputBlock {
   string id = 1;                            // Id of the block
-  string type = 2;                         // Always "userInput"
-  String subType = 3;            // Keyword, Phrase, Anything
-  repeated string keywords = 4;            // inline keywords
-  repeated KeywordGroup keywordGroups = 5; // groups of keywords
-  string phraseText = 6;                   // Prompt shown to user
-  string customMessage = 7;                // Optional custom error/help message
-  repeated Variable availableVariables = 8;// Use protobuf timestamp instead of DateTime
-  string toComponentType = 10;             // Optional reference type
-  string toComponentId = 11;               // GUID represented as string
+  string type = 2;                          // Always "userInput"
+  string subType = 3;                       // Keyword, Phrase, Anything
+  repeated string keywords = 4;             // inline keywords
+  repeated KeywordGroup keywordGroups = 5;  // groups of keywords
+  string phraseText = 6;                    // Prompt shown to user
+  string customMessage = 7;                 // Optional custom error/help message
+  repeated Variable availableVariables = 8; // Use protobuf timestamp instead of DateTime
+  string toComponentType = 10;              // Optional reference type
+  string toComponentId = 11;                // GUID represented as string
   string storyId = 12;
 }

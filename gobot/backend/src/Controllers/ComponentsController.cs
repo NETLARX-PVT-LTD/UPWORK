@@ -1,5 +1,5 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="School.cs" company="Netlarx">
+// <copyright file="ComponentsController.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
@@ -11,6 +11,7 @@ namespace Netlarx.Products.Gobot.Controllers
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using Netlarx.Products.Gobot.Interface;
+    using Netlarx.Products.Gobot.ModelDTO;
     using Netlarx.Products.Gobot.Models;
     using Netlarx.Products.Gobot.Services;
     using System;
@@ -78,6 +79,7 @@ namespace Netlarx.Products.Gobot.Controllers
                 }
 
                 _logger.LogWarning("Invalid component model received for StoryId: {StoryId}", storyId);
+                
                 var session = manager.GetStory(storyId);
                 var componentId = Guid.NewGuid();
 
@@ -111,7 +113,7 @@ namespace Netlarx.Products.Gobot.Controllers
                     }
                 }
 
-                model.ID = componentId;
+                model.ID = componentId; 
                 model.CreatedDate = DateTime.UtcNow;
                 model.ToComponentType = null;
                 model.ToComponentId = null;
@@ -158,33 +160,76 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddUserInputKeyword")]
-        public IActionResult AddUserInputKeyword(int storyId, [FromBody] UserInputBlock block)
+        public IActionResult AddUserInputKeyword(int storyId, [FromBody] UserInputBlockDto block)
         {
-            Guid Id = Guid.NewGuid();
+            if (block == null)
+            {
+                _logger.LogWarning("Swagger sent null UserInputBlock");
+                return BadRequest("Request body is missing or invalid.");
+            }
+
+            // Log input for debugging
+            var jsonInput = System.Text.Json.JsonSerializer.Serialize(block, new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+            _logger.LogInformation("Received UserInputBlock: {Json}", jsonInput);
+
+            // Generate a new ID for UserInputKeyword
+            Guid userInputKeywordId = Guid.NewGuid();
+
+            // Build UserInputKeyword model
             var model = new Models.UserInputKeyword
             {
                 StoryId = storyId,
-                Keywords = block.Keywords?.ToList() ?? new List<string>(),
-                KeywordGroup = block.KeywordGroups?
-                        .Select(kg => new Models.KeywordGroup
-                        {
-                            Id = Guid.TryParse(kg.Id, out var guid) ? guid : Guid.NewGuid(),
-                            UserInputKeywordId = Id, // 🔑 set FK properly
-                            Keywords = kg.Keywords?.ToList() ?? new List<string>()
-                        })
-                        .ToList() ?? new List<Models.KeywordGroup>(),
+
+                // Keyword groups
+                KeywordGroups = block.KeywordGroups?
+                    .Select(kg => new Models.KeywordGroupp
+                    {
+                        Id = Guid.TryParse(kg.Id, out var guid) ? guid : Guid.NewGuid(),
+                        UserInputKeywordId = userInputKeywordId, // FK to parent
+                        Keywords = kg.Keywords?
+                            .Select(k => new Models.Keyword
+                            {
+                                Id = Guid.NewGuid(),
+                                Value = k
+                            })
+                            .ToList() ?? new List<Models.Keyword>()
+                    })
+                    .ToList() ?? new List<Models.KeywordGroupp>(),
+
+                // Plain keywords (if any)
+                PlainKeywords = block.Keywords?
+                    .Select(k => new Models.PlainKeyword
+                    {
+                        Id = Guid.NewGuid(),
+                        Value = k,
+                        UserInputKeywordId = userInputKeywordId
+                    })
+                    .ToList() ?? new List<Models.PlainKeyword>(),
+
+                // Variables specific to Keyword input
                 Variables = block.AvailableVariables?
-                        .Select(v => new Models.Variable
-                        {
-                            UserInputKeywordId = Id, // 🔑 set FK properly
-                            name = v.Name,
-                            type = v.Type
-                        })
-                        .ToList() ?? new List<Models.Variable>()
+                    .Select(v => new Models.VariableKeyword
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = v.Name,
+                        Type = v.Type,
+                        UserInputKeywordId = userInputKeywordId
+                    })
+                    .ToList() ?? new List<Models.VariableKeyword>()
             };
+
             Console.WriteLine(model);
-            return AddComponent(storyId, model, ComponentTypes.UserInputKeyword,
-                 g => manager.GetStory(storyId).Keywords.Add(g));
+
+            // Add to DB or manager
+            return AddComponent(
+                storyId,
+                model,
+                ComponentTypes.UserInputKeyword,
+                g => manager.GetStory(storyId).Keywords.Add(g)
+            );
         }
 
         [HttpPost("AddUserInputAnything")]
@@ -236,7 +281,8 @@ namespace Netlarx.Products.Gobot.Controllers
             {
                 StoryId = storyId,
                 LinkStoryId = block.LinkStoryId,
-                LinkStoryName = block.LinkStoryName
+                LinkStoryName = block.LinkStoryName,
+                Type = block.Type
             };
             return AddComponent(storyId, model, ComponentTypes.LinkStory,
                  g => manager.GetStory(storyId).LinkStories.Add(g));
@@ -388,7 +434,7 @@ namespace Netlarx.Products.Gobot.Controllers
         [HttpGet("GetUserInputKeyword")]
         public async Task<IActionResult> GetUserInputKeyword(int storyId)
         {
-            var userInputKeywordss = await _db.UserInputKeyword.FirstOrDefaultAsync(s => s.StoryId == storyId);
+            var userInputKeywordss = await _db.UserInputKeywords.FirstOrDefaultAsync(s => s.StoryId == storyId);
 
             if (userInputKeywordss == null)
             {
@@ -401,7 +447,7 @@ namespace Netlarx.Products.Gobot.Controllers
         [HttpGet("GetUserInputAnything")]
         public async Task<IActionResult> GetUserInputAnything(int storyId)
         {
-            var userInputTypeAnything = await _db.UserInputTypeAnything.FirstOrDefaultAsync(s => s.StoryId == storyId);
+            var userInputTypeAnything = await _db.UserInputTypeAnythings.FirstOrDefaultAsync(s => s.StoryId == storyId);
 
             if (userInputTypeAnything == null)
             {
@@ -414,7 +460,7 @@ namespace Netlarx.Products.Gobot.Controllers
         [HttpGet("GetUserInputPhrases")]
         public async Task<IActionResult> GetUserInputPhrases(int storyId)
         {
-            var UserInputPhrases = await _db.UserInputPhrase.FirstOrDefaultAsync(s => s.StoryId == storyId);
+            var UserInputPhrases = await _db.UserInputPhrases.FirstOrDefaultAsync(s => s.StoryId == storyId);
 
             if (UserInputPhrases == null)
             {

@@ -20,12 +20,18 @@ namespace Netlarx.Products.Gobot.Db
         public BotDbContext(DbContextOptions<BotDbContext> options) : base(options) { }
 
         public DbSet<Stories> Stories { get; set; }
-        public DbSet<UserInputPhrase> UserInputPhrase { get; set; }
-        public DbSet<UserInputKeyword> UserInputKeyword { get; set; }
-        public DbSet<UserInputTypeAnything> UserInputTypeAnything { get; set; }
+        public DbSet<UserInputPhrase> UserInputPhrases { get; set; }
+        public DbSet<UserInputKeyword> UserInputKeywords { get; set; }
+        public DbSet<UserInputTypeAnything> UserInputTypeAnythings { get; set; }
+        public DbSet<KeywordGroupp> KeywordGroups { get; set; }
+        public DbSet<Keyword> Keywords { get; set; }
+        public DbSet<PlainKeyword> PlainKeywords { get; set; }
+        public DbSet<VariablePhrase> PhraseVariables { get; set; }
+        public DbSet<VariableKeyword> KeywordVariables { get; set; }
+        public DbSet<VariableAnything> AnythingVariables { get; set; }
+
         public DbSet<Connection> Connection { get; set; }
         public DbSet<TypingDelay> TypingDelay { get; set; }
-
         public DbSet<ConversationalForm> ConversationalForm { get; set; }
 
         public DbSet<JsonAPI> JsonAPI { get; set; }
@@ -72,17 +78,17 @@ namespace Netlarx.Products.Gobot.Db
 
         public void addUserInputPhrase(UserInputPhrase phrase)
         {
-            this.UserInputPhrase.AddRange(phrase);
+            this.UserInputPhrases.AddRange(phrase);
         }
 
         public void addUserInputKeyword(UserInputKeyword keyword)
         {
-            this.UserInputKeyword.AddRange(keyword);
+            this.UserInputKeywords.AddRange(keyword);
         }
 
         public void addUserInputAnything(UserInputTypeAnything anything)
         {
-            this.UserInputTypeAnything.AddRange(anything);
+            this.UserInputTypeAnythings.AddRange(anything);
         }
 
         public void addTypingDelay(TypingDelay delay)
@@ -93,9 +99,9 @@ namespace Netlarx.Products.Gobot.Db
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Stories>().ToTable("Stories");
-            modelBuilder.Entity<UserInputPhrase>().ToTable("UserInputPhrase");
-            modelBuilder.Entity<UserInputKeyword>().ToTable("UserInputKeyword");
-            modelBuilder.Entity<UserInputTypeAnything>().ToTable("UserInputTypeAnything");
+            modelBuilder.Entity<UserInputPhrase>().ToTable("UserInputPhrases");
+            modelBuilder.Entity<UserInputKeyword>().ToTable("UserInputKeywords");
+            modelBuilder.Entity<UserInputTypeAnything>().ToTable("UserInputTypeAnythings");
             modelBuilder.Entity<Connection>().ToTable("Connection");
             modelBuilder.Entity<JsonAPI>().ToTable("JsonAPI");
             modelBuilder.Entity<LinkStory>().ToTable("LinkStory");

@@ -16,33 +16,30 @@ namespace Netlarx.Products.Gobot
     using Netlarx.Products.Gobot.Interface;
     using Netlarx.Products.Gobot.Services;
 
-    public class Startup
+    public class Startup(IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
-
-        public Startup(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
+        private readonly IConfiguration configuration = configuration;
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(opts =>
+            {
+                opts.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+            }); ;
 
             services.AddDbContext<BotDbContext>(options =>
-                options.UseSqlServer(_configuration.GetConnectionString("BootsifyConnection"))
+                options.UseSqlServer(configuration.GetConnectionString("BootsifyConnection"))
             );
 
             services.AddScoped<IBotDbContext>(provider => provider.GetRequiredService<BotDbContext>());
             services.AddSingleton<StorySessionManager>();
-            //services.AddSingleton<StorySessionData>();
 
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAngularApp", policy =>
+                options.AddPolicy("AllowAll", policy =>
                 {
-                    policy.WithOrigins("http://localhost:4200")
+                    policy.WithOrigins()
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
@@ -59,9 +56,8 @@ namespace Netlarx.Products.Gobot
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
             app.UseHttpsRedirection();
-            app.UseCors("AllowAngularApp");
+            app.UseCors("AllowAll");
             app.UseAuthorization();
             app.UseRouting();
 
@@ -71,5 +67,4 @@ namespace Netlarx.Products.Gobot
             });
         }
     }
-
 }

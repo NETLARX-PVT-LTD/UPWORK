@@ -7,21 +7,20 @@
 namespace Netlarx.Products.Gobot.Models
 {
     using System;
-    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
-    public class KeywordGroup
+    public class VariableAnything
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
+        [Required]
+        public string Name { get; set; } // e.g., "Name"
+        [Required]
+        public string Type { get; set; } // e.g., "string"
+        public Guid UserInputTypeAnythingId { get; set; }
 
-        //[ForeignKey("ID")]
-        //public Guid ID { get; set; }
-        //public UserInputKeyword UserInputKeyword { get; set; }
-
-        public Guid UserInputKeywordId { get; set; }
-
-        public List<string> Keywords { get; set; } = new List<string>();
+        [ForeignKey(nameof(UserInputTypeAnythingId))]
+        public virtual UserInputTypeAnything? UserInputTypeAnything { get; set; }
     }
 }

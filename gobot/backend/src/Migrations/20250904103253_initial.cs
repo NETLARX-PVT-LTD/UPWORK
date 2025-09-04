@@ -144,23 +144,22 @@ namespace Gobot.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserInputKeyword",
+                name: "UserInputKeywords",
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StoryId = table.Column<int>(type: "int", nullable: false),
-                    Keywords = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ToComponentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ToComponentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserInputKeyword", x => x.ID);
+                    table.PrimaryKey("PK_UserInputKeywords", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserInputPhrase",
+                name: "UserInputPhrases",
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -172,11 +171,11 @@ namespace Gobot.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserInputPhrase", x => x.ID);
+                    table.PrimaryKey("PK_UserInputPhrases", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserInputTypeAnything",
+                name: "UserInputTypeAnythings",
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -188,7 +187,7 @@ namespace Gobot.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserInputTypeAnything", x => x.ID);
+                    table.PrimaryKey("PK_UserInputTypeAnythings", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -258,55 +257,125 @@ namespace Gobot.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "KeywordGroup",
+                name: "KeywordGroups",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserInputKeywordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Keywords = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    UserInputKeywordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_KeywordGroup", x => x.Id);
+                    table.PrimaryKey("PK_KeywordGroups", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_KeywordGroup_UserInputKeyword_UserInputKeywordId",
+                        name: "FK_KeywordGroups_UserInputKeywords_UserInputKeywordId",
                         column: x => x.UserInputKeywordId,
-                        principalTable: "UserInputKeyword",
+                        principalTable: "UserInputKeywords",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Variable",
+                name: "KeywordVariables",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserInputKeywordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserInputPhraseID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    UserInputTypeAnythingID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserInputKeywordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Variable", x => x.Id);
+                    table.PrimaryKey("PK_KeywordVariables", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Variable_UserInputKeyword_UserInputKeywordId",
+                        name: "FK_KeywordVariables_UserInputKeywords_UserInputKeywordId",
                         column: x => x.UserInputKeywordId,
-                        principalTable: "UserInputKeyword",
+                        principalTable: "UserInputKeywords",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Variable_UserInputPhrase_UserInputPhraseID",
-                        column: x => x.UserInputPhraseID,
-                        principalTable: "UserInputPhrase",
-                        principalColumn: "ID");
-                    table.ForeignKey(
-                        name: "FK_Variable_UserInputTypeAnything_UserInputTypeAnythingID",
-                        column: x => x.UserInputTypeAnythingID,
-                        principalTable: "UserInputTypeAnything",
-                        principalColumn: "ID");
                 });
+
+            migrationBuilder.CreateTable(
+                name: "PlainKeywords",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserInputKeywordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlainKeywords", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlainKeywords_UserInputKeywords_UserInputKeywordId",
+                        column: x => x.UserInputKeywordId,
+                        principalTable: "UserInputKeywords",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PhraseVariables",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserInputPhraseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PhraseVariables", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PhraseVariables_UserInputPhrases_UserInputPhraseId",
+                        column: x => x.UserInputPhraseId,
+                        principalTable: "UserInputPhrases",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AnythingVariables",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserInputTypeAnythingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AnythingVariables", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AnythingVariables_UserInputTypeAnythings_UserInputTypeAnythingId",
+                        column: x => x.UserInputTypeAnythingId,
+                        principalTable: "UserInputTypeAnythings",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Keywords",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    KeywordGroupId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Keywords", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Keywords_KeywordGroups_KeywordGroupId",
+                        column: x => x.KeywordGroupId,
+                        principalTable: "KeywordGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AnythingVariables_UserInputTypeAnythingId",
+                table: "AnythingVariables",
+                column: "UserInputTypeAnythingId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ApiHeader_JsonAPIID",
@@ -319,34 +388,42 @@ namespace Gobot.Migrations
                 column: "ConversationalFormID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_KeywordGroup_UserInputKeywordId",
-                table: "KeywordGroup",
+                name: "IX_KeywordGroups_UserInputKeywordId",
+                table: "KeywordGroups",
+                column: "UserInputKeywordId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Keywords_KeywordGroupId",
+                table: "Keywords",
+                column: "KeywordGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_KeywordVariables_UserInputKeywordId",
+                table: "KeywordVariables",
+                column: "UserInputKeywordId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PhraseVariables_UserInputPhraseId",
+                table: "PhraseVariables",
+                column: "UserInputPhraseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlainKeywords_UserInputKeywordId",
+                table: "PlainKeywords",
                 column: "UserInputKeywordId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TypingDelay_StoriesID",
                 table: "TypingDelay",
                 column: "StoriesID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Variable_UserInputKeywordId",
-                table: "Variable",
-                column: "UserInputKeywordId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Variable_UserInputPhraseID",
-                table: "Variable",
-                column: "UserInputPhraseID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Variable_UserInputTypeAnythingID",
-                table: "Variable",
-                column: "UserInputTypeAnythingID");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AnythingVariables");
+
             migrationBuilder.DropTable(
                 name: "ApiHeader");
 
@@ -357,10 +434,19 @@ namespace Gobot.Migrations
                 name: "FormField");
 
             migrationBuilder.DropTable(
-                name: "KeywordGroup");
+                name: "Keywords");
+
+            migrationBuilder.DropTable(
+                name: "KeywordVariables");
 
             migrationBuilder.DropTable(
                 name: "LinkStory");
+
+            migrationBuilder.DropTable(
+                name: "PhraseVariables");
+
+            migrationBuilder.DropTable(
+                name: "PlainKeywords");
 
             migrationBuilder.DropTable(
                 name: "QuickReply");
@@ -372,7 +458,7 @@ namespace Gobot.Migrations
                 name: "TypingDelay");
 
             migrationBuilder.DropTable(
-                name: "Variable");
+                name: "UserInputTypeAnythings");
 
             migrationBuilder.DropTable(
                 name: "JsonAPI");
@@ -381,16 +467,16 @@ namespace Gobot.Migrations
                 name: "CoversationalForm");
 
             migrationBuilder.DropTable(
+                name: "KeywordGroups");
+
+            migrationBuilder.DropTable(
+                name: "UserInputPhrases");
+
+            migrationBuilder.DropTable(
                 name: "Stories");
 
             migrationBuilder.DropTable(
-                name: "UserInputKeyword");
-
-            migrationBuilder.DropTable(
-                name: "UserInputPhrase");
-
-            migrationBuilder.DropTable(
-                name: "UserInputTypeAnything");
+                name: "UserInputKeywords");
         }
     }
 }

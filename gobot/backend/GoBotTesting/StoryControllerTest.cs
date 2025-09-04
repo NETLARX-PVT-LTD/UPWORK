@@ -60,7 +60,7 @@ namespace Netlarx.Products.Gobot.UnitTest
                 ToComponentType = null,
                 ToComponentId = null
             };
-            _db.Setup(x => x.UserInputPhrase).ReturnsDbSet(new List<UserInputPhrase> { phrase });
+            _db.Setup(x => x.UserInputPhrases).ReturnsDbSet(new List<UserInputPhrase> { phrase });
 
             // Add a Connection pointing to the phrase
             var connection = new Connection

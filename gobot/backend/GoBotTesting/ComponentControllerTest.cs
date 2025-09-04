@@ -13,6 +13,7 @@ namespace Netlarx.Products.Gobot.UnitTest
     using Moq.EntityFrameworkCore;
     using Netlarx.Products.Gobot.Controllers;
     using Netlarx.Products.Gobot.Interface;
+    using Netlarx.Products.Gobot.ModelDTO;
     using Netlarx.Products.Gobot.Models;
     using Netlarx.Products.Gobot.Services;
     using System;
@@ -27,6 +28,7 @@ namespace Netlarx.Products.Gobot.UnitTest
         private readonly Mock<IBotDbContext> _db; // Mocked DbContext
         private readonly Mock<StorySessionManager> storysessionmanager;
         TypingDelayBlock typingDelayBlock = new TypingDelayBlock();
+        private UserInputBlockDto userInputBlockDto;
 
         public ComponentControllerTest()
         {
@@ -98,7 +100,7 @@ namespace Netlarx.Products.Gobot.UnitTest
             UserInputBlock userInputBlock = new UserInputBlock();
             userInputBlock.CustomMessage = "Hey i am doing work on C#";
             userInputBlock.Type = "UserInput";
-            userInputBlock.SubType = UserInputSubType.Phrase;
+            userInputBlock.SubType = ComponentTypes.UserInputPhrase;
 
             // Act
             var result = _controller.AddUserInputPhrase(storyId, userInputBlock);
@@ -138,10 +140,10 @@ namespace Netlarx.Products.Gobot.UnitTest
             list.Add("hello");
             UserInputBlock userInputBlock = new UserInputBlock();
             userInputBlock.Type = "UserInput";
-            userInputBlock.SubType = UserInputSubType.Keyword;
+            userInputBlock.SubType = ComponentTypes.UserInputKeyword;
             // Act
 
-            var result = _controller.AddUserInputKeyword(storyId, userInputBlock);
+            var result = _controller.AddUserInputKeyword(storyId, userInputBlockDto);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -179,7 +181,7 @@ namespace Netlarx.Products.Gobot.UnitTest
             UserInputBlock userInputBlock = new UserInputBlock();
             userInputBlock.CustomMessage = "Hey i am doing work on C#";
             userInputBlock.Type = "UserInput";
-            userInputBlock.SubType = UserInputSubType.Anythin;
+            userInputBlock.SubType = ComponentTypes.UserInputTypeAnything;
             // Act
             var result = _controller.AddUserInputAnything(storyId, userInputBlock);
 

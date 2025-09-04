@@ -12,6 +12,7 @@ namespace Netlarx.Products.Gobot.Models
 {
     public class ApiHeader
     {
+
         [Key]
         public int jsonId { get; set; }
         public string Key { get; set; }
