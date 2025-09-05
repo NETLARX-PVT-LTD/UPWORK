@@ -20,6 +20,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="protobuf-net" Version="3.2.56" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 
 	  <Protobuf Include="..\..\Proto\typing_delay_block.proto" GrpcServices="None">

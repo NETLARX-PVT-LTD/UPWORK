@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoBotTesting", "..\GoBotTes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gobot", "Gobot.csproj", "{AB88B592-D2CF-F5A1-66B0-53FB9FACBDCA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtoTest", "..\ProtoTest\ProtoTest.csproj", "{39B003FD-9E16-9BAC-2F1A-CB165A849971}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{AB88B592-D2CF-F5A1-66B0-53FB9FACBDCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB88B592-D2CF-F5A1-66B0-53FB9FACBDCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB88B592-D2CF-F5A1-66B0-53FB9FACBDCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39B003FD-9E16-9BAC-2F1A-CB165A849971}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39B003FD-9E16-9BAC-2F1A-CB165A849971}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39B003FD-9E16-9BAC-2F1A-CB165A849971}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39B003FD-9E16-9BAC-2F1A-CB165A849971}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
