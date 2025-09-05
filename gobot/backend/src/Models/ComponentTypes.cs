@@ -16,5 +16,6 @@ namespace Netlarx.Products.Gobot.Models
         public const string LinkStory = "linkStory";
         public const string ConversationalForm = "conversationalForm";
         public const string JsonAPI = "jsonAPI";
+        public const string Media = "Media";
     }
 }

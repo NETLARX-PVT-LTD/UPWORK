@@ -31,5 +31,8 @@ namespace Netlarx.Products.Gobot.Models
             public List<JsonAPI> JsonAPIs { get; set; } = new();
 
             public Stories Story { get; set; } = new();
+
+             public List<Media> Medias { get; set; } = new();
+
     }
 }

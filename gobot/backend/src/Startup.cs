@@ -46,7 +46,11 @@ namespace Netlarx.Products.Gobot
             });
 
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+
+            services.AddSwaggerGen(options =>
+            {
+                options.CustomSchemaIds(type => type.FullName);
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
