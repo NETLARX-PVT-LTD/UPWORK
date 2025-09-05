@@ -15,6 +15,8 @@ namespace Netlarx.Products.Gobot
     using Netlarx.Products.Gobot.Db;
     using Netlarx.Products.Gobot.Interface;
     using Netlarx.Products.Gobot.Services;
+    using Netlarx.Products.Gobot.Middlewares;
+    using Microsoft.AspNetCore.Mvc.Formatters;
 
     public class Startup(IConfiguration configuration)
     {
@@ -26,7 +28,13 @@ namespace Netlarx.Products.Gobot
             services.AddControllers().AddJsonOptions(opts =>
             {
                 opts.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-            }); ;
+            });
+
+            //services.AddControllers(options =>
+            //{
+            //    options.InputFormatters.Insert(0, new ProtobufInputFormatter());
+            //    options.OutputFormatters.Insert(0, new ProtobufOutputFormatter());
+            //});
 
             services.AddDbContext<BotDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("BootsifyConnection"))
@@ -64,6 +72,7 @@ namespace Netlarx.Products.Gobot
             app.UseCors("AllowAll");
             app.UseAuthorization();
             app.UseRouting();
+            //app.UseMiddleware<DeserializationMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {

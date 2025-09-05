@@ -16,9 +16,13 @@ namespace Netlarx.Products.Gobot.Controllers
     using Netlarx.Products.Gobot.Services;
     using System;
     using System.Collections.Generic;
+    using System.IdentityModel.Tokens.Jwt;
+    using System.IO;
     using System.Linq;
     using System.Reflection.PortableExecutable;
     using System.Threading.Tasks;
+    using ProtoBuf;
+    using Microsoft.AspNetCore.Mvc;
 
     [ApiController]
     [Route("api/[controller]")]
@@ -160,20 +164,44 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddUserInputKeyword")]
-        public IActionResult AddUserInputKeyword(int storyId, [FromBody] UserInputBlockDto block)
+        [Consumes("application/x-protobuf")]
+        public async  Task<IActionResult> AddUserInputKeyword(int storyId)
         {
-            if (block == null)
+            // Retrieve the deserialized Protobuf object from middleware
+            if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not UserInputBlock bl)
+            {
+                _logger.LogWarning("Protobuf body missing or invalid");
+                return BadRequest("Protobuf body missing or invalid");
+            }
+
+            //// 1. Read the binary request body
+            //using var memoryStream = new MemoryStream();
+            //await Request.Body.CopyToAsync(memoryStream);
+            //memoryStream.Position = 0;
+
+            //// 2. Deserialize the binary data to UserData
+            //UserInputBlock bl;
+            //try
+            //{
+            //    bl = UserInputBlock.Parser.ParseFrom(memoryStream);
+            //}
+            //catch
+            //{
+            //    return BadRequest("Invalid Protobuf data");
+            //}
+
+            if (bl == null)
             {
                 _logger.LogWarning("Swagger sent null UserInputBlock");
                 return BadRequest("Request body is missing or invalid.");
             }
 
             // Log input for debugging
-            var jsonInput = System.Text.Json.JsonSerializer.Serialize(block, new System.Text.Json.JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
-            _logger.LogInformation("Received UserInputBlock: {Json}", jsonInput);
+            //var jsonInput = System.Text.Json.JsonSerializer.Serialize(bl, new System.Text.Json.JsonSerializerOptions
+            //{
+            //    WriteIndented = true
+            //});
+            //_logger.LogInformation("Received UserInputBlock: {Json}", jsonInput);
 
             // Generate a new ID for UserInputKeyword
             Guid userInputKeywordId = Guid.NewGuid();
@@ -184,7 +212,7 @@ namespace Netlarx.Products.Gobot.Controllers
                 StoryId = storyId,
 
                 // Keyword groups
-                KeywordGroups = block.KeywordGroups?
+                KeywordGroups = bl.KeywordGroups?
                     .Select(kg => new Models.KeywordGroupp
                     {
                         Id = Guid.TryParse(kg.Id, out var guid) ? guid : Guid.NewGuid(),
@@ -200,7 +228,7 @@ namespace Netlarx.Products.Gobot.Controllers
                     .ToList() ?? new List<Models.KeywordGroupp>(),
 
                 // Plain keywords (if any)
-                PlainKeywords = block.Keywords?
+                PlainKeywords = bl.Keywords?
                     .Select(k => new Models.PlainKeyword
                     {
                         Id = Guid.NewGuid(),
@@ -210,7 +238,7 @@ namespace Netlarx.Products.Gobot.Controllers
                     .ToList() ?? new List<Models.PlainKeyword>(),
 
                 // Variables specific to Keyword input
-                Variables = block.AvailableVariables?
+                Variables = bl.AvailableVariables?
                     .Select(v => new Models.VariableKeyword
                     {
                         Id = Guid.NewGuid(),
@@ -221,7 +249,14 @@ namespace Netlarx.Products.Gobot.Controllers
                     .ToList() ?? new List<Models.VariableKeyword>()
             };
 
-            Console.WriteLine(model);
+            var jsonModel = System.Text.Json.JsonSerializer.Serialize(model, new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true, // Makes it readable
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            });
+
+            // Log it
+            _logger.LogInformation("UserInputKeyword model:\n{JsonModel}", jsonModel);
 
             // Add to DB or manager
             return AddComponent(

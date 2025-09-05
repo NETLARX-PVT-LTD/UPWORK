@@ -20,7 +20,5 @@ namespace Netlarx.Products.Gobot.Models
         public Guid RootBlockConnectionId { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-
-        public ICollection<TypingDelay> TypingDelays { get; set; } = new List<TypingDelay>();
     }
 }
