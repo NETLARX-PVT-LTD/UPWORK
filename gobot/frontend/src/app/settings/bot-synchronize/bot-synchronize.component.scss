@@ -1,0 +1,480 @@
+  .container {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .bot-sync-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .bot-selector {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .bot-dropdown {
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      padding: 8px 30px 8px 15px;
+      border-radius: 6px;
+      font-size: 14px;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .dropdown-arrow {
+      position: absolute;
+      right: 10px;
+      color: #666;
+      pointer-events: none;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #4f46e5;
+      color: white;
+    }
+
+    .btn-success {
+      background: #22c55e;
+      color: white;
+    }
+
+    .btn-user {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+    }
+
+    .alert-banner {
+      background: #ef4444;
+      color: white;
+      padding: 12px 30px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .alert-link {
+      color: white;
+      text-decoration: underline;
+    }
+
+    .tutorial-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 30px;
+      background: rgba(255, 255, 255, 0.05);
+      color: rgb(10, 10, 10);
+      font-size: 14px;
+    }
+
+    .search-section {
+      display: flex;
+      justify-content: flex-end;
+      padding: 20px 30px;
+      gap: 10px;
+    }
+
+    .search-input {
+      padding: 8px 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      width: 250px;
+      font-size: 14px;
+    }
+
+    .search-btn {
+      padding: 8px 12px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .table-container {
+      margin: 0 30px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .bot-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .bot-table th {
+      background: #4f46e5;
+      color: white;
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .name-header {
+      width: 200px;
+    }
+
+    .actions-header {
+      text-align: right;
+      justify-items: end;
+    }
+
+    .bot-row {
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .bot-row:hover {
+      background: #f8fafc;
+    }
+
+    .bot-name {
+      padding: 20px 15px;
+      font-weight: 500;
+    }
+
+    .bot-actions {
+      padding: 20px 15px;
+      text-align: right;
+    }
+
+    .btn-auto-sync {
+      background: #22c55e;
+      color: white;
+      margin-right: 10px;
+      padding: 8px 16px;
+      font-size: 12px;
+    }
+
+    .btn-one-time-sync {
+      background: #22c55e;
+      color: white;
+      padding: 8px 16px;
+      font-size: 12px;
+    }
+
+    .btn-remove-auto-sync {
+      background: #ef4444;
+      color: white;
+      margin-right: 10px;
+      padding: 8px 16px;
+      font-size: 12px;
+    }
+
+    .pagination-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px;
+      color: rgb(13, 13, 13);
+      font-size: 14px;
+    }
+
+    .records-dropdown {
+      padding: 5px 10px;
+      margin-right: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .pagination-controls {
+      display: flex;
+      gap: 5px;
+    }
+
+    .pagination-btn {
+      padding: 8px 12px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .pagination-btn.active {
+      background: #4f46e5;
+      color: white;
+      border-color: #4f46e5;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-dialog {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 90%;
+      animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-content {
+      padding: 40px;
+      text-align: center;
+    }
+
+    .modal-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0 0 15px 0;
+      color: #1f2937;
+    }
+
+    .modal-message {
+      color: #6b7280;
+      margin: 0 0 30px 0;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .btn-confirm {
+      background: #4f46e5;
+      color: white;
+      padding: 12px 24px;
+      font-weight: 600;
+    }
+
+    .btn-cancel {
+      background: #ef4444;
+      color: white;
+      padding: 12px 24px;
+      font-weight: 600;
+    }
+
+    .success-message {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #22c55e;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+      z-index: 1001;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+    }
+
+    .success-message.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .success-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+    }
+
+    .success-icon {
+      font-size: 18px;
+    }
+
+    // Additional styles for One Time Sync Modal
+.btn-sync-option {
+  background: #2196f3;
+  color: white;
+  padding: 12px 24px;
+  font-size: 14px;
+}
+
+.btn-delete-sync {
+  background: #f44336;
+  color: white;
+  padding: 12px 24px;
+  font-size: 14px;
+}
+
+// One Time Sync Modal Specific Styles
+.sync-options {
+  display: flex;
+  justify-content: space-around;
+  margin: 32px 0;
+  gap: 24px;
+}
+
+.sync-option {
+  text-align: center;
+  padding: 24px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  
+  &:hover {
+    border-color: #2196f3;
+    background: #f3f8ff;
+  }
+  
+  h4 {
+    margin-top: 16px;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+  }
+}
+
+.sync-option-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.sync-option-description {
+  color: #666;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+// Delete and Sync specific styles
+.delete-warning-list {
+  text-align: left;
+  margin: 20px 0;
+  padding-left: 20px;
+  
+  li {
+    color: #666;
+    margin: 8px 0;
+    padding-left: 8px;
+    list-style: none;
+    position: relative;
+    
+    &::before {
+      content: "•";
+      color: #f44336;
+      font-weight: bold;
+      position: absolute;
+      left: -16px;
+    }
+  }
+}
+
+// Modal overlay improvements
+.modal-overlay {
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-dialog {
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Responsive design for modals
+@media (max-width: 768px) {
+  .sync-options {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 8px;
+    
+    .btn {
+      width: 100%;
+    }
+  }
+}

@@ -1,0 +1,159 @@
+<div class="container bg-gray-100">
+  <!-- Tutorial Section -->
+  <div class="tutorial-section">
+    <span class="tutorial-icon">📺</span>
+    Tutorial
+  </div>
+
+  <!-- Search Section -->
+  <div class="search-section">
+    <input type="text" placeholder="Search..." class="search-input" [(ngModel)]="searchQuery">
+    <button class="search-btn">🔍</button>
+  </div>
+
+  <!-- Bot List Table -->
+  <div class="table-container">
+    <table class="bot-table">
+      <thead>
+        <tr>
+          <th class="name-header">NAME</th>
+          <th class="actions-header">ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let bot of filteredBots" class="bot-row">
+          <td class="bot-name">{{ bot.name }}</td>
+          <td class="bot-actions">
+            <ng-container *ngIf="!bot.autoSyncEnabled">
+              <button class="btn btn-auto-sync" (click)="showAutoSyncModal(bot)">
+                Auto Sync
+              </button>
+              <button class="btn btn-one-time-sync" (click)="performOneTimeSync(bot)">
+                One Time Sync
+              </button>
+            </ng-container>
+            <ng-container *ngIf="bot.autoSyncEnabled">
+              <button class="btn btn-remove-auto-sync" (click)="showRemoveAutoSyncModal(bot)">
+                Remove Auto Sync
+              </button>
+              <button class="btn btn-one-time-sync" (click)="performOneTimeSync(bot)">
+                One Time Sync
+              </button>
+            </ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-section">
+    <div class="records-per-page">
+      <select [(ngModel)]="recordsPerPage" class="records-dropdown">
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+      Records per page
+    </div>
+    <div class="pagination-info">
+      Showing {{ startRecord }} of {{ totalRecords }} results
+    </div>
+    <div class="pagination-controls">
+      <button class="pagination-btn" [disabled]="currentPage === 1" (click)="previousPage()">‹</button>
+      <button class="pagination-btn active">{{ currentPage }}</button>
+      <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">›</button>
+    </div>
+  </div>
+
+  <!-- One Time Sync Modal -->
+  <div class="modal-overlay" *ngIf="showOneTimeSyncModal" (click)="closeModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-icon">🔄</div>
+        <h3 class="modal-title">One Time Synchronize</h3>
+        
+        <div class="sync-options">
+          <div class="sync-option" (click)="selectSyncOption('delete')">
+            <div class="sync-option-icon">🗑️</div>
+            <h4>Delete and Synchronize</h4>
+            <div class="sync-option-description">Remove existing data and sync</div>
+          </div>
+          <div class="sync-option" (click)="selectSyncOption('keep')">
+            <div class="sync-option-icon">📋</div>
+            <h4>Keep Stories and Synchronize</h4>
+            <div class="sync-option-description">Preserve existing stories</div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-delete-sync" (click)="selectSyncOption('delete')">Delete and Synchronize</button>
+          <button class="btn btn-sync-option" (click)="selectSyncOption('keep')">Keep and Synchronize</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete and Sync Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteSyncConfirm" (click)="closeModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-icon">⚠️</div>
+        <h3 class="modal-title">Delete and Synchronize</h3>
+        <p class="modal-message">Delete and synchronize actions can affect the following analytics of the selected bots</p>
+        
+        <ul class="delete-warning-list">
+          <li>Stories</li>
+          <li>Messages</li>
+          <li>Forms</li>
+          <li>Buttons</li>
+        </ul>
+
+        <p class="modal-message">This action cannot be undone. Are you sure you want to continue?</p>
+
+        <div class="modal-actions">
+          <button class="btn btn-confirm" (click)="confirmDeleteSync()">Yes</button>
+          <button class="btn btn-cancel" (click)="closeModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auto Sync Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showAutoSyncConfirm" (click)="closeModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-icon">⚠️</div>
+        <h3 class="modal-title">Are you sure?</h3>
+        <p class="modal-message">Selected bot(s) will be synchronized with {{ selectedBot }}.</p>
+        <div class="modal-actions">
+          <button class="btn btn-confirm" (click)="confirmAutoSync()">Yes</button>
+          <button class="btn btn-cancel" (click)="closeModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remove Auto Sync Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showRemoveAutoSyncConfirm" (click)="closeModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-icon">⚠️</div>
+        <h3 class="modal-title">Are you sure?</h3>
+        <p class="modal-message">Auto sync will be removed for {{ currentBot?.name }}.</p>
+        <div class="modal-actions">
+          <button class="btn btn-confirm" (click)="confirmRemoveAutoSync()">Yes</button>
+          <button class="btn btn-cancel" (click)="closeModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div class="success-message" *ngIf="showSuccessMessage" [ngClass]="{'show': showSuccessMessage}">
+    <div class="success-content">
+      <span class="success-icon">✅</span>
+      {{ successMessage }}
+    </div>
+  </div>
+</div>
