@@ -41,6 +41,8 @@ namespace Netlarx.Products.Gobot.Db
 
         public DbSet<LinkStory> LinkStory { get; set; }
 
+        public DbSet<Media> Medias { get; set; }
+
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return base.SaveChangesAsync(cancellationToken);
