@@ -26,6 +26,8 @@ namespace Netlarx.Products.Gobot.Interface
 
         DbSet<TextResponse> TextResponse { get; set; }
 
+        DbSet<Media> Medias { get; set; }
+
         public DbSet<LinkStory> LinkStory { get; set; }
         void addStory(Stories model);
 

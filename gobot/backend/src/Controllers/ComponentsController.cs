@@ -427,8 +427,65 @@ namespace Netlarx.Products.Gobot.Controllers
             return AddComponent(storyId, model, ComponentTypes.Media, g => manager.GetStory(storyId).Medias.Add(g));
         }
 
+        [HttpGet("GetMedia/{storyId}")]
+        public async Task<IActionResult> GetMedia(int storyId)
+        {
+            // 1. Fetch the data using your internal DATABASE models
+            var mediaEntity = await _db.Medias
+                .Include(m => m.Slides)
+                .Include(m => m.Buttons)
+                    .ThenInclude(b => b.ApiHeaders)
+                .FirstOrDefaultAsync(m => m.StoryId == storyId);
 
+            if (mediaEntity == null)
+            {
+                return NotFound($"No Media component found for StoryId {storyId}");
+            }
 
+            // 2. Map the database entity to the clean API Model (DTO)
+            var mediaBlockDto = new ModelDTO.MediaBlockDto
+            {
+                Type = "mediaBlock",
+                MediaId = mediaEntity.MediaId,
+                MediaType = (ModelDTO.MediaTypeDto)mediaEntity.MediaType,
+                SingleImageUrl = mediaEntity.SingleImageUrl,
+                VideoUrl = mediaEntity.VideoUrl,
+                AudioUrl = mediaEntity.AudioUrl,
+                FileUrl = mediaEntity.FileUrl,
+                MediaName = mediaEntity.MediaName,
+                ButtonTitle = mediaEntity.ButtonTitle,
+                ButtonTextMessage = mediaEntity.ButtonTextMessage,
+                ButtonType = mediaEntity.ButtonType,
+                ButtonLinkedMediaId = mediaEntity.ButtonLinkedMediaId,
+                ButtonUrl = mediaEntity.ButtonUrl,
+                Slides = mediaEntity.Slides.Select(s => new ModelDTO.ImageSlideDto
+                {
+                    Url = s.Url,
+                    Title = s.Title,
+                    Description = s.Description
+                }).ToList(),
+                Buttons = mediaEntity.Buttons.Select(b => new ModelDTO.ButtonDto
+                {
+                    Id = b.ProtoId,
+                    Title = b.Title,
+                    Type = b.Type,
+                    Value = b.Value,
+                    TextMessage = b.TextMessage,
+                    LinkedMediaId = b.LinkedMediaId,
+                    Url = b.Url,
+                    PhoneNumber = b.PhoneNumber,
+                    StoryId = b.StoryId,
+                    ApiHeaders = b.ApiHeaders.Select(h => new ModelDTO.ApiHeaderDto
+                    {
+                        Key = h.Key,
+                        Value = h.Value
+                    }).ToList()
+                }).ToList()
+            };
+
+            // 3. Return the clean DTO to the user
+            return Ok(mediaBlockDto);
+        }
 
         [HttpGet("GetTypingDelay/{storyId}")]
         public async Task<IActionResult> GetTypingDelay(int storyId)
