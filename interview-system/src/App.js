@@ -242,8 +242,8 @@ function App() {
         </header>
 
         {/* Main Content */}
-        <main className="max-w-7xl mx-auto p-6">
-          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 transition-all duration-300 min-h-[600px]">
+        <main className="w-full mx-auto ">
+          <div className="bg-white rounded-xl shadow-md border border-gray-200 transition-all duration-300 min-h-[600px]">
             {adminView === 'inventory' && <QuestionInventory onSwitchToLinkGen={() => setAdminView('links')} />}
             {adminView === 'links' && <LinkGenerator onSwitchToInventory={() => setAdminView('inventory')} onSwitchToHistory={() => setAdminView('history')} />}
             {adminView === 'history' && <InterviewHistory onSwitchToInventory={() => setAdminView('inventory')} onSwitchToLinkGen={() => setAdminView('links')} />}

@@ -157,7 +157,7 @@ const QuestionInventory = ({ onSwitchToLinkGen }) => {
 
   return (
     <div className="p-8 bg-gray-100 min-h-screen font-sans">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
@@ -180,7 +180,7 @@ const QuestionInventory = ({ onSwitchToLinkGen }) => {
               </button>
               <button
                 onClick={onSwitchToLinkGen}
-                className="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 text-sm font-medium"
+                className="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors duration-200 text-sm font-medium"
               >
                 <Link2 size={16} />
                 Generate Link
