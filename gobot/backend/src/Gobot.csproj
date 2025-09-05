@@ -43,6 +43,9 @@
 	  <Protobuf Include="..\..\Proto\conversational_form_block.proto" GrpcServices="None">
 		  <Link>Proto\conversational_form_block.proto</Link>
 	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\media_block.proto" GrpcServices="None">
+		  <Link>Proto\media_block.proto</Link>
+	  </Protobuf>
   </ItemGroup>
 
 </Project>
