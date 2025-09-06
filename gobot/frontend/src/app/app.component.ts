@@ -9,6 +9,10 @@ import { Subject } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { HttpClientModule } from '@angular/common/http';
+import { ClearDataComponent } from './settings/clear-data/clear-data.component';
+import { ClearDataResponse } from './shared/services/data.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -18,12 +22,65 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     RouterOutlet,
     MatIconModule,
     MatButtonModule,
-    MatTooltipModule,
+    MatTooltipModule,ClearDataComponent, HttpClientModule,
+    FormsModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit, OnDestroy {
+  // New properties for user profile dropdown and language modal
+showUserProfileDropdown: boolean = false;
+showLanguageModal: boolean = false;
+selectedLanguage: string = 'en';
+currentUser = {
+  name: 'Vijai',
+  email: 'vijaipidinti.123@gmail.com'
+};
+
+   onDataCleared(response: ClearDataResponse): void {
+    console.log('Data clearing completed:', response);
+    
+    // Handle the successful data clearing
+    if (response.success) {
+      console.log('Deletion successful:', response.message);
+      
+      // Optional: Show additional UI feedback
+      if (response.deletedRecords) {
+        console.log('Records deleted:', response.deletedRecords);
+      }
+      
+      // Perform additional actions after successful deletion:
+      // - Update application state
+      // - Refresh data displays
+      // - Navigate to different page
+      // - Clear cached data
+      // - Reset user session if needed
+      
+      // Example: Clear local cached data
+      this.clearLocalCache();
+      
+      // Example: Refresh other components or reload data
+      this.refreshApplication();
+      
+    } else {
+      console.error('Data deletion failed:', response.message);
+    }
+  }
+
+  private clearLocalCache(): void {
+    // Clear any cached data in your application
+    localStorage.removeItem('chatbot-cache');
+    sessionStorage.clear();
+    // Clear any service caches, etc.
+  }
+
+  private refreshApplication(): void {
+    // Refresh any data that depends on the cleared information
+    // Emit events to other components
+    // Update global state
+    // Trigger data reloads
+  }
   pageHeading: string = 'Dashboard';
   showSocialMediaCard = false;
   showWebsiteSidebar = false;
@@ -88,6 +145,13 @@ export class AppComponent implements OnInit, OnDestroy {
       console.log('Show header:', this.showHeader);
       console.log('Show aside:', this.showAside);
     });
+
+    // Close dropdowns when clicking outside
+document.addEventListener('click', (event) => {
+  if (this.showUserProfileDropdown) {
+    this.showUserProfileDropdown = false;
+  }
+});
   }
 
   ngOnDestroy() {
@@ -230,6 +294,21 @@ export class AppComponent implements OnInit, OnDestroy {
          case 'offline-hours':
         this.router.navigate(['/offline-hours']);
         break;
+          case 'bot-sync':
+        this.router.navigate(['/bot-sync']);
+        break;
+          case 'shopify':
+        this.router.navigate(['/shopify']);
+        break;
+          case 'stripe':
+        this.router.navigate(['/stripe']);
+        break;
+         case 'integrations':
+        this.router.navigate(['/integrations']);
+        break;
+         case 'clear-data':
+        this.router.navigate(['/clear-data']);
+        break;
       default:
         this.router.navigate(['/create-story']);
     }
@@ -303,4 +382,45 @@ export class AppComponent implements OnInit, OnDestroy {
     this.closeAllSidebars();
     this.showSettingsSidebar = true;
   }
+
+  // User Profile Dropdown Methods
+toggleUserProfileDropdown(event: Event): void {
+  event.stopPropagation();
+  this.showUserProfileDropdown = !this.showUserProfileDropdown;
+}
+
+closeUserProfileDropdown(): void {
+  this.showUserProfileDropdown = false;
+}
+
+onProfileMenuClick(action: string): void {
+  this.closeUserProfileDropdown();
+  
+  switch (action) {
+    case 'profile':
+      this.router.navigate(['/account-settings']);
+      break;
+    case 'billing':
+      this.router.navigate(['/billing']);
+      break;
+    case 'logout':
+      console.log('Logout clicked');
+      break;
+  }
+}
+
+// Language Modal Methods
+openLanguageModal(): void {
+  this.showLanguageModal = true;
+  this.closeUserProfileDropdown();
+}
+
+closeLanguageModal(): void {
+  this.showLanguageModal = false;
+}
+
+onLanguageChange(event: any): void {
+  const language = event.target.value;
+  console.log('Language changed to:', language);
+}
 }

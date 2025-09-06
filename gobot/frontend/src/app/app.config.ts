@@ -16,10 +16,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'; // FormsModule is for [(ngModel)], ReactiveFormsModule for reactive forms
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+     provideHttpClient(
+      withInterceptorsFromDi()
+    ),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideAnimations(), // Correctly provides animation capabilities

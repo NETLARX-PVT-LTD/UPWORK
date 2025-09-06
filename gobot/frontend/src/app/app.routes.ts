@@ -30,6 +30,12 @@ import { GeneralSettingsComponent } from './settings/general-settings/general-se
 import { ManageTeamComponent } from './settings/manage-team/manage-team.component';
 import { ManageOfflineHoursComponent } from './settings/manage-offline-hours/manage-offline-hours.component';
 import { BotSynchronizeComponent } from './settings/bot-synchronize/bot-synchronize.component';
+import { ShopifyIntegrationComponent } from './settings/shopify-integration/shopify-integration.component';
+import { StripeIntegrationComponent } from './settings/stripe-integration/stripe-integration.component';
+import { IntegrationsComponent } from './settings/integrations/integrations.component';
+import { ClearDataComponent } from './settings/clear-data/clear-data.component';
+import { AccountSettingsComponent } from './account-settings/account-settings.component';
+import { UserBillingComponent } from './user-billing/user-billing.component';
 
 export const routes: Routes = [
   // settings
@@ -37,6 +43,12 @@ export const routes: Routes = [
     { path: 'manage-team', component: ManageTeamComponent,data: { title: 'Manage Team' } },
     { path: 'offline-hours', component: ManageOfflineHoursComponent,data: { title: 'Manage Offline Hours' } },
      { path: 'bot-sync', component: BotSynchronizeComponent,data: { title: 'Bot Synchronize' } },
+     { path: 'shopify', component: ShopifyIntegrationComponent,data: { title: 'Shopify Integration' } },
+      { path: 'stripe', component: StripeIntegrationComponent,data: { title: 'Stripe Integration' } },
+      { path: 'integrations', component: IntegrationsComponent,data: { title: 'Integrations' } },
+      { path: 'clear-data', component: ClearDataComponent,data: { title: 'Clear Data' } },
+      { path: 'account-settings', component: AccountSettingsComponent,data: { title: 'Account Settings' } },
+      { path: 'billing', component: UserBillingComponent,data: { title: 'User Billing' } },
   // Analytics
   { path: 'chatbot-analytics', component: ChatbotAnalyticsComponent,data: { title: 'Chatbot Analytics' } },
   // live chat
