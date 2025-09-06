@@ -1,5 +1,5 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="School.cs" company="Netlarx">
+// <copyright file="StoryData.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
@@ -32,7 +32,6 @@ namespace Netlarx.Products.Gobot.Models
 
             public Stories Story { get; set; } = new();
 
-             public List<Media> Medias { get; set; } = new();
-
+            public List<Media> Medias { get; set; } = new();
     }
 }

@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package chatbot;
+import "google/protobuf/timestamp.proto";
+
+import "user_input_block.proto";
+import "typing_delay_block.proto";
+import "media_block.proto";
+import "link_story_block.proto";
+import "text_response_block.proto";
+import "json_api_block.proto";
+import "conversational_form_block.proto";
+
+// ---------------------------------------------------------------------
+// StorySessionData aggregates all block types
+// ---------------------------------------------------------------------
+
+message StorySessionDataBlock {
+  repeated UserInputBlock phrases = 1;
+  repeated UserInputBlock keywords = 2;
+  repeated UserInputBlock anythings = 3;
+  repeated Connectionn connections = 4;
+  repeated ConversationalFormBlock conversationalForms = 5;
+  repeated TypingDelayBlock typingDelays = 6;
+  repeated LinkStoryBlock linkStories = 7;
+  repeated TextResponseBlock textResponses = 8;
+  repeated JsonApiBlock jsonAPIs = 9;
+  Storiess story = 10;
+  repeated MediaBlock medias = 11;
+}
+
+message Storiess {
+  int32 id = 1;
+  string name = 2;
+  string rootBlockConnectionId = 3; // use string to hold Guid
+  google.protobuf.Timestamp createdDate = 4;
+}
+
+message Connectionn {
+    string id = 1;
+    int32 StoryId = 2;
+    string fromComponentType = 3;
+    string fromComponentId = 4;
+    google.protobuf.Timestamp createdDate = 5; 
+}
