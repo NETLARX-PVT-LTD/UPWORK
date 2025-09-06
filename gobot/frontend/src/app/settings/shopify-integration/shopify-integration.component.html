@@ -1,0 +1,132 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+  <div class="mb-6 flex items-center">
+    <button (click)="openTutorial()" class="flex items-center space-x-2 text-blue-600 hover:text-blue-800 font-medium">
+      <i class="fas fa-play-circle"></i> 
+      <span>Tutorial</span>
+    </button>
+  </div>
+
+  <hr class="my-6 border-t border-gray-300">
+
+  <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+    <form [formGroup]="shopifyForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <div>
+        <label for="shopUrl" class="block text-sm font-medium text-gray-700 mb-2">
+          Shop URL <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="shopUrl"
+          formControlName="shopUrl"
+          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+          placeholder="Enter Shop URL"
+          [ngClass]="{'border-red-500': shopifyForm.get('shopUrl')?.invalid && shopifyForm.get('shopUrl')?.touched}"
+        />
+        <div *ngIf="shopifyForm.get('shopUrl')?.invalid && shopifyForm.get('shopUrl')?.touched" class="text-red-500 text-sm mt-1">
+          Please enter a valid Shopify store URL (e.g., mystore.myshopify.com)
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <button
+          type="submit"
+          class="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          [disabled]="shopifyForm.invalid || isLoading"
+        >
+          <span *ngIf="isLoading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white">
+            <i class="fas fa-spinner"></i>
+          </span>
+          {{ currentStore ? 'Update' : 'Save' }}
+        </button>
+
+        <button
+          type="button"
+          class="flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          (click)="syncProducts()"
+          [disabled]="!currentStore || isLoading"
+        >
+          <i class="fas fa-sync-alt mr-2"></i>
+          Products Sync ({{ productCount }})
+        </button>
+
+        <button
+          type="button"
+          class="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          (click)="removeStore()"
+          [disabled]="!currentStore || isLoading"
+        >
+          Remove Store
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="currentStore">
+    <h3 class="text-xl font-bold text-gray-800 mb-4">Connected Store Information</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white rounded-lg shadow-sm p-4 flex items-center space-x-4">
+        <div class="text-3xl">🏪</div>
+        <div>
+          <h4 class="text-gray-500 font-medium">Store URL</h4>
+          <p class="font-semibold text-gray-900 truncate">{{ currentStore.shopUrl }}</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-sm p-4 flex items-center space-x-4">
+        <div class="text-3xl">📦</div>
+        <div>
+          <h4 class="text-gray-500 font-medium">Products</h4>
+          <p class="font-semibold text-gray-900">{{ currentStore.productCount || 0 }} items</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-sm p-4 flex items-center space-x-4">
+        <div class="text-3xl">🔄</div>
+        <div>
+          <h4 class="text-gray-500 font-medium">Last Sync</h4>
+          <p class="font-semibold text-gray-900">{{ currentStore.lastSync ? (currentStore.lastSync | date:'short') : 'Never' }}</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-sm p-4 flex items-center space-x-4">
+        <div class="text-3xl">{{ currentStore.isActive ? '✅' : '❌' }}</div>
+        <div>
+          <h4 class="text-gray-500 font-medium">Status</h4>
+          <p class="font-semibold text-gray-900">{{ currentStore.isActive ? 'Active' : 'Inactive' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="my-6 border-t border-gray-300">
+  
+  <div *ngIf="products.length > 0">
+    <h3 class="text-xl font-bold text-gray-800 mb-4">Synced Products</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+      <div *ngFor="let product of products.slice(0, 6)" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <img [src]="product.image || '/assets/placeholder-product.png'" [alt]="product.title" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <h4 class="text-gray-900 font-semibold truncate">{{ product.title }}</h4>
+          <p class="text-gray-700 font-bold mt-1">${{ product.price }}</p>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-2"
+                [ngClass]="{'bg-green-100 text-green-800': product.status.toLowerCase() === 'active', 'bg-red-100 text-red-800': product.status.toLowerCase() !== 'active'}">
+            {{ product.status }}
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    <div *ngIf="products.length > 6" class="mt-6 text-center">
+      <button (click)="showAllProducts()" class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        Show All {{ products.length }} Products
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+      <div class="animate-spin-slow h-16 w-16 mx-auto mb-4 border-4 border-t-4 border-blue-500 rounded-full"></div>
+      <p class="text-lg font-medium text-gray-800">{{ loadingMessage }}</p>
+    </div>
+  </div>
+</div>

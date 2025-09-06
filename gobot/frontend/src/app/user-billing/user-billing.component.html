@@ -1,0 +1,284 @@
+ <div class="billing-container bg-gray-100 min-h-screen p-6">
+      <div class="max-w-4xl mx-auto">
+        <!-- Billing Information Section -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <h2 class="text-xl font-semibold text-gray-800 mb-6">Billing Information</h2>
+          
+          <div class="mb-6">
+            <p class="text-gray-600 mb-4">You are currently on <span class="font-semibold text-gray-800">Professional Plan</span></p>
+            
+            <div class="flex flex-wrap gap-3">
+              <button 
+                class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition-colors"
+                (click)="openChangePlanModal()"
+              >
+                Change Plan
+              </button>
+              <button 
+                class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md transition-colors"
+                (click)="openChangePaymentModal()"
+              >
+                Change Payment Information
+              </button>
+              <button 
+                class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-md transition-colors"
+                (click)="openCancelPlanModal()"
+              >
+                Cancel Plan
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invoices Section -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-6">Invoices</h2>
+          
+          <div *ngIf="invoices.length === 0" class="text-center py-12">
+            <div class="flex flex-col items-center">
+              <mat-icon class="text-gray-400 text-4xl mb-4">receipt_long</mat-icon>
+              <p class="text-gray-500 text-lg">No Past Invoices yet</p>
+              <p class="text-gray-400 text-sm mt-2">Your invoices will appear here once you start making payments</p>
+            </div>
+          </div>
+
+          <div *ngIf="invoices.length > 0" class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="border-b border-gray-200">
+                <tr>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-800">Invoice ID</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-800">Date</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-800">Amount</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-800">Status</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-800">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let invoice of invoices" class="border-b border-gray-100 hover:bg-gray-50">
+                  <td class="py-3 px-4 text-gray-700">{{ invoice.id }}</td>
+                  <td class="py-3 px-4 text-gray-700">{{ invoice.date }}</td>
+                  <td class="py-3 px-4 text-gray-700">\${{ invoice.amount }}</td>
+                  <td class="py-3 px-4">
+                    <span 
+                      class="px-2 py-1 rounded-full text-xs font-medium"
+                      [ngClass]="{
+                        'bg-green-100 text-green-800': invoice.status === 'paid',
+                        'bg-yellow-100 text-yellow-800': invoice.status === 'pending',
+                        'bg-red-100 text-red-800': invoice.status === 'overdue'
+                      }"
+                    >
+                      {{ invoice.status | titlecase }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4">
+                    <button 
+                      *ngIf="invoice.status === 'paid'"
+                      class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      (click)="downloadInvoice(invoice)"
+                    >
+                      Download
+                    </button>
+                    <button 
+                      *ngIf="invoice.status === 'pending' || invoice.status === 'overdue'"
+                      class="text-green-600 hover:text-green-800 text-sm font-medium"
+                      (click)="payInvoice(invoice)"
+                    >
+                      Pay Now
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+     
+      </div>
+    </div>
+
+    <!-- Change Plan Modal -->
+    <div *ngIf="showChangePlanModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold text-gray-800">Change Your Plan</h3>
+          <button (click)="closeChangePlanModal()" class="text-gray-400 hover:text-gray-600">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        
+        <div class="mb-6">
+          <div class="border border-green-200 rounded-lg p-4 bg-green-50">
+            <p class="text-green-700 font-medium">Annually ( Professional Plan ) $1490 /Year</p>
+          </div>
+        </div>
+        
+        <p class="text-gray-600 text-sm mb-6">If you want to downgrade plan please contact us</p>
+        
+        <div class="flex justify-center">
+          <button 
+            class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-2 rounded-md transition-colors"
+            (click)="contactUs()"
+          >
+            Contact Us
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Payment Information Modal -->
+    <div *ngIf="showChangePaymentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold text-gray-800">Billing Information</h3>
+          <button (click)="closeChangePaymentModal()" class="text-gray-400 hover:text-gray-600">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        
+        <form (ngSubmit)="updatePaymentInfo()">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">CARD NUMBER *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="paymentInfo.cardNumber"
+              name="cardNumber"
+              placeholder="Valid Card Number"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">EXP DATE *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="paymentInfo.expiryDate"
+                name="expiryDate"
+                placeholder="MM / YY"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">CVV CODE *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="paymentInfo.cvv"
+                name="cvv"
+                placeholder="CVC"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">NAME ON CARD *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="paymentInfo.nameOnCard"
+              name="nameOnCard"
+              placeholder="Name on Card"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+          
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">COUPON CODE</label>
+            <input 
+              type="text" 
+              [(ngModel)]="paymentInfo.couponCode"
+              name="couponCode"
+              placeholder="Discount Coupon"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+          
+          <button 
+            type="submit"
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-md font-medium transition-colors mb-6"
+          >
+            UPDATE INFORMATION
+          </button>
+        </form>
+        
+        <div class="flex justify-center space-x-2">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCA0MCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iIzAwNTFBNSIvPgo8cGF0aCBkPSJNMTYuNzUgMTJIMjMuMjVWMTBIMTYuNzVWMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K" alt="Visa" class="h-8">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCA0MCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iIzAwMzA4NyIvPgo8cGF0aCBkPSJNMTYuNzUgMTJIMjMuMjVWMTBIMTYuNzVWMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K" alt="PayPal" class="h-8">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCA0MCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iI0VCMDAxQiIvPgo8cGF0aCBkPSJNMTYuNzUgMTJIMjMuMjVWMTBIMTYuNzVWMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K" alt="MasterCard" class="h-8">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCA0MCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iIzAwNjFBNyIvPgo8cGF0aCBkPSJNMTYuNzUgMTJIMjMuMjVWMTBIMTYuNzVWMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K" alt="American Express" class="h-8">
+        </div>
+      </div>
+    </div>
+
+    <!-- Cancel Plan Modal -->
+    <div *ngIf="showCancelPlanModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-6">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3">
+              <span class="text-white font-bold text-sm">B</span>
+            </div>
+            <span class="text-lg font-semibold text-gray-800">botsify</span>
+          </div>
+          <button (click)="closeCancelPlanModal()" class="text-gray-400 hover:text-gray-600">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        
+        <h3 class="text-xl font-semibold text-gray-800 mb-6">Why are you cancelling?</h3>
+        
+        <div class="space-y-4 mb-8">
+          <label class="flex items-center">
+            <input 
+              type="radio" 
+              name="cancelReason" 
+              value="difficult"
+              [(ngModel)]="cancelReason"
+              class="mr-3 text-blue-500 focus:ring-blue-500"
+            >
+            <span class="text-gray-700">Difficult to use</span>
+          </label>
+          
+          <label class="flex items-center">
+            <input 
+              type="radio" 
+              name="cancelReason" 
+              value="expensive"
+              [(ngModel)]="cancelReason"
+              class="mr-3 text-blue-500 focus:ring-blue-500"
+            >
+            <span class="text-gray-700">Do you think it's expensive?</span>
+          </label>
+          
+          <label class="flex items-center">
+            <input 
+              type="radio" 
+              name="cancelReason" 
+              value="dont-need"
+              [(ngModel)]="cancelReason"
+              class="mr-3 text-blue-500 focus:ring-blue-500"
+            >
+            <span class="text-gray-700">Don't need it</span>
+          </label>
+          
+          <label class="flex items-center">
+            <input 
+              type="radio" 
+              name="cancelReason" 
+              value="not-achieving-goal"
+              [(ngModel)]="cancelReason"
+              class="mr-3 text-blue-500 focus:ring-blue-500"
+            >
+            <span class="text-gray-700">Not able to achieve your goal?</span>
+          </label>
+        </div>
+        
+        <div class="flex justify-center">
+          <button 
+            class="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-md font-medium transition-colors"
+            (click)="submitCancellation()"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </div>

@@ -1,0 +1,44 @@
+<div class="font-sans bg-gray-100 min-h-screen p-0">
+  <main class="p-6 md:p-8 max-w-7xl mx-auto">
+    <div class="text-center mb-12">
+      <p class="text-base text-gray-600 leading-relaxed max-w-xl mx-auto">
+        You can integrate with almost every platform using JSON API integration & Botsify Conversational Form Hooks. Some of the primary platform integrations are mentioned below.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-16">
+      <div 
+        *ngFor="let integration of integrations; trackBy: trackByIntegration"
+        class="bg-white rounded-xl p-6 md:p-8 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden flex items-center justify-center min-h-[140px]"
+        [ngClass]="{
+          'border-2 border-green-500 shadow-lg shadow-green-200': integration.isActive,
+          'opacity-70': integration.comingSoon
+        }"
+        (click)="onIntegrationClick(integration)"
+      >
+        <div class="relative w-full h-full flex items-center justify-center">
+          <img 
+            [src]="integration.logo" 
+            [alt]="integration.name" 
+            class="max-w-xs max-h-16 w-auto h-auto object-contain" 
+            (error)="onImageError($event)"
+          >
+          <div *ngIf="integration.comingSoon" class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-80 text-white font-semibold text-sm opacity-0 hover:opacity-100 transition-opacity duration-300">
+            <span class="p-2 px-4 rounded-full bg-white bg-opacity-20 backdrop-blur-sm">Coming Soon</span>
+          </div>
+          <div *ngIf="integration.isActive" class="absolute inset-0 flex items-center justify-center bg-green-600 bg-opacity-90 text-white font-semibold text-sm opacity-0 hover:opacity-100 transition-opacity duration-300">
+            <span class="p-2 px-4 rounded-full bg-white bg-opacity-20 backdrop-blur-sm">Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center pt-8 border-t border-gray-200">
+      <div class="zapier-integromat-section">
+        <p class="text-base text-gray-600 leading-relaxed max-w-xl mx-auto">
+          Want to use integrations with Botsify? You can integrate with 1000+ applications using Zapier or Integromat.
+        </p>
+      </div>
+    </div>
+  </main>
+</div>

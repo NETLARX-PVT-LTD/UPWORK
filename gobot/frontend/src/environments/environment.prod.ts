@@ -1,6 +1,7 @@
+// environments/environment.prod.ts
 export const environment = {
-  production: false,
-  apiUrl: 'https://localhost:7221/api',
+  production: true,
+  apiUrl: 'https://localhost:7221/api', // Your production API URL
   features: {
     dataDeletion: true,
     analytics: true,
