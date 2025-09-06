@@ -23,6 +23,7 @@ namespace Netlarx.Products.Gobot.Controllers
     using System.Threading.Tasks;
     using ProtoBuf;
     using Microsoft.AspNetCore.Mvc;
+    using Netlarx.Products.Gobot.Pipelines;
 
     [ApiController]
     [Route("api/[controller]")]
@@ -151,7 +152,8 @@ namespace Netlarx.Products.Gobot.Controllers
                 .LastOrDefault();
         }
 
-        [HttpPost("AddUserInputPhrase/{storyId}")]
+        [MiddlewareFilter(typeof(ProtoPipeline))]
+        [HttpPost("AddUserInputPhrase")]
         public IActionResult AddUserInputPhrase(int storyId, [FromBody] UserInputBlock block)
         {
             var model = new Models.UserInputPhrase
@@ -163,9 +165,11 @@ namespace Netlarx.Products.Gobot.Controllers
                 m => manager.GetStory(storyId).Phrases.Add(m));
         }
 
+
         [HttpPost("AddUserInputKeyword")]
+        [MiddlewareFilter(typeof(ProtoPipeline))]
         [Consumes("application/x-protobuf")]
-        public async  Task<IActionResult> AddUserInputKeyword(int storyId)
+        public async Task<IActionResult> AddUserInputKeyword(int storyId)
         {
             // Retrieve the deserialized Protobuf object from middleware
             if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not UserInputBlock bl)
@@ -197,14 +201,14 @@ namespace Netlarx.Products.Gobot.Controllers
             }
 
             // Log input for debugging
-            //var jsonInput = System.Text.Json.JsonSerializer.Serialize(bl, new System.Text.Json.JsonSerializerOptions
-            //{
-            //    WriteIndented = true
-            //});
-            //_logger.LogInformation("Received UserInputBlock: {Json}", jsonInput);
+            var jsonInput = System.Text.Json.JsonSerializer.Serialize(bl, new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+            _logger.LogInformation("Received UserInputBlock: {Json}", jsonInput);
 
             // Generate a new ID for UserInputKeyword
-            Guid userInputKeywordId = Guid.NewGuid();
+            //Guid userInputKeywordId = Guid.NewGuid();
 
             // Build UserInputKeyword model
             var model = new Models.UserInputKeyword
@@ -216,7 +220,7 @@ namespace Netlarx.Products.Gobot.Controllers
                     .Select(kg => new Models.KeywordGroupp
                     {
                         Id = Guid.TryParse(kg.Id, out var guid) ? guid : Guid.NewGuid(),
-                        UserInputKeywordId = userInputKeywordId, // FK to parent
+                        //UserInputKeywordId = userInputKeywordId, // FK to parent
                         Keywords = kg.Keywords?
                             .Select(k => new Models.Keyword
                             {
@@ -233,7 +237,7 @@ namespace Netlarx.Products.Gobot.Controllers
                     {
                         Id = Guid.NewGuid(),
                         Value = k,
-                        UserInputKeywordId = userInputKeywordId
+                        //UserInputKeywordId = userInputKeywordId
                     })
                     .ToList() ?? new List<Models.PlainKeyword>(),
 
@@ -244,7 +248,7 @@ namespace Netlarx.Products.Gobot.Controllers
                         Id = Guid.NewGuid(),
                         Name = v.Name,
                         Type = v.Type,
-                        UserInputKeywordId = userInputKeywordId
+                        //UserInputKeywordId = userInputKeywordId
                     })
                     .ToList() ?? new List<Models.VariableKeyword>()
             };
@@ -307,7 +311,6 @@ namespace Netlarx.Products.Gobot.Controllers
             return AddComponent(storyId, model, ComponentTypes.TypingDelay,
                  g => manager.GetStory(storyId).TypingDelays.Add(g));
         }
-
 
         [HttpPost("AddLinkStory")]
         public IActionResult AddLinkStory(int storyId, [FromBody] LinkStoryBlock block)
@@ -594,7 +597,7 @@ namespace Netlarx.Products.Gobot.Controllers
 
             if (userInputKeywordss == null)
             {
-                return NotFound($"No LinkStory found for StoryId {storyId}");
+                return NotFound($"No userInputKeywordss found for StoryId {storyId}");
             }
 
             return Ok(userInputKeywordss);

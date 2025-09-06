@@ -47,6 +47,9 @@
 	  <Protobuf Include="..\..\Proto\media_block.proto" GrpcServices="None">
 		  <Link>Proto\media_block.proto</Link>
 	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\story_session.proto" GrpcServices="None">
+		  <Link>Proto\story_session.proto</Link>
+	  </Protobuf>
   </ItemGroup>
 
 </Project>

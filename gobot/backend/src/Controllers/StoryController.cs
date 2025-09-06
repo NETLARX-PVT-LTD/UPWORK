@@ -16,6 +16,7 @@ namespace Netlarx.Products.Gobot.Controllers
     using System.Linq;
     using System.Threading.Tasks;
     using Netlarx.Products.Gobot.Services;
+    using Chatbot;
 
     [ApiController]
     [Route("api/[controller]")]
@@ -163,7 +164,7 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("SaveStoryToDb")]
-        public async Task<ActionResult> SaveStoryToDb([FromBody] StorySessionData session)
+        public async Task<ActionResult> SaveStoryToDb([FromBody] StorySessionDataBlock session)
         {
             try
             {
@@ -181,16 +182,16 @@ namespace Netlarx.Products.Gobot.Controllers
 
                 //await _db.Stories.AddAsync(session.Story);
                 //await _db.SaveChangesAsync(); // This will assign Story.Id
-                var storyId = session.Story.ID;
+                //var storyId = session.Story.ID;
 
 
-                _logger.LogInformation("Story saved with Id: {StoryId}", storyId);
+                //_logger.LogInformation("Story saved with Id: {StoryId}", storyId);
 
                 // Save phrases
                 if (session.Phrases != null && session.Phrases.Any())
                 {
-                    foreach (var phrase in session.Phrases)
-                        phrase.StoryId = storyId;
+                    //foreach (var phrase in session.Phrases)
+                    //    phrase.StoryId = storyId;
 
                     _db.UserInputPhrases.AddRange(session.Phrases);
                 }
@@ -198,8 +199,6 @@ namespace Netlarx.Products.Gobot.Controllers
                 // Save keywords
                 if (session.Keywords != null && session.Keywords.Any())
                 {
-                    foreach (var keyword in session.Keywords)
-                        keyword.StoryId = storyId;
 
                     _db.UserInputKeywords.AddRange(session.Keywords);
                 }
@@ -207,8 +206,8 @@ namespace Netlarx.Products.Gobot.Controllers
                 // Save "type anything"
                 if (session.Anythings != null && session.Anythings.Any())
                 {
-                    foreach (var anything in session.Anythings)
-                        anything.StoryId = storyId;
+                    //foreach (var anything in session.Anythings)
+                    //    anything.StoryId = storyId;
 
                     _db.UserInputTypeAnythings.AddRange(session.Anythings);
                 }
@@ -216,8 +215,8 @@ namespace Netlarx.Products.Gobot.Controllers
                 // Save connections
                 if (session.Connections != null && session.Connections.Any())
                 {
-                    foreach (var conn in session.Connections)
-                        conn.StoryId = storyId;
+                    //foreach (var conn in session.Connections)
+                    //    conn.StoryId = storyId;
 
                     _db.Connection.AddRange(session.Connections);
 
@@ -239,7 +238,6 @@ namespace Netlarx.Products.Gobot.Controllers
                             var newStory = new Stories
                             {
                                 Name = session.Story.Name,
-                                ID = firstConnection.StoryId,
                                 RootBlockConnectionId = firstConnection.ID
                             };
 
@@ -252,8 +250,8 @@ namespace Netlarx.Products.Gobot.Controllers
                 // Save typing delays
                 if (session.TypingDelays != null && session.TypingDelays.Any())
                 {
-                    foreach (var delay in session.TypingDelays)
-                        delay.StoryId = storyId;
+                    //foreach (var delay in session.TypingDelays)
+                    //    delay.StoryId = storyId;
 
                     _db.TypingDelay.AddRange(session.TypingDelays);
                 }
@@ -261,8 +259,8 @@ namespace Netlarx.Products.Gobot.Controllers
                 // 7. Save conversational forms
                 if (session.ConversationalForms != null && session.ConversationalForms.Any())
                 {
-                    foreach (var form in session.ConversationalForms)
-                        form.StoryId = storyId;
+                    //foreach (var form in session.ConversationalForms)
+                    //    form.StoryId = storyId;
 
                     _db.ConversationalForm.AddRange(session.ConversationalForms);
                 }
@@ -270,8 +268,8 @@ namespace Netlarx.Products.Gobot.Controllers
                 // 8. Save JSON APIs
                 if (session.JsonAPIs != null && session.JsonAPIs.Any())
                 {
-                    foreach (var api in session.JsonAPIs)
-                        api.StoryId = storyId;
+                    //foreach (var api in session.JsonAPIs)
+                    //    api.StoryId = storyId;
 
                     _db.JsonAPI.AddRange(session.JsonAPIs);
                 }
@@ -279,8 +277,8 @@ namespace Netlarx.Products.Gobot.Controllers
                 // 9. Save text responses
                 if (session.TextResponses != null && session.TextResponses.Any())
                 {
-                    foreach (var response in session.TextResponses)
-                        response.StoryId = storyId;
+                    //foreach (var response in session.TextResponses)
+                    //    response.StoryId = storyId;
 
                     _db.TextResponse.AddRange(session.TextResponses);
                 }
@@ -288,8 +286,8 @@ namespace Netlarx.Products.Gobot.Controllers
                 // 10. Save linked stories
                 if (session.LinkStories != null && session.LinkStories.Any())
                 {
-                    foreach (var link in session.LinkStories)
-                        link.StoryId = storyId;
+                    //foreach (var link in session.LinkStories)
+                    //    link.StoryId = storyId;
 
                     _db.LinkStory.AddRange(session.LinkStories);
                 }
@@ -307,6 +305,7 @@ namespace Netlarx.Products.Gobot.Controllers
                 return StatusCode(500, new { error = innerMessage });
             }
         }
+
 
         [HttpPut("UpdateStory")]
         public async Task<ActionResult> UpdateStory([FromBody] StorySessionData session)
