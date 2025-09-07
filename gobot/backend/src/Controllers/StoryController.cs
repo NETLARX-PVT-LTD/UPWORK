@@ -164,7 +164,7 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("SaveStoryToDb")]
-        public async Task<ActionResult> SaveStoryToDb([FromBody] StorySessionDataBlock session)
+        public async Task<ActionResult> SaveStoryToDb([FromBody] StorySessionData session)
         {
             try
             {
@@ -305,6 +305,306 @@ namespace Netlarx.Products.Gobot.Controllers
                 return StatusCode(500, new { error = innerMessage });
             }
         }
+
+        //[HttpPost("SaveStoryToDb")]
+        //public async Task<ActionResult> SaveStoryToDb([FromBody] StorySessionDataBlock session)
+        //{
+        //    try
+        //    {
+        //        if (session == null)
+        //        {
+        //            _logger.LogWarning("Invalid session data received");
+        //            return BadRequest("Invalid data");
+        //        }
+
+        //        // 1. Save Story first
+        //        if (session.Story == null)
+        //        {
+        //            return BadRequest("Story data is required");
+        //        }
+
+        //        if (session == null)
+        //        {
+        //            _logger.LogWarning("Invalid session data received");
+        //            return BadRequest("Invalid data");
+        //        }
+
+        //        if (session.Story == null)
+        //        {
+        //            return BadRequest("Story data is required");
+        //        }
+
+        //        // 🔹 Map Block → DB Entity
+        //        // 🔹 Map Block → DB Entity
+        //        var storyData = new StoryData
+        //        {
+        //            Story = new Stories
+        //            {
+        //                ID = session.Story.Id,
+        //                Name = session.Story.Name,
+        //                RootBlockConnectionId = Guid.Parse(session.Story.RootBlockConnectionId),
+        //                CreatedDate = session.Story.CreatedDate.ToDateTime()
+        //            },
+
+        //            // 🔹 Phrases
+        //            Phrases = session.Phrases != null
+        //                ? session.Phrases.Select(p => new Models.UserInputPhrase
+        //                {
+        //                    ID = Guid.Parse(p.Id),
+        //                    Phrase = p.PhraseText,
+        //                    ToComponentId = Guid.Parse(p.ToComponentId),
+        //                    ToComponentType = p.ToComponentType,
+        //                    Variables = p.AvailableVariables != null
+        //                                 ? p.AvailableVariables.Select(s => new Models.VariablePhrase
+        //                                 {
+        //                                     Name = s.Name,
+        //                                     Type = s.Type,
+        //                                     UserInputPhraseId = Guid.Parse(p.Id),
+        //                                 }).ToList() : new List<Models.VariablePhrase>(),
+        //                }).ToList()
+        //                : new List<Models.UserInputPhrase>(),
+
+        //            // 🔹 Keywords
+        //            Keywords = session.Keywords != null
+        //                ? session.Keywords.Select(bl => new Models.UserInputKeyword
+        //                {
+        //                    StoryId = storyId,
+
+        //                    // Keyword groups
+        //                    KeywordGroups = bl.KeywordGroups?
+        //                        .Select(kg => new Models.KeywordGroupp
+        //                        {
+        //                            Id = Guid.TryParse(kg.Id, out var guid) ? guid : Guid.NewGuid(),
+        //                            Keywords = kg.Keywords?
+        //                                .Select(k => new Models.Keyword
+        //                                {
+        //                                    Id = Guid.NewGuid(),
+        //                                    Value = k
+        //                                })
+        //                                .ToList() ?? new List<Models.Keyword>()
+        //                        })
+        //                        .ToList() ?? new List<Models.KeywordGroupp>(),
+
+        //                    // Plain keywords
+        //                    PlainKeywords = bl.Keywords?
+        //                        .Select(k => new Models.PlainKeyword
+        //                        {
+        //                            Id = Guid.NewGuid(),
+        //                            Value = k
+        //                        })
+        //                        .ToList() ?? new List<Models.PlainKeyword>(),
+
+        //                    // Variable keywords
+        //                    Variables = bl.AvailableVariables?
+        //                        .Select(v => new Models.VariableKeyword
+        //                        {
+        //                            Id = Guid.NewGuid(),
+        //                            Name = v.Name,
+        //                            Type = v.Type
+        //                        })
+        //                        .ToList() ?? new List<Models.VariableKeyword>()
+        //                }).ToList()
+        //                : new List<Models.UserInputKeyword>(),
+
+        //            // 🔹 Anything inputs
+        //            Anythings = session.Anythings != null
+        //                ? session.Anythings.Select(a => new Models.UserInputTypeAnything
+        //                {
+        //                    Id = Guid.NewGuid(),
+        //                    Value = a
+        //                }).ToList()
+        //                : new List<Models.UserInputTypeAnything>(),
+
+        //            // 🔹 Connections
+        //            Connections = session.Connections != null
+        //                ? session.Connections.Select(c => new Models.Connection
+        //                {
+        //                    Id = Guid.NewGuid(),
+        //                    FromComponentId = Guid.Parse(c.FromComponentId),
+        //                    ToComponentId = Guid.Parse(c.ToComponentId),
+        //                    ToComponentType = c.ToComponentType,
+        //                    StoryId = storyId
+        //                }).ToList()
+        //                : new List<Models.Connection>(),
+
+        //            // 🔹 Typing Delays
+        //            TypingDelays = session.TypingDelays != null
+        //                ? session.TypingDelays.Select(t => new Models.TypingDelay
+        //                {
+        //                    Id = Guid.NewGuid(),
+        //                    DelaySeconds = t.DelaySeconds,
+        //                    StoryId = storyId
+        //                }).ToList()
+        //                : new List<Models.TypingDelay>(),
+
+        //            // 🔹 Conversational Forms
+        //            ConversationalForms = session.ConversationalForms != null
+        //                ? session.ConversationalForms.Select(cf => new Models.ConversationalForm
+        //                {
+        //                    Id = Guid.NewGuid(),
+        //                    FormName = cf.FormName
+        //                }).ToList()
+        //                : new List<Models.ConversationalForm>(),
+
+        //            // 🔹 JSON APIs
+        //            JsonAPIs = session.JsonAPIs != null
+        //                ? session.JsonAPIs.Select(api => new Models.JsonAPI
+        //                {
+        //                    Id = Guid.NewGuid(),
+        //                    Url = api.Url
+        //                }).ToList()
+        //                : new List<Models.JsonAPI>(),
+
+        //            // 🔹 Text Responses
+        //            TextResponses = session.TextResponses != null
+        //                ? session.TextResponses.Select(tr => new Models.TextResponse
+        //                {
+        //                    Id = Guid.NewGuid(),
+        //                    Content = tr.Content
+        //                }).ToList()
+        //                : new List<Models.TextResponse>(),
+
+        //            // 🔹 Link Stories
+        //            LinkStories = session.LinkStories != null
+        //                ? session.LinkStories.Select(ls => new Models.LinkStory
+        //                {
+        //                    Id = Guid.NewGuid(),
+        //                    LinkedStoryId = Guid.Parse(ls.LinkedStoryId)
+        //                }).ToList()
+        //                : new List<Models.LinkStory>(),
+
+        //            // 🔹 Media
+        //            Medias = session.Medias != null
+        //                ? session.Medias.Select(m => new Models.Media
+        //                {
+        //                    Id = Guid.NewGuid(),
+        //                    Url = m.Url,
+        //                    MediaType = m.MediaType
+        //                }).ToList()
+        //                : new List<Models.Media>()
+        //        };
+
+
+        //        //_logger.LogInformation("Story saved with Id: {StoryId}", storyId);
+
+        //        // Save phrases
+        //        if (session.Phrases != null && session.Phrases.Any())
+        //        {
+        //            //foreach (var phrase in session.Phrases)
+        //            //    phrase.StoryId = storyId;
+
+        //            _db.UserInputPhrases.AddRange(session.Phrases);
+        //        }
+
+        //        // Save keywords
+        //        if (session.Keywords != null && session.Keywords.Any())
+        //        {
+
+        //            _db.UserInputKeywords.AddRange(session.Keywords);
+        //        }
+
+        //        // Save "type anything"
+        //        if (session.Anythings != null && session.Anythings.Any())
+        //        {
+        //            //foreach (var anything in session.Anythings)
+        //            //    anything.StoryId = storyId;
+
+        //            _db.UserInputTypeAnythings.AddRange(session.Anythings);
+        //        }
+
+        //        // Save connections
+        //        if (session.Connections != null && session.Connections.Any())
+        //        {
+        //            //foreach (var conn in session.Connections)
+        //            //    conn.StoryId = storyId;
+
+        //            _db.Connection.AddRange(session.Connections);
+
+        //            var firstConnection = session.Connections.FirstOrDefault();
+        //            if (firstConnection != null)
+        //            {
+        //                var story = await _db.Stories
+        //                                     .FirstOrDefaultAsync(s => s.ID == firstConnection.StoryId);
+
+        //                if (story != null)
+        //                {
+        //                    story.RootBlockConnectionId = firstConnection.ID;
+        //                    _db.Stories.Update(story);
+        //                    _logger.LogInformation("Updated root connection for StoryId: {StoryId}", story.ID);
+        //                }
+        //                else
+        //                {
+        //                    // Story does not exist → create it
+        //                    var newStory = new Stories
+        //                    {
+        //                        Name = session.Story.Name,
+        //                        RootBlockConnectionId = firstConnection.ID
+        //                    };
+
+        //                    await _db.Stories.AddAsync(newStory);
+        //                    _logger.LogInformation("Created new Story with StoryId: {StoryId}", newStory.ID);
+        //                }
+        //            }
+        //        }
+
+        //        // Save typing delays
+        //        if (session.TypingDelays != null && session.TypingDelays.Any())
+        //        {
+        //            //foreach (var delay in session.TypingDelays)
+        //            //    delay.StoryId = storyId;
+
+        //            _db.TypingDelay.AddRange(session.TypingDelays);
+        //        }
+
+        //        // 7. Save conversational forms
+        //        if (session.ConversationalForms != null && session.ConversationalForms.Any())
+        //        {
+        //            //foreach (var form in session.ConversationalForms)
+        //            //    form.StoryId = storyId;
+
+        //            _db.ConversationalForm.AddRange(session.ConversationalForms);
+        //        }
+
+        //        // 8. Save JSON APIs
+        //        if (session.JsonAPIs != null && session.JsonAPIs.Any())
+        //        {
+        //            //foreach (var api in session.JsonAPIs)
+        //            //    api.StoryId = storyId;
+
+        //            _db.JsonAPI.AddRange(session.JsonAPIs);
+        //        }
+
+        //        // 9. Save text responses
+        //        if (session.TextResponses != null && session.TextResponses.Any())
+        //        {
+        //            //foreach (var response in session.TextResponses)
+        //            //    response.StoryId = storyId;
+
+        //            _db.TextResponse.AddRange(session.TextResponses);
+        //        }
+
+        //        // 10. Save linked stories
+        //        if (session.LinkStories != null && session.LinkStories.Any())
+        //        {
+        //            //foreach (var link in session.LinkStories)
+        //            //    link.StoryId = storyId;
+
+        //            _db.LinkStory.AddRange(session.LinkStories);
+        //        }
+
+        //        //Finally save all
+        //        await _db.SaveChangesAsync();
+        //        _logger.LogInformation("Session saved to DB successfully");
+
+        //        return Ok(new { message = "Story saved to DB" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var innerMessage = ex.InnerException?.Message ?? ex.Message;
+        //        _logger.LogError(ex, "Error occurred while saving story session to DB");
+        //        return StatusCode(500, new { error = innerMessage });
+        //    }
+        //}
 
 
         [HttpPut("UpdateStory")]
