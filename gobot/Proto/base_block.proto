@@ -32,20 +32,27 @@ message Connections {
   repeated string output = 2;
 }
 
+//message BaseBlock {
+  //string id = 1;
+  //string name = 2;
+  //string icon = 3;
+  //BlockType type = 4;
+  //BlockStatus status = 5;
+  //double x = 6;
+  //double y = 7;
+  //double width = 8;
+  //double height = 9;
+  //string description = 10;
+  //google.protobuf.Timestamp createdAt = 11;
+  //google.protobuf.Timestamp updatedAt = 12;
+  //Position position = 13;
+  //Connections connections = 14;
+  //bool isInitializing = 15;
+//}
+
 message BaseBlock {
-  string id = 1;
-  string name = 2;
-  string icon = 3;
-  BlockType type = 4;
-  BlockStatus status = 5;
-  double x = 6;
-  double y = 7;
-  double width = 8;
-  double height = 9;
-  string description = 10;
-  google.protobuf.Timestamp createdAt = 11;
-  google.protobuf.Timestamp updatedAt = 12;
-  Position position = 13;
-  Connections connections = 14;
-  bool isInitializing = 15;
+    string Id = 1;
+    google.protobuf.Timestamp CreatedDate = 2;
+    string ToComponentType = 3;
+    string ToComponentId = 4;
 }

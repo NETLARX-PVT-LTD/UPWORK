@@ -171,7 +171,7 @@ namespace Netlarx.Products.Gobot.Controllers
         [Consumes("application/x-protobuf")]
         public async Task<IActionResult> AddUserInputKeyword(int storyId)
         {
-            // Retrieve the deserialized Protobuf object from middleware
+            //Retrieve the deserialized Protobuf object from middleware
             if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not UserInputBlock bl)
             {
                 _logger.LogWarning("Protobuf body missing or invalid");
@@ -318,7 +318,7 @@ namespace Netlarx.Products.Gobot.Controllers
             var model = new Models.LinkStory
             {
                 StoryId = storyId,
-                LinkStoryId = block.LinkStoryId,
+                //LinkStoryId = block.LinkStoryId,
                 LinkStoryName = block.LinkStoryName,
                 Type = block.Type
             };
@@ -336,7 +336,7 @@ namespace Netlarx.Products.Gobot.Controllers
                 ApiHeaders = block.ApiHeaders
                             .Select(h => new Models.ApiHeader
                             {
-                                jsonId = h.JsonId,
+                                //jsonId = h.JsonId,
                                 Key = h.HeaderKey ?? string.Empty,
                                 Value = h.HeaderValue ?? string.Empty
                             })
@@ -404,7 +404,7 @@ namespace Netlarx.Products.Gobot.Controllers
                  g => manager.GetStory(storyId).TextResponses.Add(g));
         }
 
-        // adding of media block api by ashutosh
+        //// adding of media block api by ashutosh
 
         [HttpPost("AddMediaBlock")]
         public IActionResult AddMediaBlock(int storyId, [FromBody] MediaBlock block)

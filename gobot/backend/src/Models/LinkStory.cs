@@ -10,10 +10,11 @@ namespace Netlarx.Products.Gobot.Models
 {
     public class LinkStory : BaseComponent
     {
+        public int BotId { get; set; }
         [Required]
         public int StoryId { get; set; }
         public string Type { get; set; } // "linkStory"
-        public string LinkStoryId { get; set; }
+        public int LinkStoryId { get; set; }
         public string LinkStoryName { get; set; }
     }
 }

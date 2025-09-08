@@ -50,6 +50,12 @@
 	  <Protobuf Include="..\..\Proto\story_session.proto" GrpcServices="None">
 		  <Link>Proto\story_session.proto</Link>
 	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\base_block.proto" GrpcServices="None">
+		  <Link>Proto\base_block.proto</Link>
+	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\story_block.proto" GrpcServices="None">
+		  <Link>Proto\story_block.proto</Link>
+	  </Protobuf>
   </ItemGroup>
 
 </Project>

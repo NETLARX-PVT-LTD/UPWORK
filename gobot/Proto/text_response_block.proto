@@ -12,4 +12,7 @@ message TextResponseBlock {
   string content = 2;
   repeated string alternateResponses = 3;
   repeated QuickReply quickReplies = 4;
+  string ToComponentType = 5; 
+  string ToComponentId = 6; 
+  int32 StoryId = 7;
 }

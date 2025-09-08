@@ -12,8 +12,8 @@ using Netlarx.Products.Gobot.Db;
 namespace Gobot.Migrations
 {
     [DbContext(typeof(BotDbContext))]
-    [Migration("20250904103253_initial")]
-    partial class initial
+    [Migration("20250908080731_intital")]
+    partial class intital
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,6 +49,156 @@ namespace Gobot.Migrations
                     b.HasIndex("JsonAPIID");
 
                     b.ToTable("ApiHeader");
+                });
+
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.ApiHeaderblock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ButtonblockId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ButtonblockId");
+
+                    b.ToTable("ApiHeaderblock");
+                });
+
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.Bot", b =>
+                {
+                    b.Property<int>("BotId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BotId"));
+
+                    b.Property<string>("BotName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("BotId");
+
+                    b.ToTable("Bots");
+                });
+
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.Buttonblock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApiEndpoint")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmailForNotification")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FormId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JsonApiBody")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JsonApiHeaders")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JsonApiMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JsonApiUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LinkedMediaId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("MediaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("MessageAfterAction")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProtoId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RequestType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RssButtonText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RssItemCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RssUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("ShowInline")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("StopBotForUser")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("StoryId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TextMessage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MediaId");
+
+                    b.ToTable("Buttonblock");
                 });
 
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.Connection", b =>
@@ -200,6 +350,36 @@ namespace Gobot.Migrations
                     b.ToTable("FormField");
                 });
 
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.ImageSlideblock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("MediaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MediaId");
+
+                    b.ToTable("ImageSlideblock");
+                });
+
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.JsonAPI", b =>
                 {
                     b.Property<Guid>("ID")
@@ -306,6 +486,76 @@ namespace Gobot.Migrations
                     b.ToTable("LinkStory", (string)null);
                 });
 
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.Media", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AudioUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ButtonLinkedMediaId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ButtonTextMessage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ButtonTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ButtonType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ButtonUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MediaId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MediaName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MediaType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SingleImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StoryId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ToComponentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ToComponentType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VideoUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Medias");
+                });
+
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.PlainKeyword", b =>
                 {
                     b.Property<Guid>("Id")
@@ -355,6 +605,9 @@ namespace Gobot.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("BotId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -418,9 +671,6 @@ namespace Gobot.Migrations
                     b.Property<double>("DelaySeconds")
                         .HasColumnType("float");
 
-                    b.Property<int?>("StoriesID")
-                        .HasColumnType("int");
-
                     b.Property<int>("StoryId")
                         .HasColumnType("int");
 
@@ -431,8 +681,6 @@ namespace Gobot.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("StoriesID");
 
                     b.ToTable("TypingDelay", (string)null);
                 });
@@ -591,11 +839,44 @@ namespace Gobot.Migrations
                         .HasForeignKey("JsonAPIID");
                 });
 
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.ApiHeaderblock", b =>
+                {
+                    b.HasOne("Netlarx.Products.Gobot.Models.Buttonblock", "Button")
+                        .WithMany("ApiHeaders")
+                        .HasForeignKey("ButtonblockId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Button");
+                });
+
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.Buttonblock", b =>
+                {
+                    b.HasOne("Netlarx.Products.Gobot.Models.Media", "Media")
+                        .WithMany("Buttons")
+                        .HasForeignKey("MediaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Media");
+                });
+
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.FormField", b =>
                 {
                     b.HasOne("Netlarx.Products.Gobot.Models.ConversationalForm", null)
                         .WithMany("FormFields")
                         .HasForeignKey("ConversationalFormID");
+                });
+
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.ImageSlideblock", b =>
+                {
+                    b.HasOne("Netlarx.Products.Gobot.Models.Media", "Media")
+                        .WithMany("Slides")
+                        .HasForeignKey("MediaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Media");
                 });
 
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.Keyword", b =>
@@ -631,13 +912,6 @@ namespace Gobot.Migrations
                     b.Navigation("UserInputKeyword");
                 });
 
-            modelBuilder.Entity("Netlarx.Products.Gobot.Models.TypingDelay", b =>
-                {
-                    b.HasOne("Netlarx.Products.Gobot.Models.Stories", null)
-                        .WithMany("TypingDelays")
-                        .HasForeignKey("StoriesID");
-                });
-
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.VariableAnything", b =>
                 {
                     b.HasOne("Netlarx.Products.Gobot.Models.UserInputTypeAnything", "UserInputTypeAnything")
@@ -671,6 +945,11 @@ namespace Gobot.Migrations
                     b.Navigation("UserInputPhrase");
                 });
 
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.Buttonblock", b =>
+                {
+                    b.Navigation("ApiHeaders");
+                });
+
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.ConversationalForm", b =>
                 {
                     b.Navigation("FormFields");
@@ -686,9 +965,11 @@ namespace Gobot.Migrations
                     b.Navigation("Keywords");
                 });
 
-            modelBuilder.Entity("Netlarx.Products.Gobot.Models.Stories", b =>
+            modelBuilder.Entity("Netlarx.Products.Gobot.Models.Media", b =>
                 {
-                    b.Navigation("TypingDelays");
+                    b.Navigation("Buttons");
+
+                    b.Navigation("Slides");
                 });
 
             modelBuilder.Entity("Netlarx.Products.Gobot.Models.UserInputKeyword", b =>

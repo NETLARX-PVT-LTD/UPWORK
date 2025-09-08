@@ -17,6 +17,8 @@ namespace Netlarx.Products.Gobot.Models
 
         public double DelaySeconds { get; set; }
 
+        public string Type { get; set; }
+
         // Navigation property (important for EF relationships)
     }
 }

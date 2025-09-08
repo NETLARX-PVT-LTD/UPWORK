@@ -26,6 +26,8 @@ namespace Netlarx.Products.Gobot.Middlewares
         private static readonly Dictionary<string, Type> ProtoMap = new()
         {
             { "/api/components/AddUserInputKeyword", typeof(UserInputBlock) },
+            { "/api/story/SaveStorytoDbBlock", typeof(StorySessionDataBlock) },
+            { "/api/bots/{botId}/stories", typeof(StoryBlock) },
             { "/api/story/SaveStoryToDb", typeof(StorySessionData) },
             { "/api/components/AddUserInputPhrase", typeof(UserInputBlock) },
             { "/api/components/AddUserInputTypeAnything", typeof(UserInputBlock) },
@@ -34,7 +36,8 @@ namespace Netlarx.Products.Gobot.Middlewares
             { "/api/components/AddJsonApi", typeof(JsonApiBlock) },
             { "/api/components/AddConversationalForm", typeof(ConversationalFormBlock) },
             { "/api/components/AddTextResponse", typeof(TextResponseBlock) },
-            { "api/components/AddMedia", typeof(MediaBlock) }
+            { "/api/components/AddMedia", typeof(MediaBlock) },
+            { "/api/bots/{botId}/linkstories", typeof(LinkStoryBlock) }
             // add more mappings here
         };
 

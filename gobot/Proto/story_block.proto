@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+
+package chatbot;
+import "google/protobuf/timestamp.proto";
+
+message StoryBlock {
+    int32 id = 1;
+    string name = 2;
+    string rootBlockConnectionId = 3; // use string to hold Guid
+    google.protobuf.Timestamp createdDate = 4;
+    int32 botId = 5;
+}
