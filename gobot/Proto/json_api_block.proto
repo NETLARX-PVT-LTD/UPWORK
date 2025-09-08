@@ -17,4 +17,6 @@ message JsonApiBlock {
   string apiEndpoint = 3;           // API URL
   string requestType = 4;           // "GET", "POST", etc.
   repeated ApiHeaderr apiHeaders = 5; // List of headers
+  string ToComponentType = 6; 
+  string ToComponentId = 7; 
 }

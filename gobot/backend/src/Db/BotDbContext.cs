@@ -19,6 +19,7 @@ namespace Netlarx.Products.Gobot.Db
     {
         public BotDbContext(DbContextOptions<BotDbContext> options) : base(options) { }
 
+        public DbSet<Bot> Bots { get; set; }
         public DbSet<Stories> Stories { get; set; }
         public DbSet<UserInputPhrase> UserInputPhrases { get; set; }
         public DbSet<UserInputKeyword> UserInputKeywords { get; set; }

@@ -35,4 +35,6 @@ message MediaBlock {
   string buttonLinkedMediaId = 13;
   string buttonUrl = 14;
   repeated Button buttons = 15;
+  string ToComponentType = 16; 
+  string ToComponentId = 17; 
 }

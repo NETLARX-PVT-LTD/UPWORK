@@ -5,4 +5,6 @@ package chatbot;
 message TypingDelayBlock {
   string type = 1; // "typingDelay"
   double delaySeconds = 2;
+  string ToComponentType = 3; 
+  string ToComponentId = 4; 
 }

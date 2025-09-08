@@ -14,7 +14,7 @@ namespace Netlarx.Products.Gobot.Models
     {
 
         [Key]
-        public int jsonId { get; set; }
+        public Guid jsonId { get; set; }
         public string Key { get; set; }
         public string Value { get; set; }
     }

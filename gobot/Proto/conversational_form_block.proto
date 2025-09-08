@@ -34,4 +34,6 @@ message ConversationalFormBlock {
   bool requireCompletion = 18;
   string successMessage = 19;
   string redirectUrl = 20;
+  string ToComponentType = 21; 
+  string ToComponentId = 22; 
 }

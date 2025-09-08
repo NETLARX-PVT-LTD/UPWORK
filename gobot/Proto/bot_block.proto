@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package chatbot;
+
+message BotBlock {
+    int32 botId;
+    string botName;
+}
