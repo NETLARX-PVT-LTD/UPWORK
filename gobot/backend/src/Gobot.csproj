@@ -38,9 +38,6 @@
 	  <Protobuf Include="..\..\Proto\button.proto" GrpcServices="None">
 		  <Link>Proto\button.proto</Link>
 	  </Protobuf>
-	  <Protobuf Include="..\..\Proto\text_response_block.proto" GrpcServices="None">
-		  <Link>Proto\text_response_block.proto</Link>
-	  </Protobuf>
 	  <Protobuf Include="..\..\Proto\conversational_form_block.proto" GrpcServices="None">
 		  <Link>Proto\conversational_form_block.proto</Link>
 	  </Protobuf>
@@ -56,6 +53,16 @@
 	  <Protobuf Include="..\..\Proto\story_block.proto" GrpcServices="None">
 		  <Link>Proto\story_block.proto</Link>
 	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\text_response_block.proto" GrpcServices="None">
+		  <Link>Proto\text_response_block.proto</Link>
+	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\variable_block.proto" GrpcServices="None">
+		  <Link>Proto\variable_block.proto</Link>
+	  </Protobuf>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\TextResponses\" />
   </ItemGroup>
 
 </Project>

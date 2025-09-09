@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package chatbot;
+
+message VariableBlock {
+    string id = 1;
+    string name = 2;
+    string type = 3;
+}

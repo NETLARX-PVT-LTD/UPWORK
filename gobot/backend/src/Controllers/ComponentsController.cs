@@ -353,7 +353,6 @@ namespace Netlarx.Products.Gobot.Controllers
             {
                 StoryId = storyId,
                 Type = block.Type,
-                FormId = block.FormId,
                 FormName = block.FormName,
                 WebhookUrl = block.WebhookUrl,
                 SendEmailNotification = block.SendEmailNotification,
@@ -365,41 +364,65 @@ namespace Netlarx.Products.Gobot.Controllers
                 AllowExitForm = block.AllowExitForm,
                 ExitFormMessage = block.ExitFormMessage,
                 SuccessResponseType = block.SuccessResponseType,
-                //SuccessRedirectStoryId = block.SuccessRedirectStoryId,
+                // SuccessRedirectStoryId = block.SuccessRedirectStoryId,
                 ValidateEmail = block.ValidateEmail,
                 ValidatePhone = block.ValidatePhone,
                 SpamProtection = block.SpamProtection,
                 RequireCompletion = block.RequireCompletion,
                 SuccessMessage = block.SuccessMessage,
-                RedirectUrl = block.RedirectUrl,
+                RedirectUrl = block.RedirectUrl
+            };
 
-                // Map nested FormFields
-                FormFields = block.FormFields?.Select(f => new FormField
+            // ✅ Add form fields inside ConversationalForm
+            foreach (var f in block.FormFields)
+            {
+                model.FormFields.Add(new Models.FormField
                 {
-                    FormFieldId = f.FormFieldId,
                     Name = f.Name,
                     Type = f.Type,
                     Required = f.Required,
                     PromptPhrase = f.PromptPhrase,
                     Options = f.Options?.ToList(),
-                    OptionsText = f.OptionsText
-                }).ToList()
-            };
+                    OptionsText = f.OptionsText,
+                    ConversationalFormId = model.ID
+                });
+            }
 
             return AddComponent(storyId, model, ComponentTypes.ConversationalForm,
                 g => manager.GetStory(storyId).ConversationalForms.Add(g));
         }
 
+        private IActionResult AddQuickReply(int storyId, [FromBody] QuickReplyModel model)
+        {
+            return AddComponent(storyId, model, "quickReply",
+                 g => manager.GetStory(storyId).quickReplies.Add(g));
+        }
 
         [HttpPost("AddTextReponse")]
         public IActionResult AddTextResponse(int storyId, [FromBody] TextResponseBlock block)
         {
+            Guid QuickId = Guid.NewGuid();
+
             var model = new Models.TextResponse
             {
+                ID = Guid.NewGuid(),
                 StoryId = storyId,
                 Type = block.Type,
-                Content = block.Content
+                Content = block.Content,
+                BotId = block.BotId,
+                QuickReplyId = QuickId
             };
+
+            foreach (var qr in block.QuickReplies)
+            {
+                var quickReply = new Models.QuickReplyModel
+                {
+                    ID = QuickId,
+                    Text = qr.Text
+                };
+                var response = AddQuickReply(storyId, quickReply);
+            }
+
             return AddComponent(storyId, model, ComponentTypes.TextResponse,
                  g => manager.GetStory(storyId).TextResponses.Add(g));
         }

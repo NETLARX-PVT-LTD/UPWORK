@@ -10,8 +10,9 @@ enum UserInputSubType {
 
 // A keyword group, used for keyword-based branching
 message KeywordGroup {
-  string id = 1;                // UUID or unique identifier
-  repeated string keywords = 2; // e.g., ["hello", "hi", "hey"]
+  string userInputKeywordId = 1;
+  string id = 2;                // UUID or unique identifier
+  repeated string keywords = 3; // e.g., ["hello", "hi", "hey"]
 }
 
 // A variable, either system-defined or user-defined

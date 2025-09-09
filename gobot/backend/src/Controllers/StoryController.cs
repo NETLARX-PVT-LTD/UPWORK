@@ -1,5 +1,5 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="School.cs" company="Netlarx">
+// <copyright file="StoryController.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
@@ -573,7 +573,6 @@ namespace Netlarx.Products.Gobot.Controllers
                             ID = Guid.NewGuid(),
                             StoryId = session.Story.Id,    // assuming you want to link to Story
                             Type = cf.Type,
-                            FormId = cf.FormId,
                             FormName = cf.FormName,
                             WebhookUrl = cf.WebhookUrl,
                             SendEmailNotification = cf.SendEmailNotification,
@@ -590,10 +589,12 @@ namespace Netlarx.Products.Gobot.Controllers
                             SpamProtection = cf.SpamProtection,
                             RequireCompletion = cf.RequireCompletion,
                             SuccessMessage = cf.SuccessMessage,
-                            RedirectUrl = cf.RedirectUrl,
+                            RedirectUrl = cf.RedirectUrl
+                        };
 
-                            // Map FormFields (Proto → C# List<FormField>)
-                            FormFields = cf.FormFields.Select(f => new Models.FormField
+                        foreach (var f in cf.FormFields)
+                        {
+                            var formfield = new Models.FormField
                             {
                                 FormFieldId = f.FormFieldId,
                                 Name = f.Name,
@@ -601,9 +602,12 @@ namespace Netlarx.Products.Gobot.Controllers
                                 Required = f.Required,
                                 PromptPhrase = f.PromptPhrase,
                                 Options = f.Options?.ToList(),
-                                OptionsText = f.OptionsText
-                            }).ToList()
-                        };
+                                OptionsText = f.OptionsText,
+                                ConversationalFormId = form.ID
+                            };
+
+                            _db.FormFields.Add(formfield);
+                        }
                         _db.ConversationalForm.Add(form);
                     }
                 }
@@ -639,12 +643,20 @@ namespace Netlarx.Products.Gobot.Controllers
                     }
                 }
 
-
                 // 🔹Text Responses
                 if (session.TextResponses != null)
                 {
                     foreach (var tr in session.TextResponses)
                     {
+                        Guid quickReplyId = Guid.NewGuid();
+                       foreach(var qr in tr.QuickReplies)
+                        {
+                            var QuickReply = new Models.QuickReplyModel
+                            {
+                                ID = quickReplyId,
+                                Text = qr.Text
+                            };
+                        }
                         var textResponse = new Models.TextResponse
                         {
                             ID = Guid.NewGuid(),
@@ -652,7 +664,7 @@ namespace Netlarx.Products.Gobot.Controllers
                             Type = tr.Type,      // coming from proto
                             Content = tr.Content,
                             AlternateResponses = tr.AlternateResponses?.ToList() ?? new List<string>(),
-
+                            QuickReplyId = quickReplyId,
                             // BaseComponent fields
                             ToComponentType = tr.ToComponentType,
                             ToComponentId = Guid.Parse(tr.ToComponentId)
@@ -744,7 +756,6 @@ namespace Netlarx.Products.Gobot.Controllers
                 return StatusCode(500, new { error = innerMessage });
             }
         }
-
 
         [HttpPut("UpdateStory")]
         public async Task<ActionResult> UpdateStory([FromBody] StorySessionData session)
