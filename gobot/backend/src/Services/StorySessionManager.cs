@@ -32,6 +32,8 @@ namespace Netlarx.Products.Gobot.Services
 
         public List<Media> Medias { get; set; } = new();
 
+        public List<QuickReplyModel> quickReplies { get; set; } = new();
+
         public Stories Story { get; set; } = new();
     }
     public class StorySessionManager

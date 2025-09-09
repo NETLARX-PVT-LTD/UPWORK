@@ -6,6 +6,7 @@
 
 namespace Netlarx.Products.Gobot.Interface
 {
+    using Gobot.Models;
     using Microsoft.EntityFrameworkCore;
     using Netlarx.Products.Gobot.Models;
     using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace Netlarx.Products.Gobot.Interface
         DbSet<UserInputPhrase> UserInputPhrases { get; set; }
         DbSet<UserInputKeyword> UserInputKeywords { get; set; }
         DbSet<UserInputTypeAnything> UserInputTypeAnythings { get; set; }
+        DbSet<Variable> Variables { get; set; }
         DbSet<Connection> Connection { get; set; }
         DbSet<TypingDelay> TypingDelay { get; set; }
         DbSet<ConversationalForm> ConversationalForm { get; set; }
@@ -37,7 +39,11 @@ namespace Netlarx.Products.Gobot.Interface
 
         DbSet<Media> Medias { get; set; }
 
-        public DbSet<LinkStory> LinkStory { get; set; }
+        DbSet<LinkStory> LinkStory { get; set; }
+
+        DbSet<FormField> FormFields { get; set; }
+        DbSet<FormSubmission> FormSubmissions { get; set; }
+
         void addStory(Stories model);
 
         void addConnection(Connection connection);

@@ -36,4 +36,5 @@ message ConversationalFormBlock {
   string redirectUrl = 20;
   string ToComponentType = 21; 
   string ToComponentId = 22; 
+  int32 botId = 23;
 }

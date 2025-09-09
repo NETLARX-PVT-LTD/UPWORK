@@ -12,8 +12,11 @@ namespace Netlarx.Products.Gobot.Models
 
     public class TextResponse : BaseComponent
     {
+        public int BotId { get; set; }
         [Required]
         public int StoryId { get; set; }
+
+        public Guid QuickReplyId { get; set; }
 
         public string Type { get; set; }
 

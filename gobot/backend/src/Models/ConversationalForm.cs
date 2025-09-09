@@ -1,16 +1,25 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="School.cs" company="Netlarx">
+// <copyright file="ConversationalForm.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
 
-using System.Collections.Generic;
 
 namespace Netlarx.Products.Gobot.Models
 {
+    using Microsoft.EntityFrameworkCore.Metadata.Internal;
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+
     public class FormField
     {
+        [Key]
         public int FormFieldId { get; set; }
+        public Guid ConversationalFormId { get; set; }
+        [ForeignKey(nameof(ConversationalFormId))]
+        public virtual ConversationalForm ConversationalForm { get; set; }
         public string Name { get; set; }
         public string Type { get; set; }
         public bool Required { get; set; }
@@ -31,14 +40,15 @@ namespace Netlarx.Products.Gobot.Models
 
     public class ConversationalForm : BaseComponent
     {
+        public int BotId { get; set; }
         public int StoryId { get; set; }
         public string Type { get; set; } // e.g. "conversationalForm"
-        public string FormId { get; set; }
+
+        [Required]
         public string FormName { get; set; }
         public string WebhookUrl { get; set; }
         public bool SendEmailNotification { get; set; }
         public string? NotificationEmail { get; set; }
-        public List<FormField> FormFields { get; set; }
         public bool ShowAsInlineForm { get; set; }
         public bool RenderFormResponses { get; set; }
         public bool AllowMultipleSubmission { get; set; }
@@ -53,5 +63,6 @@ namespace Netlarx.Products.Gobot.Models
         public bool RequireCompletion { get; set; }
         public string SuccessMessage { get; set; }
         public string RedirectUrl { get; set; }
+        public ICollection<FormField> FormFields { get; set; } = new List<FormField>();
     }
 }

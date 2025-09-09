@@ -30,6 +30,7 @@ namespace Netlarx.Products.Gobot.Db
         public DbSet<VariablePhrase> PhraseVariables { get; set; }
         public DbSet<VariableKeyword> KeywordVariables { get; set; }
         public DbSet<VariableAnything> AnythingVariables { get; set; }
+        public DbSet<Variable> Variables { get; set; }
 
         public DbSet<Connection> Connection { get; set; }
         public DbSet<TypingDelay> TypingDelay { get; set; }
@@ -38,11 +39,15 @@ namespace Netlarx.Products.Gobot.Db
         public DbSet<JsonAPI> JsonAPI { get; set; }
 
         public DbSet<TextResponse> TextResponse { get; set; }
-        public DbSet<QuickReply> QuickReplies { get; set; }
+        public DbSet<QuickReplyModel> QuickReplies { get; set; }
 
         public DbSet<LinkStory> LinkStory { get; set; }
 
         public DbSet<Media> Medias { get; set; }
+
+        public DbSet<FormField> FormFields { get; set; }
+
+        public DbSet<FormSubmission> FormSubmissions { get; set; }
 
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
@@ -112,7 +117,7 @@ namespace Netlarx.Products.Gobot.Db
             //modelBuilder.Entity<TextResponse>().ToTable("TextResponse");
             modelBuilder.Entity<TypingDelay>().ToTable("TypingDelay");
             modelBuilder.Entity<TextResponse>().ToTable("TextResponse");
-            modelBuilder.Entity<QuickReply>().ToTable("QuickReply");
+            modelBuilder.Entity<QuickReplyModel>().ToTable("QuickReply");
             // ✅ TextResponse configuration
             //modelBuilder.Entity<TextResponse>(entity =>
             //{
