@@ -406,6 +406,9 @@ namespace Netlarx.Products.Gobot.Controllers
 
         //// adding of media block api by ashutosh
 
+
+        //// adding of media block api by ashutosh
+
         [HttpPost("AddMediaBlock")]
         public IActionResult AddMediaBlock(int storyId, [FromBody] MediaBlock block)
         {
@@ -450,7 +453,17 @@ namespace Netlarx.Products.Gobot.Controllers
                     RssUrl = b.RssUrl,
                     RssItemCount = b.RssItemCount,
                     RssButtonText = b.RssButtonText,
-                    // ... mapping all other button properties for completeness ...
+                    JsonApiUrl = b.JsonApiUrl,
+                    JsonApiMethod = b.JsonApiMethod,
+                    JsonApiHeaders = b.JsonApiHeaders,
+                    JsonApiBody = b.JsonApiBody,
+                    ApiEndpoint = b.ApiEndpoint,
+                    RequestType = b.RequestType,
+                    MessageAfterAction = b.MessageAfterAction,
+                    EmailForNotification = b.EmailForNotification,
+                    StopBotForUser = b.StopBotForUser,
+                    FormId = b.FormId,
+                    ShowInline = b.ShowInline,
 
                     // Corrected to map to Models.ApiHeaderBlock
                     ApiHeaders = b.ApiHeaders.Select(h => new Models.ApiHeaderblock
@@ -468,7 +481,7 @@ namespace Netlarx.Products.Gobot.Controllers
         [HttpGet("GetMedia/{storyId}")]
         public async Task<IActionResult> GetMedia(int storyId)
         {
-            // 1. Fetch the data using your internal DATABASE models
+            // 1. Fetch the data using your internal DATABASE models, including all children
             var mediaEntity = await _db.Medias
                 .Include(m => m.Slides)
                 .Include(m => m.Buttons)
@@ -480,49 +493,116 @@ namespace Netlarx.Products.Gobot.Controllers
                 return NotFound($"No Media component found for StoryId {storyId}");
             }
 
-            // 2. Map the database entity to the clean API Model (DTO)
-            var mediaBlockDto = new ModelDTO.MediaBlockDto
+            // 2. Return the database entity directly
+            return Ok(mediaEntity);
+        }
+
+        [HttpPut("UpdateMedia/{id}")]
+        public async Task<IActionResult> UpdateMedia([FromRoute] Guid id, [FromBody] Models.Media updatedEntity)
+        {
+            // Find the existing record in the database, including its children, that we want to update
+            var existingEntity = await _db.Medias
+                .Include(m => m.Slides)
+                .Include(m => m.Buttons)
+                    .ThenInclude(b => b.ApiHeaders)
+                .FirstOrDefaultAsync(m => m.ID == id);
+
+            if (existingEntity == null)
             {
-                Type = "mediaBlock",
-                MediaId = mediaEntity.MediaId,
-                MediaType = (ModelDTO.MediaTypeDto)mediaEntity.MediaType,
-                SingleImageUrl = mediaEntity.SingleImageUrl,
-                VideoUrl = mediaEntity.VideoUrl,
-                AudioUrl = mediaEntity.AudioUrl,
-                FileUrl = mediaEntity.FileUrl,
-                MediaName = mediaEntity.MediaName,
-                ButtonTitle = mediaEntity.ButtonTitle,
-                ButtonTextMessage = mediaEntity.ButtonTextMessage,
-                ButtonType = mediaEntity.ButtonType,
-                ButtonLinkedMediaId = mediaEntity.ButtonLinkedMediaId,
-                ButtonUrl = mediaEntity.ButtonUrl,
-                Slides = mediaEntity.Slides.Select(s => new ModelDTO.ImageSlideDto
+                return NotFound($"No Media component found with ID {id}");
+            }
+
+            // 1. Update all simple properties on the parent Media object
+            existingEntity.MediaId = updatedEntity.MediaId;
+            existingEntity.MediaType = updatedEntity.MediaType;
+            existingEntity.SingleImageUrl = updatedEntity.SingleImageUrl;
+            existingEntity.VideoUrl = updatedEntity.VideoUrl;
+            existingEntity.AudioUrl = updatedEntity.AudioUrl;
+            existingEntity.FileUrl = updatedEntity.FileUrl;
+            existingEntity.MediaName = updatedEntity.MediaName;
+            existingEntity.ButtonTitle = updatedEntity.ButtonTitle;
+            existingEntity.ButtonTextMessage = updatedEntity.ButtonTextMessage;
+            existingEntity.ButtonType = updatedEntity.ButtonType;
+            existingEntity.ButtonLinkedMediaId = updatedEntity.ButtonLinkedMediaId;
+            existingEntity.ButtonUrl = updatedEntity.ButtonUrl;
+
+            // 2. Clear the old child collections to prepare for the new ones
+            existingEntity.Slides.Clear();
+            existingEntity.Buttons.Clear();
+
+            // 3. Create and add the new children from the incoming data
+            foreach (var slide in updatedEntity.Slides)
+            {
+                existingEntity.Slides.Add(new Models.ImageSlideblock
                 {
-                    Url = s.Url,
-                    Title = s.Title,
-                    Description = s.Description
-                }).ToList(),
-                Buttons = mediaEntity.Buttons.Select(b => new ModelDTO.ButtonDto
+                    Url = slide.Url,
+                    Title = slide.Title,
+                    Description = slide.Description
+                });
+            }
+
+            foreach (var button in updatedEntity.Buttons)
+            {
+                existingEntity.Buttons.Add(new Models.Buttonblock
                 {
-                    Id = b.ProtoId,
-                    Title = b.Title,
-                    Type = b.Type,
-                    Value = b.Value,
-                    TextMessage = b.TextMessage,
-                    LinkedMediaId = b.LinkedMediaId,
-                    Url = b.Url,
-                    PhoneNumber = b.PhoneNumber,
-                    StoryId = b.StoryId,
-                    ApiHeaders = b.ApiHeaders.Select(h => new ModelDTO.ApiHeaderDto
+                    // Correct: Copying the string (button.ProtoId) to the string property (ProtoId)
+                    ProtoId = button.ProtoId,
+                    Title = button.Title,
+                    Type = button.Type,
+                    Value = button.Value,
+                    TextMessage = button.TextMessage,
+                    LinkedMediaId = button.LinkedMediaId,
+                    Url = button.Url,
+                    PhoneNumber = button.PhoneNumber,
+                    StoryId = button.StoryId,
+                    RssUrl = button.RssUrl,
+                    RssItemCount = button.RssItemCount,
+                    RssButtonText = button.RssButtonText,
+                    JsonApiUrl = button.JsonApiUrl,
+                    JsonApiMethod = button.JsonApiMethod,
+                    JsonApiHeaders = button.JsonApiHeaders,
+                    JsonApiBody = button.JsonApiBody,
+                    ApiEndpoint = button.ApiEndpoint,
+                    RequestType = button.RequestType,
+                    MessageAfterAction = button.MessageAfterAction,
+                    EmailForNotification = button.EmailForNotification,
+                    StopBotForUser = button.StopBotForUser,
+                    FormId = button.FormId,
+                    ShowInline = button.ShowInline,
+                    ApiHeaders = button.ApiHeaders.Select(h => new Models.ApiHeaderblock
                     {
                         Key = h.Key,
                         Value = h.Value
                     }).ToList()
-                }).ToList()
-            };
+                });
+            }
 
-            // 3. Return the clean DTO to the user
-            return Ok(mediaBlockDto);
+            // 4. Save all changes (updates, deletions, and additions) to the database
+            await _db.SaveChangesAsync();
+
+            return NoContent(); // Success
+        }
+
+        [HttpDelete("media/{id}")]
+        public async Task<IActionResult> DeleteMedia(Guid id)
+        {
+            // 1. Find the media component in the database by its unique ID
+            var mediaEntity = await _db.Medias.FindAsync(id);
+
+            // 2. If it doesn't exist, return a 404 Not Found error
+            if (mediaEntity == null)
+            {
+                return NotFound();
+            }
+
+            // 3. Tell the database to remove this record
+            _db.Medias.Remove(mediaEntity);
+
+            // 4. Save the changes to permanently delete it
+            await _db.SaveChangesAsync();
+
+            // 5. Return a success response with no content
+            return NoContent();
         }
 
         [HttpGet("GetTypingDelay/{storyId}")]
