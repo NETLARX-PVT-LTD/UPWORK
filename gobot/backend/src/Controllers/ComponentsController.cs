@@ -7,13 +7,17 @@
 namespace Netlarx.Products.Gobot.Controllers
 {
     using Chatbot;
+    using Contract.Enum;
+    using Contract.ResponseModel;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using Netlarx.Products.Gobot.Interface;
     using Netlarx.Products.Gobot.ModelDTO;
     using Netlarx.Products.Gobot.Models;
+    using Netlarx.Products.Gobot.Pipelines;
     using Netlarx.Products.Gobot.Services;
+    using ProtoBuf;
     using System;
     using System.Collections.Generic;
     using System.IdentityModel.Tokens.Jwt;
@@ -21,9 +25,6 @@ namespace Netlarx.Products.Gobot.Controllers
     using System.Linq;
     using System.Reflection.PortableExecutable;
     using System.Threading.Tasks;
-    using ProtoBuf;
-    using Microsoft.AspNetCore.Mvc;
-    using Netlarx.Products.Gobot.Pipelines;
 
     [ApiController]
     [Route("api/[controller]")]
@@ -48,29 +49,21 @@ namespace Netlarx.Products.Gobot.Controllers
             manager = _manager;
         }
 
-        [HttpPost("AddStory")]
-        public async Task<IActionResult> AddStory([FromBody] Stories model)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    _logger.LogWarning("Invalid Story model received");
-                    return BadRequest(ModelState);
-                }
 
-                model.CreatedDate = DateTime.UtcNow;
+        [HttpPost("AddStory")]
+        public async Task<AddStoryResult> AddStory([FromBody] Stories model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return new AddStoryResult(ErrorCode.ValidationError,ErrorMessage.InvalidModel);
+            }
+
+                 model.CreatedDate = DateTime.UtcNow;
                 _db.addStory(model);
                 await _db.SaveChangesAsync();
 
-                _logger.LogInformation("Story created with ID: {StoryId}", model.ID);
-                return Ok(new { message = "Story created", storyId = model.ID });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while creating story");
-                return StatusCode(500, new { error = ex.Message });
-            }
+                return new AddStoryResult(model.ID);
+           
         }
 
         private IActionResult AddComponent<T>(int storyId, T model, string compType, Action<T> addToCollection) where T : BaseComponent
