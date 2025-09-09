@@ -6,17 +6,18 @@
 
 namespace Netlarx.Products.Gobot
 {
+    using global::Gobot.Middlewares;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Mvc.Formatters;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Netlarx.Products.Gobot.Db;
     using Netlarx.Products.Gobot.Interface;
-    using Netlarx.Products.Gobot.Services;
     using Netlarx.Products.Gobot.Middlewares;
-    using Microsoft.AspNetCore.Mvc.Formatters;
+    using Netlarx.Products.Gobot.Services;
 
     public class Startup(IConfiguration configuration)
     {
@@ -69,9 +70,11 @@ namespace Netlarx.Products.Gobot
                 app.UseSwaggerUI();
             }
             app.UseHttpsRedirection();
+            app.UseRouting();
+            app.UseMiddleware<ServiceExceptionMiddleware>();
             app.UseCors("AllowAll");
             app.UseAuthorization();
-            app.UseRouting();
+         
             //app.UseMiddleware<DeserializationMiddleware>();
 
             app.UseEndpoints(endpoints =>
