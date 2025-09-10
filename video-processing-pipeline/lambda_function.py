@@ -6,7 +6,7 @@ import requests
 import time
 from datetime import datetime, timedelta
 
-# Database configuration
+# Database configuration.
 DB_HOST = 'analytics-and-library.cxqeuoaemxbe.ca-central-1.rds.amazonaws.com'
 DB_USER = 'admin'
 DB_PASSWORD = 'qsCLwrB742VRjyN58ubpKU'
