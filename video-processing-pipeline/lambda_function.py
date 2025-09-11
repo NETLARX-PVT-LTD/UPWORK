@@ -646,6 +646,13 @@ def lambda_handler(event, context):
                     return {'statusCode': 500, 'body': json.dumps('Failed to create new VM')}
                 log_step("New VM Ready", "SUCCESS", f"Created and will use: {vm_id}")
 
+                if vm_id is None:
+                    log_step("VM Assignment Check", "ERROR", "No VM available to assign the match")
+                    connection.rollback()
+                    return {
+                        'statusCode': 500, 'body': json.dumps('No VM available for assignment')}
+                log_step("VM Assignment Success", "SUCCESS", f"VM {vm_id} assigned successfully")
+
             # 4. Assign match to VM (matches table untouched)
             log_scenario("MATCH-VM ASSIGNMENT", f"Assigning Match {match_id_to_process} to VM {vm_id}")
             current_time = datetime.now()
