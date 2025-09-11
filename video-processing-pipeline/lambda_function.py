@@ -15,16 +15,16 @@ DB_PASSWORD = 'qsCLwrB742VRjyN58ubpKU'
 DB_NAME = 'analytics_and_library'
 
 # Lambda Cloud API configuration
-LAMBDA_API_KEY = os.environ.get('LAMBDA_CLOUD_API_KEY')
-SSH_KEY_NAME = os.environ.get('LAMBDA_SSH_KEY_NAME')
+LAMBDA_API_KEY = 'secret_amit_0b09f77438444ab4bca61705bb77fa8f.5aLQrpr7saUdzcjI7KYm8IirAXL0LBqg'
+SSH_KEY_NAME = 'football-analysis-yolov11-lambda-ssh'
 BASE_URL = 'https://cloud.lambda.ai/api/v1/instance-operations'
 
 # SSH Configuration
-SSH_PRIVATE_KEY_SECRET_NAME = "os.environ.get('SSH_PRIVATE_KEY_SECRET_NAME')"  # AWS Secrets Manager secret name
+SSH_PRIVATE_KEY_SECRET_NAME = "b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW QyNTUxOQAAACCcDtX3gLXIlSOXHIgCV5qs9RDN9VF4wTQPbrQofPDlZwAAAIhQ63UrUOt1 KwAAAAtzc2gtZWQyNTUxOQAAACCcDtX3gLXIlSOXHIgCV5qs9RDN9VF4wTQPbrQofPDlZw AAAECGdggAOl8Yo70f05XRNcKwmgEIXNhquodW4xa1sF5KNJwO1feAtciVI5cciAJXmqz1 EM31UXjBNA9utCh88OVnAAAABHRlc3QB"  # AWS Secrets Manager secret name
 AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
 
 # Testing mode flag
-TESTING_MODE = os.environ.get('TESTING_MODE', 'False').lower() == 'true'
+# TESTING_MODE = os.environ.get('TESTING_MODE', 'False').lower() == 'true'
 
 def log_scenario(scenario_name, details=""):
     """Enhanced logging for different test scenarios"""
@@ -803,119 +803,119 @@ def vm_processing_complete_handler(event, context):
             connection.close()
 
 # Enhanced testing functions
-def create_test_scenario_data(cursor):
-    """Create test data for different scenarios"""
-    log_scenario("TEST DATA SETUP", "Creating test data for different scenarios")
+# def create_test_scenario_data(cursor):
+#     """Create test data for different scenarios"""
+#     log_scenario("TEST DATA SETUP", "Creating test data for different scenarios")
 
-    current_time = datetime.now()
-    old_time = current_time - timedelta(minutes=10)
+#     current_time = datetime.now()
+#     old_time = current_time - timedelta(minutes=10)
 
-    try:
-        # Clean up existing test data
-        cursor.execute("DELETE FROM vms WHERE vm_id LIKE 'test-%'")
-        cursor.execute("DELETE FROM matches WHERE match_id LIKE 'test-%'")
+#     try:
+#         # Clean up existing test data
+#         cursor.execute("DELETE FROM vms WHERE vm_id LIKE 'test-%'")
+#         cursor.execute("DELETE FROM matches WHERE match_id LIKE 'test-%'")
 
-        # Scenario 1: Free VM available (no assigned match)
-        cursor.execute("""
-            INSERT INTO vms (vm_id, assigned_match_id, created_at, last_activity)
-            VALUES ('test-vm-free', NULL, %s, %s)
-        """, (current_time, current_time))
+#         # Scenario 1: Free VM available (no assigned match)
+#         cursor.execute("""
+#             INSERT INTO vms (vm_id, assigned_match_id, created_at, last_activity)
+#             VALUES ('test-vm-free', NULL, %s, %s)
+#         """, (current_time, current_time))
 
-        # Scenario 2: Old idle VM that should be cleaned up
-        cursor.execute("""
-            INSERT INTO vms (vm_id, assigned_match_id, created_at, last_activity)
-            VALUES ('test-vm-idle', NULL, %s, %s)
-        """, (old_time, old_time))
+#         # Scenario 2: Old idle VM that should be cleaned up
+#         cursor.execute("""
+#             INSERT INTO vms (vm_id, assigned_match_id, created_at, last_activity)
+#             VALUES ('test-vm-idle', NULL, %s, %s)
+#         """, (old_time, old_time))
 
-        # Scenario 3: Busy VM
-        cursor.execute("""
-            INSERT INTO vms (vm_id, assigned_match_id, created_at, last_activity)
-            VALUES ('test-vm-busy', 'test-match-busy', %s, %s)
-        """, (current_time, current_time))
+#         # Scenario 3: Busy VM
+#         cursor.execute("""
+#             INSERT INTO vms (vm_id, assigned_match_id, created_at, last_activity)
+#             VALUES ('test-vm-busy', 'test-match-busy', %s, %s)
+#         """, (current_time, current_time))
 
-        # Test matches with S3 links
-        cursor.execute("""
-            INSERT INTO matches (match_id, video_path, s3_link, processing_status, created_at)
-            VALUES ('test-match-ready', '/path/to/test/video.mp4', 's3://test-bucket/test-match-ready/video.mp4', 'cv_ready', %s)
-        """, (current_time,))
+#         # Test matches with S3 links
+#         cursor.execute("""
+#             INSERT INTO matches (match_id, video_path, s3_link, processing_status, created_at)
+#             VALUES ('test-match-ready', '/path/to/test/video.mp4', 's3://test-bucket/test-match-ready/video.mp4', 'cv_ready', %s)
+#         """, (current_time,))
         
-        # Test match for completion handler
-        cursor.execute("""
-            INSERT INTO matches (match_id, video_path, s3_link, processing_status, created_at)
-            VALUES ('test-match-complete', '/path/to/completion/video.mp4', 's3://test-bucket/test-match-complete/video.mp4', 'cv_processing', %s)
-        """, (current_time,))
+#         # Test match for completion handler
+#         cursor.execute("""
+#             INSERT INTO matches (match_id, video_path, s3_link, processing_status, created_at)
+#             VALUES ('test-match-complete', '/path/to/completion/video.mp4', 's3://test-bucket/test-match-complete/video.mp4', 'cv_processing', %s)
+#         """, (current_time,))
         
-        # Test VM for completion handler
-        cursor.execute("""
-            INSERT INTO vms (vm_id, assigned_match_id, created_at, last_activity)
-            VALUES ('test-vm-complete', 'test-match-complete', %s, %s)
-        """, (current_time, current_time))
+#         # Test VM for completion handler
+#         cursor.execute("""
+#             INSERT INTO vms (vm_id, assigned_match_id, created_at, last_activity)
+#             VALUES ('test-vm-complete', 'test-match-complete', %s, %s)
+#         """, (current_time, current_time))
 
-        log_step("Test Data Created", "SUCCESS", "All test scenarios data inserted")
+#         log_step("Test Data Created", "SUCCESS", "All test scenarios data inserted")
 
-    except Exception as e:
-        log_step("Test Data Creation", "ERROR", f"Failed: {str(e)}")
+#     except Exception as e:
+#         log_step("Test Data Creation", "ERROR", f"Failed: {str(e)}")
 
-def test_scenario_free_vm():
-    """Test scenario when free VM is available"""
-    log_scenario("TEST: FREE VM AVAILABLE", "Testing assignment with existing free VM")
-    os.environ['TESTING_MODE'] = 'true'
-    result = lambda_handler({}, None)
-    return result
+# def test_scenario_free_vm():
+#     """Test scenario when free VM is available"""
+#     log_scenario("TEST: FREE VM AVAILABLE", "Testing assignment with existing free VM")
+#     os.environ['TESTING_MODE'] = 'true'
+#     result = lambda_handler({}, None)
+#     return result
 
-def test_scenario_no_free_vm():
-    """Test scenario when no free VM is available"""
-    log_scenario("TEST: NO FREE VM", "Testing new VM creation scenario")
-    os.environ['TESTING_MODE'] = 'true'
-    result = lambda_handler({}, None)
-    return result
+# def test_scenario_no_free_vm():
+#     """Test scenario when no free VM is available"""
+#     log_scenario("TEST: NO FREE VM", "Testing new VM creation scenario")
+#     os.environ['TESTING_MODE'] = 'true'
+#     result = lambda_handler({}, None)
+#     return result
 
-def test_scenario_completion():
-    """Test VM processing completion"""
-    log_scenario("TEST: PROCESSING COMPLETION", "Testing completion handler")
-    os.environ['TESTING_MODE'] = 'true'
+# def test_scenario_completion():
+#     """Test VM processing completion"""
+#     log_scenario("TEST: PROCESSING COMPLETION", "Testing completion handler")
+#     os.environ['TESTING_MODE'] = 'true'
 
-    test_event = {
-        'match_id': 'test-match-complete',
-        'vm_id': 'test-vm-complete'
-    }
-    result = vm_processing_complete_handler(test_event, None)
-    return result
+#     test_event = {
+#         'match_id': 'test-match-complete',
+#         'vm_id': 'test-vm-complete'
+#     }
+#     result = vm_processing_complete_handler(test_event, None)
+#     return result
 
-def test_scenario_cleanup():
-    """Test VM cleanup when an idle VM exists"""
-    log_scenario("TEST: VM CLEANUP", "Testing VM termination for an idle VM")
-    os.environ['TESTING_MODE'] = 'true'
-    result = lambda_handler({}, None)
-    return result
+# def test_scenario_cleanup():
+#     """Test VM cleanup when an idle VM exists"""
+#     log_scenario("TEST: VM CLEANUP", "Testing VM termination for an idle VM")
+#     os.environ['TESTING_MODE'] = 'true'
+#     result = lambda_handler({}, None)
+#     return result
 
-if __name__ == '__main__':
-    os.environ['TESTING_MODE'] = 'true'
+# if __name__ == '__main__':
+#     os.environ['TESTING_MODE'] = 'true'
 
-    print("🧪 STARTING COMPREHENSIVE TESTING WITH SSH COMMANDS")
-    print("=" * 80)
+#     print("🧪 STARTING COMPREHENSIVE TESTING WITH SSH COMMANDS")
+#     print("=" * 80)
 
-    # Test 1: Normal assignment with SSH command execution
-    log_scenario("TEST 1", "Normal assignment process with SSH commands")
-    result1 = lambda_handler({}, None)
-    print(f"Result: {result1}")
+#     # Test 1: Normal assignment with SSH command execution
+#     log_scenario("TEST 1", "Normal assignment process with SSH commands")
+#     result1 = lambda_handler({}, None)
+#     print(f"Result: {result1}")
 
-    print("\n" + "=" * 80)
+#     print("\n" + "=" * 80)
 
-    # Test 2: Completion handler
-    log_scenario("TEST 2", "Processing completion")
-    completion_event = {
-        'match_id': 'test-match-complete',
-        'vm_id': 'test-vm-complete'
-    }
-    result2 = vm_processing_complete_handler(completion_event, None)
-    print(f"Result: {result2}")
+#     # Test 2: Completion handler
+#     log_scenario("TEST 2", "Processing completion")
+#     completion_event = {
+#         'match_id': 'test-match-complete',
+#         'vm_id': 'test-vm-complete'
+#     }
+#     result2 = vm_processing_complete_handler(completion_event, None)
+#     print(f"Result: {result2}")
 
-    print("\n" + "=" * 80)
+#     print("\n" + "=" * 80)
 
-    # Test 3: Cleanup handler for an idle VM
-    log_scenario("TEST 3", "VM cleanup test for an idle VM")
-    result3 = test_scenario_cleanup()
-    print(f"Result: {result3}")
+#     # Test 3: Cleanup handler for an idle VM
+#     log_scenario("TEST 3", "VM cleanup test for an idle VM")
+#     result3 = test_scenario_cleanup()
+#     print(f"Result: {result3}")
 
-    print("\n🧪 TESTING COMPLETE")
+#     print("\n🧪 TESTING COMPLETE")
