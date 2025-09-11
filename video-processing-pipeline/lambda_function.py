@@ -285,7 +285,7 @@ def check_database_state(cursor):
         print(f"      ├─ VM {vm_id}: {status}, Assigned Match: {assigned_match}, Activity: {activity_str}")
 
     # Check matches
-    cursor.execute("SELECT match_id, processing_status FROM matches WHERE processing_status IN ('cv_ready', 'cv_processed', 'cv_processed')")
+    cursor.execute("SELECT match_id, processing_status FROM matches WHERE processing_status IN ('cv_ready', 'cv_processed', 'cv_processeded')")
     matches = cursor.fetchall()
 
     log_step("Relevant Matches", "INFO", f"Matches ready/processing: {len(matches)}")
@@ -389,13 +389,13 @@ def lambda_handler(event, context):
 
                 # Update the matches table to prevent re-processing
                 log_step("Updating Match Status", "INFO", f"Setting match {match_id_to_process} to 'cv_processed'")
-                # sql_update_match_status = """
-                #     UPDATE matches
-                #     SET processing_status = 'cv_processed',
-                #         updated_at = %s
-                #     WHERE match_id = %s
-                # """
-                # cursor.execute(sql_update_match_status, (current_time, match_id_to_process))
+                sql_update_match_status = """
+                    UPDATE matches
+                    SET processing_status = 'cv_processed',
+                        updated_at = %s
+                    WHERE match_id = %s
+                """
+                cursor.execute(sql_update_match_status, (current_time, match_id_to_process))
 
                 log_step("Assignment Complete", "SUCCESS", f"Match {match_id_to_process} assigned to VM {vm_id}")
                 connection.commit()
@@ -478,15 +478,15 @@ def vm_processing_complete_handler(event, context):
         with connection.cursor() as cursor:
             check_database_state(cursor)
 
-            # Update match status to cv_processed
-            log_step("Updating Match Status", "INFO", f"Setting match {match_id} to cv_processed")
-            # sql_update_match_status = """
-            #     UPDATE matches
-            #     SET processing_status = 'cv_processed',
-            #         updated_at = %s
-            #     WHERE match_id = %s
-            # """
-            # cursor.execute(sql_update_match_status, (datetime.now(), match_id))
+            # Update match status to cv_processeded
+            log_step("Updating Match Status", "INFO", f"Setting match {match_id} to cv_processeded")
+            sql_update_match_status = """
+                UPDATE matches
+                SET processing_status = 'cv_processeded',
+                    updated_at = %s
+                WHERE match_id = %s
+            """
+            cursor.execute(sql_update_match_status, (datetime.now(), match_id))
 
             # Free up the VM by setting assigned_match_id to NULL
             log_step("Freeing VM", "INFO", f"Setting VM {vm_id} to free status")
