@@ -551,14 +551,17 @@ def check_database_state(cursor):
 
 def lambda_handler(event, context):
     """
-    Main handler with enhanced logic that includes SSH command execution.
+    Main handler with updated logic:
+    - Only assign matches that are 'cv_ready' AND not already assigned to any VM
+    - Never update matches table status here
+    - On failure, only free VM (matches table untouched)
     """
     connection = None
     try:
         log_scenario("LAMBDA HANDLER EXECUTION", "Video processing assignment started")
-
         check_configuration()
 
+        # DB connect
         log_step("Database Connection", "INFO", f"Connecting to {DB_HOST}")
         connection = pymysql.connect(
             host=DB_HOST,
@@ -574,181 +577,30 @@ def lambda_handler(event, context):
         with connection.cursor() as cursor:
             check_database_state(cursor)
 
-            # 1. Find a match that is ready for CV processing and not assigned
+            # 1. Find one cv_ready match that is not already assigned to a VM
             log_scenario("MATCH ASSIGNMENT PROCESS", "Looking for a match to assign")
-            match_id_to_process = None
             sql_find_ready_match = """
-                SELECT match_id
-                FROM matches
-                WHERE processing_status = 'cv_ready'
-                ORDER BY created_at ASC
+                SELECT m.match_id
+                FROM matches m
+                WHERE m.processing_status = 'cv_ready'
+                AND NOT EXISTS (
+                    SELECT 1 FROM vms v WHERE v.assigned_match_id = m.match_id
+                )
                 LIMIT 1
             """
             cursor.execute(sql_find_ready_match)
             ready_match_row = cursor.fetchone()
-            if ready_match_row:
-                match_id_to_process = ready_match_row[0]
-                log_step("Match Found", "SUCCESS", f"Found unassigned match: {match_id_to_process}")
-            else:
+
+            if not ready_match_row:
                 log_step("No Unassigned Matches", "INFO", "No new matches to process.")
 
-            if match_id_to_process:
-                # 2. Get match details
-                match_details = get_match_details(cursor, match_id_to_process)
-                if not match_details:
-                    log_step("Match Details Error", "ERROR", "Could not retrieve match details")
-                    connection.rollback()
-                    return {
-                        'statusCode': 500,
-                        'body': json.dumps('Failed to retrieve match details')
-                    }
-
-                # 3. Find or create a VM
-                log_scenario("VM AVAILABILITY CHECK", "Looking for free VMs")
-                sql_find_free_vms = """
-                    SELECT vm_id, last_activity
-                    FROM vms
-                    WHERE assigned_match_id IS NULL
-                    ORDER BY last_activity ASC
-                    LIMIT 1
-                """
-
-                log_step("Querying Free VMs", "INFO", "Searching for an available VM")
-                cursor.execute(sql_find_free_vms)
-                free_vms = cursor.fetchall()
-
-                vm_id = None
-                if free_vms:
-                    vm_id = free_vms[0][0]
-                    last_activity = free_vms[0][1]
-                    activity_str = last_activity.strftime('%Y-%m-%d %H:%M:%S') if last_activity else "NULL"
-                    log_step("Free VM Found", "SUCCESS", f"Using existing VM: {vm_id} (Last activity: {activity_str})")
-                else:
-                    log_step("No Free VMs", "WARNING", "No free VMs available, creating a new one")
-                    new_vm_id = create_new_vm(cursor)
-                    if new_vm_id:
-                        vm_id = new_vm_id
-                        log_step("New VM Ready", "SUCCESS", f"Created and will use: {new_vm_id}")
-                    else:
-                        log_step("VM Creation Failed", "ERROR", "Cannot proceed without VM")
-                        connection.rollback()
-                        return {
-                            'statusCode': 500,
-                            'body': json.dumps('Failed to create new VM')
-                        }
-
-                # 4. Assign match to VM
-                log_scenario("MATCH-VM ASSIGNMENT", f"Assigning Match {match_id_to_process} to VM {vm_id}")
-                current_time = datetime.now()
-
-                # Update the VM's assigned_match_id
-                log_step("Updating VM Status", "INFO", f"Setting VM {vm_id} to busy with match {match_id_to_process}")
-                sql_update_vm = """
-                    UPDATE vms
-                    SET assigned_match_id = %s,
-                        last_activity = %s
-                    WHERE vm_id = %s
-                """
-                cursor.execute(sql_update_vm, (match_id_to_process, current_time, vm_id))
-
-                # Update the matches table to show processing started
-                log_step("Updating Match Status", "INFO", f"Setting match {match_id_to_process} to 'cv_processing'")
-                sql_update_match_status = """
-                    UPDATE matches
-                    SET processing_status = 'cv_processing',
-                        updated_at = %s
-                    WHERE match_id = %s
-                """
-                cursor.execute(sql_update_match_status, (current_time, match_id_to_process))
-
-                log_step("Assignment Complete", "SUCCESS", f"Match {match_id_to_process} assigned to VM {vm_id}")
-                connection.commit()
-                log_step("Database Commit", "SUCCESS", "All changes saved")
-
-                # 5. Execute processing commands on VM
-                log_scenario("VM COMMAND EXECUTION", f"Running processing commands on VM {vm_id}")
-                
-                # Get VM IP address
-                vm_ip = get_vm_ip_address(vm_id)
-                if not vm_ip:
-                    log_step("VM IP Error", "ERROR", "Could not get VM IP address")
-                    return {
-                        'statusCode': 500,
-                        'body': json.dumps('Failed to get VM IP address')
-                    }
-
-                # Wait for VM to be ready
-                if not wait_for_vm_ready(vm_ip):
-                    log_step("VM Ready Check", "ERROR", "VM did not become ready in time")
-                    return {
-                        'statusCode': 500,
-                        'body': json.dumps('VM did not become ready for SSH')
-                    }
-
-                # Get SSH private key
-                private_key_str = get_ssh_private_key()
-                if not private_key_str:
-                    log_step("SSH Key Error", "ERROR", "Could not retrieve SSH private key")
-                    return {
-                        'statusCode': 500,
-                        'body': json.dumps('Failed to retrieve SSH private key')
-                    }
-
-                # Execute commands
-                command_success = execute_ssh_commands(vm_ip, match_details, private_key_str)
-                
-                if command_success:
-                    log_scenario("EXECUTION COMPLETE", f"Successfully started processing for match {match_id_to_process} on VM {vm_id}")
-                    
-                    return {
-                        'statusCode': 200,
-                        'body': json.dumps({
-                            'message': 'Video processing started successfully',
-                            'match_assigned': match_id_to_process,
-                            'vm_used': vm_id,
-                            'vm_ip': vm_ip,
-                            'commands_executed': True,
-                            'testing_mode': TESTING_MODE
-                        })
-                    }
-                else:
-                    log_step("Command Execution Failed", "ERROR", "Failed to execute processing commands")
-                    
-                    # Update match status back to cv_ready since processing failed
-                    with connection.cursor() as rollback_cursor:
-                        sql_rollback_match = """
-                            UPDATE matches
-                            SET processing_status = 'cv_ready',
-                                updated_at = %s
-                            WHERE match_id = %s
-                        """
-                        rollback_cursor.execute(sql_rollback_match, (datetime.now(), match_id_to_process))
-                        
-                        # Free up the VM
-                        sql_free_vm = """
-                            UPDATE vms
-                            SET assigned_match_id = NULL,
-                                last_activity = %s
-                            WHERE vm_id = %s
-                        """
-                        rollback_cursor.execute(sql_free_vm, (datetime.now(), vm_id))
-                        connection.commit()
-                    
-                    return {
-                        'statusCode': 500,
-                        'body': json.dumps('Failed to execute processing commands on VM')
-                    }
-
-            else:
-                # 3. No matches were found, proceed with cleanup
+                # Cleanup phase
                 log_step("Starting Cleanup Phase", "INFO", "No work to do, performing cleanup.")
-
                 terminated_count = vm_cleanup(cursor)
-                log_step("VM Cleanup", "SUCCESS", f"Terminated and deleted {terminated_count} truly idle VMs.")
+                log_step("VM Cleanup", "SUCCESS", f"Terminated and deleted {terminated_count} idle VMs.")
 
                 connection.commit()
                 log_scenario("EXECUTION COMPLETE", f"No work to do, cleaned up {terminated_count} idle VMs.")
-
                 return {
                     'statusCode': 200,
                     'body': json.dumps({
@@ -757,24 +609,120 @@ def lambda_handler(event, context):
                     })
                 }
 
+            match_id_to_process = ready_match_row[0]
+            log_step("Match Found", "SUCCESS", f"Found unassigned match: {match_id_to_process}")
+
+            # 2. Get match details
+            match_details = get_match_details(cursor, match_id_to_process)
+            if not match_details:
+                log_step("Match Details Error", "ERROR", "Could not retrieve match details")
+                connection.rollback()
+                return {'statusCode': 500, 'body': json.dumps('Failed to retrieve match details')}
+
+            # 3. Find or create a VM
+            log_scenario("VM AVAILABILITY CHECK", "Looking for free VMs")
+            sql_find_free_vms = """
+                SELECT vm_id, last_activity
+                FROM vms
+                WHERE assigned_match_id IS NULL
+                ORDER BY last_activity ASC
+                LIMIT 1
+            """
+            log_step("Querying Free VMs", "INFO", "Searching for an available VM")
+            cursor.execute(sql_find_free_vms)
+            free_vm = cursor.fetchone()
+
+            if free_vm:
+                vm_id = free_vm[0]
+                last_activity = free_vm[1]
+                activity_str = last_activity.strftime('%Y-%m-%d %H:%M:%S') if last_activity else "NULL"
+                log_step("Free VM Found", "SUCCESS", f"Using VM {vm_id} (Last activity: {activity_str})")
+            else:
+                log_step("No Free VMs", "WARNING", "No free VMs available, creating a new one")
+                vm_id = create_new_vm(cursor)
+                if not vm_id:
+                    log_step("VM Creation Failed", "ERROR", "Cannot proceed without VM")
+                    connection.rollback()
+                    return {'statusCode': 500, 'body': json.dumps('Failed to create new VM')}
+                log_step("New VM Ready", "SUCCESS", f"Created and will use: {vm_id}")
+
+            # 4. Assign match to VM (matches table untouched)
+            log_scenario("MATCH-VM ASSIGNMENT", f"Assigning Match {match_id_to_process} to VM {vm_id}")
+            current_time = datetime.now()
+            sql_update_vm = """
+                UPDATE vms
+                SET assigned_match_id = %s,
+                    last_activity = %s
+                WHERE vm_id = %s
+            """
+            cursor.execute(sql_update_vm, (match_id_to_process, current_time, vm_id))
+
+            log_step("Assignment Complete", "SUCCESS", f"Match {match_id_to_process} assigned to VM {vm_id}")
+            connection.commit()
+            log_step("Database Commit", "SUCCESS", "All changes saved")
+
+        # 5. Execute processing commands on VM (outside cursor)
+        log_scenario("VM COMMAND EXECUTION", f"Running processing commands on VM {vm_id}")
+        vm_ip = get_vm_ip_address(vm_id)
+        if not vm_ip:
+            log_step("VM IP Error", "ERROR", "Could not get VM IP address")
+            return {'statusCode': 500, 'body': json.dumps('Failed to get VM IP address')}
+
+        if not wait_for_vm_ready(vm_ip):
+            log_step("VM Ready Check", "ERROR", "VM did not become ready in time")
+            return {'statusCode': 500, 'body': json.dumps('VM did not become ready for SSH')}
+
+        private_key_str = get_ssh_private_key()
+        if not private_key_str:
+            log_step("SSH Key Error", "ERROR", "Could not retrieve SSH private key")
+            return {'statusCode': 500, 'body': json.dumps('Failed to retrieve SSH private key')}
+
+        command_success = execute_ssh_commands(vm_ip, match_details, private_key_str)
+
+        if command_success:
+            log_scenario("EXECUTION COMPLETE", f"Successfully started processing for match {match_id_to_process} on VM {vm_id}")
+            return {
+                'statusCode': 200,
+                'body': json.dumps({
+                    'message': 'Video processing started successfully',
+                    'match_assigned': match_id_to_process,
+                    'vm_used': vm_id,
+                    'vm_ip': vm_ip,
+                    'commands_executed': True,
+                    'testing_mode': TESTING_MODE
+                })
+            }
+        else:
+            log_step("Command Execution Failed", "ERROR", "Failed to execute processing commands")
+            # Only free up the VM
+            with connection.cursor() as rollback_cursor:
+                sql_free_vm = """
+                    UPDATE vms
+                    SET assigned_match_id = NULL,
+                        last_activity = %s
+                    WHERE vm_id = %s
+                """
+                rollback_cursor.execute(sql_free_vm, (datetime.now(), vm_id))
+                connection.commit()
+            return {'statusCode': 500, 'body': json.dumps('Failed to execute processing commands on VM')}
+
     except Exception as e:
         log_step("Critical Error", "ERROR", f"Exception in main handler: {str(e)}")
         if connection:
             connection.rollback()
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f"Error: {str(e)}")
-        }
+        return {'statusCode': 500, 'body': json.dumps(f"Error: {str(e)}")}
 
     finally:
         if connection and connection.open:
             log_step("Cleanup", "INFO", "Closing database connection")
             connection.close()
 
+
 def vm_processing_complete_handler(event, context):
     """
-    Function to handle when VM completes processing.
-    This should be called by the VM when it finishes processing.
+    Handler called by VM after finishing processing.
+    - Marks match as cv_processed
+    - Frees up VM
     """
     connection = None
     try:
@@ -782,13 +730,13 @@ def vm_processing_complete_handler(event, context):
 
         match_id = event.get('match_id')
         vm_id = event.get('vm_id')
-
         log_step("Event Parameters", "INFO", f"Match: {match_id}, VM: {vm_id}")
 
         if not match_id or not vm_id:
             log_step("Parameter Validation", "ERROR", "match_id and vm_id are required")
             raise ValueError("match_id and vm_id are required")
 
+        # DB connect
         connection = pymysql.connect(
             host=DB_HOST,
             user=DB_USER,
@@ -803,7 +751,7 @@ def vm_processing_complete_handler(event, context):
         with connection.cursor() as cursor:
             check_database_state(cursor)
 
-            # Update match status to cv_processed (completed)
+            # Update match to processed
             log_step("Updating Match Status", "INFO", f"Setting match {match_id} to cv_processed")
             sql_update_match_status = """
                 UPDATE matches
@@ -813,7 +761,7 @@ def vm_processing_complete_handler(event, context):
             """
             cursor.execute(sql_update_match_status, (datetime.now(), match_id))
 
-            # Free up the VM by setting assigned_match_id to NULL
+            # Free VM
             log_step("Freeing VM", "INFO", f"Setting VM {vm_id} to free status")
             sql_free_vm = """
                 UPDATE vms
@@ -826,10 +774,7 @@ def vm_processing_complete_handler(event, context):
             connection.commit()
             log_step("Completion Handling", "SUCCESS", f"Processing for match {match_id} completed. VM {vm_id} is now free.")
 
-            check_database_state(cursor)
-
         log_scenario("COMPLETION HANDLING COMPLETE", f"VM {vm_id} is now free")
-
         return {
             'statusCode': 200,
             'body': json.dumps({
@@ -844,10 +789,7 @@ def vm_processing_complete_handler(event, context):
         log_step("Completion Error", "ERROR", f"Exception: {str(e)}")
         if connection:
             connection.rollback()
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f"Error: {str(e)}")
-        }
+        return {'statusCode': 500, 'body': json.dumps(f"Error: {str(e)}")}
 
     finally:
         if connection and connection.open:
