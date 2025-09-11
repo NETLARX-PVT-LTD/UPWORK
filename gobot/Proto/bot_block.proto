@@ -3,6 +3,6 @@ syntax = "proto3";
 package chatbot;
 
 message BotBlock {
-    int32 botId;
-    string botName;
+    int32 botId = 1;
+    string botName = 2;
 }

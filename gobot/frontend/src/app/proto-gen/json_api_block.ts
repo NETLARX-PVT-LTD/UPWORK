@@ -10,44 +10,163 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
-import { ApiHeader } from "./button";
 /**
+ * Represents a single header (key-value pair)
+ *
+ * @generated from protobuf message chatbot.ApiHeaderr
+ */
+export interface ApiHeaderr {
+    /**
+     * @generated from protobuf field: int32 jsonId = 1
+     */
+    jsonId: number; // Primary key
+    /**
+     * @generated from protobuf field: string headerKey = 2
+     */
+    headerKey: string; // Header name
+    /**
+     * @generated from protobuf field: string headerValue = 3
+     */
+    headerValue: string; // Header value
+    /**
+     * @generated from protobuf field: string id = 4
+     */
+    id: string;
+}
+/**
+ * Represents a JSON API configuration
+ *
  * @generated from protobuf message chatbot.JsonApiBlock
  */
 export interface JsonApiBlock {
     /**
-     * @generated from protobuf field: string type = 1
+     * @generated from protobuf field: int32 storyId = 1
+     */
+    storyId: number; // StoryId (required)
+    /**
+     * @generated from protobuf field: string type = 2
      */
     type: string; // "jsonApi"
     /**
-     * @generated from protobuf field: string apiEndpoint = 2
+     * @generated from protobuf field: string apiEndpoint = 3
      */
-    apiEndpoint: string;
+    apiEndpoint: string; // API URL
     /**
-     * @generated from protobuf field: string requestType = 3
+     * @generated from protobuf field: string requestType = 4
      */
     requestType: string; // "GET", "POST", etc.
     /**
-     * @generated from protobuf field: repeated chatbot.ApiHeader apiHeaders = 4
+     * @generated from protobuf field: repeated chatbot.ApiHeaderr apiHeaders = 5
      */
-    apiHeaders: ApiHeader[];
+    apiHeaders: ApiHeaderr[]; // List of headers
+    /**
+     * @generated from protobuf field: string ToComponentType = 6
+     */
+    toComponentType: string;
+    /**
+     * @generated from protobuf field: string ToComponentId = 7
+     */
+    toComponentId: string;
+    /**
+     * @generated from protobuf field: string id = 9
+     */
+    id: string;
 }
+// @generated message type with reflection information, may provide speed optimized methods
+class ApiHeaderr$Type extends MessageType<ApiHeaderr> {
+    constructor() {
+        super("chatbot.ApiHeaderr", [
+            { no: 1, name: "jsonId", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 2, name: "headerKey", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "headerValue", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ApiHeaderr>): ApiHeaderr {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.jsonId = 0;
+        message.headerKey = "";
+        message.headerValue = "";
+        message.id = "";
+        if (value !== undefined)
+            reflectionMergePartial<ApiHeaderr>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ApiHeaderr): ApiHeaderr {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int32 jsonId */ 1:
+                    message.jsonId = reader.int32();
+                    break;
+                case /* string headerKey */ 2:
+                    message.headerKey = reader.string();
+                    break;
+                case /* string headerValue */ 3:
+                    message.headerValue = reader.string();
+                    break;
+                case /* string id */ 4:
+                    message.id = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ApiHeaderr, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int32 jsonId = 1; */
+        if (message.jsonId !== 0)
+            writer.tag(1, WireType.Varint).int32(message.jsonId);
+        /* string headerKey = 2; */
+        if (message.headerKey !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.headerKey);
+        /* string headerValue = 3; */
+        if (message.headerValue !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.headerValue);
+        /* string id = 4; */
+        if (message.id !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.id);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message chatbot.ApiHeaderr
+ */
+export const ApiHeaderr = new ApiHeaderr$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class JsonApiBlock$Type extends MessageType<JsonApiBlock> {
     constructor() {
         super("chatbot.JsonApiBlock", [
-            { no: 1, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "apiEndpoint", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "requestType", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 4, name: "apiHeaders", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => ApiHeader }
+            { no: 1, name: "storyId", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 2, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "apiEndpoint", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "requestType", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "apiHeaders", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => ApiHeaderr },
+            { no: 6, name: "ToComponentType", kind: "scalar", jsonName: "ToComponentType", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "ToComponentId", kind: "scalar", jsonName: "ToComponentId", T: 9 /*ScalarType.STRING*/ },
+            { no: 9, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<JsonApiBlock>): JsonApiBlock {
         const message = globalThis.Object.create((this.messagePrototype!));
+        message.storyId = 0;
         message.type = "";
         message.apiEndpoint = "";
         message.requestType = "";
         message.apiHeaders = [];
+        message.toComponentType = "";
+        message.toComponentId = "";
+        message.id = "";
         if (value !== undefined)
             reflectionMergePartial<JsonApiBlock>(this, message, value);
         return message;
@@ -57,17 +176,29 @@ class JsonApiBlock$Type extends MessageType<JsonApiBlock> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string type */ 1:
+                case /* int32 storyId */ 1:
+                    message.storyId = reader.int32();
+                    break;
+                case /* string type */ 2:
                     message.type = reader.string();
                     break;
-                case /* string apiEndpoint */ 2:
+                case /* string apiEndpoint */ 3:
                     message.apiEndpoint = reader.string();
                     break;
-                case /* string requestType */ 3:
+                case /* string requestType */ 4:
                     message.requestType = reader.string();
                     break;
-                case /* repeated chatbot.ApiHeader apiHeaders */ 4:
-                    message.apiHeaders.push(ApiHeader.internalBinaryRead(reader, reader.uint32(), options));
+                case /* repeated chatbot.ApiHeaderr apiHeaders */ 5:
+                    message.apiHeaders.push(ApiHeaderr.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                case /* string ToComponentType */ 6:
+                    message.toComponentType = reader.string();
+                    break;
+                case /* string ToComponentId */ 7:
+                    message.toComponentId = reader.string();
+                    break;
+                case /* string id */ 9:
+                    message.id = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -81,18 +212,30 @@ class JsonApiBlock$Type extends MessageType<JsonApiBlock> {
         return message;
     }
     internalBinaryWrite(message: JsonApiBlock, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string type = 1; */
+        /* int32 storyId = 1; */
+        if (message.storyId !== 0)
+            writer.tag(1, WireType.Varint).int32(message.storyId);
+        /* string type = 2; */
         if (message.type !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.type);
-        /* string apiEndpoint = 2; */
+            writer.tag(2, WireType.LengthDelimited).string(message.type);
+        /* string apiEndpoint = 3; */
         if (message.apiEndpoint !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.apiEndpoint);
-        /* string requestType = 3; */
+            writer.tag(3, WireType.LengthDelimited).string(message.apiEndpoint);
+        /* string requestType = 4; */
         if (message.requestType !== "")
-            writer.tag(3, WireType.LengthDelimited).string(message.requestType);
-        /* repeated chatbot.ApiHeader apiHeaders = 4; */
+            writer.tag(4, WireType.LengthDelimited).string(message.requestType);
+        /* repeated chatbot.ApiHeaderr apiHeaders = 5; */
         for (let i = 0; i < message.apiHeaders.length; i++)
-            ApiHeader.internalBinaryWrite(message.apiHeaders[i], writer.tag(4, WireType.LengthDelimited).fork(), options).join();
+            ApiHeaderr.internalBinaryWrite(message.apiHeaders[i], writer.tag(5, WireType.LengthDelimited).fork(), options).join();
+        /* string ToComponentType = 6; */
+        if (message.toComponentType !== "")
+            writer.tag(6, WireType.LengthDelimited).string(message.toComponentType);
+        /* string ToComponentId = 7; */
+        if (message.toComponentId !== "")
+            writer.tag(7, WireType.LengthDelimited).string(message.toComponentId);
+        /* string id = 9; */
+        if (message.id !== "")
+            writer.tag(9, WireType.LengthDelimited).string(message.id);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

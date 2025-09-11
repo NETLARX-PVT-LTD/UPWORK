@@ -17,6 +17,8 @@ namespace Netlarx.Products.Gobot.Models
         public Guid jsonId { get; set; }
         public string Key { get; set; }
         public string Value { get; set; }
+        public Guid Id { get; set; }
+
     }
 
     public class JsonAPI : BaseComponent

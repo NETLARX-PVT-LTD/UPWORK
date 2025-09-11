@@ -47,7 +47,7 @@ namespace Netlarx.Products.Gobot
             {
                 options.AddPolicy("AllowAll", policy =>
                 {
-                    policy.WithOrigins()
+                    policy.WithOrigins("http://localhost:4200")
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
@@ -69,9 +69,9 @@ namespace Netlarx.Products.Gobot
                 app.UseSwaggerUI();
             }
             app.UseHttpsRedirection();
-            app.UseCors("AllowAll");
             app.UseAuthorization();
             app.UseRouting();
+            app.UseCors("AllowAll");
             //app.UseMiddleware<DeserializationMiddleware>();
 
             app.UseEndpoints(endpoints =>

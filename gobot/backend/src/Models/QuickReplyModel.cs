@@ -15,6 +15,8 @@ namespace Netlarx.Products.Gobot.Models
         [Required]
         public string Text { get; set; }
 
+        [Required]
+        public Guid textResponseId { get; set; }
         //// Foreign Key
         //public Guid TextResponseId { get; set; }
 

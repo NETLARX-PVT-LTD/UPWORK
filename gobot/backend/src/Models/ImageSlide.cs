@@ -8,7 +8,7 @@ namespace Netlarx.Products.Gobot.Models
         /// <summary>
         /// Primary Key for the ImageSlide in the database.
         /// </summary>
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         // Properties from the ImageSlide proto message
         public string Url { get; set; }

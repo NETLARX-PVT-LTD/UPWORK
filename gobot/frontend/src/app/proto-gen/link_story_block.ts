@@ -19,28 +19,46 @@ export interface LinkStoryBlock {
      */
     type: string; // "linkStory"
     /**
-     * @generated from protobuf field: string linkStoryId = 2
+     * @generated from protobuf field: int32 linkStoryId = 2
      */
-    linkStoryId: string;
+    linkStoryId: number;
     /**
      * @generated from protobuf field: string linkStoryName = 3
      */
     linkStoryName: string;
+    /**
+     * @generated from protobuf field: string ToComponentType = 4
+     */
+    toComponentType: string;
+    /**
+     * @generated from protobuf field: string ToComponentId = 5
+     */
+    toComponentId: string;
+    /**
+     * @generated from protobuf field: string id = 6
+     */
+    id: string;
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class LinkStoryBlock$Type extends MessageType<LinkStoryBlock> {
     constructor() {
         super("chatbot.LinkStoryBlock", [
             { no: 1, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "linkStoryId", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "linkStoryName", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 2, name: "linkStoryId", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 3, name: "linkStoryName", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "ToComponentType", kind: "scalar", jsonName: "ToComponentType", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "ToComponentId", kind: "scalar", jsonName: "ToComponentId", T: 9 /*ScalarType.STRING*/ },
+            { no: 6, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<LinkStoryBlock>): LinkStoryBlock {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.type = "";
-        message.linkStoryId = "";
+        message.linkStoryId = 0;
         message.linkStoryName = "";
+        message.toComponentType = "";
+        message.toComponentId = "";
+        message.id = "";
         if (value !== undefined)
             reflectionMergePartial<LinkStoryBlock>(this, message, value);
         return message;
@@ -53,11 +71,20 @@ class LinkStoryBlock$Type extends MessageType<LinkStoryBlock> {
                 case /* string type */ 1:
                     message.type = reader.string();
                     break;
-                case /* string linkStoryId */ 2:
-                    message.linkStoryId = reader.string();
+                case /* int32 linkStoryId */ 2:
+                    message.linkStoryId = reader.int32();
                     break;
                 case /* string linkStoryName */ 3:
                     message.linkStoryName = reader.string();
+                    break;
+                case /* string ToComponentType */ 4:
+                    message.toComponentType = reader.string();
+                    break;
+                case /* string ToComponentId */ 5:
+                    message.toComponentId = reader.string();
+                    break;
+                case /* string id */ 6:
+                    message.id = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -74,12 +101,21 @@ class LinkStoryBlock$Type extends MessageType<LinkStoryBlock> {
         /* string type = 1; */
         if (message.type !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.type);
-        /* string linkStoryId = 2; */
-        if (message.linkStoryId !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.linkStoryId);
+        /* int32 linkStoryId = 2; */
+        if (message.linkStoryId !== 0)
+            writer.tag(2, WireType.Varint).int32(message.linkStoryId);
         /* string linkStoryName = 3; */
         if (message.linkStoryName !== "")
             writer.tag(3, WireType.LengthDelimited).string(message.linkStoryName);
+        /* string ToComponentType = 4; */
+        if (message.toComponentType !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.toComponentType);
+        /* string ToComponentId = 5; */
+        if (message.toComponentId !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.toComponentId);
+        /* string id = 6; */
+        if (message.id !== "")
+            writer.tag(6, WireType.LengthDelimited).string(message.id);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

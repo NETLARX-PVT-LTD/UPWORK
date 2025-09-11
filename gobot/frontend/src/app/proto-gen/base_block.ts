@@ -37,70 +37,44 @@ export interface Connections {
      */
     output: string[];
 }
+// message BaseBlock {
+// string id = 1;
+// string name = 2;
+// string icon = 3;
+// BlockType type = 4;
+// BlockStatus status = 5;
+// double x = 6;
+// double y = 7;
+// double width = 8;
+// double height = 9;
+// string description = 10;
+// google.protobuf.Timestamp createdAt = 11;
+// google.protobuf.Timestamp updatedAt = 12;
+// Position position = 13;
+// Connections connections = 14;
+// bool isInitializing = 15;
+// }
+
 /**
  * @generated from protobuf message chatbot.BaseBlock
  */
 export interface BaseBlock {
     /**
-     * @generated from protobuf field: string id = 1
+     * @generated from protobuf field: string Id = 1
      */
     id: string;
     /**
-     * @generated from protobuf field: string name = 2
+     * @generated from protobuf field: google.protobuf.Timestamp CreatedDate = 2
      */
-    name: string;
+    createdDate?: Timestamp;
     /**
-     * @generated from protobuf field: string icon = 3
+     * @generated from protobuf field: string ToComponentType = 3
      */
-    icon: string;
+    toComponentType: string;
     /**
-     * @generated from protobuf field: chatbot.BlockType type = 4
+     * @generated from protobuf field: string ToComponentId = 4
      */
-    type: BlockType;
-    /**
-     * @generated from protobuf field: chatbot.BlockStatus status = 5
-     */
-    status: BlockStatus;
-    /**
-     * @generated from protobuf field: double x = 6
-     */
-    x: number;
-    /**
-     * @generated from protobuf field: double y = 7
-     */
-    y: number;
-    /**
-     * @generated from protobuf field: double width = 8
-     */
-    width: number;
-    /**
-     * @generated from protobuf field: double height = 9
-     */
-    height: number;
-    /**
-     * @generated from protobuf field: string description = 10
-     */
-    description: string;
-    /**
-     * @generated from protobuf field: google.protobuf.Timestamp createdAt = 11
-     */
-    createdAt?: Timestamp;
-    /**
-     * @generated from protobuf field: google.protobuf.Timestamp updatedAt = 12
-     */
-    updatedAt?: Timestamp;
-    /**
-     * @generated from protobuf field: chatbot.Position position = 13
-     */
-    position?: Position;
-    /**
-     * @generated from protobuf field: chatbot.Connections connections = 14
-     */
-    connections?: Connections;
-    /**
-     * @generated from protobuf field: bool isInitializing = 15
-     */
-    isInitializing: boolean;
+    toComponentId: string;
 }
 /**
  * @generated from protobuf enum chatbot.BlockStatus
@@ -274,36 +248,17 @@ export const Connections = new Connections$Type();
 class BaseBlock$Type extends MessageType<BaseBlock> {
     constructor() {
         super("chatbot.BaseBlock", [
-            { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "icon", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 4, name: "type", kind: "enum", T: () => ["chatbot.BlockType", BlockType] },
-            { no: 5, name: "status", kind: "enum", T: () => ["chatbot.BlockStatus", BlockStatus] },
-            { no: 6, name: "x", kind: "scalar", T: 1 /*ScalarType.DOUBLE*/ },
-            { no: 7, name: "y", kind: "scalar", T: 1 /*ScalarType.DOUBLE*/ },
-            { no: 8, name: "width", kind: "scalar", T: 1 /*ScalarType.DOUBLE*/ },
-            { no: 9, name: "height", kind: "scalar", T: 1 /*ScalarType.DOUBLE*/ },
-            { no: 10, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 11, name: "createdAt", kind: "message", T: () => Timestamp },
-            { no: 12, name: "updatedAt", kind: "message", T: () => Timestamp },
-            { no: 13, name: "position", kind: "message", T: () => Position },
-            { no: 14, name: "connections", kind: "message", T: () => Connections },
-            { no: 15, name: "isInitializing", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+            { no: 1, name: "Id", kind: "scalar", jsonName: "Id", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "CreatedDate", kind: "message", jsonName: "CreatedDate", T: () => Timestamp },
+            { no: 3, name: "ToComponentType", kind: "scalar", jsonName: "ToComponentType", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "ToComponentId", kind: "scalar", jsonName: "ToComponentId", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<BaseBlock>): BaseBlock {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.id = "";
-        message.name = "";
-        message.icon = "";
-        message.type = 0;
-        message.status = 0;
-        message.x = 0;
-        message.y = 0;
-        message.width = 0;
-        message.height = 0;
-        message.description = "";
-        message.isInitializing = false;
+        message.toComponentType = "";
+        message.toComponentId = "";
         if (value !== undefined)
             reflectionMergePartial<BaseBlock>(this, message, value);
         return message;
@@ -313,50 +268,17 @@ class BaseBlock$Type extends MessageType<BaseBlock> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string id */ 1:
+                case /* string Id */ 1:
                     message.id = reader.string();
                     break;
-                case /* string name */ 2:
-                    message.name = reader.string();
+                case /* google.protobuf.Timestamp CreatedDate */ 2:
+                    message.createdDate = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.createdDate);
                     break;
-                case /* string icon */ 3:
-                    message.icon = reader.string();
+                case /* string ToComponentType */ 3:
+                    message.toComponentType = reader.string();
                     break;
-                case /* chatbot.BlockType type */ 4:
-                    message.type = reader.int32();
-                    break;
-                case /* chatbot.BlockStatus status */ 5:
-                    message.status = reader.int32();
-                    break;
-                case /* double x */ 6:
-                    message.x = reader.double();
-                    break;
-                case /* double y */ 7:
-                    message.y = reader.double();
-                    break;
-                case /* double width */ 8:
-                    message.width = reader.double();
-                    break;
-                case /* double height */ 9:
-                    message.height = reader.double();
-                    break;
-                case /* string description */ 10:
-                    message.description = reader.string();
-                    break;
-                case /* google.protobuf.Timestamp createdAt */ 11:
-                    message.createdAt = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.createdAt);
-                    break;
-                case /* google.protobuf.Timestamp updatedAt */ 12:
-                    message.updatedAt = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.updatedAt);
-                    break;
-                case /* chatbot.Position position */ 13:
-                    message.position = Position.internalBinaryRead(reader, reader.uint32(), options, message.position);
-                    break;
-                case /* chatbot.Connections connections */ 14:
-                    message.connections = Connections.internalBinaryRead(reader, reader.uint32(), options, message.connections);
-                    break;
-                case /* bool isInitializing */ 15:
-                    message.isInitializing = reader.bool();
+                case /* string ToComponentId */ 4:
+                    message.toComponentId = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -370,51 +292,18 @@ class BaseBlock$Type extends MessageType<BaseBlock> {
         return message;
     }
     internalBinaryWrite(message: BaseBlock, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string id = 1; */
+        /* string Id = 1; */
         if (message.id !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.id);
-        /* string name = 2; */
-        if (message.name !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.name);
-        /* string icon = 3; */
-        if (message.icon !== "")
-            writer.tag(3, WireType.LengthDelimited).string(message.icon);
-        /* chatbot.BlockType type = 4; */
-        if (message.type !== 0)
-            writer.tag(4, WireType.Varint).int32(message.type);
-        /* chatbot.BlockStatus status = 5; */
-        if (message.status !== 0)
-            writer.tag(5, WireType.Varint).int32(message.status);
-        /* double x = 6; */
-        if (message.x !== 0)
-            writer.tag(6, WireType.Bit64).double(message.x);
-        /* double y = 7; */
-        if (message.y !== 0)
-            writer.tag(7, WireType.Bit64).double(message.y);
-        /* double width = 8; */
-        if (message.width !== 0)
-            writer.tag(8, WireType.Bit64).double(message.width);
-        /* double height = 9; */
-        if (message.height !== 0)
-            writer.tag(9, WireType.Bit64).double(message.height);
-        /* string description = 10; */
-        if (message.description !== "")
-            writer.tag(10, WireType.LengthDelimited).string(message.description);
-        /* google.protobuf.Timestamp createdAt = 11; */
-        if (message.createdAt)
-            Timestamp.internalBinaryWrite(message.createdAt, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
-        /* google.protobuf.Timestamp updatedAt = 12; */
-        if (message.updatedAt)
-            Timestamp.internalBinaryWrite(message.updatedAt, writer.tag(12, WireType.LengthDelimited).fork(), options).join();
-        /* chatbot.Position position = 13; */
-        if (message.position)
-            Position.internalBinaryWrite(message.position, writer.tag(13, WireType.LengthDelimited).fork(), options).join();
-        /* chatbot.Connections connections = 14; */
-        if (message.connections)
-            Connections.internalBinaryWrite(message.connections, writer.tag(14, WireType.LengthDelimited).fork(), options).join();
-        /* bool isInitializing = 15; */
-        if (message.isInitializing !== false)
-            writer.tag(15, WireType.Varint).bool(message.isInitializing);
+        /* google.protobuf.Timestamp CreatedDate = 2; */
+        if (message.createdDate)
+            Timestamp.internalBinaryWrite(message.createdDate, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* string ToComponentType = 3; */
+        if (message.toComponentType !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.toComponentType);
+        /* string ToComponentId = 4; */
+        if (message.toComponentId !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.toComponentId);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

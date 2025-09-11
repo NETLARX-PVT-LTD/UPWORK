@@ -6,5 +6,6 @@ message TypingDelayBlock {
   string type = 1; // "typingDelay"
   double delaySeconds = 2;
   string ToComponentType = 3; 
-  string ToComponentId = 4; 
+  string ToComponentId = 4;
+  string id = 5;
 }

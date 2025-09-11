@@ -1,9 +1,9 @@
 import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, HostListener, OnDestroy, ChangeDetectorRef, EventEmitter, Input, Output } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, CdkDragEnd, CdkDragStart } from '@angular/cdk/drag-drop';
 import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, throwError, lastValueFrom } from 'rxjs';
 import { map, startWith, debounceTime } from 'rxjs/operators';
-import { ChatbotBlock, Connection, AvailableMedia, AvailableStory, AvailableForm } from '../models/chatbot-block.model';
+import { ChatbotBlock, Connection, AvailableMedia, AvailableStory, AvailableForm, BlockType } from '../models/chatbot-block.model';
 import { Story } from '../publish-bot/page-message/page-message.component';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,7 +19,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { StoryService } from '../shared/services/story.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { tap, catchError } from 'rxjs/operators';
 
 // ✅ --- START: PROTOBUF IMPORTS ---
 import { TextResponseBlock } from '../proto-gen/text_response_block';
@@ -45,28 +46,30 @@ import { QuickReplyFlowComponent } from './blocks/quick-reply-flow/quick-reply-f
 import { JarvishBlockComponent } from './blocks/jarvish-block/jarvish-block.component';
 import { JsPlumbFlowService, ConnectionInfo } from './services/jsplumb-flow.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Connectionn, Storiess, StorySessionDataBlock } from '../proto-gen/story_session';
+import { LinkStoryBlock } from '../proto-gen/link_story_block';
 
 
 // / ✅ --- START: TWO-WAY TRANSLATION FUNCTIONS ---
 function mapStringToUserInputSubType(subTypeString: string): UserInputSubType {
   const lowerCaseSubType = subTypeString?.toLowerCase();
-  if (['phrase', 'keywordgroup', 'anything', 'text'].includes(lowerCaseSubType)) {
-    return UserInputSubType.TEXT;
-  }
+  // if (['phrase', 'keywordgroup', 'anything', 'text'].includes(lowerCaseSubType)) {
+  //   return UserInputSubType ;
+  // }
   switch (lowerCaseSubType) {
-    case 'number': return UserInputSubType.NUMBER;
-    case 'email': return UserInputSubType.EMAIL;
-    case 'phone': return UserInputSubType.PHONE;
-    default: return UserInputSubType.UNSPECIFIED;
+    case 'phrase': return UserInputSubType.Phrase;
+    case 'keywordgroup': return UserInputSubType.Keyword;
+    default : return UserInputSubType.Anythin;
+    // 'default: return UserInputSubType.UNSPECIFIED;'
   }
 }
 
 function mapUserInputSubTypeToString(subTypeEnum: UserInputSubType): string {
   switch (subTypeEnum) {
-    case UserInputSubType.TEXT: return 'text';
-    case UserInputSubType.NUMBER: return 'number';
-    case UserInputSubType.EMAIL: return 'email';
-    case UserInputSubType.PHONE: return 'phone';
+    case UserInputSubType.Anythin: return 'anything';
+    case UserInputSubType.Keyword: return 'keywordGroup';
+    case UserInputSubType.Phrase: return 'phrase';
+    // case UserInputSubType.PHONE: return 'phone';
     default: return 'unspecified';
   }
 }
@@ -76,7 +79,10 @@ function mapStringToMediaType(mediaTypeString: string): MediaType {
     case 'text': return MediaType.TEXT;
     case 'image': return MediaType.IMAGE;
     case 'video': return MediaType.VIDEO;
-    default: return MediaType.UNSPECIFIED;
+    case 'file': return MediaType.FILE;
+    // case 'audio': return MediaType.AUDIO;
+    // case 'location': return MediaType.LOCATION;
+    default: return MediaType.AUDIO;
   }
 }
 
@@ -210,7 +216,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute, 
     private snackBar: MatSnackBar,
-     private http: HttpClient 
+    private http: HttpClient 
     ) { }
 
   ngOnInit(): void {
@@ -236,6 +242,7 @@ export class ChatbotFlowComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
   }
+
 
  private loadExistingStory(storyId: string): void {
   const story = this.storyService.getStoryById(storyId);
@@ -345,10 +352,10 @@ private updateBlockConnectionsFromJsPlumb(): void {
 
     // A. CREATE THE ORIGINAL MESSAGE with dummy data
     const originalMessage = TextResponseBlock.create({
-      base: BaseBlock.create({
-        id: 'test-id-001',
-        name: 'Dummy Text Block'
-      }),
+      // base: BaseBlock.create({
+      //   id: 'test-id-001',
+      //   name: 'Dummy Text Block'
+      // }),
       content: 'Hello Protobuf!'
     });
 
@@ -866,150 +873,152 @@ private updateBlockConnectionsFromJsPlumb(): void {
   }
 
   // ✅ --- STEP 4: TRANSLATE AND SAVE THE ENTIRE FLOW ---
- saveFlow() {
-  // Validation
-  if (this.canvasBlocks.length === 0) {
-    this.snackBar.open('Please add at least one block to your story.', 'Close', {
-      duration: 3000
-    });
-    return;
-  }
+//  saveFlow() {
+//   // Validation
+//   if (this.canvasBlocks.length === 0) {
+//     this.snackBar.open('Please add at least one block to your story.', 'Close', {
+//       duration: 3000
+//     });
+//     return;
+//   }
 
-  console.log("--- Preparing to save flow. Translating all blocks to Protobuf format... ---");
+//   console.log("--- Preparing to save flow. Translating all blocks to Protobuf format... ---");
 
-  // GET CURRENT CONNECTIONS FROM JSPLUMB
-  const currentConnections = this.jsPlumbFlowService.getConnections().map(conn => ({
-    sourceId: conn.sourceId,
-    targetId: conn.targetId,
-    // Add any other connection properties you need
-  }));
+//   // GET CURRENT CONNECTIONS FROM JSPLUMB
+//   const currentConnections = this.jsPlumbFlowService.getConnections().map(conn => ({
+//     sourceId: conn.sourceId,
+//     targetId: conn.targetId,
+//     // Add any other connection properties you need
+//   }));
 
-    const protoPayloads = this.canvasBlocks.map(block => {
-      let payload: any;
-      switch (block.type) {
+//     const protoPayloads = this.canvasBlocks.map(block => {
+//       let payload: any;
+//       switch (block.type) {
 
-        case 'userInput':
-          payload = UserInputBlock.create({
-            type: block.type,
-            subType: mapStringToUserInputSubType(block.subType || ''),
-            keywords: block.keywords || [],
-            keywordGroups: (block.keywordGroups || []).map(g => ({ keywords: g })),
-            phraseText: block.phraseText || '',
-            customMessage: block.customMessage || '',
-            datastoreVariable: block.datastoreVariable || ''
-          });
-          break;
+//         case 'userInput':
+//           payload = UserInputBlock.create({
+//             type: block.type,
+//             subType: mapStringToUserInputSubType(block.subType || ''),
+//             keywords: block.keywords || [],
+//             keywordGroups: (block.keywordGroups || []).map(g => ({ keywords: g })),
+//             phraseText: block.phraseText || '',
+//             customMessage: block.customMessage || '',
+//             datastoreVariable: block.datastoreVariable || ''
+//           });
+//           break;
 
-        case 'mediaBlock':
-          payload = MediaBlock.create({
-            type: block.type,
-            mediaId: block.mediaId || '',
-            mediaType: mapStringToMediaType(block.mediaType || ''),
-            singleImageUrl: block.singleImageUrl || '',
-            videoUrl: block.videoUrl || '',
-            audioUrl: block.audioUrl || '',
-            fileUrl: block.fileUrl || '',
-            slides: block.slides || [],
-            mediaName: block.mediaName || '',
-            buttons: mapButtons(block.buttons || [])
-          });
-          break;
+//         case 'mediaBlock':
+//           payload = MediaBlock.create({
+//             type: block.type,
+//             mediaId: block.mediaId || '',
+//             mediaType: mapStringToMediaType(block.mediaType || ''),
+//             singleImageUrl: block.singleImageUrl || '',
+//             videoUrl: block.videoUrl || '',
+//             audioUrl: block.audioUrl || '',
+//             fileUrl: block.fileUrl || '',
+//             slides: block.slides || [],
+//             mediaName: block.mediaName || '',
+//             buttons: mapButtons(block.buttons || [])
+//           });
+//           break;
 
-        case 'textResponse':
-          payload = TextResponseBlock.create({
-            content: block.content || '',
-            alternateResponses: block.alternateResponses || [],
-            quickReplies: mapButtons(block.quickReplies || [])
-          });
-          break;
+//         case 'textResponse':
+//           payload = TextResponseBlock.create({
+//             content: block.content || '',
+//             alternateResponses: block.alternateResponses || [],
+//             quickReplies: mapButtons(block.quickReplies || [])
+//           });
+//           break;
 
-        case 'conversationalForm':
-          payload = ConversationalFormBlock.create({
-            type: block.type,
-            formId: block.formId || '',
-            formName: block.formName || '',
-            webhookUrl: block.webhookUrl || '',
-            sendEmailNotification: block.sendEmailNotification || false,
-            notificationEmail: block.notificationEmail || '',
-            formFields: block.formFields || [],
-            showAsInlineForm: block.showAsInlineForm || false,
-            renderFormResponses: block.renderFormResponses || false,
-            allowMultipleSubmission: block.allowMultipleSubmission || false,
-            multipleSubmissionMessage: block.multipleSubmissionMessage || '',
-            allowExitForm: block.allowExitForm || false,
-            exitFormMessage: block.exitFormMessage || '',
-            successResponseType: block.successResponseType || '',
-            successRedirectStoryId: block.successRedirectStoryId || '',
-            validateEmail: block.validateEmail || false,
-            validatePhone: block.validatePhone || false,
-            spamProtection: block.spamProtection || false,
-            requireCompletion: block.requireCompletion || false,
-            successMessage: block.successMessage || '',
-            redirectUrl: block.redirectUrl || ''
-          });
-          break;
+//         case 'conversationalForm':
+//           payload = ConversationalFormBlock.create({
+//             type: block.type,
+//             formId: block.formId || '',
+//             formName: block.formName || '',
+//             webhookUrl: block.webhookUrl || '',
+//             sendEmailNotification: block.sendEmailNotification || false,
+//             notificationEmail: block.notificationEmail || '',
+//             formFields: block.formFields || [],
+//             showAsInlineForm: block.showAsInlineForm || false,
+//             renderFormResponses: block.renderFormResponses || false,
+//             allowMultipleSubmission: block.allowMultipleSubmission || false,
+//             multipleSubmissionMessage: block.multipleSubmissionMessage || '',
+//             allowExitForm: block.allowExitForm || false,
+//             exitFormMessage: block.exitFormMessage || '',
+//             successResponseType: block.successResponseType || '',
+//             successRedirectStoryId: block.successRedirectStoryId || '',
+//             validateEmail: block.validateEmail || false,
+//             validatePhone: block.validatePhone || false,
+//             spamProtection: block.spamProtection || false,
+//             requireCompletion: block.requireCompletion || false,
+//             successMessage: block.successMessage || '',
+//             redirectUrl: block.redirectUrl || ''
+//           });
+//           break;
 
-        case 'typingDelay':
-          payload = TypingDelayBlock.create({
-            delaySeconds: block.delaySeconds || 0
-          });
-          break;
+//         case 'typingDelay':
+//           payload = TypingDelayBlock.create({
+//             delaySeconds: block.delaySeconds || 0
+//           });
+//           break;
 
-        case 'jsonApi':
-          payload = JsonApiBlock.create({
-            type: block.type,
-            apiEndpoint: block.apiEndpoint || '',
-            requestType: block.requestType || '',
-            apiHeaders: block.apiHeaders || []
-          });
-          break;
+//         case 'jsonApi':
+//           payload = JsonApiBlock.create({
+//             type: block.type,
+//             apiEndpoint: block.apiEndpoint || '',
+//             requestType: block.requestType || '',
+//             apiHeaders: block.apiHeaders || []
+//           });
+//           break;
 
-        case 'linkStory':
-          payload = {
-            type: 'linkStory',
-            linkedStoryId: block.storyId || ''
-          };
-          break;
+//         case 'linkStory':
+//           payload = {
+//             type: 'linkStory',
+//             linkedStoryId: block.storyId || ''
+//           };
+//           break;
 
-        default:
-          payload = { id: block.id, type: block.type, error: "Unknown block type for proto conversion" };
-          break;
-      }
-      return payload;
-    });
+//         default:
+//           payload = { id: block.id, type: block.type, error: "Unknown block type for proto conversion" };
+//           break;
+//       }
+//       return payload;
+//     });
 
 
 
-    // Prepare flow data WITH CONNECTIONS
-  const flowData = {
-    canvasBlocks: this.canvasBlocks,
-    connections: currentConnections, // Include current connections
-    protoPayloads: protoPayloads
-  };
+//     // Prepare flow data WITH CONNECTIONS
+//   const flowData = {
+//     canvasBlocks: this.canvasBlocks,
+//     connections: currentConnections, // Include current connections
+//     protoPayloads: protoPayloads
+//   };
 
-  try {
-    // Create story using the service
-    const createdStory = this.storyService.createStoryFromFlow(flowData);
+//   try {
+//     // Create story using the service
+//     const createdStory = this.storyService.createStoryFromFlow(flowData);
 
-    console.log('✅ Story created successfully:', createdStory);
+//     console.log('✅ Story created successfully:', createdStory);
 
-    // Show success message
-    this.snackBar.open(`Story "${createdStory.name}" created successfully!`, 'Close', {
-      duration: 3000,
-      panelClass: ['success-snackbar']
-    });
+//     // Show success message
+//     this.snackBar.open(`Story "${createdStory.name}" created successfully!`, 'Close', {
+//       duration: 3000,
+//       panelClass: ['success-snackbar']
+//     });
 
-    // Navigate back to manage stories
-    this.router.navigate(['/manage-stories']);
+//     // Navigate back to manage stories
+//     this.router.navigate(['/manage-stories']);
 
-  } catch (error) {
-    console.error('❌ Error creating story:', error);
-    this.snackBar.open('Error creating story. Please try again.', 'Close', {
-      duration: 5000,
-      panelClass: ['error-snackbar']
-    });
-  }
-}
+//   } catch (error) {
+//     console.error('❌ Error creating story:', error);
+//     this.snackBar.open('Error creating story. Please try again.', 'Close', {
+//       duration: 5000,
+//       panelClass: ['error-snackbar']
+//     });
+//   }
+// }
+
+
 
 
   zoomIn() { this.zoomLevel = Math.min(this.maxZoom, this.zoomLevel + this.zoomStep); this.updateCanvasTransform(); this.jsPlumbFlowService.repaintAllConnections(); }
@@ -1277,4 +1286,788 @@ testAddConversationalForm(block: ChatbotBlock): void {
   });
 }
 
+// Replace your saveFlow method with this:
+// async saveFlow() {
+//   // Validation
+//   if (this.canvasBlocks.length === 0) {
+//     this.snackBar.open('Please add at least one block to your story.', 'Close', {
+//       duration: 3000
+//     });
+//     return;
+//   }
+
+//   console.log("--- Preparing to save flow. Structuring data for StorySessionDataBlock... ---");
+
+//   try {
+//     // 1. GET CURRENT CONNECTIONS FROM JSPLUMB AND CONVERT TO Connectionn FORMAT
+//     const connections = this.jsPlumbFlowService.getConnections().map(conn => 
+//       Connectionn.create({
+//         id: conn.id || `conn-${Date.now()}`,
+//         storyId: this.story?.id ? parseInt(this.story.id) : 0, // Convert to number if needed
+//         fromComponentType: this.getComponentTypeFromId(conn.sourceId),
+//         fromComponentId: conn.sourceId.replace('block-', '')
+//       })
+//     );
+
+//     // 2. CATEGORIZE AND CONVERT CANVAS BLOCKS INTO THEIR RESPECTIVE TYPES
+//     const storySessionData = StorySessionDataBlock.create({
+//       // Categorize blocks by type
+//       phrases: this.canvasBlocks
+//         .filter(block => block.type === 'userInput' && block.subType === 'phrase')
+//         .map(block => this.convertToUserInputBlock(block)),
+      
+//       keywords: this.canvasBlocks
+//         .filter(block => block.type === 'userInput' && block.subType === 'keywordGroup')
+//         .map(block => this.convertToUserInputBlock(block)),
+      
+//       anythings: this.canvasBlocks
+//         .filter(block => block.type === 'userInput' && block.subType === 'anything')
+//         .map(block => this.convertToUserInputBlock(block)),
+      
+//       conversationalForms: this.canvasBlocks
+//         .filter(block => block.type === 'conversationalForm')
+//         .map(block => this.convertToConversationalFormBlock(block)),
+      
+//       typingDelays: this.canvasBlocks
+//         .filter(block => block.type === 'typingDelay')
+//         .map(block => this.convertToTypingDelayBlock(block)),
+      
+//       linkStories: this.canvasBlocks
+//         .filter(block => block.type === 'linkStory')
+//         .map(block => this.convertToLinkStoryBlock(block)),
+      
+//       textResponses: this.canvasBlocks
+//         .filter(block => block.type === 'textResponse')
+//         .map(block => this.convertToTextResponseBlock(block)),
+      
+//       jsonAPIs: this.canvasBlocks
+//         .filter(block => block.type === 'jsonApi')
+//         .map(block => this.convertToJsonApiBlock(block)),
+      
+//       medias: this.canvasBlocks
+//         .filter(block => block.type === 'mediaBlock')
+//         .map(block => this.convertToMediaBlock(block)),
+      
+//       connections: connections,
+      
+//       story: Storiess.create({
+//         id: this.story?.id ? parseInt(this.story.id) : 0,
+//         name: this.story?.name || 'New Story',
+//         rootBlockConnectionId: this.findRootBlockConnectionId()
+//         // createdDate: new Date()
+//       })
+//     });
+
+//     console.log(storySessionData);
+
+//     // 3. SERIALIZE TO BINARY
+//     const binaryData = StorySessionDataBlock.toBinary(storySessionData);
+    
+//     // 4. SEND AS PROTOBUF
+//     const headers = new HttpHeaders({
+//       'Content-Type': 'application/x-protobuf',
+//       // 'Accept': 'application/x-protobuf'
+//     });
+//       this.http.post(
+//       'https://localhost:7221/api/story/SaveStoryToDbBlock',
+//       binaryData,
+//       {
+//         headers: headers,
+//         // responseType: 'json' // or 'arraybuffer' if you expect binary back
+//       }
+//       ).subscribe({
+//         next: (res) => {
+//           console.log('✅ Story session data saved successfully via Protobuf', res);
+//         },
+//         error: (err) => {
+//           console.error('❌ Error saving story session data via Protobuf:', err);
+//         },
+//         complete: () => {
+//           console.log('🎉 Request completed');
+//         }
+//       });
+
+
+
+//     // console.log('✅ Story session data saved successfully via Protobuf', response);
+//     // const response = this.http.get("https://localhost:7221/api/components/allstories").subscribe();
+
+//     this.snackBar.open(`Story "${storySessionData.story?.name}" saved successfully!`, 'Close', {
+//       duration: 3000,
+//       panelClass: ['success-snackbar']
+//     });
+
+//     this.router.navigate(['/manage-stories']);
+
+//   } catch (error) {
+//     console.error('❌ Error saving story session data via Protobuf:', error);
+//     this.snackBar.open('Error saving story. Please try again.', 'Close', {
+//       duration: 5000,
+//       panelClass: ['error-snackbar']
+//     });
+//   }
+// }
+
+// this is correct
+// async saveFlow() {
+//   // 1. Validation
+//   if (this.canvasBlocks.length === 0) {
+//     this.snackBar.open('Please add at least one block to your story.', 'Close', {
+//       duration: 3000
+//     });
+//     return;
+//   }
+
+//   console.log("--- Preparing to save flow. Structuring data for StorySessionDataBlock... ---");
+
+//   try {
+//     // 2. Build Connections
+//     const connections = this.jsPlumbFlowService.getConnections().map(conn =>
+//       Connectionn.create({
+//         // id: conn.id || `conn-${Date.now()}`,
+//         id : this.generateGuid(),
+//         storyId: this.story?.id ? parseInt(this.story.id) : 0,
+//         fromComponentType: this.getComponentTypeFromId(conn.sourceId),
+//         fromComponentId: conn.sourceId.replace('block-', '')
+//       })
+//     );
+
+//     // 3. Build StorySessionDataBlock
+//     const storySessionData = StorySessionDataBlock.create({
+//       phrases: this.canvasBlocks
+//         .filter(b => b.type === 'userInput' && b.subType === 'phrase')
+//         .map(b => this.convertToUserInputBlock(b)),
+
+//       keywords: this.canvasBlocks
+//         .filter(b => b.type === 'userInput' && b.subType === 'keywordGroup')
+//         .map(b => this.convertToUserInputBlock(b)),
+
+//       anythings: this.canvasBlocks
+//         .filter(b => b.type === 'userInput' && b.subType === 'anything')
+//         .map(b => this.convertToUserInputBlock(b)),
+
+//       conversationalForms: this.canvasBlocks
+//         .filter(b => b.type === 'conversationalForm')
+//         .map(b => this.convertToConversationalFormBlock(b)),
+
+//       typingDelays: this.canvasBlocks
+//         .filter(b => b.type === 'typingDelay')
+//         .map(b => this.convertToTypingDelayBlock(b)),
+
+//       linkStories: this.canvasBlocks
+//         .filter(b => b.type === 'linkStory')
+//         .map(b => this.convertToLinkStoryBlock(b)),
+
+//       textResponses: this.canvasBlocks
+//         .filter(b => b.type === 'textResponse')
+//         .map(b => this.convertToTextResponseBlock(b)),
+
+//       jsonAPIs: this.canvasBlocks
+//         .filter(b => b.type === 'jsonApi')
+//         .map(b => this.convertToJsonApiBlock(b)),
+
+//       medias: this.canvasBlocks
+//         .filter(b => b.type === 'mediaBlock')
+//         .map(b => this.convertToMediaBlock(b)),
+
+//       connections,
+//       story: Storiess.create({
+//         id: this.story?.id ? parseInt(this.story.id) : 0,
+//         name: this.story?.name || 'New Story',
+//         rootBlockConnectionId: this.findRootBlockConnectionId()
+//       })
+//     });
+
+//     console.log("🚀 Prepared StorySessionDataBlock:", storySessionData);
+
+//     // 4. Serialize to binary
+//     const binaryData = StorySessionDataBlock.toBinary(storySessionData);
+//     console.log("📦 Binary size:", binaryData?.length);
+
+//     // Wrap as Blob (safest for HttpClient)
+//     const uint8 = new Uint8Array(binaryData); // re-wrap into a plain Uint8Array
+//     const blob = new Blob([uint8], { type: 'application/x-protobuf' });
+
+
+//     // 5. Send API request
+//     this.http.post(
+//       'https://localhost:7221/api/story/SaveStoryToDbBlock',
+//       blob,
+//       {
+//         headers: new HttpHeaders({ 'Content-Type': 'application/x-protobuf' }),
+//         responseType: 'json' // or 'arraybuffer' if server returns protobuf
+//       }
+//     ).subscribe({
+//       next: (res) => {
+//         console.log('✅ Story session data saved successfully via Protobuf', res);
+
+//         this.snackBar.open(
+//           `Story "${storySessionData.story?.name}" saved successfully!`,
+//           'Close',
+//           { duration: 3000, panelClass: ['success-snackbar'] }
+//         );
+
+//         this.router.navigate(['/manage-stories']);
+//       },
+//       error: (err) => {
+//         console.error('❌ Error saving story session data via Protobuf:', err);
+//         this.snackBar.open('Error saving story. Please try again.', 'Close', {
+//           duration: 5000,
+//           panelClass: ['error-snackbar']
+//         });
+//       },
+//       complete: () => {
+//         console.log('🎉 Request completed');
+//       }
+//     });
+
+//   } catch (error) {
+//     console.error('❌ Error preparing story session data:', error);
+//     this.snackBar.open('Error saving story. Please try again.', 'Close', {
+//       duration: 5000,
+//       panelClass: ['error-snackbar']
+//     });
+//   }
+// }
+
+async saveFlow() {
+  // 1. Validation
+  if (this.canvasBlocks.length === 0) {
+    this.snackBar.open('Please add at least one block to your story.', 'Close', {
+      duration: 3000
+    });
+    return;
+  }
+
+  try {
+    console.log("--- Preparing to save flow. Structuring data for StorySessionDataBlock... ---");
+
+    // 2. Find Root Block and create only one connection
+    const rootBlock = this.canvasBlocks.find(block =>
+      !block.connections?.input || block.connections.input.length === 0
+    );
+
+    if (!rootBlock) {
+      this.snackBar.open('No root block found. Please set a root block.', 'Close', { duration: 5000 });
+      return;
+    }
+
+    const rootConnectionId = this.generateGuid();
+    // ✅ If root block is userInput, use subType; otherwise use type
+    const fromComponentType =
+    rootBlock.type === 'userInput'
+      ? (rootBlock.subType || 'userInput')
+      : rootBlock.type;
+
+    const connections: Connectionn[] = [
+      Connectionn.create({
+        id: rootConnectionId,
+        storyId: this.story?.id ? parseInt(this.story.id) : 0,
+        fromComponentType: fromComponentType,
+        fromComponentId: rootBlock.id
+      })
+    ];
+
+    // ✅ Pick story name from first block (prefer subtype if userInput)
+    const firstBlock = this.canvasBlocks[0];
+    const storyName =
+                    this.story?.name && this.story.name.trim().length > 0
+                      ? this.story.name
+                      : (firstBlock.type === 'userInput'
+                          ? (firstBlock.subType || firstBlock.type)
+                          : firstBlock.type);
+
+
+    // 3. Build StorySessionDataBlock
+    const storySessionData = StorySessionDataBlock.create({
+      phrases: this.canvasBlocks
+                  .filter((b): b is ChatbotBlock & { subType: 'phrase' } => 
+                    b.type === 'userInput' && b.subType === 'phrase'
+                  )
+                  .map(b => this.convertToUserInputBlock(b)),
+
+      keywords: this.canvasBlocks
+                    .filter((b): b is ChatbotBlock & { subType: 'keywordGroup' } =>
+                      b.type === 'userInput' && b.subType === 'keywordGroup'
+                    )
+                    .map(b => this.convertToUserInputBlock(b)),
+
+      anythings: this.canvasBlocks
+        .filter(b => b.type === 'userInput' && b.subType === 'anything')
+        .map(b => this.convertToUserInputBlock(b)),
+
+      conversationalForms: this.canvasBlocks
+        .filter(b => b.type === 'conversationalForm')
+        .map(b => this.convertToConversationalFormBlock(b)),
+
+      typingDelays: this.canvasBlocks
+        .filter(b => b.type === 'typingDelay')
+        .map(b => this.convertToTypingDelayBlock(b)),
+
+      linkStories: this.canvasBlocks
+        .filter(b => b.type === 'linkStory')
+        .map(b => this.convertToLinkStoryBlock(b)),
+
+      textResponses: this.canvasBlocks
+        .filter(b => b.type === 'textResponse')
+        .map(b => this.convertToTextResponseBlock(b)),
+
+      jsonAPIs: this.canvasBlocks
+        .filter(b => b.type === 'jsonApi')
+        .map(b => this.convertToJsonApiBlock(b)),
+
+      medias: this.canvasBlocks
+        .filter(b => b.type === 'mediaBlock')
+        .map(b => this.convertToMediaBlock(b)),
+
+      connections, // Only one connection, matching rootBlockConnectionId
+
+      story: Storiess.create({
+        name: storyName || 'New Story',
+        rootBlockConnectionId: rootConnectionId
+      })
+    });
+
+    console.log("🚀 Prepared StorySessionDataBlock with root connection only:", storySessionData);
+
+    // 4. Serialize and send
+    const binaryData = StorySessionDataBlock.toBinary(storySessionData);
+    const blob = new Blob([new Uint8Array(binaryData)], { type: 'application/x-protobuf' });
+
+    this.http.post(
+      'https://localhost:7221/api/story/SaveStoryToDbBlock',
+      blob,
+      {
+        headers: new HttpHeaders({ 'Content-Type': 'application/x-protobuf' }),
+        responseType: 'json'
+      }
+    ).subscribe({
+      next: (res) => {
+        console.log('✅ Story session data saved successfully via Protobuf', res);
+        this.snackBar.open(`Story "${storySessionData.story?.name}" saved successfully!`, 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
+        this.router.navigate(['/manage-stories']);
+      },
+      error: (err) => {
+        console.error('❌ Error saving story session data via Protobuf:', err);
+        this.snackBar.open('Error saving story. Please try again.', 'Close', { duration: 5000, panelClass: ['error-snackbar'] });
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error preparing story session data:', error);
+    this.snackBar.open('Error saving story. Please try again.', 'Close', { duration: 5000, panelClass: ['error-snackbar'] });
+  }
+}
+
+private generateGuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+// saveFlow(): Observable<any> {
+//   // ✅ 1. Validation
+//   if (this.canvasBlocks.length === 0) {
+//     this.snackBar.open('Please add at least one block to your story.', 'Close', {
+//       duration: 3000
+//     });
+//     return throwError(() => new Error('No blocks to save'));
+//   }
+
+//   console.log("--- Preparing to save flow. Structuring data for StorySessionDataBlock... ---");
+
+//   // ✅ 2. Build connections
+//   const connections = this.jsPlumbFlowService.getConnections().map(conn =>
+//     Connectionn.create({
+//       id: conn.id || `conn-${Date.now()}`,
+//       storyId: this.story?.id ? parseInt(this.story.id) : 0,
+//       fromComponentType: this.getComponentTypeFromId(conn.sourceId),
+//       fromComponentId: conn.sourceId.replace('block-', '')
+//     })
+//   );
+
+//   // ✅ 3. Build StorySessionDataBlock
+//   const storySessionData = StorySessionDataBlock.create({
+//     phrases: this.canvasBlocks
+//       .filter(block => block.type === 'userInput' && block.subType === 'phrase')
+//       .map(block => this.convertToUserInputBlock(block)),
+
+//     keywords: this.canvasBlocks
+//       .filter(block => block.type === 'userInput' && block.subType === 'keywordGroup')
+//       .map(block => this.convertToUserInputBlock(block)),
+
+//     anythings: this.canvasBlocks
+//       .filter(block => block.type === 'userInput' && block.subType === 'anything')
+//       .map(block => this.convertToUserInputBlock(block)),
+
+//     conversationalForms: this.canvasBlocks
+//       .filter(block => block.type === 'conversationalForm')
+//       .map(block => this.convertToConversationalFormBlock(block)),
+
+//     typingDelays: this.canvasBlocks
+//       .filter(block => block.type === 'typingDelay')
+//       .map(block => this.convertToTypingDelayBlock(block)),
+
+//     linkStories: this.canvasBlocks
+//       .filter(block => block.type === 'linkStory')
+//       .map(block => this.convertToLinkStoryBlock(block)),
+
+//     textResponses: this.canvasBlocks
+//       .filter(block => block.type === 'textResponse')
+//       .map(block => this.convertToTextResponseBlock(block)),
+
+//     jsonAPIs: this.canvasBlocks
+//       .filter(block => block.type === 'jsonApi')
+//       .map(block => this.convertToJsonApiBlock(block)),
+
+//     medias: this.canvasBlocks
+//       .filter(block => block.type === 'mediaBlock')
+//       .map(block => this.convertToMediaBlock(block)),
+
+//     connections: connections,
+
+//     story: Storiess.create({
+//       id: this.story?.id ? parseInt(this.story.id) : 0,
+//       name: this.story?.name || 'New Story',
+//       rootBlockConnectionId: this.findRootBlockConnectionId()
+//     })
+//   });
+
+//   console.log("📦 Protobuf object:", storySessionData);
+
+//   // ✅ 4. Serialize to binary
+//   const binaryData = StorySessionDataBlock.toBinary(storySessionData);
+
+//   // ✅ 5. Send using Angular HttpClient (Observable)
+//   const headers = new HttpHeaders({ 'Content-Type': 'application/x-protobuf' });
+  
+//   return this.http.post(
+//     'https://localhost:7221/api/story/SaveStoryToDbBlock',
+//     binaryData,
+//     { headers }
+//   ).pipe(
+//     tap((response: any) => {
+//       console.log('✅ Story saved successfully via Protobuf:', response);
+
+//       this.snackBar.open(
+//         `Story "${storySessionData.story?.name}" saved successfully!`,
+//         'Close',
+//         { duration: 3000, panelClass: ['success-snackbar'] }
+//       );
+
+//       this.router.navigate(['/manage-stories']);
+//     }),
+//     catchError(error => {
+//       console.error('❌ Error saving story session data via Protobuf:', error);
+//       this.snackBar.open('Error saving story. Please try again.', 'Close', {
+//         duration: 5000,
+//         panelClass: ['error-snackbar']
+//       });
+//       return throwError(() => error);
+//     })
+//   );
+// }
+
+// // Example: button click handler
+// onSaveFlow(): void {
+//   this.saveFlow().subscribe({
+//     next: res => {
+//       console.log("✅ Save response:", res);
+//       this.snackBar.open('Flow saved successfully!', 'Close', { duration: 3000 });
+//     },
+//     error: err => {
+//       console.error("❌ Save error:", err);
+//       this.snackBar.open('Failed to save flow. Please try again.', 'Close', { duration: 3000 });
+//     }
+//   });
+// }
+// Helper methods for conversion
+private getComponentTypeFromId(blockId: string): BlockType {
+  const block = this.canvasBlocks.find(b => b.id === blockId);
+  if (!block) return 'userInput';
+
+  switch (block.type) {
+    case 'userInput':
+      // you could refine further by subtype if needed
+      return 'userInput';
+
+    case 'textResponse':
+      return 'textResponse';
+
+    case 'typingDelay':
+      return 'typingDelay';
+
+    case 'mediaBlock':
+      return 'mediaBlock';
+
+    case 'linkStory':
+      return 'linkStory';
+
+    case 'notifyAgent':
+      return 'notifyAgent';
+
+    case 'conversationalForm':
+      return 'conversationalForm';
+
+    case 'conditionalRedirect':
+      return 'conditionalRedirect';
+
+    case 'rssFeed':
+      return 'rssFeed';
+
+    case 'jsonApi':
+      return 'jsonApi';
+
+    case 'shopify':
+      return 'shopify';
+
+    case 'noQuickReply':
+      return 'noQuickReply';
+
+    case 'quickRepliesMain':
+      return 'quickRepliesMain';
+
+    case 'quickReplyItem':
+      return 'quickReplyItem';
+
+    case 'quickReply':
+      return 'quickReply';
+
+    default:
+      return 'userInput'; // 👈 fallback to something valid
+  }
+}
+
+
+private getUserInputSubType(block: ChatbotBlock): string | undefined {
+  return block.subType as string | undefined;
+}
+
+private findRootBlockConnectionId(): string {
+  // Find the root block (usually the first user input block)
+  const rootBlock = this.canvasBlocks.find(block => 
+    // block.type === 'userInput' && 
+    (!block.connections?.input || block.connections.input.length === 0)
+  );
+  
+  return rootBlock ? `${rootBlock.id}` : '';
+}
+
+private convertToUserInputBlock(block: ChatbotBlock): UserInputBlock {
+  const targetId = block.connections?.output?.[0] ?? null;
+  let toComponentType: BlockType | UserInputSubType | string = 'null';
+
+  if (targetId) {
+    toComponentType = this.getComponentTypeFromId(targetId) || null;
+
+    if (toComponentType === 'userInput') {
+      const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
+      if (targetBlock?.subType === 'phrase' || targetBlock?.subType === 'keywordGroup' || targetBlock?.subType === 'anything') {
+        toComponentType = targetBlock.subType;
+      }
+    }
+  }
+
+  return UserInputBlock.create({
+    keywords: block.keywords || [],
+    keywordGroups: (block.keywordGroups || []).map(g => ({ keywords: g })),
+    phraseText: block.phraseText || '',
+    customMessage: block.customMessage || '',
+    // availableVariables : block.datastoreVariable || [],
+    toComponentType,
+    toComponentId: targetId || '',
+    id : block.id || '',
+    type : block.type,
+    subType: (this.getUserInputSubType(block) as string) ?? 'anything',
+  });
+}
+
+private convertToTextResponseBlock(block: ChatbotBlock): TextResponseBlock {
+  const targetId = block.connections?.output?.[0] ?? null;
+  let toComponentType: BlockType | UserInputSubType | string = 'null';
+
+  if (targetId) {
+    toComponentType = this.getComponentTypeFromId(targetId) || null;
+
+    if (toComponentType === 'userInput') {
+      const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
+      if (targetBlock?.subType === 'phrase' || targetBlock?.subType === 'keywordGroup' || targetBlock?.subType === 'anything') {
+        toComponentType = targetBlock.subType;
+      }
+    }
+  }
+
+  return TextResponseBlock.create({
+    // base: BaseBlock.create({
+    //   id: block.id,
+    //   name: block.name,
+    // }),
+    content: block.content || '',
+    alternateResponses: block.alternateResponses || [],
+    quickReplies: mapButtons(block.quickReplies || []),
+    toComponentType,
+    toComponentId: targetId || '',
+    id : block.id || '',
+    type : block.type 
+  });
+}
+
+private convertToMediaBlock(block: ChatbotBlock): MediaBlock {
+  const targetId = block.connections?.output?.[0] ?? null;
+  let toComponentType: BlockType | UserInputSubType | string = 'null';
+
+  if (targetId) {
+    toComponentType = this.getComponentTypeFromId(targetId) || null;
+
+    if (toComponentType === 'userInput') {
+      const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
+      if (targetBlock?.subType === 'phrase' || targetBlock?.subType === 'keywordGroup' || targetBlock?.subType === 'anything') {
+        toComponentType = targetBlock.subType;
+      }
+    }
+  }
+
+  return MediaBlock.create({
+    // base: BaseBlock.create({
+    //   id: block.id,
+    //   name: block.name,
+    // }),
+    mediaId: block.mediaId || '',
+    mediaType: mapStringToMediaType(block.mediaType || ''),
+    singleImageUrl: block.singleImageUrl || '',
+    videoUrl: block.videoUrl || '',
+    audioUrl: block.audioUrl || '',
+    fileUrl: block.fileUrl || '',
+    slides: block.slides || [],
+    mediaName: block.mediaName || '',
+    buttons: mapButtons(block.buttons || []),
+    toComponentType,
+    toComponentId: targetId || '',
+    id : block.id || ''
+  });
+}
+
+private convertToConversationalFormBlock(block: ChatbotBlock): ConversationalFormBlock {
+  const targetId = block.connections?.output?.[0] ?? null;
+  let toComponentType: BlockType | UserInputSubType | string = 'null';
+
+  if (targetId) {
+    toComponentType = this.getComponentTypeFromId(targetId) || null;
+
+    if (toComponentType === 'userInput') {
+      const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
+      if (targetBlock?.subType === 'phrase' || targetBlock?.subType === 'keywordGroup' || targetBlock?.subType === 'anything') {
+        toComponentType = targetBlock.subType;
+      }
+    }
+  }
+
+  return ConversationalFormBlock.create({
+    // base: BaseBlock.create({
+    //   id: block.id,
+    //   name: block.name,
+    // }),
+    formId: block.formId || '',
+    formName: block.formName || '',
+    webhookUrl: block.webhookUrl || '',
+    sendEmailNotification: block.sendEmailNotification || false,
+    notificationEmail: block.notificationEmail || '',
+    formFields: block.formFields || [],
+    showAsInlineForm: block.showAsInlineForm || false,
+    renderFormResponses: block.renderFormResponses || false,
+    allowMultipleSubmission: block.allowMultipleSubmission || false,
+    multipleSubmissionMessage: block.multipleSubmissionMessage || '',
+    allowExitForm: block.allowExitForm || false,
+    exitFormMessage: block.exitFormMessage || '',
+    successResponseType: block.successResponseType || '',
+    // successRedirectStoryId: block.successRedirectStoryId || '',
+    validateEmail: block.validateEmail || false,
+    validatePhone: block.validatePhone || false,
+    spamProtection: block.spamProtection || false,
+    requireCompletion: block.requireCompletion || false,
+    successMessage: block.successMessage || '',
+    redirectUrl: block.redirectUrl || '',
+    toComponentType,
+    toComponentId: targetId || ''
+  });
+}
+
+private convertToTypingDelayBlock(block: ChatbotBlock): TypingDelayBlock {
+  const targetId = block.connections?.output?.[0] ?? null;
+  let toComponentType: BlockType | UserInputSubType | string = 'null';
+
+  if (targetId) {
+    toComponentType = this.getComponentTypeFromId(targetId) || null;
+
+    if (toComponentType === 'userInput') {
+      const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
+      if (targetBlock?.subType === 'phrase' || targetBlock?.subType === 'keywordGroup' || targetBlock?.subType === 'anything') {
+        toComponentType = targetBlock.subType;
+      }
+    }
+  }
+
+  return TypingDelayBlock.create({
+    // base: BaseBlock.create({
+    //   id: block.id,
+    //   name: block.name,
+    // }),
+    delaySeconds: block.delaySeconds || 0,
+    toComponentType,
+    toComponentId: targetId || ''
+  });
+}
+
+private convertToJsonApiBlock(block: ChatbotBlock): JsonApiBlock {
+  const targetId = block.connections?.output?.[0] ?? null;
+  let toComponentType: BlockType | UserInputSubType | string = 'null';
+
+  if (targetId) {
+    toComponentType = this.getComponentTypeFromId(targetId) || null;
+
+    if (toComponentType === 'userInput') {
+      const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
+      if (targetBlock?.subType === 'phrase' || targetBlock?.subType === 'keywordGroup' || targetBlock?.subType === 'anything') {
+        toComponentType = targetBlock.subType;
+      }
+    }
+  }
+
+  return JsonApiBlock.create({
+    // base: BaseBlock.create({
+    //   id: block.id,
+    //   name: block.name,
+    // }),
+    apiEndpoint: block.apiEndpoint || '',
+    requestType: block.requestType || '',
+    // apiHeaders: block.apiHeaders || [],
+    toComponentType,
+    toComponentId: targetId || ''
+  });
+}
+
+private convertToLinkStoryBlock(block: ChatbotBlock): LinkStoryBlock {
+  const targetId = block.connections?.output?.[0] ?? null;
+  let toComponentType: BlockType | UserInputSubType | string = 'null';
+
+  if (targetId) {
+    toComponentType = this.getComponentTypeFromId(targetId) || null;
+
+    if (toComponentType === 'userInput') {
+      const targetBlock = this.canvasBlocks.find(b => b.id === targetId);
+      if (targetBlock?.subType === 'phrase' || targetBlock?.subType === 'keywordGroup' || targetBlock?.subType === 'anything') {
+        toComponentType = targetBlock.subType;
+      }
+    }
+  }
+
+  return LinkStoryBlock.create({
+    id: block.id || '',
+    type: 'linkStory',
+    linkStoryName: block.linkStoryName || '',
+    // linkStoryId: block.linkStoryId || '',
+    toComponentType,
+    toComponentId: targetId || ''
+  });
+}
 }
