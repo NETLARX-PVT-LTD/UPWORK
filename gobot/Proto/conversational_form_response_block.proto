@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package chatbot;
+
+import "google/protobuf/timestamp.proto";
+
+message FormFieldResponseBlock {
+  string id = 1;              // Guid → string
+  string formResponseId = 2;  // Foreign key Guid → string
+  string fieldName = 3;       // Required string
+  string value = 4;           // Optional string
+}
+
+message FormResponseBlock {
+    string id = 1;
+    string formId = 2;
+    google.protobuf.Timestamp SubmittedAt = 3;
+    repeated FormFieldResponseBlock fieldResponse = 4;
+}

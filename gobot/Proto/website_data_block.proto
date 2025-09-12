@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package chatbot;
+
+import "google/protobuf/timestamp.proto";
+
+message WebsiteDataBlock {
+  int32 id = 1;                       // int in C# → int32 in proto
+  string websiteType = 2;             // Website type (string)
+
+  string assistantId = 3;             // Guid → string
+  string url = 4;                     // Required string
+
+  bool autoSync = 5;                  // Default true
+
+  // Crawl settings
+  int32 maxPages = 6;                 // Nullable int → int32 (0 means unset)
+  int32 maxDepth = 7;                 // Nullable int → int32 (0 means unset)
+  bool includeSubdomains = 8;         // Nullable bool → bool
+
+  // Advanced options
+  string excludePatterns = 9;         // Nullable string → string
+  string cssSelector = 10;            // Nullable string → string
+  bool respectRobots = 11;            // Nullable bool → bool
+
+  google.protobuf.Timestamp createdAt = 12;              // DateTime → string (ISO-8601)
+}
