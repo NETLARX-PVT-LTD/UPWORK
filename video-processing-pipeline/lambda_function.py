@@ -20,13 +20,7 @@ SSH_KEY_NAME = 'football-analysis-yolov11-lambda-ssh'
 BASE_URL = 'https://cloud.lambda.ai/api/v1/instance-operations'
 
 # SSH Configuration
-SSH_PRIVATE_KEY_SECRET_NAME = '''-----BEGIN OPENSSH PRIVATE KEY-----
-b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
-QyNTUxOQAAACAoi3QnhXiqYtN33yhTfeZaaW1g2Ty8Mwm3gcVMd/ig7gAAAIgzGNp0Mxja
-dAAAAAtzc2gtZWQyNTUxOQAAACAoi3QnhXiqYtN33yhTfeZaaW1g2Ty8Mwm3gcVMd/ig7g
-AAAEALf+CY+0FlvHenJHhdhCY2aR0zQX07fkSNoJT/gNPa3CiLdCeFeKpi03ffKFN95lpp
-bWDZPLwzCbeBxUx3+KDuAAAABHRlc3QB
------END OPENSSH PRIVATE KEY-----'''
+SSH_PRIVATE_KEY_SECRET_NAME = 'football-ssh-key'
 AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
 
 # Testing mode flag
@@ -76,8 +70,11 @@ def get_ssh_private_key():
         log_step("SSH Key Retrieval", "ERROR", f"Failed to get private key: {str(e)}")
         return None
 
-def get_vm_ip_address(vm_id):
-    """Get the IP address of a VM instance"""
+
+def get_vm_ip_address(vm_id, max_retries=5, retry_delay=10):
+    """
+    Get the IP address of a VM instance with a retry mechanism.
+    """
     if TESTING_MODE:
         fake_ip = f"192.168.1.{hash(vm_id) % 254 + 1}"
         log_step("VM IP Retrieval", "TESTING", f"Using fake IP: {fake_ip}")
@@ -92,27 +89,35 @@ def get_vm_ip_address(vm_id):
         'Authorization': f'Bearer {LAMBDA_API_KEY}'
     }
     
-    url = f"https://cloud.lambda.ai/api/v1/instances/{vm_id}"
+    url = f"https://cloud.lambda.ai/api/v1/instances"  # Changed to list instances
     
-    try:
-        response = requests.get(url, headers=headers, timeout=60)
-        response.raise_for_status()
+    for attempt in range(max_retries):
+        log_step("VM IP Retrieval", "INFO", f"Attempt {attempt + 1}/{max_retries} to get IP for {vm_id}")
         
-        data = response.json()
-        if 'data' in data:
-            for instance in data['data']:
-                if instance.get('id') == vm_id:
-                    ip_address = instance.get('ip')
-                    if ip_address:
-                        log_step("VM IP Retrieval", "SUCCESS", f"IP for {vm_id}: {ip_address}")
-                        return ip_address
-        
-        log_step("VM IP Retrieval", "ERROR", f"IP not found for VM {vm_id}")
-        return None
-        
-    except Exception as e:
-        log_step("VM IP Retrieval", "ERROR", f"Failed to get IP for {vm_id}: {str(e)}")
-        return None
+        try:
+            response = requests.get(url, headers=headers, timeout=60)
+            response.raise_for_status()
+            
+            data = response.json()
+
+            if 'data' in data and data['data']:
+                for instance in data['data']:
+                    if instance.get('id') == vm_id:
+                        ip_address = instance.get('ip')
+                        if ip_address:
+                            log_step("VM IP Retrieval", "SUCCESS", f"IP for {vm_id}: {ip_address}")
+                            return ip_address
+            
+            # If VM is not found in the list, or IP is not yet available
+            log_step("VM IP Retrieval", "INFO", f"VM {vm_id} not found or IP not ready. Retrying in {retry_delay} seconds...")
+            time.sleep(retry_delay)
+
+        except (requests.exceptions.RequestException, json.JSONDecodeError, Exception) as e:
+            log_step("VM IP Retrieval", "WARNING", f"Error on attempt {attempt + 1}: {str(e)}. Retrying...")
+            time.sleep(retry_delay)
+
+    log_step("VM IP Retrieval", "ERROR", f"Failed to get IP for {vm_id} after {max_retries} attempts.")
+    return None
 
 def get_match_details(cursor, match_id):
     """Get match details including S3 link"""
@@ -450,9 +455,9 @@ def create_new_vm_instance():
         'Authorization': f'Bearer {LAMBDA_API_KEY}'
     }
 
-    regions_to_try = ["us-west-3", "us-midwest-1", "us-east-2", "us-south-2", "us-south-3", "us-east-3", "us-midwest-2"]
+    regions_to_try = ["us-south-2"]
     list_sku = ["gpu_1x_gh200"]
-    max_retries = 3
+    max_retries = 1
     retry_delay_seconds = 15
 
     for region in regions_to_try:
@@ -461,7 +466,7 @@ def create_new_vm_instance():
 
             payload = {
                 "region_name": region,
-                "instance_type_name": "gpu_1x_gh200",
+                "instance_type_name": "gpu_1x_h100_sxm5",
                 "ssh_key_names": [SSH_KEY_NAME],
             }
             url = f"{BASE_URL}/launch"
