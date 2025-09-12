@@ -8,6 +8,8 @@ message ImageSlide {
   string url = 1;
   string title = 2;
   string description = 3;
+  string id = 4;
+  string mediaId = 5;
 }
 
 enum MediaType {
@@ -37,4 +39,5 @@ message MediaBlock {
   repeated Button buttons = 15;
   string ToComponentType = 16; 
   string ToComponentId = 17; 
+  string id = 18;
 }

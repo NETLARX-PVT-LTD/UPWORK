@@ -11,87 +11,122 @@ import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 /**
- * Helper message to represent a single group (or list) of keywords
+ * A keyword group, used for keyword-based branching
  *
  * @generated from protobuf message chatbot.KeywordGroup
  */
 export interface KeywordGroup {
     /**
-     * @generated from protobuf field: repeated string keywords = 1
+     * @generated from protobuf field: string userInputKeywordId = 1
      */
-    keywords: string[];
+    userInputKeywordId: string;
+    /**
+     * @generated from protobuf field: string id = 2
+     */
+    id: string; // UUID or unique identifier
+    /**
+     * @generated from protobuf field: repeated string keywords = 3
+     */
+    keywords: string[]; // e.g., ["hello", "hi", "hey"]
 }
 /**
+ * A variable, either system-defined or user-defined
+ *
+ * @generated from protobuf message chatbot.Variable
+ */
+export interface Variable {
+    /**
+     * @generated from protobuf field: string name = 1
+     */
+    name: string; // e.g., "location", "user_name"
+    /**
+     * @generated from protobuf field: string type = 2
+     */
+    type: string; // e.g., "string", "number"
+}
+/**
+ * User input block definition inside a story
+ *
  * @generated from protobuf message chatbot.UserInputBlock
  */
 export interface UserInputBlock {
     /**
-     * @generated from protobuf field: string type = 1
+     * @generated from protobuf field: string id = 1
      */
-    type: string; // "userInput"
+    id: string; // Id of the block
     /**
-     * @generated from protobuf field: chatbot.UserInputSubType subType = 2
+     * @generated from protobuf field: string type = 2
      */
-    subType: UserInputSubType;
+    type: string; // Always "userInput"
     /**
-     * @generated from protobuf field: repeated string keywords = 3
+     * @generated from protobuf field: string subType = 3
      */
-    keywords: string[];
+    subType: string; // Keyword, Phrase, Anything
     /**
-     * This is now a list of KeywordGroup messages
-     *
-     * @generated from protobuf field: repeated chatbot.KeywordGroup keywordGroups = 4
+     * @generated from protobuf field: repeated string keywords = 4
      */
-    keywordGroups: KeywordGroup[];
+    keywords: string[]; // inline keywords
     /**
-     * @generated from protobuf field: string phraseText = 5
+     * @generated from protobuf field: repeated chatbot.KeywordGroup keywordGroups = 5
      */
-    phraseText: string;
+    keywordGroups: KeywordGroup[]; // groups of keywords
     /**
-     * @generated from protobuf field: string customMessage = 6
+     * @generated from protobuf field: string phraseText = 6
      */
-    customMessage: string;
+    phraseText: string; // Prompt shown to user
     /**
-     * @generated from protobuf field: string datastoreVariable = 7
+     * @generated from protobuf field: string customMessage = 7
      */
-    datastoreVariable: string;
+    customMessage: string; // Optional custom error/help message
+    /**
+     * @generated from protobuf field: repeated chatbot.Variable availableVariables = 8
+     */
+    availableVariables: Variable[]; // Use protobuf timestamp instead of DateTime
+    /**
+     * @generated from protobuf field: string toComponentType = 10
+     */
+    toComponentType: string; // Optional reference type
+    /**
+     * @generated from protobuf field: string toComponentId = 11
+     */
+    toComponentId: string; // GUID represented as string
+    /**
+     * @generated from protobuf field: string storyId = 12
+     */
+    storyId: string;
 }
 /**
+ * Supported input types for user input block
+ *
  * @generated from protobuf enum chatbot.UserInputSubType
  */
 export enum UserInputSubType {
     /**
-     * It's good practice for the zero value to mean "unspecified"
-     *
-     * @generated from protobuf enum value: USER_INPUT_SUB_TYPE_UNSPECIFIED = 0;
+     * @generated from protobuf enum value: Keyword = 0;
      */
-    UNSPECIFIED = 0,
+    Keyword = 0,
     /**
-     * @generated from protobuf enum value: USER_INPUT_SUB_TYPE_TEXT = 1;
+     * @generated from protobuf enum value: Phrase = 1;
      */
-    TEXT = 1,
+    Phrase = 1,
     /**
-     * @generated from protobuf enum value: USER_INPUT_SUB_TYPE_NUMBER = 2;
+     * @generated from protobuf enum value: Anythin = 2;
      */
-    NUMBER = 2,
-    /**
-     * @generated from protobuf enum value: USER_INPUT_SUB_TYPE_EMAIL = 3;
-     */
-    EMAIL = 3,
-    /**
-     * @generated from protobuf enum value: USER_INPUT_SUB_TYPE_PHONE = 4;
-     */
-    PHONE = 4
+    Anythin = 2
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class KeywordGroup$Type extends MessageType<KeywordGroup> {
     constructor() {
         super("chatbot.KeywordGroup", [
-            { no: 1, name: "keywords", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "userInputKeywordId", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "keywords", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<KeywordGroup>): KeywordGroup {
         const message = globalThis.Object.create((this.messagePrototype!));
+        message.userInputKeywordId = "";
+        message.id = "";
         message.keywords = [];
         if (value !== undefined)
             reflectionMergePartial<KeywordGroup>(this, message, value);
@@ -102,7 +137,13 @@ class KeywordGroup$Type extends MessageType<KeywordGroup> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* repeated string keywords */ 1:
+                case /* string userInputKeywordId */ 1:
+                    message.userInputKeywordId = reader.string();
+                    break;
+                case /* string id */ 2:
+                    message.id = reader.string();
+                    break;
+                case /* repeated string keywords */ 3:
                     message.keywords.push(reader.string());
                     break;
                 default:
@@ -117,9 +158,15 @@ class KeywordGroup$Type extends MessageType<KeywordGroup> {
         return message;
     }
     internalBinaryWrite(message: KeywordGroup, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* repeated string keywords = 1; */
+        /* string userInputKeywordId = 1; */
+        if (message.userInputKeywordId !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.userInputKeywordId);
+        /* string id = 2; */
+        if (message.id !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.id);
+        /* repeated string keywords = 3; */
         for (let i = 0; i < message.keywords.length; i++)
-            writer.tag(1, WireType.LengthDelimited).string(message.keywords[i]);
+            writer.tag(3, WireType.LengthDelimited).string(message.keywords[i]);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -131,27 +178,90 @@ class KeywordGroup$Type extends MessageType<KeywordGroup> {
  */
 export const KeywordGroup = new KeywordGroup$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class Variable$Type extends MessageType<Variable> {
+    constructor() {
+        super("chatbot.Variable", [
+            { no: 1, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<Variable>): Variable {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.name = "";
+        message.type = "";
+        if (value !== undefined)
+            reflectionMergePartial<Variable>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Variable): Variable {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string name */ 1:
+                    message.name = reader.string();
+                    break;
+                case /* string type */ 2:
+                    message.type = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Variable, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string name = 1; */
+        if (message.name !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.name);
+        /* string type = 2; */
+        if (message.type !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.type);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message chatbot.Variable
+ */
+export const Variable = new Variable$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class UserInputBlock$Type extends MessageType<UserInputBlock> {
     constructor() {
         super("chatbot.UserInputBlock", [
-            { no: 1, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "subType", kind: "enum", T: () => ["chatbot.UserInputSubType", UserInputSubType, "USER_INPUT_SUB_TYPE_"] },
-            { no: 3, name: "keywords", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
-            { no: 4, name: "keywordGroups", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => KeywordGroup },
-            { no: 5, name: "phraseText", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 6, name: "customMessage", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 7, name: "datastoreVariable", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "subType", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "keywords", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "keywordGroups", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => KeywordGroup },
+            { no: 6, name: "phraseText", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "customMessage", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 8, name: "availableVariables", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Variable },
+            { no: 10, name: "toComponentType", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 11, name: "toComponentId", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 12, name: "storyId", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<UserInputBlock>): UserInputBlock {
         const message = globalThis.Object.create((this.messagePrototype!));
+        message.id = "";
         message.type = "";
-        message.subType = 0;
+        message.subType = "";
         message.keywords = [];
         message.keywordGroups = [];
         message.phraseText = "";
         message.customMessage = "";
-        message.datastoreVariable = "";
+        message.availableVariables = [];
+        message.toComponentType = "";
+        message.toComponentId = "";
+        message.storyId = "";
         if (value !== undefined)
             reflectionMergePartial<UserInputBlock>(this, message, value);
         return message;
@@ -161,26 +271,38 @@ class UserInputBlock$Type extends MessageType<UserInputBlock> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string type */ 1:
+                case /* string id */ 1:
+                    message.id = reader.string();
+                    break;
+                case /* string type */ 2:
                     message.type = reader.string();
                     break;
-                case /* chatbot.UserInputSubType subType */ 2:
-                    message.subType = reader.int32();
+                case /* string subType */ 3:
+                    message.subType = reader.string();
                     break;
-                case /* repeated string keywords */ 3:
+                case /* repeated string keywords */ 4:
                     message.keywords.push(reader.string());
                     break;
-                case /* repeated chatbot.KeywordGroup keywordGroups */ 4:
+                case /* repeated chatbot.KeywordGroup keywordGroups */ 5:
                     message.keywordGroups.push(KeywordGroup.internalBinaryRead(reader, reader.uint32(), options));
                     break;
-                case /* string phraseText */ 5:
+                case /* string phraseText */ 6:
                     message.phraseText = reader.string();
                     break;
-                case /* string customMessage */ 6:
+                case /* string customMessage */ 7:
                     message.customMessage = reader.string();
                     break;
-                case /* string datastoreVariable */ 7:
-                    message.datastoreVariable = reader.string();
+                case /* repeated chatbot.Variable availableVariables */ 8:
+                    message.availableVariables.push(Variable.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                case /* string toComponentType */ 10:
+                    message.toComponentType = reader.string();
+                    break;
+                case /* string toComponentId */ 11:
+                    message.toComponentId = reader.string();
+                    break;
+                case /* string storyId */ 12:
+                    message.storyId = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -194,27 +316,39 @@ class UserInputBlock$Type extends MessageType<UserInputBlock> {
         return message;
     }
     internalBinaryWrite(message: UserInputBlock, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string type = 1; */
+        /* string id = 1; */
+        if (message.id !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.id);
+        /* string type = 2; */
         if (message.type !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.type);
-        /* chatbot.UserInputSubType subType = 2; */
-        if (message.subType !== 0)
-            writer.tag(2, WireType.Varint).int32(message.subType);
-        /* repeated string keywords = 3; */
+            writer.tag(2, WireType.LengthDelimited).string(message.type);
+        /* string subType = 3; */
+        if (message.subType !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.subType);
+        /* repeated string keywords = 4; */
         for (let i = 0; i < message.keywords.length; i++)
-            writer.tag(3, WireType.LengthDelimited).string(message.keywords[i]);
-        /* repeated chatbot.KeywordGroup keywordGroups = 4; */
+            writer.tag(4, WireType.LengthDelimited).string(message.keywords[i]);
+        /* repeated chatbot.KeywordGroup keywordGroups = 5; */
         for (let i = 0; i < message.keywordGroups.length; i++)
-            KeywordGroup.internalBinaryWrite(message.keywordGroups[i], writer.tag(4, WireType.LengthDelimited).fork(), options).join();
-        /* string phraseText = 5; */
+            KeywordGroup.internalBinaryWrite(message.keywordGroups[i], writer.tag(5, WireType.LengthDelimited).fork(), options).join();
+        /* string phraseText = 6; */
         if (message.phraseText !== "")
-            writer.tag(5, WireType.LengthDelimited).string(message.phraseText);
-        /* string customMessage = 6; */
+            writer.tag(6, WireType.LengthDelimited).string(message.phraseText);
+        /* string customMessage = 7; */
         if (message.customMessage !== "")
-            writer.tag(6, WireType.LengthDelimited).string(message.customMessage);
-        /* string datastoreVariable = 7; */
-        if (message.datastoreVariable !== "")
-            writer.tag(7, WireType.LengthDelimited).string(message.datastoreVariable);
+            writer.tag(7, WireType.LengthDelimited).string(message.customMessage);
+        /* repeated chatbot.Variable availableVariables = 8; */
+        for (let i = 0; i < message.availableVariables.length; i++)
+            Variable.internalBinaryWrite(message.availableVariables[i], writer.tag(8, WireType.LengthDelimited).fork(), options).join();
+        /* string toComponentType = 10; */
+        if (message.toComponentType !== "")
+            writer.tag(10, WireType.LengthDelimited).string(message.toComponentType);
+        /* string toComponentId = 11; */
+        if (message.toComponentId !== "")
+            writer.tag(11, WireType.LengthDelimited).string(message.toComponentId);
+        /* string storyId = 12; */
+        if (message.storyId !== "")
+            writer.tag(12, WireType.LengthDelimited).string(message.storyId);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

@@ -10,28 +10,39 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
-import { BaseBlock } from "./base_block";
 /**
  * @generated from protobuf message chatbot.QuickReply
  */
 export interface QuickReply {
     /**
-     * @generated from protobuf field: string title = 1
+     * @generated from protobuf field: string id = 1
      */
-    title: string;
+    id: string;
     /**
-     * @generated from protobuf field: string value = 2
+     * @generated from protobuf field: string text = 2
      */
-    value: string;
+    text: string;
+    /**
+     * @generated from protobuf field: string ToComponentId = 3
+     */
+    toComponentId: string;
+    /**
+     * @generated from protobuf field: string ToComponentType = 4
+     */
+    toComponentType: string;
+    /**
+     * @generated from protobuf field: string textResponseId = 5
+     */
+    textResponseId: string;
 }
 /**
  * @generated from protobuf message chatbot.TextResponseBlock
  */
 export interface TextResponseBlock {
     /**
-     * @generated from protobuf field: chatbot.BaseBlock base = 1
+     * @generated from protobuf field: string type = 1
      */
-    base?: BaseBlock;
+    type: string; // "textResponse"
     /**
      * @generated from protobuf field: string content = 2
      */
@@ -44,19 +55,49 @@ export interface TextResponseBlock {
      * @generated from protobuf field: repeated chatbot.QuickReply quickReplies = 4
      */
     quickReplies: QuickReply[];
+    /**
+     * @generated from protobuf field: string ToComponentType = 5
+     */
+    toComponentType: string;
+    /**
+     * @generated from protobuf field: string ToComponentId = 6
+     */
+    toComponentId: string;
+    /**
+     * @generated from protobuf field: int32 StoryId = 7
+     */
+    storyId: number;
+    /**
+     * @generated from protobuf field: string QuickReplyId = 8
+     */
+    quickReplyId: string;
+    /**
+     * @generated from protobuf field: int32 BotId = 9
+     */
+    botId: number;
+    /**
+     * @generated from protobuf field: string id = 10
+     */
+    id: string;
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class QuickReply$Type extends MessageType<QuickReply> {
     constructor() {
         super("chatbot.QuickReply", [
-            { no: 1, name: "title", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "value", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "text", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "ToComponentId", kind: "scalar", jsonName: "ToComponentId", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "ToComponentType", kind: "scalar", jsonName: "ToComponentType", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "textResponseId", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<QuickReply>): QuickReply {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.title = "";
-        message.value = "";
+        message.id = "";
+        message.text = "";
+        message.toComponentId = "";
+        message.toComponentType = "";
+        message.textResponseId = "";
         if (value !== undefined)
             reflectionMergePartial<QuickReply>(this, message, value);
         return message;
@@ -66,11 +107,20 @@ class QuickReply$Type extends MessageType<QuickReply> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string title */ 1:
-                    message.title = reader.string();
+                case /* string id */ 1:
+                    message.id = reader.string();
                     break;
-                case /* string value */ 2:
-                    message.value = reader.string();
+                case /* string text */ 2:
+                    message.text = reader.string();
+                    break;
+                case /* string ToComponentId */ 3:
+                    message.toComponentId = reader.string();
+                    break;
+                case /* string ToComponentType */ 4:
+                    message.toComponentType = reader.string();
+                    break;
+                case /* string textResponseId */ 5:
+                    message.textResponseId = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -84,12 +134,21 @@ class QuickReply$Type extends MessageType<QuickReply> {
         return message;
     }
     internalBinaryWrite(message: QuickReply, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string title = 1; */
-        if (message.title !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.title);
-        /* string value = 2; */
-        if (message.value !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.value);
+        /* string id = 1; */
+        if (message.id !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.id);
+        /* string text = 2; */
+        if (message.text !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.text);
+        /* string ToComponentId = 3; */
+        if (message.toComponentId !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.toComponentId);
+        /* string ToComponentType = 4; */
+        if (message.toComponentType !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.toComponentType);
+        /* string textResponseId = 5; */
+        if (message.textResponseId !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.textResponseId);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -104,17 +163,30 @@ export const QuickReply = new QuickReply$Type();
 class TextResponseBlock$Type extends MessageType<TextResponseBlock> {
     constructor() {
         super("chatbot.TextResponseBlock", [
-            { no: 1, name: "base", kind: "message", T: () => BaseBlock },
+            { no: 1, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "content", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 3, name: "alternateResponses", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
-            { no: 4, name: "quickReplies", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => QuickReply }
+            { no: 4, name: "quickReplies", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => QuickReply },
+            { no: 5, name: "ToComponentType", kind: "scalar", jsonName: "ToComponentType", T: 9 /*ScalarType.STRING*/ },
+            { no: 6, name: "ToComponentId", kind: "scalar", jsonName: "ToComponentId", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "StoryId", kind: "scalar", jsonName: "StoryId", T: 5 /*ScalarType.INT32*/ },
+            { no: 8, name: "QuickReplyId", kind: "scalar", jsonName: "QuickReplyId", T: 9 /*ScalarType.STRING*/ },
+            { no: 9, name: "BotId", kind: "scalar", jsonName: "BotId", T: 5 /*ScalarType.INT32*/ },
+            { no: 10, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<TextResponseBlock>): TextResponseBlock {
         const message = globalThis.Object.create((this.messagePrototype!));
+        message.type = "";
         message.content = "";
         message.alternateResponses = [];
         message.quickReplies = [];
+        message.toComponentType = "";
+        message.toComponentId = "";
+        message.storyId = 0;
+        message.quickReplyId = "";
+        message.botId = 0;
+        message.id = "";
         if (value !== undefined)
             reflectionMergePartial<TextResponseBlock>(this, message, value);
         return message;
@@ -124,8 +196,8 @@ class TextResponseBlock$Type extends MessageType<TextResponseBlock> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* chatbot.BaseBlock base */ 1:
-                    message.base = BaseBlock.internalBinaryRead(reader, reader.uint32(), options, message.base);
+                case /* string type */ 1:
+                    message.type = reader.string();
                     break;
                 case /* string content */ 2:
                     message.content = reader.string();
@@ -135,6 +207,24 @@ class TextResponseBlock$Type extends MessageType<TextResponseBlock> {
                     break;
                 case /* repeated chatbot.QuickReply quickReplies */ 4:
                     message.quickReplies.push(QuickReply.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                case /* string ToComponentType */ 5:
+                    message.toComponentType = reader.string();
+                    break;
+                case /* string ToComponentId */ 6:
+                    message.toComponentId = reader.string();
+                    break;
+                case /* int32 StoryId */ 7:
+                    message.storyId = reader.int32();
+                    break;
+                case /* string QuickReplyId */ 8:
+                    message.quickReplyId = reader.string();
+                    break;
+                case /* int32 BotId */ 9:
+                    message.botId = reader.int32();
+                    break;
+                case /* string id */ 10:
+                    message.id = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -148,9 +238,9 @@ class TextResponseBlock$Type extends MessageType<TextResponseBlock> {
         return message;
     }
     internalBinaryWrite(message: TextResponseBlock, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* chatbot.BaseBlock base = 1; */
-        if (message.base)
-            BaseBlock.internalBinaryWrite(message.base, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* string type = 1; */
+        if (message.type !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.type);
         /* string content = 2; */
         if (message.content !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.content);
@@ -160,6 +250,24 @@ class TextResponseBlock$Type extends MessageType<TextResponseBlock> {
         /* repeated chatbot.QuickReply quickReplies = 4; */
         for (let i = 0; i < message.quickReplies.length; i++)
             QuickReply.internalBinaryWrite(message.quickReplies[i], writer.tag(4, WireType.LengthDelimited).fork(), options).join();
+        /* string ToComponentType = 5; */
+        if (message.toComponentType !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.toComponentType);
+        /* string ToComponentId = 6; */
+        if (message.toComponentId !== "")
+            writer.tag(6, WireType.LengthDelimited).string(message.toComponentId);
+        /* int32 StoryId = 7; */
+        if (message.storyId !== 0)
+            writer.tag(7, WireType.Varint).int32(message.storyId);
+        /* string QuickReplyId = 8; */
+        if (message.quickReplyId !== "")
+            writer.tag(8, WireType.LengthDelimited).string(message.quickReplyId);
+        /* int32 BotId = 9; */
+        if (message.botId !== 0)
+            writer.tag(9, WireType.Varint).int32(message.botId);
+        /* string id = 10; */
+        if (message.id !== "")
+            writer.tag(10, WireType.LengthDelimited).string(message.id);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

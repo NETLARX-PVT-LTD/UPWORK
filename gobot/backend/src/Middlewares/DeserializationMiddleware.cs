@@ -23,10 +23,10 @@ namespace Netlarx.Products.Gobot.Middlewares
         private readonly ILogger<DeserializationMiddleware> _logger;
 
         // Registry of endpoint paths → Proto types
-        private static readonly Dictionary<string, Type> ProtoMap = new()
+        private static readonly Dictionary<string, Type> ProtoMap = new(StringComparer.OrdinalIgnoreCase)
         {
             { "/api/components/AddUserInputKeyword", typeof(UserInputBlock) },
-            { "/api/story/SaveStorytoDbBlock", typeof(StorySessionDataBlock) },
+            { "/api/story/SaveStoryToDbBlock", typeof(StorySessionDataBlock) },
             { "/api/bots/{botId}/stories", typeof(StoryBlock) },
             { "/api/story/SaveStoryToDb", typeof(StorySessionData) },
             { "/api/components/AddUserInputPhrase", typeof(UserInputBlock) },

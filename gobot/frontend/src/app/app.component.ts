@@ -9,7 +9,6 @@ import { Subject } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { HttpClientModule } from '@angular/common/http';
 import { ClearDataComponent } from './settings/clear-data/clear-data.component';
 import { ClearDataResponse } from './shared/services/data.service';
 import { FormsModule } from '@angular/forms';
@@ -22,7 +21,7 @@ import { FormsModule } from '@angular/forms';
     RouterOutlet,
     MatIconModule,
     MatButtonModule,
-    MatTooltipModule,ClearDataComponent, HttpClientModule,
+    MatTooltipModule,ClearDataComponent,
     FormsModule
   ],
   templateUrl: './app.component.html',

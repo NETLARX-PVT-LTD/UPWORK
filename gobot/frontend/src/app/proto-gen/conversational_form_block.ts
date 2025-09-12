@@ -11,62 +11,37 @@ import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 /**
- * @generated from protobuf message chatbot.FormField
+ * @generated from protobuf message chatbot.FormFieldd
  */
-export interface FormField {
+export interface FormFieldd {
     /**
-     * @generated from protobuf field: string name = 1
+     * @generated from protobuf field: int32 formFieldId = 1
+     */
+    formFieldId: number;
+    /**
+     * @generated from protobuf field: string name = 2
      */
     name: string;
     /**
-     * @generated from protobuf field: string type = 2
+     * @generated from protobuf field: string type = 3
      */
     type: string;
     /**
-     * @generated from protobuf field: bool required = 3
+     * @generated from protobuf field: bool required = 4
      */
     required: boolean;
     /**
-     * @generated from protobuf field: string promptPhrase = 4
+     * @generated from protobuf field: string promptPhrase = 5
      */
     promptPhrase: string;
     /**
-     * @generated from protobuf field: repeated string options = 5
+     * @generated from protobuf field: repeated string options = 6
      */
     options: string[];
     /**
-     * @generated from protobuf field: string optionsText = 6
+     * @generated from protobuf field: string optionsText = 7
      */
     optionsText: string;
-    /**
-     * @generated from protobuf field: chatbot.FormField.Validation validation = 7
-     */
-    validation?: FormField_Validation;
-}
-/**
- * @generated from protobuf message chatbot.FormField.Validation
- */
-export interface FormField_Validation {
-    /**
-     * @generated from protobuf field: int32 minLength = 1
-     */
-    minLength: number;
-    /**
-     * @generated from protobuf field: int32 maxLength = 2
-     */
-    maxLength: number;
-    /**
-     * @generated from protobuf field: string pattern = 3
-     */
-    pattern: string;
-    /**
-     * @generated from protobuf field: double min = 4
-     */
-    min: number;
-    /**
-     * @generated from protobuf field: double max = 5
-     */
-    max: number;
 }
 /**
  * @generated from protobuf message chatbot.ConversationalFormBlock
@@ -75,7 +50,7 @@ export interface ConversationalFormBlock {
     /**
      * @generated from protobuf field: string type = 1
      */
-    type: string; // "conversationalForm"
+    type: string; // always "conversationalForm"
     /**
      * @generated from protobuf field: string formId = 2
      */
@@ -97,9 +72,9 @@ export interface ConversationalFormBlock {
      */
     notificationEmail: string;
     /**
-     * @generated from protobuf field: repeated chatbot.FormField formFields = 7
+     * @generated from protobuf field: repeated chatbot.FormFieldd formFields = 7
      */
-    formFields: FormField[];
+    formFields: FormFieldd[];
     /**
      * @generated from protobuf field: bool showAsInlineForm = 8
      */
@@ -129,49 +104,60 @@ export interface ConversationalFormBlock {
      */
     successResponseType: string; // "textMessage" | "story"
     /**
-     * @generated from protobuf field: string successRedirectStoryId = 15
-     */
-    successRedirectStoryId: string;
-    /**
-     * @generated from protobuf field: bool validateEmail = 16
+     * string successRedirectStoryId = 15;
+     *
+     * @generated from protobuf field: bool validateEmail = 15
      */
     validateEmail: boolean;
     /**
-     * @generated from protobuf field: bool validatePhone = 17
+     * @generated from protobuf field: bool validatePhone = 16
      */
     validatePhone: boolean;
     /**
-     * @generated from protobuf field: bool spamProtection = 18
+     * @generated from protobuf field: bool spamProtection = 17
      */
     spamProtection: boolean;
     /**
-     * @generated from protobuf field: bool requireCompletion = 19
+     * @generated from protobuf field: bool requireCompletion = 18
      */
     requireCompletion: boolean;
     /**
-     * @generated from protobuf field: string successMessage = 20
+     * @generated from protobuf field: string successMessage = 19
      */
     successMessage: string;
     /**
-     * @generated from protobuf field: string redirectUrl = 21
+     * @generated from protobuf field: string redirectUrl = 20
      */
     redirectUrl: string;
+    /**
+     * @generated from protobuf field: string ToComponentType = 21
+     */
+    toComponentType: string;
+    /**
+     * @generated from protobuf field: string ToComponentId = 22
+     */
+    toComponentId: string;
+    /**
+     * @generated from protobuf field: int32 botId = 23
+     */
+    botId: number;
 }
 // @generated message type with reflection information, may provide speed optimized methods
-class FormField$Type extends MessageType<FormField> {
+class FormFieldd$Type extends MessageType<FormFieldd> {
     constructor() {
-        super("chatbot.FormField", [
-            { no: 1, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "required", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 4, name: "promptPhrase", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "options", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
-            { no: 6, name: "optionsText", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 7, name: "validation", kind: "message", T: () => FormField_Validation }
+        super("chatbot.FormFieldd", [
+            { no: 1, name: "formFieldId", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "required", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 5, name: "promptPhrase", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 6, name: "options", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "optionsText", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<FormField>): FormField {
+    create(value?: PartialMessage<FormFieldd>): FormFieldd {
         const message = globalThis.Object.create((this.messagePrototype!));
+        message.formFieldId = 0;
         message.name = "";
         message.type = "";
         message.required = false;
@@ -179,35 +165,35 @@ class FormField$Type extends MessageType<FormField> {
         message.options = [];
         message.optionsText = "";
         if (value !== undefined)
-            reflectionMergePartial<FormField>(this, message, value);
+            reflectionMergePartial<FormFieldd>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: FormField): FormField {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: FormFieldd): FormFieldd {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string name */ 1:
+                case /* int32 formFieldId */ 1:
+                    message.formFieldId = reader.int32();
+                    break;
+                case /* string name */ 2:
                     message.name = reader.string();
                     break;
-                case /* string type */ 2:
+                case /* string type */ 3:
                     message.type = reader.string();
                     break;
-                case /* bool required */ 3:
+                case /* bool required */ 4:
                     message.required = reader.bool();
                     break;
-                case /* string promptPhrase */ 4:
+                case /* string promptPhrase */ 5:
                     message.promptPhrase = reader.string();
                     break;
-                case /* repeated string options */ 5:
+                case /* repeated string options */ 6:
                     message.options.push(reader.string());
                     break;
-                case /* string optionsText */ 6:
+                case /* string optionsText */ 7:
                     message.optionsText = reader.string();
                     break;
-                case /* chatbot.FormField.Validation validation */ 7:
-                    message.validation = FormField_Validation.internalBinaryRead(reader, reader.uint32(), options, message.validation);
-                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -219,28 +205,28 @@ class FormField$Type extends MessageType<FormField> {
         }
         return message;
     }
-    internalBinaryWrite(message: FormField, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string name = 1; */
+    internalBinaryWrite(message: FormFieldd, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int32 formFieldId = 1; */
+        if (message.formFieldId !== 0)
+            writer.tag(1, WireType.Varint).int32(message.formFieldId);
+        /* string name = 2; */
         if (message.name !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.name);
-        /* string type = 2; */
+            writer.tag(2, WireType.LengthDelimited).string(message.name);
+        /* string type = 3; */
         if (message.type !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.type);
-        /* bool required = 3; */
+            writer.tag(3, WireType.LengthDelimited).string(message.type);
+        /* bool required = 4; */
         if (message.required !== false)
-            writer.tag(3, WireType.Varint).bool(message.required);
-        /* string promptPhrase = 4; */
+            writer.tag(4, WireType.Varint).bool(message.required);
+        /* string promptPhrase = 5; */
         if (message.promptPhrase !== "")
-            writer.tag(4, WireType.LengthDelimited).string(message.promptPhrase);
-        /* repeated string options = 5; */
+            writer.tag(5, WireType.LengthDelimited).string(message.promptPhrase);
+        /* repeated string options = 6; */
         for (let i = 0; i < message.options.length; i++)
-            writer.tag(5, WireType.LengthDelimited).string(message.options[i]);
-        /* string optionsText = 6; */
+            writer.tag(6, WireType.LengthDelimited).string(message.options[i]);
+        /* string optionsText = 7; */
         if (message.optionsText !== "")
-            writer.tag(6, WireType.LengthDelimited).string(message.optionsText);
-        /* chatbot.FormField.Validation validation = 7; */
-        if (message.validation)
-            FormField_Validation.internalBinaryWrite(message.validation, writer.tag(7, WireType.LengthDelimited).fork(), options).join();
+            writer.tag(7, WireType.LengthDelimited).string(message.optionsText);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -248,88 +234,9 @@ class FormField$Type extends MessageType<FormField> {
     }
 }
 /**
- * @generated MessageType for protobuf message chatbot.FormField
+ * @generated MessageType for protobuf message chatbot.FormFieldd
  */
-export const FormField = new FormField$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class FormField_Validation$Type extends MessageType<FormField_Validation> {
-    constructor() {
-        super("chatbot.FormField.Validation", [
-            { no: 1, name: "minLength", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
-            { no: 2, name: "maxLength", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
-            { no: 3, name: "pattern", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 4, name: "min", kind: "scalar", T: 1 /*ScalarType.DOUBLE*/ },
-            { no: 5, name: "max", kind: "scalar", T: 1 /*ScalarType.DOUBLE*/ }
-        ]);
-    }
-    create(value?: PartialMessage<FormField_Validation>): FormField_Validation {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.minLength = 0;
-        message.maxLength = 0;
-        message.pattern = "";
-        message.min = 0;
-        message.max = 0;
-        if (value !== undefined)
-            reflectionMergePartial<FormField_Validation>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: FormField_Validation): FormField_Validation {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* int32 minLength */ 1:
-                    message.minLength = reader.int32();
-                    break;
-                case /* int32 maxLength */ 2:
-                    message.maxLength = reader.int32();
-                    break;
-                case /* string pattern */ 3:
-                    message.pattern = reader.string();
-                    break;
-                case /* double min */ 4:
-                    message.min = reader.double();
-                    break;
-                case /* double max */ 5:
-                    message.max = reader.double();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: FormField_Validation, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* int32 minLength = 1; */
-        if (message.minLength !== 0)
-            writer.tag(1, WireType.Varint).int32(message.minLength);
-        /* int32 maxLength = 2; */
-        if (message.maxLength !== 0)
-            writer.tag(2, WireType.Varint).int32(message.maxLength);
-        /* string pattern = 3; */
-        if (message.pattern !== "")
-            writer.tag(3, WireType.LengthDelimited).string(message.pattern);
-        /* double min = 4; */
-        if (message.min !== 0)
-            writer.tag(4, WireType.Bit64).double(message.min);
-        /* double max = 5; */
-        if (message.max !== 0)
-            writer.tag(5, WireType.Bit64).double(message.max);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message chatbot.FormField.Validation
- */
-export const FormField_Validation = new FormField_Validation$Type();
+export const FormFieldd = new FormFieldd$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class ConversationalFormBlock$Type extends MessageType<ConversationalFormBlock> {
     constructor() {
@@ -340,7 +247,7 @@ class ConversationalFormBlock$Type extends MessageType<ConversationalFormBlock> 
             { no: 4, name: "webhookUrl", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "sendEmailNotification", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 6, name: "notificationEmail", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 7, name: "formFields", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => FormField },
+            { no: 7, name: "formFields", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => FormFieldd },
             { no: 8, name: "showAsInlineForm", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 9, name: "renderFormResponses", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 10, name: "allowMultipleSubmission", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
@@ -348,13 +255,15 @@ class ConversationalFormBlock$Type extends MessageType<ConversationalFormBlock> 
             { no: 12, name: "allowExitForm", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 13, name: "exitFormMessage", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 14, name: "successResponseType", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 15, name: "successRedirectStoryId", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 16, name: "validateEmail", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 17, name: "validatePhone", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 18, name: "spamProtection", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 19, name: "requireCompletion", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 20, name: "successMessage", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 21, name: "redirectUrl", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 15, name: "validateEmail", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 16, name: "validatePhone", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 17, name: "spamProtection", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 18, name: "requireCompletion", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 19, name: "successMessage", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 20, name: "redirectUrl", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 21, name: "ToComponentType", kind: "scalar", jsonName: "ToComponentType", T: 9 /*ScalarType.STRING*/ },
+            { no: 22, name: "ToComponentId", kind: "scalar", jsonName: "ToComponentId", T: 9 /*ScalarType.STRING*/ },
+            { no: 23, name: "botId", kind: "scalar", T: 5 /*ScalarType.INT32*/ }
         ]);
     }
     create(value?: PartialMessage<ConversationalFormBlock>): ConversationalFormBlock {
@@ -373,13 +282,15 @@ class ConversationalFormBlock$Type extends MessageType<ConversationalFormBlock> 
         message.allowExitForm = false;
         message.exitFormMessage = "";
         message.successResponseType = "";
-        message.successRedirectStoryId = "";
         message.validateEmail = false;
         message.validatePhone = false;
         message.spamProtection = false;
         message.requireCompletion = false;
         message.successMessage = "";
         message.redirectUrl = "";
+        message.toComponentType = "";
+        message.toComponentId = "";
+        message.botId = 0;
         if (value !== undefined)
             reflectionMergePartial<ConversationalFormBlock>(this, message, value);
         return message;
@@ -407,8 +318,8 @@ class ConversationalFormBlock$Type extends MessageType<ConversationalFormBlock> 
                 case /* string notificationEmail */ 6:
                     message.notificationEmail = reader.string();
                     break;
-                case /* repeated chatbot.FormField formFields */ 7:
-                    message.formFields.push(FormField.internalBinaryRead(reader, reader.uint32(), options));
+                case /* repeated chatbot.FormFieldd formFields */ 7:
+                    message.formFields.push(FormFieldd.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 case /* bool showAsInlineForm */ 8:
                     message.showAsInlineForm = reader.bool();
@@ -431,26 +342,32 @@ class ConversationalFormBlock$Type extends MessageType<ConversationalFormBlock> 
                 case /* string successResponseType */ 14:
                     message.successResponseType = reader.string();
                     break;
-                case /* string successRedirectStoryId */ 15:
-                    message.successRedirectStoryId = reader.string();
-                    break;
-                case /* bool validateEmail */ 16:
+                case /* bool validateEmail */ 15:
                     message.validateEmail = reader.bool();
                     break;
-                case /* bool validatePhone */ 17:
+                case /* bool validatePhone */ 16:
                     message.validatePhone = reader.bool();
                     break;
-                case /* bool spamProtection */ 18:
+                case /* bool spamProtection */ 17:
                     message.spamProtection = reader.bool();
                     break;
-                case /* bool requireCompletion */ 19:
+                case /* bool requireCompletion */ 18:
                     message.requireCompletion = reader.bool();
                     break;
-                case /* string successMessage */ 20:
+                case /* string successMessage */ 19:
                     message.successMessage = reader.string();
                     break;
-                case /* string redirectUrl */ 21:
+                case /* string redirectUrl */ 20:
                     message.redirectUrl = reader.string();
+                    break;
+                case /* string ToComponentType */ 21:
+                    message.toComponentType = reader.string();
+                    break;
+                case /* string ToComponentId */ 22:
+                    message.toComponentId = reader.string();
+                    break;
+                case /* int32 botId */ 23:
+                    message.botId = reader.int32();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -482,9 +399,9 @@ class ConversationalFormBlock$Type extends MessageType<ConversationalFormBlock> 
         /* string notificationEmail = 6; */
         if (message.notificationEmail !== "")
             writer.tag(6, WireType.LengthDelimited).string(message.notificationEmail);
-        /* repeated chatbot.FormField formFields = 7; */
+        /* repeated chatbot.FormFieldd formFields = 7; */
         for (let i = 0; i < message.formFields.length; i++)
-            FormField.internalBinaryWrite(message.formFields[i], writer.tag(7, WireType.LengthDelimited).fork(), options).join();
+            FormFieldd.internalBinaryWrite(message.formFields[i], writer.tag(7, WireType.LengthDelimited).fork(), options).join();
         /* bool showAsInlineForm = 8; */
         if (message.showAsInlineForm !== false)
             writer.tag(8, WireType.Varint).bool(message.showAsInlineForm);
@@ -506,27 +423,33 @@ class ConversationalFormBlock$Type extends MessageType<ConversationalFormBlock> 
         /* string successResponseType = 14; */
         if (message.successResponseType !== "")
             writer.tag(14, WireType.LengthDelimited).string(message.successResponseType);
-        /* string successRedirectStoryId = 15; */
-        if (message.successRedirectStoryId !== "")
-            writer.tag(15, WireType.LengthDelimited).string(message.successRedirectStoryId);
-        /* bool validateEmail = 16; */
+        /* bool validateEmail = 15; */
         if (message.validateEmail !== false)
-            writer.tag(16, WireType.Varint).bool(message.validateEmail);
-        /* bool validatePhone = 17; */
+            writer.tag(15, WireType.Varint).bool(message.validateEmail);
+        /* bool validatePhone = 16; */
         if (message.validatePhone !== false)
-            writer.tag(17, WireType.Varint).bool(message.validatePhone);
-        /* bool spamProtection = 18; */
+            writer.tag(16, WireType.Varint).bool(message.validatePhone);
+        /* bool spamProtection = 17; */
         if (message.spamProtection !== false)
-            writer.tag(18, WireType.Varint).bool(message.spamProtection);
-        /* bool requireCompletion = 19; */
+            writer.tag(17, WireType.Varint).bool(message.spamProtection);
+        /* bool requireCompletion = 18; */
         if (message.requireCompletion !== false)
-            writer.tag(19, WireType.Varint).bool(message.requireCompletion);
-        /* string successMessage = 20; */
+            writer.tag(18, WireType.Varint).bool(message.requireCompletion);
+        /* string successMessage = 19; */
         if (message.successMessage !== "")
-            writer.tag(20, WireType.LengthDelimited).string(message.successMessage);
-        /* string redirectUrl = 21; */
+            writer.tag(19, WireType.LengthDelimited).string(message.successMessage);
+        /* string redirectUrl = 20; */
         if (message.redirectUrl !== "")
-            writer.tag(21, WireType.LengthDelimited).string(message.redirectUrl);
+            writer.tag(20, WireType.LengthDelimited).string(message.redirectUrl);
+        /* string ToComponentType = 21; */
+        if (message.toComponentType !== "")
+            writer.tag(21, WireType.LengthDelimited).string(message.toComponentType);
+        /* string ToComponentId = 22; */
+        if (message.toComponentId !== "")
+            writer.tag(22, WireType.LengthDelimited).string(message.toComponentId);
+        /* int32 botId = 23; */
+        if (message.botId !== 0)
+            writer.tag(23, WireType.Varint).int32(message.botId);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

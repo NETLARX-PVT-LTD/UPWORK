@@ -272,8 +272,16 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddUserInputAnything")]
-        public IActionResult AddUserInputAnything(int storyId, [FromBody] UserInputBlock block)
+        [MiddlewareFilter(typeof(ProtoPipeline))]
+        [Consumes("application/x-protobuf")]
+        public IActionResult AddUserInputAnything(int storyId)
         {
+            if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not UserInputBlock block)
+            {
+                _logger.LogWarning("Protobuf body missing or invalid");
+                return BadRequest("Protobuf body missing or invalid");
+            }
+
             var model = new Models.UserInputTypeAnything
             {
                 StoryId = storyId,
@@ -300,8 +308,17 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddTypingDelay")]
-        public IActionResult AddTypingDelay(int storyId, [FromBody] TypingDelayBlock typingDelay)
+        [MiddlewareFilter(typeof(ProtoPipeline))]
+        [Consumes("application/x-protobuf")]
+        public IActionResult AddTypingDelay(int storyId)
         {
+            //Retrieve the deserialized Protobuf object from middleware
+            if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not TypingDelayBlock typingDelay)
+            {
+                _logger.LogWarning("Protobuf body missing or invalid");
+                return BadRequest("Protobuf body missing or invalid");
+            }
+
             var model = new Models.TypingDelay
             {
                 DelaySeconds = typingDelay.DelaySeconds,
@@ -313,8 +330,17 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddLinkStory")]
-        public IActionResult AddLinkStory(int storyId, [FromBody] LinkStoryBlock block)
+        [MiddlewareFilter(typeof(ProtoPipeline))]
+        [Consumes("application/x-protobuf")]
+        public IActionResult AddLinkStory(int storyId)
         {
+            //Retrieve the deserialized Protobuf object from middleware
+            if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not LinkStoryBlock block)
+            {
+                _logger.LogWarning("Protobuf body missing or invalid");
+                return BadRequest("Protobuf body missing or invalid");
+            }
+
             var model = new Models.LinkStory
             {
                 StoryId = storyId,
@@ -327,8 +353,17 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddJsonApi")]
-        public IActionResult AddJsonApi(int storyId, [FromBody] JsonApiBlock block)
+        [MiddlewareFilter(typeof(ProtoPipeline))]
+        [Consumes("application/x-protobuf")]
+        public IActionResult AddJsonApi(int storyId)
         {
+            //Retrieve the deserialized Protobuf object from middleware
+            if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not JsonApiBlock block)
+            {
+                _logger.LogWarning("Protobuf body missing or invalid");
+                return BadRequest("Protobuf body missing or invalid");
+            }
+
             var model = new Models.JsonAPI
             {
                 ApiEndpoint = block.ApiEndpoint,
@@ -347,6 +382,8 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddConversationalform")]
+        [MiddlewareFilter(typeof(ProtoPipeline))]
+        [Consumes("application/x-protobuf")]
         public IActionResult AddConversationalForm(int storyId, [FromBody] ConversationalFormBlock block)
         {
             var model = new ConversationalForm

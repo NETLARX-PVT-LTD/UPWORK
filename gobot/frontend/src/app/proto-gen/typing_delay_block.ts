@@ -22,19 +22,37 @@ export interface TypingDelayBlock {
      * @generated from protobuf field: double delaySeconds = 2
      */
     delaySeconds: number;
+    /**
+     * @generated from protobuf field: string ToComponentType = 3
+     */
+    toComponentType: string;
+    /**
+     * @generated from protobuf field: string ToComponentId = 4
+     */
+    toComponentId: string;
+    /**
+     * @generated from protobuf field: string id = 5
+     */
+    id: string;
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class TypingDelayBlock$Type extends MessageType<TypingDelayBlock> {
     constructor() {
         super("chatbot.TypingDelayBlock", [
             { no: 1, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "delaySeconds", kind: "scalar", T: 1 /*ScalarType.DOUBLE*/ }
+            { no: 2, name: "delaySeconds", kind: "scalar", T: 1 /*ScalarType.DOUBLE*/ },
+            { no: 3, name: "ToComponentType", kind: "scalar", jsonName: "ToComponentType", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "ToComponentId", kind: "scalar", jsonName: "ToComponentId", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<TypingDelayBlock>): TypingDelayBlock {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.type = "";
         message.delaySeconds = 0;
+        message.toComponentType = "";
+        message.toComponentId = "";
+        message.id = "";
         if (value !== undefined)
             reflectionMergePartial<TypingDelayBlock>(this, message, value);
         return message;
@@ -49,6 +67,15 @@ class TypingDelayBlock$Type extends MessageType<TypingDelayBlock> {
                     break;
                 case /* double delaySeconds */ 2:
                     message.delaySeconds = reader.double();
+                    break;
+                case /* string ToComponentType */ 3:
+                    message.toComponentType = reader.string();
+                    break;
+                case /* string ToComponentId */ 4:
+                    message.toComponentId = reader.string();
+                    break;
+                case /* string id */ 5:
+                    message.id = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -68,6 +95,15 @@ class TypingDelayBlock$Type extends MessageType<TypingDelayBlock> {
         /* double delaySeconds = 2; */
         if (message.delaySeconds !== 0)
             writer.tag(2, WireType.Bit64).double(message.delaySeconds);
+        /* string ToComponentType = 3; */
+        if (message.toComponentType !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.toComponentType);
+        /* string ToComponentId = 4; */
+        if (message.toComponentId !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.toComponentId);
+        /* string id = 5; */
+        if (message.id !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.id);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

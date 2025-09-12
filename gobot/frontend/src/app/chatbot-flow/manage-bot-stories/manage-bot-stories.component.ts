@@ -11,6 +11,8 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { StoryService } from '../services/api.service';
+import { StoryBlock } from '../../proto-gen/story_block';
 
 export interface Story {
   id: string;
@@ -23,6 +25,18 @@ export interface Story {
   isInConnedResponses?: boolean; // New property to track if story is in conned responses
   isDeactivated?: boolean; // New property to track if story is deactivated
 }
+
+// export interface Story : StoryBlock {
+//   id: number;
+//   name: string;             
+//   createdDate: string;
+//   rootBlockConnectionId: string; // use string to hold Guid
+//   botId: number;
+//   // keywords?: string[];
+//   // category?: 'get-started' | 'default' | 'normal';
+//   // isInConnedResponses?: boolean; // New property to track if story is in conned responses
+//   // isDeactivated?: boolean; // New property to track if story is deactivated
+// }
 
 @Component({
   selector: 'app-manage-bot-stories',
@@ -88,12 +102,32 @@ export class ManageBotStoriesComponent implements OnInit {
   constructor(
     private router: Router, 
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private storyService: StoryService
   ) {}
 
   ngOnInit(): void {
     this.loadStoriesFromStorage();
     this.filterStories();
+    this.loadStoriesFromApi();
+  }
+  
+  private loadStoriesFromApi(): void {
+    this.storyService.getAllStories().subscribe({
+      next: (data) => {
+        this.stories = data.map(story => ({
+          ...story,
+          isInConnedResponses: story.isInConnedResponses || false,
+          isDeactivated: story.isDeactivated || false,
+          category: story.category || 'normal'
+        }));
+        this.filterStories();
+      },
+      error: (err) => {
+        console.error('Error fetching stories:', err);
+        this.snackBar.open('Failed to load stories from server', 'Close', { duration: 3000 });
+      }
+    });
   }
 
   private loadStoriesFromStorage(): void {
@@ -159,17 +193,60 @@ export class ManageBotStoriesComponent implements OnInit {
     this.filteredStories = filtered;
   }
 
-  editStory(story: Story): void {
-    this.router.navigate(['/create-story'], { 
-      queryParams: { storyId: story.id } 
+  // editStory(story: Story): void {
+  //   this.router.navigate(['/create-story'], { 
+  //     queryParams: { storyId: story.id } 
+  //   });
+  // }
+
+    viewStorySchema(story: Story): void {
+    this.storyService.getStorySchemaById(+story.id).subscribe({
+      next: (response) => {
+        console.log("Story schema response:", response);
+
+        this.snackBar.open(`Schema loaded for "${story.name}"`, 'Close', { duration: 3000 });
+
+        // ✅ Navigate with state
+        this.router.navigate(['/create-story'], {
+          state: {
+            storyId: story.id,
+            storyName: story.name,
+            components: response.components
+          }
+        });
+      },
+      error: (err) => {
+        console.error("Error fetching story schema:", err);
+        this.snackBar.open("Failed to fetch story schema", "Close", { duration: 3000 });
+      }
     });
   }
 
+
+
+  // deleteStory(story: Story): void {
+  //   if (confirm(`Are you sure you want to delete "${story.name}"?`)) {
+  //     this.stories = this.stories.filter(s => s.id !== story.id);
+  //     this.saveStoriesToStorage();
+  //     this.filterStories();
+  //   }
+  // }
+  
   deleteStory(story: Story): void {
     if (confirm(`Are you sure you want to delete "${story.name}"?`)) {
-      this.stories = this.stories.filter(s => s.id !== story.id);
-      this.saveStoriesToStorage();
-      this.filterStories();
+      this.storyService.deleteStory(+story.id).subscribe({
+        next: () => {
+          // Remove locally
+          this.stories = this.stories.filter(s => s.id !== story.id);
+          this.saveStoriesToStorage();
+          this.filterStories();
+          this.showSuccessMessage('Story deleted successfully.');
+        },
+        error: (err) => {
+          console.error('Error deleting story:', err);
+          this.snackBar.open('Failed to delete story from server', 'Close', { duration: 3000 });
+        }
+      });
     }
   }
 

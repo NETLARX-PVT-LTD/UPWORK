@@ -36,6 +36,7 @@ namespace Netlarx.Products.Gobot.Interface
         DbSet<JsonAPI> JsonAPI { get; set; }
 
         DbSet<TextResponse> TextResponse { get; set; }
+        DbSet<QuickReplyModel> QuickReplies { get; set; }
 
         DbSet<Media> Medias { get; set; }
 
@@ -43,6 +44,10 @@ namespace Netlarx.Products.Gobot.Interface
 
         DbSet<FormField> FormFields { get; set; }
         DbSet<FormSubmission> FormSubmissions { get; set; }
+
+        DbSet<ApiHeader> ApiHeaders { get; set; }
+        DbSet<ImageSlideblock> ImageSlideblocks { get; set; }
+        DbSet<Buttonblock> Buttonblocks { get; set; }
 
         void addStory(Stories model);
 

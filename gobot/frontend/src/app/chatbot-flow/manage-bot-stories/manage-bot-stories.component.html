@@ -77,7 +77,7 @@
           </div>
 
           <div class="story-actions">
-            <button mat-icon-button class="edit-btn" (click)="editStory(story)">
+            <button mat-icon-button class="edit-btn" (click)="viewStorySchema(story)">
               <mat-icon>edit</mat-icon>
             </button>
             <button mat-icon-button class="delete-btn" (click)="deleteStory(story)">
@@ -89,66 +89,66 @@
 
             <!-- Custom Menu Card -->
             <mat-menu #customStoryMenu="matMenu" class="custom-story-menu">
-    <div class="custom-menu-card">
-      <button mat-menu-item *ngIf="story.isDeactivated" (click)="activateStory(story)">
-        <mat-icon>play_circle</mat-icon>
-        Activate Story
-      </button>
+            <div class="custom-menu-card">
+              <button mat-menu-item *ngIf="story.isDeactivated" (click)="activateStory(story)">
+                <mat-icon>play_circle</mat-icon>
+                Activate Story
+              </button>
 
-      <ng-container *ngIf="!story.isDeactivated">
-        <!-- <button mat-menu-item (click)="editStory(story)">
-          <mat-icon>edit</mat-icon>
-          Edit Story
-        </button>
-        <button mat-menu-item (click)="duplicateStory(story)">
-          <mat-icon>content_copy</mat-icon>
-          Duplicate Story
-        </button>
-        <button mat-menu-item (click)="exportStory(story)">
-          <mat-icon>cloud_download</mat-icon>
-          Export Story
-        </button> -->
-        <button mat-menu-item (click)="copyPayload(story)">
-          <mat-icon>content_copy</mat-icon>
-          Copy Payload
-        </button>
-        <button mat-menu-item (click)="cloneStory(story)">
-          <mat-icon>file_copy</mat-icon>
-          Clone Story
-        </button>
-        <button mat-menu-item (click)="deactivateStory(story)">
-          <mat-icon>pause_circle</mat-icon>
-          Deactivate Story
-        </button>
-        
-        <button mat-menu-item *ngIf="!story.isInConnedResponses" (click)="addToConnedResponses(story)">
-          <mat-icon>add_circle</mat-icon>
-          Add story to Conned Responses
-        </button>
-        <button mat-menu-item *ngIf="story.isInConnedResponses" (click)="removeFromConnedResponses(story)">
-          <mat-icon>remove_circle</mat-icon>
-          Remove story from Conned Responses
-        </button>
-        
-        <button mat-menu-item *ngIf="story.category !== 'get-started'" (click)="setAsGetStarted(story)">
-          <mat-icon>play_arrow</mat-icon>
-          Set as Get Started
-        </button>
-        <button mat-menu-item *ngIf="story.category === 'get-started'" (click)="removeFromGetStarted(story)">
-          <mat-icon>remove_circle</mat-icon>
-          Remove From Get Started
-        </button>
-        
-        <button mat-menu-item *ngIf="story.category !== 'default'" (click)="setAsDefaultMessage(story)">
-          <mat-icon>settings</mat-icon>
-          Set as Default Message
-        </button>
-        <button mat-menu-item *ngIf="story.category === 'default'" (click)="removeFromDefaultMessage(story)">
-          <mat-icon>remove_circle</mat-icon>
-          Remove From Default Message
-        </button>
-      </ng-container>
-    </div>
+              <ng-container *ngIf="!story.isDeactivated">
+                <!-- <button mat-menu-item (click)="editStory(story)">
+                  <mat-icon>edit</mat-icon>
+                  Edit Story
+                </button>
+                <button mat-menu-item (click)="duplicateStory(story)">
+                  <mat-icon>content_copy</mat-icon>
+                  Duplicate Story
+                </button>
+                <button mat-menu-item (click)="exportStory(story)">
+                  <mat-icon>cloud_download</mat-icon>
+                  Export Story
+                </button> -->
+                <button mat-menu-item (click)="copyPayload(story)">
+                  <mat-icon>content_copy</mat-icon>
+                  Copy Payload
+                </button>
+                <button mat-menu-item (click)="cloneStory(story)">
+                  <mat-icon>file_copy</mat-icon>
+                  Clone Story
+                </button>
+                <button mat-menu-item (click)="deactivateStory(story)">
+                  <mat-icon>pause_circle</mat-icon>
+                  Deactivate Story
+                </button>
+                
+                <button mat-menu-item *ngIf="!story.isInConnedResponses" (click)="addToConnedResponses(story)">
+                  <mat-icon>add_circle</mat-icon>
+                  Add story to Conned Responses
+                </button>
+                <button mat-menu-item *ngIf="story.isInConnedResponses" (click)="removeFromConnedResponses(story)">
+                  <mat-icon>remove_circle</mat-icon>
+                  Remove story from Conned Responses
+                </button>
+                
+                <button mat-menu-item *ngIf="story.category !== 'get-started'" (click)="setAsGetStarted(story)">
+                  <mat-icon>play_arrow</mat-icon>
+                  Set as Get Started
+                </button>
+                <button mat-menu-item *ngIf="story.category === 'get-started'" (click)="removeFromGetStarted(story)">
+                  <mat-icon>remove_circle</mat-icon>
+                  Remove From Get Started
+                </button>
+                
+                <button mat-menu-item *ngIf="story.category !== 'default'" (click)="setAsDefaultMessage(story)">
+                  <mat-icon>settings</mat-icon>
+                  Set as Default Message
+                </button>
+                <button mat-menu-item *ngIf="story.category === 'default'" (click)="removeFromDefaultMessage(story)">
+                  <mat-icon>remove_circle</mat-icon>
+                  Remove From Default Message
+                </button>
+              </ng-container>
+            </div>
   </mat-menu>
 
             <!-- Original Menu for Duplicate and Export -->

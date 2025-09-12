@@ -27,6 +27,14 @@ export interface ImageSlide {
      * @generated from protobuf field: string description = 3
      */
     description: string;
+    /**
+     * @generated from protobuf field: string id = 4
+     */
+    id: string;
+    /**
+     * @generated from protobuf field: string mediaId = 5
+     */
+    mediaId: string;
 }
 /**
  * @generated from protobuf message chatbot.MediaBlock
@@ -92,27 +100,47 @@ export interface MediaBlock {
      * @generated from protobuf field: repeated chatbot.Button buttons = 15
      */
     buttons: Button[];
+    /**
+     * @generated from protobuf field: string ToComponentType = 16
+     */
+    toComponentType: string;
+    /**
+     * @generated from protobuf field: string ToComponentId = 17
+     */
+    toComponentId: string;
+    /**
+     * @generated from protobuf field: string id = 18
+     */
+    id: string;
 }
 /**
  * @generated from protobuf enum chatbot.MediaType
  */
 export enum MediaType {
     /**
-     * @generated from protobuf enum value: MEDIA_TYPE_UNSPECIFIED = 0;
+     * @generated from protobuf enum value: TEXT = 0;
      */
-    UNSPECIFIED = 0,
+    TEXT = 0,
     /**
-     * @generated from protobuf enum value: MEDIA_TYPE_TEXT = 1;
+     * @generated from protobuf enum value: IMAGE = 1;
      */
-    TEXT = 1,
+    IMAGE = 1,
     /**
-     * @generated from protobuf enum value: MEDIA_TYPE_IMAGE = 2;
+     * @generated from protobuf enum value: VIDEO = 2;
      */
-    IMAGE = 2,
+    VIDEO = 2,
     /**
-     * @generated from protobuf enum value: MEDIA_TYPE_VIDEO = 3;
+     * @generated from protobuf enum value: FILE = 3;
      */
-    VIDEO = 3
+    FILE = 3,
+    /**
+     * @generated from protobuf enum value: IMAGE_SLIDER = 4;
+     */
+    IMAGE_SLIDER = 4,
+    /**
+     * @generated from protobuf enum value: AUDIO = 5;
+     */
+    AUDIO = 5
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class ImageSlide$Type extends MessageType<ImageSlide> {
@@ -120,7 +148,9 @@ class ImageSlide$Type extends MessageType<ImageSlide> {
         super("chatbot.ImageSlide", [
             { no: 1, name: "url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "title", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 3, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "mediaId", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<ImageSlide>): ImageSlide {
@@ -128,6 +158,8 @@ class ImageSlide$Type extends MessageType<ImageSlide> {
         message.url = "";
         message.title = "";
         message.description = "";
+        message.id = "";
+        message.mediaId = "";
         if (value !== undefined)
             reflectionMergePartial<ImageSlide>(this, message, value);
         return message;
@@ -145,6 +177,12 @@ class ImageSlide$Type extends MessageType<ImageSlide> {
                     break;
                 case /* string description */ 3:
                     message.description = reader.string();
+                    break;
+                case /* string id */ 4:
+                    message.id = reader.string();
+                    break;
+                case /* string mediaId */ 5:
+                    message.mediaId = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -167,6 +205,12 @@ class ImageSlide$Type extends MessageType<ImageSlide> {
         /* string description = 3; */
         if (message.description !== "")
             writer.tag(3, WireType.LengthDelimited).string(message.description);
+        /* string id = 4; */
+        if (message.id !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.id);
+        /* string mediaId = 5; */
+        if (message.mediaId !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.mediaId);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -183,7 +227,7 @@ class MediaBlock$Type extends MessageType<MediaBlock> {
         super("chatbot.MediaBlock", [
             { no: 1, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "mediaId", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "mediaType", kind: "enum", T: () => ["chatbot.MediaType", MediaType, "MEDIA_TYPE_"] },
+            { no: 3, name: "mediaType", kind: "enum", T: () => ["chatbot.MediaType", MediaType] },
             { no: 4, name: "singleImageUrl", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "videoUrl", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 6, name: "audioUrl", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
@@ -195,7 +239,10 @@ class MediaBlock$Type extends MessageType<MediaBlock> {
             { no: 12, name: "buttonType", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 13, name: "buttonLinkedMediaId", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 14, name: "buttonUrl", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 15, name: "buttons", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Button }
+            { no: 15, name: "buttons", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Button },
+            { no: 16, name: "ToComponentType", kind: "scalar", jsonName: "ToComponentType", T: 9 /*ScalarType.STRING*/ },
+            { no: 17, name: "ToComponentId", kind: "scalar", jsonName: "ToComponentId", T: 9 /*ScalarType.STRING*/ },
+            { no: 18, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<MediaBlock>): MediaBlock {
@@ -215,6 +262,9 @@ class MediaBlock$Type extends MessageType<MediaBlock> {
         message.buttonLinkedMediaId = "";
         message.buttonUrl = "";
         message.buttons = [];
+        message.toComponentType = "";
+        message.toComponentId = "";
+        message.id = "";
         if (value !== undefined)
             reflectionMergePartial<MediaBlock>(this, message, value);
         return message;
@@ -268,6 +318,15 @@ class MediaBlock$Type extends MessageType<MediaBlock> {
                     break;
                 case /* repeated chatbot.Button buttons */ 15:
                     message.buttons.push(Button.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                case /* string ToComponentType */ 16:
+                    message.toComponentType = reader.string();
+                    break;
+                case /* string ToComponentId */ 17:
+                    message.toComponentId = reader.string();
+                    break;
+                case /* string id */ 18:
+                    message.id = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -326,6 +385,15 @@ class MediaBlock$Type extends MessageType<MediaBlock> {
         /* repeated chatbot.Button buttons = 15; */
         for (let i = 0; i < message.buttons.length; i++)
             Button.internalBinaryWrite(message.buttons[i], writer.tag(15, WireType.LengthDelimited).fork(), options).join();
+        /* string ToComponentType = 16; */
+        if (message.toComponentType !== "")
+            writer.tag(16, WireType.LengthDelimited).string(message.toComponentType);
+        /* string ToComponentId = 17; */
+        if (message.toComponentId !== "")
+            writer.tag(17, WireType.LengthDelimited).string(message.toComponentId);
+        /* string id = 18; */
+        if (message.id !== "")
+            writer.tag(18, WireType.LengthDelimited).string(message.id);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

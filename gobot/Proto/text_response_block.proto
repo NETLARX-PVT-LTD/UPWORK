@@ -5,6 +5,9 @@ package chatbot;
 message QuickReply {
 	string id = 1;
 	string text = 2;
+	string ToComponentId = 3;
+	string ToComponentType = 4;
+	string textResponseId = 5;
 }
 
 message TextResponseBlock {
@@ -17,4 +20,5 @@ message TextResponseBlock {
   int32 StoryId = 7;
   string QuickReplyId = 8;
   int32 BotId = 9;
+  string id = 10;
 }

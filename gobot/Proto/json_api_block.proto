@@ -8,6 +8,7 @@ message ApiHeaderr {
   int32 jsonId = 1;      // Primary key
   string headerKey = 2;        // Header name
   string headerValue = 3;      // Header value
+  string id = 4;
 }
 
 // Represents a JSON API configuration
@@ -19,4 +20,5 @@ message JsonApiBlock {
   repeated ApiHeaderr apiHeaders = 5; // List of headers
   string ToComponentType = 6; 
   string ToComponentId = 7; 
+  string id = 9;
 }
