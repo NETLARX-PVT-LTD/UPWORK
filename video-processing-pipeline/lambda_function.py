@@ -1,3 +1,4 @@
+import socket
 import pymysql
 import json
 import os
@@ -5,6 +6,7 @@ import uuid
 import requests
 import time
 import paramiko
+print(f"Paramiko version: {paramiko.__version__}")
 import boto3
 from datetime import datetime, timedelta
 
@@ -88,8 +90,7 @@ def get_ssh_private_key():
     # Replace the placeholder string below with your actual private key.
     # The key must be a single string, including the BEGIN and END markers, 
     # and all line breaks should be preserved.
-    hardcoded_key = """
------BEGIN RSA PRIVATE KEY-----
+    hardcoded_key = """-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEAuOyGK8qEf0rPGwYjdKX1tsz8KgcC5gtL0HgcooEIjL2q6IOK
 ssFOkZ7Zq9imE1yiugntcyRY+7j/cjNlTas90GgPhMXbC3TIA2NV8WSBzqxY0NgP
 b/OF3Xg9ycUyDKRMnyoE8DryJdHoVsVG74n0Os9Cl4BFbJbkG4ywiSRa1L0rC6T4
@@ -115,9 +116,7 @@ U1yEKwCS0m84FtVOhrWY0EMtOACBcqTgKTyX1FIntvwOduY9gJxWxZs1wwYEZAi0
 lNiW4jUCgYAMtJAJwntvP01DE+ETcoQxrZda9O6tic0vPrkax4C4aKQiLBN+pZGM
 mwtNzo3b2w6Q1WLZL6xQqfOrBk8tjvP7tj8lGX+uJedPIQzudpasPaEFZGv5ybSy
 WqwwA7SLdbzNZxmoUjF/Vi+PLYn4iw/BvjsO+Q4aCkWJqt16E0WUOw==
------END RSA PRIVATE KEY-----
-
-"""
+-----END RSA PRIVATE KEY-----"""
     log_step("SSH Key Retrieval", "WARNING", "Using hardcoded, insecure SSH key for testing.")
     return hardcoded_key
 
@@ -210,7 +209,9 @@ def get_match_details(cursor, match_id):
         return None
 
 def execute_ssh_commands(vm_ip, match_details, private_key_str):
-    """Execute setup and processing commands on VM via SSH"""
+    """Execute setup and processing commands on VM via SSH - FIXED VERSION"""
+    print("=== EXECUTE_SSH_COMMANDS CALLED - FIXED VERSION ===")
+    
     if TESTING_MODE:
         log_step("SSH Command Execution", "TESTING", f"Simulating command execution on {vm_ip}")
         commands = get_processing_commands(match_details)
@@ -224,20 +225,62 @@ def execute_ssh_commands(vm_ip, match_details, private_key_str):
     
     ssh_client = None
     try:
-        # Create SSH client
+        print("Creating SSH client...")
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         
-        # Load private key
+        print("Loading private key...")
         from io import StringIO
-        private_key = paramiko.PKey.from_private_key(StringIO(private_key_str))        
+        
+        # Debug the key
+        print(f"Private key starts with: {private_key_str[:50]}")
+        print(f"Contains RSA: {'BEGIN RSA PRIVATE KEY' in private_key_str}")
+        
+        # FIXED: Proper key loading with better error handling
+        private_key = None
+        
+        # Try RSA first since your key is RSA format
+        try:
+            print("Attempting to load as RSA key...")
+            private_key = paramiko.RSAKey.from_private_key(StringIO(private_key_str))
+            print("SUCCESS: Private key loaded as RSA key")
+        except Exception as rsa_error:
+            print(f"RSA loading failed: {rsa_error}")
+            
+            # Only try other formats if RSA fails
+            try:
+                print("Attempting to load as Ed25519 key...")
+                private_key = paramiko.Ed25519Key.from_private_key(StringIO(private_key_str))
+                print("SUCCESS: Private key loaded as Ed25519 key")
+            except Exception as ed25519_error:
+                print(f"Ed25519 loading failed: {ed25519_error}")
+                
+                try:
+                    print("Attempting to load as ECDSA key...")
+                    private_key = paramiko.ECDSAKey.from_private_key(StringIO(private_key_str))
+                    print("SUCCESS: Private key loaded as ECDSA key")
+                except Exception as ecdsa_error:
+                    print(f"ECDSA loading failed: {ecdsa_error}")
+                    log_step("Private Key Loading", "ERROR", "All key loading methods failed")
+                    return False
+        
+        if not private_key:
+            log_step("Private Key Loading", "ERROR", "Failed to load private key")
+            return False
+        
+        log_step("Private Key", "SUCCESS", f"Loaded as {type(private_key).__name__}")
+        
         # Connect to VM
         log_step("SSH Connection", "INFO", f"Connecting to {vm_ip}")
         ssh_client.connect(
             hostname=vm_ip,
-            username='ubuntu',  # Default username for Ubuntu instances
+            username='ubuntu',
             pkey=private_key,
-            timeout=30
+            timeout=30,
+            banner_timeout=30,
+            auth_timeout=30,
+            look_for_keys=False,
+            allow_agent=False
         )
         log_step("SSH Connection", "SUCCESS", f"Connected to {vm_ip}")
         
@@ -274,12 +317,54 @@ def execute_ssh_commands(vm_ip, match_details, private_key_str):
         
     except Exception as e:
         log_step("SSH Command Execution", "ERROR", f"SSH execution failed: {str(e)}")
+        print(f"Full exception details: {type(e).__name__}: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return False
         
     finally:
         if ssh_client:
             ssh_client.close()
             log_step("SSH Connection", "INFO", "Connection closed")
+
+
+# ADDITIONAL HELPER FUNCTION: Test SSH key loading separately
+def test_ssh_key_loading():
+    """Test function to debug SSH key loading issues"""
+    print("=== TESTING SSH KEY LOADING ===")
+    
+    private_key_str = get_ssh_private_key()
+    if not private_key_str:
+        print("ERROR: Could not retrieve private key")
+        return False
+    
+    print(f"Key length: {len(private_key_str)} characters")
+    print(f"Key starts with: {repr(private_key_str[:50])}")
+    print(f"Key ends with: {repr(private_key_str[-50:])}")
+    print(f"Contains BEGIN RSA PRIVATE KEY: {'BEGIN RSA PRIVATE KEY' in private_key_str}")
+    print(f"Contains END RSA PRIVATE KEY: {'END RSA PRIVATE KEY' in private_key_str}")
+    
+    from io import StringIO
+    
+    # Test each key type
+    key_types = [
+        ('RSA', paramiko.RSAKey),
+        ('Ed25519', paramiko.Ed25519Key),
+        ('ECDSA', paramiko.ECDSAKey)
+    ]
+    
+    for key_name, key_class in key_types:
+        try:
+            print(f"\nTesting {key_name} key loading...")
+            key = key_class.from_private_key(StringIO(private_key_str))
+            print(f"SUCCESS: {key_name} key loaded successfully")
+            print(f"Key type: {type(key)}")
+            return True
+        except Exception as e:
+            print(f"FAILED: {key_name} key loading failed: {e}")
+    
+    print("\nAll key loading methods failed!")
+    return False
 
 def get_processing_commands(match_details):
     """Generate the list of commands to execute on the VM"""
@@ -305,6 +390,9 @@ def get_processing_commands(match_details):
         # Install requirements
         'cd football-DevOps-test && pip install -r requirements.txt',
         
+                'pip3 install mysql-connector-python',
+        'pip3 install pymysql',
+        'python3 -c "import mysql.connector; print(\'MySQL ready\')"',
         # Run the main processing script
         f'cd football-DevOps-test && python server_main.py --match_id {match_id} --s3_link {s3_link} --folds "all"'
     ]
@@ -312,7 +400,7 @@ def get_processing_commands(match_details):
     return commands
 
 def wait_for_vm_ready(vm_ip, max_wait_minutes=180):
-    """Wait for VM to be SSH accessible"""
+    """Wait for VM to be SSH accessible - FIXED VERSION"""
     if TESTING_MODE:
         log_step("VM Readiness Check", "TESTING", f"Simulating wait for VM {vm_ip}")
         time.sleep(2)
@@ -322,43 +410,112 @@ def wait_for_vm_ready(vm_ip, max_wait_minutes=180):
     
     start_time = time.time()
     max_wait_seconds = max_wait_minutes * 60
+    attempt = 0
     
     while (time.time() - start_time) < max_wait_seconds:
+        attempt += 1
+        ssh_client = None
         try:
+            print(f"Attempt {attempt}: Trying to connect to VM {vm_ip}")
+            
             # Try to connect via SSH briefly
             ssh_client = paramiko.SSHClient()
-            print("ssh_client created")
+            print("SSH client created")
             ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            print("missing host key policy set")
+            print("Missing host key policy set")
             
             private_key_str = get_ssh_private_key()
-            print("private key retrieved")
+            print("Private key retrieved")
+            
             if not private_key_str:
-                print("private key not found")
+                print("Private key not found")
                 return False
-            print("private key found")
-            print(private_key_str)
+            
+            print("Private key found")
+            
+            # FIXED: Load the private key correctly
             from io import StringIO
-            private_key = paramiko.PKey.from_private_key(StringIO(private_key_str))  
-            print(private_key)
-            print("private key loaded")          
+            private_key = None
+            
+            # Since your key is RSA format, try RSA first
+            try:
+                print("Attempting to load as RSA key...")
+                private_key = paramiko.RSAKey.from_private_key(StringIO(private_key_str))
+                print("SUCCESS: Private key loaded as RSA key")
+            except Exception as rsa_error:
+                print(f"RSA loading failed: {rsa_error}")
+                try:
+                    print("Attempting to load as Ed25519 key...")
+                    private_key = paramiko.Ed25519Key.from_private_key(StringIO(private_key_str))
+                    print("SUCCESS: Private key loaded as Ed25519 key")
+                except Exception as ed25519_error:
+                    print(f"Ed25519 loading failed: {ed25519_error}")
+                    try:
+                        print("Attempting to load as ECDSA key...")
+                        private_key = paramiko.ECDSAKey.from_private_key(StringIO(private_key_str))
+                        print("SUCCESS: Private key loaded as ECDSA key")
+                    except Exception as ecdsa_error:
+                        print(f"ECDSA loading failed: {ecdsa_error}")
+                        print("All key loading methods failed")
+                        return False
+            
+            if not private_key:
+                print("Failed to load private key with any method")
+                return False
+            
+            print(f"Private key loaded: {type(private_key).__name__}")
+            
+            print(f"Attempting SSH connection to {vm_ip}...")
             ssh_client.connect(
                 hostname=vm_ip,
                 username='ubuntu',
                 pkey=private_key,
-                timeout=10
+                timeout=15,
+                banner_timeout=15,
+                auth_timeout=15,
+                look_for_keys=False,
+                allow_agent=False
             )
             
+            print("SSH connection successful!")
             
-            # If we get here, connection was successful
-            ssh_client.close()
-            log_step("VM Readiness Check", "SUCCESS", f"VM {vm_ip} is ready")
-            return True
+            # Test the connection with a simple command
+            stdin, stdout, stderr = ssh_client.exec_command('echo "test"', timeout=10)
+            output = stdout.read().decode().strip()
+            error = stderr.read().decode().strip()
             
-        except Exception:
-            # VM not ready yet, wait and retry
-            time.sleep(30)
-            log_step("VM Readiness Check", "INFO", "Still waiting for VM to be ready...")
+            if output == "test":
+                log_step("VM Readiness Check", "SUCCESS", f"VM {vm_ip} is ready")
+                return True
+            else:
+                print(f"Command test failed. Output: {output}, Error: {error}")
+                
+        except paramiko.AuthenticationException as e:
+            print(f"Authentication failed: {e}")
+            # Authentication issues usually don't resolve by waiting
+            log_step("VM Readiness Check", "ERROR", f"Authentication failed for VM {vm_ip}: {e}")
+            return False
+            
+        except paramiko.SSHException as e:
+            print(f"SSH connection failed: {e}")
+            
+        except socket.timeout as e:
+            print(f"Connection timeout: {e}")
+            
+        except socket.error as e:
+            print(f"Network error: {e}")
+            
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            
+        finally:
+            if ssh_client:
+                ssh_client.close()
+        
+        # Wait before retrying
+        print("Connection failed, waiting 30 seconds before retry...")
+        time.sleep(30)
+        log_step("VM Readiness Check", "INFO", f"Still waiting for VM to be ready... (attempt {attempt})")
     
     log_step("VM Readiness Check", "ERROR", f"VM {vm_ip} did not become ready within {max_wait_minutes} minutes")
     return False
