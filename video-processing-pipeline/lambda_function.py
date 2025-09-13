@@ -16,11 +16,40 @@ DB_NAME = 'analytics_and_library'
 
 # Lambda Cloud API configuration
 LAMBDA_API_KEY = 'secret_amit_0b09f77438444ab4bca61705bb77fa8f.5aLQrpr7saUdzcjI7KYm8IirAXL0LBqg'
-SSH_KEY_NAME = 'football-analysis-yolov11-lambda-ssh'
+SSH_KEY_NAME = 'my-manual-test-key'
 BASE_URL = 'https://cloud.lambda.ai/api/v1/instance-operations'
 
 # SSH Configuration
-SSH_PRIVATE_KEY_SECRET_NAME = 'football-ssh-key'
+SSH_PRIVATE_KEY_SECRET_NAME = """
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAuOyGK8qEf0rPGwYjdKX1tsz8KgcC5gtL0HgcooEIjL2q6IOK
+ssFOkZ7Zq9imE1yiugntcyRY+7j/cjNlTas90GgPhMXbC3TIA2NV8WSBzqxY0NgP
+b/OF3Xg9ycUyDKRMnyoE8DryJdHoVsVG74n0Os9Cl4BFbJbkG4ywiSRa1L0rC6T4
+JRpfZHY1iZknIQp/acx/ASm6uqLJlCSjsCTxm0LtvFMYfPl0LYEd3zrZDgHBp21h
+rK2IAwridhzYHbS9k9bTqTA4LKyC9Y14luzR2jBXNGQzJbPYUARS2hfbbxPXB1lF
+nbz1Q3Q4TLsYZ+8ETcYp3oSFA4FYqlezat/QjQIDAQABAoIBAALJPxhBaKk8tYDn
+VCw5ixZiLkAGQDft3nC/1O0DdRKE+DwHYO6Vu2fpDpSCCVAfXcas+zcR5B+4YNJ8
+QPMTnzT/OSsIV02Fe+hfj14f5CJhNffBJmWXmkiE7qfJYQCpwdgs20tkFMPj6FRu
+WN90PHBdl3F0gEp4V4V58Cr3MXS+qK5V3oQj2cWZ9JOpE3OnyVHkUFMhZ148sCc0
+5Wf7syabI741IUtg69QYZ+oZHswO3HaDQAd4qpNBZPjNV4inmrL/N7wtbHO/E6Rb
+U22fx0ZjKxymfDmNPQtXFSvu+K+VmuCj+kBLC44gekoTZb+6KMGAG144EBld+1XO
+xprc7m0CgYEA9LqAlJaOWFJvCyxDsBt8uiVR81Zzyc3no8vjKj8jf8HLjE3NXpcC
+pCqNHojVtbP5lAqI+8UOBEcMbqzTEs4GLtQoonWD5ViNvoT1iMKuNnlZOdK5TPos
+aO8KiSZ3mH5yYDJClNefZw28OZZV6F7/rrNtzainAnWBDs6EVrU5v2sCgYEAwXDj
+qZu58M/UgqqvdAgwO8iyLg9gaMyRQKtpmwWXAcRWrKH+ahFcfsDHgTQB3bffFDYk
+MViI8kEOuib1KaX7XUfD4nAXztFWqxMpfjs5PYhXX80BNyfHeZl2hKD5PKAUMxmf
+3uexA4+s/3NTjRRQibM37yFSxYqcFNDAiT3VBecCgYEA7W2bnYzLoQiozvAs40hn
+o7jdXvW69EiduR3v0GbdK+96aS56VpCvcVIPA1bB770iH+xwpcKyLJg5iY6GYTIc
+cYZHvgXA5tsY+YPJKtulZRgp5p14RSRZvZxcXl9BnGLg2E8qpXjkH3kF6eDei8jO
+ylEt8F71WL9jbFgTsIO1+O0CgYEAsxNMzvEI+3OKqcRVVLdX36B1wsodWCc4uIN2
+6joMh2g5TOtSWOLlm7nfdy6sI5Nagp10d/IcJRgxCAeUog+0WbBcGL3obF/DOfAt
+U1yEKwCS0m84FtVOhrWY0EMtOACBcqTgKTyX1FIntvwOduY9gJxWxZs1wwYEZAi0
+lNiW4jUCgYAMtJAJwntvP01DE+ETcoQxrZda9O6tic0vPrkax4C4aKQiLBN+pZGM
+mwtNzo3b2w6Q1WLZL6xQqfOrBk8tjvP7tj8lGX+uJedPIQzudpasPaEFZGv5ybSy
+WqwwA7SLdbzNZxmoUjF/Vi+PLYn4iw/BvjsO+Q4aCkWJqt16E0WUOw==
+-----END RSA PRIVATE KEY-----
+
+"""
 AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
 
 # Testing mode flag
@@ -51,25 +80,54 @@ def log_step(step_name, status="INFO", details=""):
         print(f"      └─ {details}")
 
 def get_ssh_private_key():
-    """Retrieve SSH private key from AWS Secrets Manager"""
-    if TESTING_MODE:
-        log_step("SSH Key Retrieval", "TESTING", "Using dummy SSH key for testing")
-        return "dummy-ssh-key-for-testing"
+    """Retrieve SSH private key (hardcoded version for testing only)"""
     
-    if not SSH_PRIVATE_KEY_SECRET_NAME:
-        log_step("SSH Key Configuration", "ERROR", "SSH_PRIVATE_KEY_SECRET_NAME not set")
-        return None
-    
-    try:
-        secrets_client = boto3.client('secretsmanager', region_name=AWS_REGION)
-        response = secrets_client.get_secret_value(SecretId=SSH_PRIVATE_KEY_SECRET_NAME)
-        private_key = response['SecretString']
-        log_step("SSH Key Retrieval", "SUCCESS", "Private key retrieved from Secrets Manager")
-        return private_key
-    except Exception as e:
-        log_step("SSH Key Retrieval", "ERROR", f"Failed to get private key: {str(e)}")
-        return None
+    # WARNING: This is INSECURE and should NEVER be used in production.
+    # It is for temporary testing purposes only.
 
+    # Replace the placeholder string below with your actual private key.
+    # The key must be a single string, including the BEGIN and END markers, 
+    # and all line breaks should be preserved.
+    hardcoded_key = """
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAuOyGK8qEf0rPGwYjdKX1tsz8KgcC5gtL0HgcooEIjL2q6IOK
+ssFOkZ7Zq9imE1yiugntcyRY+7j/cjNlTas90GgPhMXbC3TIA2NV8WSBzqxY0NgP
+b/OF3Xg9ycUyDKRMnyoE8DryJdHoVsVG74n0Os9Cl4BFbJbkG4ywiSRa1L0rC6T4
+JRpfZHY1iZknIQp/acx/ASm6uqLJlCSjsCTxm0LtvFMYfPl0LYEd3zrZDgHBp21h
+rK2IAwridhzYHbS9k9bTqTA4LKyC9Y14luzR2jBXNGQzJbPYUARS2hfbbxPXB1lF
+nbz1Q3Q4TLsYZ+8ETcYp3oSFA4FYqlezat/QjQIDAQABAoIBAALJPxhBaKk8tYDn
+VCw5ixZiLkAGQDft3nC/1O0DdRKE+DwHYO6Vu2fpDpSCCVAfXcas+zcR5B+4YNJ8
+QPMTnzT/OSsIV02Fe+hfj14f5CJhNffBJmWXmkiE7qfJYQCpwdgs20tkFMPj6FRu
+WN90PHBdl3F0gEp4V4V58Cr3MXS+qK5V3oQj2cWZ9JOpE3OnyVHkUFMhZ148sCc0
+5Wf7syabI741IUtg69QYZ+oZHswO3HaDQAd4qpNBZPjNV4inmrL/N7wtbHO/E6Rb
+U22fx0ZjKxymfDmNPQtXFSvu+K+VmuCj+kBLC44gekoTZb+6KMGAG144EBld+1XO
+xprc7m0CgYEA9LqAlJaOWFJvCyxDsBt8uiVR81Zzyc3no8vjKj8jf8HLjE3NXpcC
+pCqNHojVtbP5lAqI+8UOBEcMbqzTEs4GLtQoonWD5ViNvoT1iMKuNnlZOdK5TPos
+aO8KiSZ3mH5yYDJClNefZw28OZZV6F7/rrNtzainAnWBDs6EVrU5v2sCgYEAwXDj
+qZu58M/UgqqvdAgwO8iyLg9gaMyRQKtpmwWXAcRWrKH+ahFcfsDHgTQB3bffFDYk
+MViI8kEOuib1KaX7XUfD4nAXztFWqxMpfjs5PYhXX80BNyfHeZl2hKD5PKAUMxmf
+3uexA4+s/3NTjRRQibM37yFSxYqcFNDAiT3VBecCgYEA7W2bnYzLoQiozvAs40hn
+o7jdXvW69EiduR3v0GbdK+96aS56VpCvcVIPA1bB770iH+xwpcKyLJg5iY6GYTIc
+cYZHvgXA5tsY+YPJKtulZRgp5p14RSRZvZxcXl9BnGLg2E8qpXjkH3kF6eDei8jO
+ylEt8F71WL9jbFgTsIO1+O0CgYEAsxNMzvEI+3OKqcRVVLdX36B1wsodWCc4uIN2
+6joMh2g5TOtSWOLlm7nfdy6sI5Nagp10d/IcJRgxCAeUog+0WbBcGL3obF/DOfAt
+U1yEKwCS0m84FtVOhrWY0EMtOACBcqTgKTyX1FIntvwOduY9gJxWxZs1wwYEZAi0
+lNiW4jUCgYAMtJAJwntvP01DE+ETcoQxrZda9O6tic0vPrkax4C4aKQiLBN+pZGM
+mwtNzo3b2w6Q1WLZL6xQqfOrBk8tjvP7tj8lGX+uJedPIQzudpasPaEFZGv5ybSy
+WqwwA7SLdbzNZxmoUjF/Vi+PLYn4iw/BvjsO+Q4aCkWJqt16E0WUOw==
+-----END RSA PRIVATE KEY-----
+
+"""
+    log_step("SSH Key Retrieval", "WARNING", "Using hardcoded, insecure SSH key for testing.")
+    return hardcoded_key
+
+def get_vm_ip(vm_id,data):
+    """Extract IP address from instance data"""
+    for instance in data.get('data', []):
+        print(instance)
+        if instance.get('id') == vm_id:
+            return instance.get('ip')
+    return None
 
 def get_vm_ip_address(vm_id, max_retries=5, retry_delay=10):
     """
@@ -99,14 +157,20 @@ def get_vm_ip_address(vm_id, max_retries=5, retry_delay=10):
             response.raise_for_status()
             
             data = response.json()
-
-            if 'data' in data and data['data']:
-                for instance in data['data']:
-                    if instance.get('id') == vm_id:
-                        ip_address = instance.get('ip')
-                        if ip_address:
-                            log_step("VM IP Retrieval", "SUCCESS", f"IP for {vm_id}: {ip_address}")
-                            return ip_address
+            print(data)
+            # if 'data' in data and data['data']:
+            #     for instance in data['data']:
+            #         if instance.get('id') == vm_id:
+            #             ip_address = instance.get('ip')
+            #             if ip_address:
+            #                 log_step("VM IP Retrieval", "SUCCESS", f"IP for {vm_id}: {ip_address}")
+            #                 return ip_address
+            ip_address = data['data'][0]['ip']
+            if ip_address==None:
+                log_step("VM IP Retrieval", "WARNING", f"IP for {vm_id} not found in response data.")
+            else:
+                log_step("VM IP Retrieval", "SUCCESS", f"IP for {vm_id}: {ip_address}")
+                return ip_address
             
             # If VM is not found in the list, or IP is not yet available
             log_step("VM IP Retrieval", "INFO", f"VM {vm_id} not found or IP not ready. Retrying in {retry_delay} seconds...")
@@ -166,8 +230,7 @@ def execute_ssh_commands(vm_ip, match_details, private_key_str):
         
         # Load private key
         from io import StringIO
-        private_key = paramiko.RSAKey.from_private_key(StringIO(private_key_str))
-        
+        private_key = paramiko.PKey.from_private_key(StringIO(private_key_str))        
         # Connect to VM
         log_step("SSH Connection", "INFO", f"Connecting to {vm_ip}")
         ssh_client.connect(
@@ -248,7 +311,7 @@ def get_processing_commands(match_details):
     
     return commands
 
-def wait_for_vm_ready(vm_ip, max_wait_minutes=10):
+def wait_for_vm_ready(vm_ip, max_wait_minutes=180):
     """Wait for VM to be SSH accessible"""
     if TESTING_MODE:
         log_step("VM Readiness Check", "TESTING", f"Simulating wait for VM {vm_ip}")
@@ -264,21 +327,28 @@ def wait_for_vm_ready(vm_ip, max_wait_minutes=10):
         try:
             # Try to connect via SSH briefly
             ssh_client = paramiko.SSHClient()
+            print("ssh_client created")
             ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            print("missing host key policy set")
             
             private_key_str = get_ssh_private_key()
+            print("private key retrieved")
             if not private_key_str:
+                print("private key not found")
                 return False
-                
+            print("private key found")
+            print(private_key_str)
             from io import StringIO
-            private_key = paramiko.RSAKey.from_private_key(StringIO(private_key_str))
-            
+            private_key = paramiko.PKey.from_private_key(StringIO(private_key_str))  
+            print(private_key)
+            print("private key loaded")          
             ssh_client.connect(
                 hostname=vm_ip,
                 username='ubuntu',
                 pkey=private_key,
                 timeout=10
             )
+            
             
             # If we get here, connection was successful
             ssh_client.close()
@@ -456,7 +526,7 @@ def create_new_vm_instance():
     }
 
     regions_to_try = ["us-south-2"]
-    list_sku = ["gpu_1x_gh200"]
+    list_sku = ["gpu_1x_h100_sxm5"]
     max_retries = 1
     retry_delay_seconds = 15
 
