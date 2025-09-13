@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "Gobot.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "..\\ProtoTest\\ProtoTest.csproj",
+        "Action": "Start",
+        "DebugTarget": "ProtoTest"
+      }
+    ]
+  }
+]

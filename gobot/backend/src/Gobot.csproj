@@ -59,6 +59,15 @@
 	  <Protobuf Include="..\..\Proto\variable_block.proto" GrpcServices="None">
 		  <Link>Proto\variable_block.proto</Link>
 	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\ai_assistant_block.proto" GrpcServices="None">
+		  <Link>Proto\ai_assistant_block.proto</Link>
+	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\conversational_form_response_block.proto" GrpcServices="None">
+		  <Link>Proto\conversational_form_response_block.proto</Link>
+	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\website_data_block.proto" GrpcServices="None">
+		  <Link>Proto\website_data_block.proto</Link>
+	  </Protobuf>
   </ItemGroup>
 
   <ItemGroup>

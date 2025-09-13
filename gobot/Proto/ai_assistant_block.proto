@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package chatbot;
+
+message AiAssistantBlock {
+  string id = 1;                    // Guid in C# → string in proto
+  string assistantName = 2;         // Required string
+  string apiKey = 3;                // Required string
+  string plateform = 4;             // OpenAPI, Gemini, OpenRouter
+  string instruction = 5;           
+  string model = 6;                 // GPT, Gemini, GPT Pro
+  string source = 7;                // My content
+  string fallbackTextMessage = 8;   // Fallback message
+  int32 fallbackStory = 9;          // Story Id
+  int32 maxToken = 10;              // Max token limit
+  double temperature = 11;          // Temperature (0–2)
+  double topP = 12;                 // Top-P sampling
+  string createdAt = 13;            // DateTime → string (ISO-8601)
+  
+  // Relation with TrainingFile (repeated = collection)
+  repeated TrainingFileBlock trainingFiles = 14;
+}
+
+message TrainingFileBlock {
+  string id = 1;        
+  string fileName = 2;  
+  string fileUrl = 3;  
+  string assistantId = 4; 
+}

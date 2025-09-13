@@ -49,6 +49,13 @@ namespace Netlarx.Products.Gobot.Interface
         DbSet<ImageSlideblock> ImageSlideblocks { get; set; }
         DbSet<Buttonblock> Buttonblocks { get; set; }
 
+        DbSet<AiAssistant> AiAssistants { get; set; }
+        DbSet<TrainingFile> TrainingFiles { get; set; }
+
+        DbSet<WebsiteData> WebsiteSources { get; set; }
+        DbSet<FormResponse> FormResponses { get; set; }
+        
+        DbSet<FormFieldResponse> FormFieldResponses { get; set; }
         void addStory(Stories model);
 
         void addConnection(Connection connection);

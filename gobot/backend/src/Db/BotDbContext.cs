@@ -53,6 +53,16 @@ namespace Netlarx.Products.Gobot.Db
         public DbSet<ImageSlideblock> ImageSlideblocks { get; set; }
         public DbSet<Buttonblock> Buttonblocks { get; set; }
 
+        public DbSet<AiAssistant> AiAssistants { get; set; }
+
+        public DbSet<TrainingFile> TrainingFiles { get; set; }
+
+        public DbSet<WebsiteData> WebsiteSources { get; set; }
+
+        public DbSet<FormResponse> FormResponses { get; set; }
+
+        public DbSet<FormFieldResponse> FormFieldResponses { get; set; }
+
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return base.SaveChangesAsync(cancellationToken);

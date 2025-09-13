@@ -303,5 +303,44 @@ namespace Netlarx.Products.Gobot.Controllers.ConversationalForms
 
             return Ok(new { message = "Form submitted successfully", submission = newSubmission });
         }
+
+        [HttpPost("{formId:guid}/responses")]
+        public async Task<IActionResult> SubmitFormResponse(Guid formId, [FromBody] Dictionary<string, string> responses)
+        {
+            var form = await _db.ConversationalForm.FindAsync(formId);
+            if (form == null)
+                return NotFound($"Form with Id '{formId}' not found.");
+
+            if (responses == null || responses.Count == 0)
+                return BadRequest("No responses submitted.");
+
+            // Save main response record
+            var formResponse = new FormResponse
+            {
+                Id = Guid.NewGuid(),
+                FormId = formId,
+                SubmittedAt = DateTime.UtcNow
+            };
+
+            _db.FormResponses.Add(formResponse);
+
+            // Save each field response
+            foreach (var r in responses)
+            {
+                var fieldResponse = new FormFieldResponse
+                {
+                    Id = Guid.NewGuid(),
+                    FormResponseId = formResponse.Id,
+                    FieldName = r.Key,
+                    Value = r.Value
+                };
+                _db.FormFieldResponses.Add(fieldResponse);
+            }
+
+            await _db.SaveChangesAsync();
+
+            return Ok(new { Message = "Form response submitted successfully.", ResponseId = formResponse.Id });
+        }
+
     }
 }
