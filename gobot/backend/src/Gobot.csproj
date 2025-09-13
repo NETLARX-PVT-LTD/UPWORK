@@ -21,6 +21,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="protobuf-net" Version="3.2.56" />
+    <PackageReference Include="SendGrid" Version="9.29.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 
 	  <Protobuf Include="..\..\Proto\typing_delay_block.proto" GrpcServices="None">
@@ -68,7 +69,19 @@
 	  <Protobuf Include="..\..\Proto\website_data_block.proto" GrpcServices="None">
 		  <Link>Proto\website_data_block.proto</Link>
 	  </Protobuf>
-  </ItemGroup>
+	  <Protobuf Include="..\..\Proto\email_request_block.proto" GrpcServices="None">
+		  <Link>Proto\email_request_block.proto</Link>
+	  </Protobuf>
+      <Protobuf Include="..\..\Proto\page_message_block.proto" GrpcServices="None">
+		  <Link>Proto\page_message_block.proto</Link>
+	  </Protobuf>
+      <Protobuf Include="..\..\Proto\menu_button_block.proto" GrpcServices="None">
+		  <Link>Proto\menu_button_block.proto</Link>
+	  </Protobuf>
+      <Protobuf Include="..\..\Proto\bot_block.proto" GrpcServices="None">
+		  <Link>Proto\bot_block.proto</Link>
+	  </Protobuf>
+	</ItemGroup>
 
   <ItemGroup>
     <Folder Include="Controllers\TextResponses\" />

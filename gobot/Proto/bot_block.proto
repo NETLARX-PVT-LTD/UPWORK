@@ -2,7 +2,35 @@ syntax = "proto3";
 
 package chatbot;
 
+// Represents theme details
+message ThemeBlock {
+  int32 id = 1;
+  string primary_color = 2;
+}
+
+// Represents landing page configuration
+message LandingConfigBlock {
+  string id = 1; // Guid stored as string
+  string title = 2;
+  string description = 3;
+  string background_style = 4;
+}
+
 message BotBlock {
-    int32 botId = 1;
+    string botId = 1;
     string botName = 2;
+    string api_key = 3; // generated API key
+    string story = 4;
+
+    // JSON navigation properties
+    ThemeBlock theme = 5;
+    string position = 6;
+    string size = 7;
+    string greeting = 8;
+    string placeholder = 9;
+    bool allow_fullscreen = 10;
+    bool show_branding = 11;
+    string background_style = 12;
+
+    LandingConfigBlock landing_config = 13;
 }

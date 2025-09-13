@@ -9,5 +9,5 @@ message StoryBlock {
     string name = 2;
     string rootBlockConnectionId = 3; // use string to hold Guid
     google.protobuf.Timestamp createdDate = 4;
-    int32 botId = 5;
+    string botId = 5;
 }

@@ -48,6 +48,8 @@ namespace Netlarx.Products.Gobot.Interface
         DbSet<ApiHeader> ApiHeaders { get; set; }
         DbSet<ImageSlideblock> ImageSlideblocks { get; set; }
         DbSet<Buttonblock> Buttonblocks { get; set; }
+        DbSet<BotConfig> BotConfigs { get; set; }
+        DbSet<BotMenu> BotMenus { get; set; }
 
         DbSet<AiAssistant> AiAssistants { get; set; }
         DbSet<TrainingFile> TrainingFiles { get; set; }
@@ -56,6 +58,10 @@ namespace Netlarx.Products.Gobot.Interface
         DbSet<FormResponse> FormResponses { get; set; }
         
         DbSet<FormFieldResponse> FormFieldResponses { get; set; }
+
+        DbSet<Theme> Themes { get; set; }
+        DbSet<LandingConfig> LandingConfigs { get; set; }
+        DbSet<PageMessage> PageMessages { get; set; }
         void addStory(Stories model);
 
         void addConnection(Connection connection);

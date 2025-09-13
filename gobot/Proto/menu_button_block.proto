@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package chatbot;
+
+// Represents a menu button
+message MenuButtonBlock {
+  string id = 1;
+  string label = 2;
+  string type = 3; // action | submenu | weblink
+  string parent_id = 4;
+  bool is_active = 5;
+  int32 order = 6;
+
+  // Action type specific fields
+  string message = 7;
+  string story = 8;
+  string template = 9;
+  string plugin = 10;
+
+  // Weblink specific
+  string url = 11;
+
+  // Submenu specific
+  //repeated MenuButtonBlock children = 12;
+
+  // Metadata
+  MetadataBlock metadata = 13;
+}
+
+// Extra information for buttons
+message MetadataBlock {
+  string color = 1;
+  string icon = 2;
+  string description = 3;
+  string created_at = 4;
+  string updated_at = 5;
+  repeated string tags = 6;
+  AnalyticsBlock analytics = 7;
+}
+
+// Analytics info
+message AnalyticsBlock {
+  int32 click_count = 1;
+  string last_clicked = 2;
+}
