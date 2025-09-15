@@ -7,13 +7,13 @@
 namespace Netlarx.Products.Gobot.Db
 {
     using Microsoft.EntityFrameworkCore;
-    using System.Threading.Tasks;
-    using System.Threading;
+    using Netlarx.Products.Gobot.Interface;
+    using Netlarx.Products.Gobot.Models;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Netlarx.Products.Gobot.Interface;
-    using Netlarx.Products.Gobot.Models;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     public class BotDbContext : DbContext, IBotDbContext
     {
@@ -62,6 +62,13 @@ namespace Netlarx.Products.Gobot.Db
         public DbSet<FormResponse> FormResponses { get; set; }
 
         public DbSet<FormFieldResponse> FormFieldResponses { get; set; }
+
+        public DbSet<Theme> Themes { get; set; }
+        public DbSet<LandingConfig> LandingConfigs { get; set; }
+        public DbSet<BotConfig> BotConfigs { get; set; }
+        public DbSet<BotMenu> BotMenus { get; set; }
+        public DbSet<PageMessage> PageMessages { get; set; }
+        public DbSet<BotPublishRequest> BotPublishRequests { get; set; }
 
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

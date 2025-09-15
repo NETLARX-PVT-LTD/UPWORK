@@ -1,10 +1,10 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="FormsController.cs" company="Netlarx">
+// <copyright file="AssistantsController.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
 
-namespace Gobot.Controllers.AiAssistant
+namespace Netlarx.Products.Gobot.Controllers.AiAssistant
 {
     using Chatbot;
     using Microsoft.AspNetCore.Http;

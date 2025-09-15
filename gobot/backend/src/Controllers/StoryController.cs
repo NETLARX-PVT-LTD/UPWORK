@@ -1271,7 +1271,8 @@ namespace Netlarx.Products.Gobot.Controllers
                                     ? "New Story"
                                     : session.Story.Name,
                                     RootBlockConnectionId = rootBlockGuid,
-                                    CreatedDate = DateTime.UtcNow
+                                    CreatedDate = DateTime.UtcNow,
+                                    BotId = session.Story.Name
                 };
 
 

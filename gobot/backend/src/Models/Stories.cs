@@ -14,7 +14,7 @@ namespace Netlarx.Products.Gobot.Models
         public int ID { get; set; }
 
         // Foreign Key
-        public int BotId { get; set; }
+        public string BotId { get; set; }
 
         [Required]
         public string? Name { get; set; }

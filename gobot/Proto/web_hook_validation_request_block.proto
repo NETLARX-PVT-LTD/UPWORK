@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package chatbot;
+
+message WebhookValidationRequestBlock {
+  string webhook_url = 1;
+  string verify_token = 2;
+}
+
+message WebhookValidationResponseBlock {
+  bool success = 1;
+  string message = 2;
+}

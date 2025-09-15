@@ -9,4 +9,6 @@ message LinkStoryBlock {
   string ToComponentType = 4; 
   string ToComponentId = 5;
   string id = 6;
+  string botId = 7;
+  string story_id = 8;
 }

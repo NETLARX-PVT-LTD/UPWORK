@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package chatbot;
+
+// Represents an email request
+message EmailRequestBlock {
+  string to = 1;
+  string subject = 2;
+  string message = 3;
+  string bot_id = 4;
+  string api_key = 5;
+  string landing_url = 6;
+  string embed_code = 7;
+}
