@@ -4,10 +4,16 @@
 // </copyright>
 // ---------------------------------------------------------------------
 
+
+
 namespace Netlarx.Products.Gobot.Models
 {
+    using System.ComponentModel.DataAnnotations;
+
     public class BotConfig
     {
+        [Key]
+        public string BotConfigId { get; set; }
         public string BotId { get; set; }
         public string BotName { get; set; }
         public string PrimaryColor { get; set; }

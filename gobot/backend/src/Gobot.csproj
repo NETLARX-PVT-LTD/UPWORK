@@ -81,6 +81,15 @@
       <Protobuf Include="..\..\Proto\bot_block.proto" GrpcServices="None">
 		  <Link>Proto\bot_block.proto</Link>
 	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\bot_publish_request.proto" GrpcServices="None">
+		  <Link>Proto\bot_publish_request.proto</Link>
+	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\web_hook_validation_request_block.proto" GrpcServices="None">
+		  <Link>Proto\web_hook_validation_request_block.proto</Link>
+	  </Protobuf>
+	  <Protobuf Include="..\..\Proto\text_connection_request_block.proto" GrpcServices="None">
+		  <Link>Proto\text_connection_request_block.proto</Link>
+	  </Protobuf>
 	</ItemGroup>
 
   <ItemGroup>

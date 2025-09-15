@@ -1,13 +1,15 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="School.cs" company="Netlarx">
+// <copyright file="LinkStory.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
 
-using System.ComponentModel.DataAnnotations;
 
 namespace Netlarx.Products.Gobot.Models
 {
+
+    using System.ComponentModel.DataAnnotations;
+
     public class LinkStory : BaseComponent
     {
         public string BotId { get; set; }

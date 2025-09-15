@@ -37,7 +37,11 @@ namespace Netlarx.Products.Gobot.Middlewares
             { "/api/components/AddConversationalForm", typeof(ConversationalFormBlock) },
             { "/api/components/AddTextResponse", typeof(TextResponseBlock) },
             { "/api/components/AddMedia", typeof(MediaBlock) },
-            { "/api/bots/{botId}/linkstories", typeof(LinkStoryBlock) }
+            { "/api/bots/{botId}/linkstories", typeof(LinkStoryBlock) },
+            { "/api/whatsapp/publish", typeof(BotPublishRequestBlock) },
+            { "/api/whatsapp/validate-webhook", typeof(WebhookValidationRequestBlock) },
+            { "/api/whatsapp/test-connection", typeof(TestConnectionRequestBlock) },
+            { "/api/bots/{botId}", typeof(BotBlock) }
             // add more mappings here
         };
 

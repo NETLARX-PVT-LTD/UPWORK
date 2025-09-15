@@ -38,7 +38,7 @@ namespace Netlarx.Products.Gobot.Controllers.Config
                 {
                     BotName = bot.BotName,
                     PrimaryColor = bot.PrimaryColor,
-                    SecondaryColor = bot.SecondaryColor,
+                    SecondaryColor = bot.SecondaryColor
                     //ImageUrl = bot.Imageurl
                 },
                 WelcomeMessage = bot.WelcomeMessage,

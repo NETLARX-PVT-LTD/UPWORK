@@ -1,5 +1,5 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="School.cs" company="Netlarx">
+// <copyright file="IBotDbContext.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
@@ -62,6 +62,8 @@ namespace Netlarx.Products.Gobot.Interface
         DbSet<Theme> Themes { get; set; }
         DbSet<LandingConfig> LandingConfigs { get; set; }
         DbSet<PageMessage> PageMessages { get; set; }
+
+        DbSet<BotPublishRequest> BotPublishRequests { get; set; }
         void addStory(Stories model);
 
         void addConnection(Connection connection);

@@ -68,6 +68,7 @@ namespace Netlarx.Products.Gobot.Db
         public DbSet<BotConfig> BotConfigs { get; set; }
         public DbSet<BotMenu> BotMenus { get; set; }
         public DbSet<PageMessage> PageMessages { get; set; }
+        public DbSet<BotPublishRequest> BotPublishRequests { get; set; }
 
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

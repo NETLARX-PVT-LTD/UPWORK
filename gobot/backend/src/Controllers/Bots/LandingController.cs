@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Netlarx.Products.Gobot.Interface;
-using System.Threading.Tasks;
+﻿// ---------------------------------------------------------------------
+// <copyright file="LandingController.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
-namespace Gobot.Controllers.Bots
+namespace Netlarx.Products.Gobot.Controllers.Bots
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using Netlarx.Products.Gobot.Interface;
+    using System.Threading.Tasks;
+
     [Route("api/[controller]")]
     [ApiController]
     public class LandingController : ControllerBase

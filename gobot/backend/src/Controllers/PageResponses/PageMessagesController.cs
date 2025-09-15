@@ -48,6 +48,7 @@ namespace Netlarx.Products.Gobot.Controllers.PageResponses
             var newMessage = new PageMessage
             {
                 Id = Guid.NewGuid().ToString("N"), // database-generated ID
+                BotId = botId,
                 Urls = request.Urls.ToList() ?? new List<string>(),
                 ShowAfterDelay = request.ShowAfterDelay,
                 Delay = request.Delay,
@@ -61,6 +62,7 @@ namespace Netlarx.Products.Gobot.Controllers.PageResponses
                         Id = request.SelectedStory.Id,
                         Name = request.SelectedStory.Name
                     }
+                
             };
 
             await _db.PageMessages.AddAsync(newMessage);
@@ -81,6 +83,65 @@ namespace Netlarx.Products.Gobot.Controllers.PageResponses
                 return NotFound(new { message = $"No page messages found for BotId {botId}" });
 
             return Ok(messages);
+        }
+
+        [HttpPut("{id}")]
+        [MiddlewareFilter(typeof(ProtoPipeline))]
+        public async Task<ActionResult<PageMessage>> UpdatePageMessage(string id)
+        {
+            // Retrieve the deserialized Protobuf object from middleware
+            if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not PageMessageBlock request)
+            {
+                _logger.LogWarning("Protobuf body missing or invalid");
+                return BadRequest("Protobuf body missing or invalid");
+            }
+
+            // Find the existing message
+            var existingMessage = await _db.PageMessages.FindAsync(id);
+            if (existingMessage == null)
+            {
+                return NotFound(new { message = $"PageMessage with ID '{id}' not found." });
+            }
+
+            // Update fields
+            existingMessage.BotId = request.BotId;
+            existingMessage.Urls = request.Urls.ToList() ?? new List<string>();
+            existingMessage.ShowAfterDelay = request.ShowAfterDelay;
+            existingMessage.Delay = request.Delay;
+            existingMessage.MessageType = request.MessageType;
+            existingMessage.TextMessage = request.TextMessage;
+
+            existingMessage.SelectedStory = request.SelectedStory == null
+                ? null
+                : new StoryReference
+                {
+                    Id = request.SelectedStory.Id,
+                    Name = request.SelectedStory.Name
+                };
+
+            // Save changes
+            await _db.SaveChangesAsync();
+
+            return Ok(existingMessage); // ✅ Return updated object
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePageMessage(string id)
+        {
+            // Find the existing message
+            var existingMessage = await _db.PageMessages.FindAsync(id);
+
+            if (existingMessage == null)
+            {
+                return NotFound(new { message = $"PageMessage with ID '{id}' not found." });
+            }
+
+            // Remove it from DB
+            _db.PageMessages.Remove(existingMessage);
+            await _db.SaveChangesAsync();
+
+            // Return success with no content
+            return NoContent();
         }
     }
 }

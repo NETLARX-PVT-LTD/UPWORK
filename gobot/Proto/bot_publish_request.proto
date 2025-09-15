@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package chatbot;
+
+// BotPublishRequest message definition
+message BotPublishRequestBlock {
+  string bot_publish_request_id = 1; // Guid as string
+  string bot_id = 2;
+  string bot_name = 3;
+  string api_type = 4;
+  string phone_number = 5;
+  string webhook_url = 6;
+  string verify_token = 7;
+  string access_token = 8;
+  string phone_number_id = 9;
+  string business_account_id = 10;
+  int32 story_id = 11;
+  string published_at = 12; // DateTime as string (use google.protobuf.Timestamp for exact type)
+  bool is_active = 13;
+}

@@ -1,0 +1,16 @@
+syntax = "proto3";
+package chatbot;
+
+message TestConnectionRequestBlock {
+    string botId = 1;
+    string api_type = 2;
+    string access_token = 3;
+    string phone_number_id = 4;
+    string business_account_id = 5;
+}
+
+message TestConnectionResponseBlock {
+    bool success = 1;
+    string message = 2;
+    string details = 3;
+}
