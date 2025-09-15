@@ -22,8 +22,7 @@ SSH_KEY_NAME = 'my-manual-test-key'
 BASE_URL = 'https://cloud.lambda.ai/api/v1/instance-operations'
 
 # SSH Configuration
-SSH_PRIVATE_KEY_SECRET_NAME = """
------BEGIN RSA PRIVATE KEY-----
+SSH_PRIVATE_KEY_SECRET_NAME = """-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEAuOyGK8qEf0rPGwYjdKX1tsz8KgcC5gtL0HgcooEIjL2q6IOK
 ssFOkZ7Zq9imE1yiugntcyRY+7j/cjNlTas90GgPhMXbC3TIA2NV8WSBzqxY0NgP
 b/OF3Xg9ycUyDKRMnyoE8DryJdHoVsVG74n0Os9Cl4BFbJbkG4ywiSRa1L0rC6T4
@@ -49,9 +48,7 @@ U1yEKwCS0m84FtVOhrWY0EMtOACBcqTgKTyX1FIntvwOduY9gJxWxZs1wwYEZAi0
 lNiW4jUCgYAMtJAJwntvP01DE+ETcoQxrZda9O6tic0vPrkax4C4aKQiLBN+pZGM
 mwtNzo3b2w6Q1WLZL6xQqfOrBk8tjvP7tj8lGX+uJedPIQzudpasPaEFZGv5ybSy
 WqwwA7SLdbzNZxmoUjF/Vi+PLYn4iw/BvjsO+Q4aCkWJqt16E0WUOw==
------END RSA PRIVATE KEY-----
-
-"""
+-----END RSA PRIVATE KEY-----"""
 AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
 
 # Testing mode flag
@@ -367,34 +364,51 @@ def test_ssh_key_loading():
     return False
 
 def get_processing_commands(match_details):
-    """Generate the list of commands to execute on the VM"""
-    match_id = match_details['match_id']
-    s3_link = match_details['s3_link']
+    """
+    Generate the list of commands to execute on the VM using a hardcoded token.
+    WARNING: Hardcoding tokens is insecure and not recommended for production.
+    """
+    # This line is for the final command, but the debug log below will show all keys.
+    # It will use 's3_link' if present, otherwise it will be None.
+    s3_link = match_details.get('s3_link') 
+    match_id = match_details.get('match_id')
+
+    # --- INSECURE: Hardcoded token for temporary use ---
+    # Replace the placeholder text with your actual GitHub Personal Access Token.
+    git_token = "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"
     
+    # Construct the new repository URL with the hardcoded token
+    repo_url_with_token = f"https://{git_token}@github.com/abhi643/Automation.git"
+
     commands = [
-        # SSH key generation
-        'ssh-keygen -t rsa -f /home/ubuntu/.ssh/id_rsa -N "" -C "test"',
+        # --- ADDED: Debug log for confirmation ---
+        # This command prints the entire dictionary to the log for inspection.
+        f'echo "DEBUG: Received match_details dictionary: {match_details}"',
         
-        # Display public key (for logging/debugging)
-        'cat /home/ubuntu/.ssh/id_rsa.pub',
+        # Log the match details for better traceability
+        f'echo "--- Starting processing for Match ID: {match_id} ---"',
         
-        # Clone repository
-        'git clone https://github.com/nadhirhasan/football-DevOps-test.git',
+        # Clone the specified repository using the token
+        f'git clone -q {repo_url_with_token}',
         
-        # Navigate to project directory
-        'cd football-DevOps-test',
+        # Navigate into the newly cloned project directory
+        'cd Automation',
+
         
-        # Checkout specific version
-        'cd football-DevOps-test && git checkout tags/v0.0.2 -b v0.0.2-branch',
+        # Install Python package dependencies
+        # 'pip install -r requirements.txt',
+        'cd Automation && pip install -r requirements.txt',
+        'pip3 install boto3',
         
-        # Install requirements
-        'cd football-DevOps-test && pip install -r requirements.txt',
-        
-                'pip3 install mysql-connector-python',
+        'pip3 install mysql-connector-python',
         'pip3 install pymysql',
-        'python3 -c "import mysql.connector; print(\'MySQL ready\')"',
-        # Run the main processing script
-        f'cd football-DevOps-test && python server_main.py --match_id {match_id} --s3_link {s3_link} --folds "all"'
+        'python3 -c "import mysql.connector; print(\'MySQL drivers are ready.\')"',
+        
+        # Run the main processing script from the new repository
+        # IMPORTANT: After checking the debug log, confirm 's3_link' is the correct variable.
+        # If the log shows 'm3u8_link', change '--s3_link {s3_link}' to '--s3_link {match_details.get("m3u8_link")}'.
+        f'cd Automation && python server_main.py --match_id {match_id} --s3_link {s3_link} --folds "all"'
+
     ]
     
     return commands
@@ -683,7 +697,7 @@ def create_new_vm_instance():
     }
 
     regions_to_try = ["us-south-2"]
-    list_sku = ["gpu_1x_h100_sxm5"]
+    list_sku = ["gpu_2x_h100_sxm5"]
     max_retries = 1
     retry_delay_seconds = 15
 
@@ -693,7 +707,7 @@ def create_new_vm_instance():
 
             payload = {
                 "region_name": region,
-                "instance_type_name": "gpu_1x_h100_sxm5",
+                "instance_type_name": "gpu_2x_h100_sxm5",
                 "ssh_key_names": [SSH_KEY_NAME],
             }
             url = f"{BASE_URL}/launch"
@@ -930,6 +944,7 @@ def lambda_handler(event, context):
 
         # 4. Execute all risky operations BEFORE assigning VM to match
         log_scenario("RISKY OPERATIONS PHASE", f"Testing VM {vm_id} before assignment")
+        time.sleep(300)
         
         # 4a. Get VM IP address
         vm_ip = get_vm_ip_address(vm_id)
