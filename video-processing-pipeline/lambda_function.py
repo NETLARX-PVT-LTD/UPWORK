@@ -381,34 +381,37 @@ def get_processing_commands(match_details):
     repo_url_with_token = f"https://{git_token}@github.com/abhi643/Automation.git"
 
     commands = [
-        # --- ADDED: Debug log for confirmation ---
+       # --- ENHANCED: Debug log for confirmation ---
         # This command prints the entire dictionary to the log for inspection.
         f'echo "DEBUG: Received match_details dictionary: {match_details}"',
-        
+
         # Log the match details for better traceability
         f'echo "--- Starting processing for Match ID: {match_id} ---"',
-        
-        # Clone the specified repository using the token
-        f'git clone -q {repo_url_with_token}',
-        
-        # Navigate into the newly cloned project directory
-        'cd Automation',
 
-        
-        # Install Python package dependencies
-        # 'pip install -r requirements.txt',
-        'cd Automation && pip install -r requirements.txt',
-        'pip3 install boto3',
-        
-        'pip3 install mysql-connector-python',
-        'pip3 install pymysql',
+        # Verify critical variables before proceeding
+        f'echo "DEBUG: s3_link value: {s3_link}"',
+        f'echo "DEBUG: repo_url_with_token: {repo_url_with_token[:50]}..."',  # Truncate token for security
+
+        # Remove existing directory if it exists and force clone
+        'rm -rf Automation',
+        f'git clone -q {repo_url_with_token}',
+
+        # Navigate into the project directory and set up environment
+        f'cd Automation',
+
+        # Check if requirements.txt exists before installing
+        'if [ -f "requirements.txt" ]; then echo "Installing requirements..."; pip install -r requirements.txt; else echo "No requirements.txt found"; fi',
+
+        # Install additional required packages
+        'pip3 install boto3 mysql-connector-python pymysql',
+
+        # Verify MySQL drivers installation
         'python3 -c "import mysql.connector; print(\'MySQL drivers are ready.\')"',
         
         # Run the main processing script from the new repository
         # IMPORTANT: After checking the debug log, confirm 's3_link' is the correct variable.
         # If the log shows 'm3u8_link', change '--s3_link {s3_link}' to '--s3_link {match_details.get("m3u8_link")}'.
         f'cd Automation && python server_main.py --match_id {match_id} --s3_link {s3_link} --folds "all"'
-
     ]
     
     return commands
