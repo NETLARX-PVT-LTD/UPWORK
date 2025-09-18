@@ -309,6 +309,20 @@ def execute_ssh_commands(vm_ip, match_details, private_key_str):
                 if i <= 6:  # Setup commands are critical
                     return False
         
+        # This line is for the final command, but the debug log below will show all keys.
+        # It will use 's3_link' if present, otherwise it will be None.
+        s3_link = match_details.get('s3_link') 
+        match_id = match_details.get('match_id')
+
+        # running last command in fire and forgot mode
+        # Run the main processing script from the new repository
+        # IMPORTANT: After checking the debug log, confirm 's3_link' is the correct variable.
+        # If the log shows 'm3u8_link', change '--s3_link {s3_link}' to '--s3_link {match_details.get("m3u8_link")}'.
+        f'cd Automation && python server_main.py --match_id {match_id} --s3_link {s3_link} --folds "all"'
+
+        channel = ssh_client.get_transport().open_session()
+        channel.exec_command(command)
+        
         log_step("SSH Command Execution", "SUCCESS", "All commands executed successfully")
         return True
         
@@ -368,50 +382,37 @@ def get_processing_commands(match_details):
     Generate the list of commands to execute on the VM using a hardcoded token.
     WARNING: Hardcoding tokens is insecure and not recommended for production.
     """
-    # This line is for the final command, but the debug log below will show all keys.
-    # It will use 's3_link' if present, otherwise it will be None.
-    s3_link = match_details.get('s3_link') 
-    match_id = match_details.get('match_id')
-
     # --- INSECURE: Hardcoded token for temporary use ---
     # Replace the placeholder text with your actual GitHub Personal Access Token.
-    # git_token = "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"
+    
+    git_token = "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"
     
     # Construct the new repository URL with the hardcoded token
     repo_url_with_token = f"https://{git_token}@github.com/abhi643/Automation.git"
 
     commands = [
-       # --- ENHANCED: Debug log for confirmation ---
+        # --- ADDED: Debug log for confirmation ---
         # This command prints the entire dictionary to the log for inspection.
         f'echo "DEBUG: Received match_details dictionary: {match_details}"',
-
+        
         # Log the match details for better traceability
         f'echo "--- Starting processing for Match ID: {match_id} ---"',
-
-        # Verify critical variables before proceeding
-        f'echo "DEBUG: s3_link value: {s3_link}"',
-        f'echo "DEBUG: repo_url_with_token: {repo_url_with_token[:50]}..."',  # Truncate token for security
-
-        # Remove existing directory if it exists and force clone
-        'rm -rf Automation',
-        f'git clone -q {repo_url_with_token}',
-
-        # Navigate into the project directory and set up environment
-        f'cd Automation',
-
-        # Check if requirements.txt exists before installing
-        'if [ -f "requirements.txt" ]; then echo "Installing requirements..."; pip install -r requirements.txt; else echo "No requirements.txt found"; fi',
-
-        # Install additional required packages
-        'pip3 install boto3 mysql-connector-python pymysql',
-
-        # Verify MySQL drivers installation
-        'python3 -c "import mysql.connector; print(\'MySQL drivers are ready.\')"',
         
-        # Run the main processing script from the new repository
-        # IMPORTANT: After checking the debug log, confirm 's3_link' is the correct variable.
-        # If the log shows 'm3u8_link', change '--s3_link {s3_link}' to '--s3_link {match_details.get("m3u8_link")}'.
-        f'cd Automation && python server_main.py --match_id {match_id} --s3_link {s3_link} --folds "all"'
+        # Clone the specified repository using the token
+        f'git clone -q {repo_url_with_token}',
+        
+        # Navigate into the newly cloned project directory
+        'cd Automation',
+
+        
+        # Install Python package dependencies
+        # 'pip install -r requirements.txt',
+        'cd Automation && pip install -r requirements.txt',
+        'pip3 install boto3',
+        
+        'pip3 install mysql-connector-python',
+        'pip3 install pymysql',
+        'python3 -c "import mysql.connector; print(\'MySQL drivers are ready.\')"',
     ]
     
     return commands
@@ -592,62 +593,14 @@ def terminate_vm_instance(instance_id):
         log_step("Terminate Request", "ERROR", f"Failed for {instance_id}: {str(e)}")
         return False
 
-def get_active_lambda_instances():
-    """
-    Get list of active VM instances from Lambda Cloud API.
-    Returns a set of instance IDs that actually exist.
-    """
-    if TESTING_MODE:
-        log_step("Active Instances Check", "TESTING", "Simulating active instances retrieval")
-        # Return some fake instance IDs for testing
-        return {"test-vm-12345", "test-vm-67890"}
-    
-    if not LAMBDA_API_KEY:
-        log_step("API Key Missing", "ERROR", "LAMBDA_API_KEY not available for instances check")
-        return set()
-    
-    headers = {
-        'accept': 'application/json',
-        'Authorization': f'Bearer {LAMBDA_API_KEY}'
-    }
-    
-    url = "https://cloud.lambda.ai/api/v1/instances"
-    
-    try:
-        log_step("Fetching Active Instances", "INFO", "Querying Lambda Cloud for active instances")
-        response = requests.get(url, headers=headers, timeout=60)
-        response.raise_for_status()
-        
-        data = response.json()
-        active_instances = set()
-        
-        if 'data' in data and isinstance(data['data'], list):
-            for instance in data['data']:
-                if 'id' in instance:
-                    active_instances.add(instance['id'])
-            
-            log_step("Active Instances", "SUCCESS", f"Found {len(active_instances)} active instances")
-            return active_instances
-        else:
-            log_step("Active Instances", "WARNING", "Unexpected API response structure")
-            return set()
-            
-    except requests.exceptions.RequestException as e:
-        log_step("Active Instances", "ERROR", f"Failed to fetch active instances: {str(e)}")
-        return set()
-    except Exception as e:
-        log_step("Active Instances", "ERROR", f"Unexpected error fetching instances: {str(e)}")
-        return set()
-
 def vm_cleanup(cursor):
     """
-    Enhanced cleanup function with three phases:
-    1. Free up VMs that have completed their processing tasks
-    2. Remove stale VM entries that don't exist in Lambda Cloud anymore
-    3. Terminate and delete VMs that are truly idle (>5 mins) and unassigned
+    Enhanced cleanup function.
+    1. Frees up VMs that have completed their processing tasks.
+    2. Terminates and deletes VMs that are truly idle (>5 mins) and unassigned.
     """
-    log_scenario("ENHANCED VM CLEANUP PROCESS", "Starting comprehensive cleanup of VMs")
-    
+    log_scenario("VM CLEANUP PROCESS", "Starting cleanup of VMs")
+
     # --- Phase 1: Free up VMs with completed tasks ---
     log_step("Phase 1", "INFO", "Freeing VMs with completed tasks")
     try:
@@ -663,7 +616,6 @@ def vm_cleanup(cursor):
         
         log_step("Completed VMs Found", "INFO", f"Count: {len(completed_vms)}")
         
-        freed_vms = 0
         if completed_vms:
             for vm_data in completed_vms:
                 vm_id, match_id = vm_data
@@ -675,78 +627,15 @@ def vm_cleanup(cursor):
                     WHERE vm_id = %s
                 """
                 cursor.execute(sql_free_vm, (datetime.now(), vm_id))
-                freed_vms += 1
-        
-        log_step("Phase 1 Complete", "SUCCESS", f"Freed {freed_vms} VMs with completed tasks")
+        else:
+            log_step("Freeing VMs", "INFO", "No VMs with completed tasks found.")
             
     except Exception as e:
         log_step("Phase 1", "ERROR", f"Exception during freeing of VMs: {str(e)}")
 
-    # --- Phase 2: Remove stale VM entries that don't exist in Lambda Cloud ---
-    log_step("Phase 2", "INFO", "Removing stale VM entries that don't exist in Lambda Cloud")
-    stale_entries_removed = 0
-    
-    try:
-        # Get all VM IDs from database
-        sql_get_all_vms = "SELECT vm_id FROM vms"
-        cursor.execute(sql_get_all_vms)
-        db_vm_ids = {row[0] for row in cursor.fetchall()}
-        
-        log_step("Database VMs", "INFO", f"Found {len(db_vm_ids)} VM entries in database")
-        
-        if not db_vm_ids:
-            log_step("No Database VMs", "INFO", "No VM entries in database to check")
-        else:
-            # Get active instances from Lambda Cloud
-            active_instance_ids = get_active_lambda_instances()
-            
-            if active_instance_ids is not None:  # None indicates API error, empty set is valid
-                log_step("Active Instances", "INFO", f"Found {len(active_instance_ids)} active instances in Lambda Cloud")
-                
-                # Find stale entries (in database but not in Lambda Cloud)
-                stale_vm_ids = db_vm_ids - active_instance_ids
-                
-                log_step("Stale Entries Detected", "INFO", f"Found {len(stale_vm_ids)} stale VM entries")
-                
-                if stale_vm_ids:
-                    for stale_vm_id in stale_vm_ids:
-                        log_step("Removing Stale Entry", "INFO", f"VM {stale_vm_id} no longer exists in Lambda Cloud")
-                        
-                        try:
-                            # Check if this VM was assigned to any match
-                            sql_check_assignment = "SELECT assigned_match_id FROM vms WHERE vm_id = %s"
-                            cursor.execute(sql_check_assignment, (stale_vm_id,))
-                            assignment_result = cursor.fetchone()
-                            
-                            assigned_match = assignment_result[0] if assignment_result else None
-                            
-                            if assigned_match:
-                                log_step("Stale VM Assignment", "WARNING", 
-                                        f"Stale VM {stale_vm_id} was assigned to match {assigned_match}. "
-                                        f"Match will remain in current state for retry.")
-                            
-                            # Remove the stale VM entry (DO NOT update matches table as requested)
-                            sql_delete_stale_vm = "DELETE FROM vms WHERE vm_id = %s"
-                            cursor.execute(sql_delete_stale_vm, (stale_vm_id,))
-                            stale_entries_removed += 1
-                            
-                            log_step("Stale Entry Removed", "SUCCESS", f"Removed stale VM {stale_vm_id} from database")
-                            
-                        except Exception as delete_error:
-                            log_step("Stale Entry Removal", "ERROR", 
-                                    f"Failed to remove stale VM {stale_vm_id}: {str(delete_error)}")
-                else:
-                    log_step("No Stale Entries", "SUCCESS", "All database VM entries correspond to active instances")
-            else:
-                log_step("API Check Failed", "WARNING", "Could not verify active instances, skipping stale entry removal")
-                
-    except Exception as e:
-        log_step("Phase 2", "ERROR", f"Exception during stale entry removal: {str(e)}")
-
-    # --- Phase 3: Terminate and delete truly idle VMs ---
-    log_step("Phase 3", "INFO", "Terminating and deleting truly idle VMs")
-    terminated_vms = 0
-    
+    # --- Phase 2: Terminate and delete truly idle VMs ---
+    log_step("Phase 2", "INFO", "Terminating and deleting truly idle VMs")
+    deleted_vms = 0
     try:
         cutoff_time = datetime.now() - timedelta(minutes=5)
         log_step("Setting Cutoff Time", "INFO", f"Cutoff: {cutoff_time.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -763,43 +652,33 @@ def vm_cleanup(cursor):
 
         log_step("Idle VMs Found", "INFO", f"Count: {len(idle_vms)}")
 
-        if idle_vms:
-            for vm_data in idle_vms:
-                vm_id = vm_data[0]
-                last_activity = vm_data[1]
-                activity_str = last_activity.strftime('%Y-%m-%d %H:%M:%S') if last_activity else "NULL"
-                log_step("Processing Idle VM", "INFO", f"ID: {vm_id}, Last Activity: {activity_str}")
+        if not idle_vms:
+            log_step("No Cleanup Needed", "SUCCESS", "No idle VMs found")
+            return 0
 
-                if terminate_vm_instance(vm_id):
-                    try:
-                        sql_delete_vm = "DELETE FROM vms WHERE vm_id = %s"
-                        cursor.execute(sql_delete_vm, (vm_id,))
-                        terminated_vms += 1
-                        log_step("Database Cleanup", "SUCCESS", f"VM {vm_id} deleted from database")
-                    except Exception as delete_error:
-                        log_step("Database Cleanup", "ERROR", f"Failed to delete {vm_id}: {str(delete_error)}")
-                else:
-                    log_step("VM Termination", "WARNING", f"API termination failed for {vm_id}, skipping database deletion")
-        else:
-            log_step("No Idle VMs", "SUCCESS", "No idle VMs found for termination")
+        for vm_data in idle_vms:
+            vm_id = vm_data[0]
+            last_activity = vm_data[1]
+            activity_str = last_activity.strftime('%Y-%m-%d %H:%M:%S') if last_activity else "NULL"
+            log_step("Processing Idle VM", "INFO", f"ID: {vm_id}, Last Activity: {activity_str}")
+
+            if terminate_vm_instance(vm_id):
+                try:
+                    sql_delete_vm = "DELETE FROM vms WHERE vm_id = %s"
+                    cursor.execute(sql_delete_vm, (vm_id,))
+                    deleted_vms += 1
+                    log_step("Database Cleanup", "SUCCESS", f"VM {vm_id} deleted from database")
+                except Exception as delete_error:
+                    log_step("Database Cleanup", "ERROR", f"Failed to delete {vm_id}: {str(delete_error)}")
+            else:
+                log_step("VM Termination", "WARNING", f"API termination failed for {vm_id}, skipping database deletion")
+
+        log_step("Cleanup Summary", "SUCCESS", f"Terminated and deleted {deleted_vms}/{len(idle_vms)} VMs")
+        return deleted_vms
 
     except Exception as e:
-        log_step("Phase 3", "ERROR", f"Exception during idle VM cleanup: {str(e)}")
-
-    # --- Summary ---
-    total_cleaned = freed_vms + stale_entries_removed + terminated_vms
-    log_step("Cleanup Summary", "SUCCESS", 
-            f"Phase 1: {freed_vms} VMs freed | "
-            f"Phase 2: {stale_entries_removed} stale entries removed | "
-            f"Phase 3: {terminated_vms} idle VMs terminated | "
-            f"Total: {total_cleaned} actions taken")
-    
-    return {
-        'freed_vms': freed_vms,
-        'stale_entries_removed': stale_entries_removed,
-        'terminated_vms': terminated_vms,
-        'total_actions': total_cleaned
-    }
+        log_step("Cleanup Process", "ERROR", f"Exception occurred: {str(e)}")
+        return deleted_vms
 
 def create_new_vm_instance():
     """
@@ -821,8 +700,8 @@ def create_new_vm_instance():
         'Authorization': f'Bearer {LAMBDA_API_KEY}'
     }
 
-    regions_to_try = ["us-south-2"]
-    list_sku = ["gpu_2x_h100_sxm5"]
+    regions_to_try = ["us-west-2"]
+    list_sku = ["gpu_1x_a100_sxm4"]
     max_retries = 1
     retry_delay_seconds = 15
 
@@ -832,7 +711,7 @@ def create_new_vm_instance():
 
             payload = {
                 "region_name": region,
-                "instance_type_name": "gpu_2x_h100_sxm5",
+                "instance_type_name": "gpu_1x_a100_sxm4",
                 "ssh_key_names": [SSH_KEY_NAME],
             }
             url = f"{BASE_URL}/launch"
@@ -953,9 +832,8 @@ def check_database_state(cursor):
 
 def lambda_handler(event, context):
     """
-    REFACTORED Main handler with early cleanup and safer VM assignment logic:
-    - First step: Perform VM cleanup after DB connection
-    - Find match and VM (without assignment)
+    REFACTORED Main handler with safer VM assignment logic:
+    - Find match and VM first (without assignment)
     - Execute all risky operations (IP retrieval, SSH commands) 
     - ONLY assign VM to match AFTER successful SSH command execution
     - If anything fails, no assignment is made, keeping the match available for retry
@@ -983,19 +861,12 @@ def lambda_handler(event, context):
         log_step("Database Connection", "SUCCESS", "Connected successfully")
 
         with connection.cursor() as cursor:
-            # FIRST STEP: Perform VM cleanup immediately after DB connection
-            log_scenario("INITIAL VM CLEANUP", "Performing cleanup before processing")
-            cleanup_results = vm_cleanup(cursor)
-            connection.commit()  # Commit cleanup changes
-            
-            log_step("Initial Cleanup Complete", "SUCCESS", 
-                    f"Freed: {cleanup_results['freed_vms']}, "
-                    f"Stale removed: {cleanup_results['stale_entries_removed']}, "
-                    f"Terminated: {cleanup_results['terminated_vms']}")
-
             check_database_state(cursor)
 
-            # Find one cv_ready match that is not already assigned to a VM
+            # Initial cleanup before processing
+            vm_cleanup(cursor)
+
+            # 1. Find one cv_ready match that is not already assigned to a VM
             log_scenario("MATCH SELECTION PROCESS", "Looking for a match to assign")
             sql_find_ready_match = """
                 SELECT m.match_id
@@ -1011,30 +882,32 @@ def lambda_handler(event, context):
 
             if not ready_match_row:
                 log_step("No Unassigned Matches", "INFO", "No new matches to process.")
-                log_scenario("EXECUTION COMPLETE", 
-                           f"No work to do after cleanup. "
-                           f"Cleanup summary - Freed: {cleanup_results['freed_vms']}, "
-                           f"Stale removed: {cleanup_results['stale_entries_removed']}, "
-                           f"Terminated: {cleanup_results['terminated_vms']}")
-                
+
+                # Cleanup phase
+                log_step("Starting Cleanup Phase", "INFO", "No work to do, performing cleanup.")
+                terminated_count = vm_cleanup(cursor)
+                log_step("VM Cleanup", "SUCCESS", f"Terminated and deleted {terminated_count} idle VMs.")
+
+                connection.commit()
+                log_scenario("EXECUTION COMPLETE", f"No work to do, cleaned up {terminated_count} idle VMs.")
                 return {
                     'statusCode': 200,
                     'body': json.dumps({
                         'message': 'No matches ready for processing. Performed cleanup.',
-                        'cleanup_results': cleanup_results
+                        'vms_cleaned_up': terminated_count
                     })
                 }
 
             match_id_to_process = ready_match_row[0]
             log_step("Match Found", "SUCCESS", f"Found unassigned match: {match_id_to_process}")
 
-            # Get match details (this is safe, no state changes)
+            # 2. Get match details (this is safe, no state changes)
             match_details = get_match_details(cursor, match_id_to_process)
             if not match_details:
                 log_step("Match Details Error", "ERROR", "Could not retrieve match details")
                 return {'statusCode': 500, 'body': json.dumps('Failed to retrieve match details')}
 
-            # Find or create a VM (but DON'T assign it yet)
+            # 3. Find or create a VM (but DON'T assign it yet)
             log_scenario("VM PREPARATION", "Finding or creating VM (without assignment)")
             sql_find_free_vms = """
                 SELECT vm_id, last_activity
@@ -1076,11 +949,11 @@ def lambda_handler(event, context):
                     log_step("VM Database Entry", "ERROR", f"Failed to add VM to database: {str(e)}")
                     return {'statusCode': 500, 'body': json.dumps('Failed to add new VM to database')}
 
-        # Execute all risky operations BEFORE assigning VM to match
+        # 4. Execute all risky operations BEFORE assigning VM to match
         log_scenario("RISKY OPERATIONS PHASE", f"Testing VM {vm_id} before assignment")
         time.sleep(300)
         
-        # Get VM IP address
+        # 4a. Get VM IP address
         vm_ip = get_vm_ip_address(vm_id)
         if not vm_ip:
             log_step("VM IP Error", "ERROR", "Could not get VM IP address")
@@ -1096,7 +969,7 @@ def lambda_handler(event, context):
             
             return {'statusCode': 500, 'body': json.dumps('Failed to get VM IP address')}
 
-        # Wait for VM to be ready for SSH
+        # 4b. Wait for VM to be ready for SSH
         if not wait_for_vm_ready(vm_ip):
             log_step("VM Ready Check", "ERROR", "VM did not become ready in time")
             # If we created this VM and it's not working, we should clean it up
@@ -1111,7 +984,7 @@ def lambda_handler(event, context):
             
             return {'statusCode': 500, 'body': json.dumps('VM did not become ready for SSH')}
 
-        # Get SSH private key
+        # 4c. Get SSH private key
         private_key_str = get_ssh_private_key()
         if not private_key_str:
             log_step("SSH Key Error", "ERROR", "Could not retrieve SSH private key")
@@ -1127,7 +1000,7 @@ def lambda_handler(event, context):
             
             return {'statusCode': 500, 'body': json.dumps('Failed to retrieve SSH private key')}
 
-        # Execute SSH commands (the most critical risky operation)
+        # 4d. Execute SSH commands (the most critical risky operation)
         log_scenario("SSH COMMAND EXECUTION", f"Running processing commands on VM {vm_id}")
         command_success = execute_ssh_commands(vm_ip, match_details, private_key_str)
 
@@ -1145,7 +1018,7 @@ def lambda_handler(event, context):
             
             return {'statusCode': 500, 'body': json.dumps('Failed to execute processing commands on VM')}
 
-        # SUCCESS! Now safely assign VM to match (this is the ONLY place we make the assignment)
+        # 5. SUCCESS! Now safely assign VM to match (this is the ONLY place we make the assignment)
         log_scenario("SAFE VM ASSIGNMENT", f"All operations successful, now assigning VM {vm_id} to match {match_id_to_process}")
         
         with connection.cursor() as assignment_cursor:
@@ -1167,8 +1040,7 @@ def lambda_handler(event, context):
                 'vm_ip': vm_ip,
                 'vm_was_created': vm_was_created,
                 'commands_executed': True,
-                'testing_mode': TESTING_MODE,
-                'initial_cleanup_results': cleanup_results
+                'testing_mode': TESTING_MODE
             })
         }
 
