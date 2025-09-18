@@ -384,8 +384,9 @@ def get_processing_commands(match_details):
     """
     # --- INSECURE: Hardcoded token for temporary use ---
     # Replace the placeholder text with your actual GitHub Personal Access Token.
-    
-    git_token = "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"
+    match_id = match_details.get('match_id')
+
+    # git_token = "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"
     
     # Construct the new repository URL with the hardcoded token
     repo_url_with_token = f"https://{git_token}@github.com/abhi643/Automation.git"
@@ -398,6 +399,8 @@ def get_processing_commands(match_details):
         # Log the match details for better traceability
         f'echo "--- Starting processing for Match ID: {match_id} ---"',
         
+        'rm -rf Automation',
+
         # Clone the specified repository using the token
         f'git clone -q {repo_url_with_token}',
         
@@ -700,8 +703,7 @@ def create_new_vm_instance():
         'Authorization': f'Bearer {LAMBDA_API_KEY}'
     }
 
-    regions_to_try = ["us-west-2"]
-    list_sku = ["gpu_1x_a100_sxm4"]
+    regions_to_try = ["us-east-3"]
     max_retries = 1
     retry_delay_seconds = 15
 
@@ -711,7 +713,7 @@ def create_new_vm_instance():
 
             payload = {
                 "region_name": region,
-                "instance_type_name": "gpu_1x_a100_sxm4",
+                "instance_type_name": "gpu_1x_gh200",
                 "ssh_key_names": [SSH_KEY_NAME],
             }
             url = f"{BASE_URL}/launch"
