@@ -143,7 +143,7 @@ def get_vm_ip_address(vm_id, max_retries=5, retry_delay=10):
         'Authorization': f'Bearer {LAMBDA_API_KEY}'
     }
     
-    url = f"https://cloud.lambda.ai/api/v1/instances"  # Changed to list instances
+    url = "https://cloud.lambda.ai/api/v1/instances"  # list all instances
     
     for attempt in range(max_retries):
         log_step("VM IP Retrieval", "INFO", f"Attempt {attempt + 1}/{max_retries} to get IP for {vm_id}")
@@ -153,22 +153,20 @@ def get_vm_ip_address(vm_id, max_retries=5, retry_delay=10):
             response.raise_for_status()
             
             data = response.json()
-            print(data)
-            # if 'data' in data and data['data']:
-            #     for instance in data['data']:
-            #         if instance.get('id') == vm_id:
-            #             ip_address = instance.get('ip')
-            #             if ip_address:
-            #                 log_step("VM IP Retrieval", "SUCCESS", f"IP for {vm_id}: {ip_address}")
-            #                 return ip_address
-            ip_address = data['data'][0]['ip']
-            if ip_address==None:
-                log_step("VM IP Retrieval", "WARNING", f"IP for {vm_id} not found in response data.")
-            else:
-                log_step("VM IP Retrieval", "SUCCESS", f"IP for {vm_id}: {ip_address}")
-                return ip_address
+            instances = data.get("data", [])
             
-            # If VM is not found in the list, or IP is not yet available
+            # Traverse through instances to find matching vm_id
+            for instance in instances:
+                if instance.get("id") == vm_id:
+                    ip_address = instance.get("ip")
+                    if ip_address:
+                        log_step("VM IP Retrieval", "SUCCESS", f"IP for {vm_id}: {ip_address}")
+                        return ip_address
+                    else:
+                        log_step("VM IP Retrieval", "WARNING", f"VM {vm_id} found but IP not yet assigned.")
+                        break  # no need to keep searching
+            
+            # If VM is not found or IP not available
             log_step("VM IP Retrieval", "INFO", f"VM {vm_id} not found or IP not ready. Retrying in {retry_delay} seconds...")
             time.sleep(retry_delay)
 
@@ -178,6 +176,7 @@ def get_vm_ip_address(vm_id, max_retries=5, retry_delay=10):
 
     log_step("VM IP Retrieval", "ERROR", f"Failed to get IP for {vm_id} after {max_retries} attempts.")
     return None
+
 
 def get_match_details(cursor, match_id):
     """Get match details including S3 link"""
@@ -307,21 +306,7 @@ def execute_ssh_commands(vm_ip, match_details, private_key_str):
                 
                 # For critical setup commands, return False
                 if i <= 6:  # Setup commands are critical
-                    return False
-        
-        # This line is for the final command, but the debug log below will show all keys.
-        # It will use 's3_link' if present, otherwise it will be None.
-        s3_link = match_details.get('s3_link') 
-        match_id = match_details.get('match_id')
-
-        # running last command in fire and forgot mode
-        # Run the main processing script from the new repository
-        # IMPORTANT: After checking the debug log, confirm 's3_link' is the correct variable.
-        # If the log shows 'm3u8_link', change '--s3_link {s3_link}' to '--s3_link {match_details.get("m3u8_link")}'.
-        f'cd Automation && python server_main.py --match_id {match_id} --s3_link {s3_link} --folds "all"'
-
-        channel = ssh_client.get_transport().open_session()
-        channel.exec_command(command)
+                    return False  
         
         log_step("SSH Command Execution", "SUCCESS", "All commands executed successfully")
         return True
@@ -382,11 +367,12 @@ def get_processing_commands(match_details):
     Generate the list of commands to execute on the VM using a hardcoded token.
     WARNING: Hardcoding tokens is insecure and not recommended for production.
     """
-    # --- INSECURE: Hardcoded token for temporary use ---
-    # Replace the placeholder text with your actual GitHub Personal Access Token.
+    # This line is for the final command, but the debug log below will show all keys.
+    # It will use 's3_link' if present, otherwise it will be None.
+    s3_link = match_details.get('s3_link') 
     match_id = match_details.get('match_id')
 
-    # git_token = "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"
+    git_token = "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"
     
     # Construct the new repository URL with the hardcoded token
     repo_url_with_token = f"https://{git_token}@github.com/abhi643/Automation.git"
@@ -416,6 +402,7 @@ def get_processing_commands(match_details):
         'pip3 install mysql-connector-python',
         'pip3 install pymysql',
         'python3 -c "import mysql.connector; print(\'MySQL drivers are ready.\')"',
+        f'cd Automation && nohup python server_main.py --match_id {match_id} --s3_link {s3_link} --folds "all" > server_main.log 2>&1 &',
     ]
     
     return commands
@@ -703,7 +690,7 @@ def create_new_vm_instance():
         'Authorization': f'Bearer {LAMBDA_API_KEY}'
     }
 
-    regions_to_try = ["us-east-3"]
+    regions_to_try = ["us-south-1"]
     max_retries = 1
     retry_delay_seconds = 15
 
@@ -713,7 +700,7 @@ def create_new_vm_instance():
 
             payload = {
                 "region_name": region,
-                "instance_type_name": "gpu_1x_gh200",
+                "instance_type_name": "gpu_4x_a6000",
                 "ssh_key_names": [SSH_KEY_NAME],
             }
             url = f"{BASE_URL}/launch"
