@@ -10,6 +10,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
     using Microsoft.EntityFrameworkCore;
     using Netlarx.Products.Gobot.Interface;
     using System.Threading.Tasks;
+    using System;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -24,7 +25,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
 
         // ✅ GET /api/landing/{botId}
         [HttpGet("{botId}")]
-        public async Task<IActionResult> GetLandingPage(string botId)
+        public async Task<IActionResult> GetLandingPage(Guid botId)
         {
             var bot = await _context.Bots
                 .Include(b => b.Theme)
@@ -43,7 +44,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
                 botConfig = new
                 {
                     id = bot.BotId,
-                    story = bot.Story,
+                    story = bot.StoryId,
                     primaryColor = bot.Theme?.PrimaryColor,
                     name = bot.BotName,
                     greeting = bot.Greeting

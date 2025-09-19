@@ -10,6 +10,7 @@ namespace Netlarx.Products.Gobot.Controllers.Config
     using Microsoft.EntityFrameworkCore;
     using Netlarx.Products.Gobot.Interface;
     using Netlarx.Products.Gobot.Models;
+    using System;
     using System.Threading.Tasks;
 
 
@@ -26,9 +27,9 @@ namespace Netlarx.Products.Gobot.Controllers.Config
 
         // ✅ GET /api/config/{botId}
         [HttpGet("{botId}")]
-        public async Task<IActionResult> GetConfig(string botId)
+        public async Task<IActionResult> GetConfig(Guid botId)
         {
-            var bot = await _db.BotConfigs.FirstOrDefaultAsync(b => b.BotId == botId);
+            var bot = await _db.Bots.FirstOrDefaultAsync(b => b.BotId == botId);
             if (bot == null)
                 return NotFound(new { message = $"Bot with Id '{botId}' not found." });
 
@@ -38,11 +39,11 @@ namespace Netlarx.Products.Gobot.Controllers.Config
                 {
                     BotName = bot.BotName,
                     PrimaryColor = bot.PrimaryColor,
-                    SecondaryColor = bot.SecondaryColor
-                    //ImageUrl = bot.Imageurl
+                    SecondaryColor = bot.SecondaryColor,
+                    ImageUrl = bot.ImageUrl
                 },
                 WelcomeMessage = bot.WelcomeMessage,
-                InputPlaceholder = bot.InputPlaceholder
+                InputPlaceholder = bot.Placeholder
             };
 
             return Ok(response);

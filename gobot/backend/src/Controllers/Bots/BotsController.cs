@@ -30,7 +30,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
 
         // ✅ GET /api/bots/{botId}
         [HttpGet("{botId}")]
-        public async Task<IActionResult> GetBot(string botId)
+        public async Task<IActionResult> GetBot(Guid botId)
         {
             var bot = await _context.Bots.FirstOrDefaultAsync(b => b.BotId == botId);
 
@@ -42,7 +42,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
 
         // ✅ POST /api/bots/{botId}
         [HttpPost("{botId}")]
-        public async Task<IActionResult> CreateBot(string botId)
+        public async Task<IActionResult> CreateBot(Guid botId)
         {
             //Retrieve the deserialized Protobuf object from middleware
             if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not BotBlock block)
@@ -58,10 +58,10 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
             //botRequest.ApiKey = botRequest.ApiKey;
             var model =  new Bot
             {
-                BotId = botId,
+                BotId = Guid.Parse(block.BotId),
                 BotName = block.BotName,
                 ApiKey = string.IsNullOrEmpty(block.ApiKey) ? Guid.NewGuid().ToString("N") : block.ApiKey,
-                Story = block.Story,
+                StoryId = block.StoryId,
                 Position = block.Position,
                 Size = block.Size,
                 Greeting = block.Greeting,
@@ -72,20 +72,20 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
 
                 Theme = block.Theme == null ? null : new Theme
                 {
-                    Id = block.Theme.Id,
+                    Id = Guid.Parse(block.BotId),
                     PrimaryColor = block.Theme.PrimaryColor
                 },
 
                 LandingConfig = block.LandingConfig == null ? null : new LandingConfig
                 {
-                    Id = string.IsNullOrEmpty(block.LandingConfig.Id) ? Guid.NewGuid() : Guid.Parse(block.LandingConfig.Id),
+                    Id = string.IsNullOrEmpty(block.BotId) ? Guid.NewGuid() : Guid.Parse(block.BotId),
                     Title = block.LandingConfig.Title,
                     Description = block.LandingConfig.Description,
                     BackgroundStyle = block.LandingConfig.BackgroundStyle
                 }
             };
 
-        _context.Bots.Add(model);
+            _context.Bots.Add(model);
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -97,7 +97,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
         }
 
         [HttpPut("{botId}")]
-        public async Task<IActionResult> UpdateBot(string botId)
+        public async Task<IActionResult> UpdateBot(Guid botId)
         {
             //Retrieve the deserialized Protobuf object from middleware
             if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not BotBlock botRequest)
@@ -116,7 +116,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
 
             // 🔄 Map fields from BotBlock → existing Bot
             existingBot.BotName = botRequest.BotName ?? existingBot.BotName;
-            existingBot.Story = botRequest.Story ?? existingBot.Story;
+            existingBot.StoryId = botRequest.StoryId;
             existingBot.Position = botRequest.Position ?? existingBot.Position;
             existingBot.Size = botRequest.Size ?? existingBot.Size;
             existingBot.Greeting = botRequest.Greeting ?? existingBot.Greeting;
@@ -125,6 +125,12 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
             existingBot.ShowBranding = botRequest.ShowBranding;
             existingBot.BackgroundStyle = botRequest.BackgroundStyle ?? existingBot.BackgroundStyle;
             existingBot.ApiKey = botRequest.ApiKey;
+            existingBot.PrimaryColor = botRequest.PrimaryColor;
+            existingBot.SecondaryColor = botRequest.SecondaryColor;
+            existingBot.ImageUrl = botRequest.ImageUrl;
+            existingBot.WelcomeMessage = botRequest.Greeting;
+            existingBot.FallbackMessage = botRequest.FallbackMessage;
+            existingBot.IsActive = botRequest.IsActive;
 
             // ✅ Handle Theme update
             if (botRequest.Theme != null)
@@ -160,7 +166,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
 
         // ✅ DELETE /api/bots/{botId}
         [HttpDelete("{botId}")]
-        public async Task<IActionResult> DeleteBot(string botId)
+        public async Task<IActionResult> DeleteBot(Guid botId)
         {
             var bot = await _context.Bots.FirstOrDefaultAsync(b => b.BotId == botId);
             if (bot == null)

@@ -20,7 +20,7 @@ message BotBlock {
     string botId = 1;
     string botName = 2;
     string api_key = 3; // generated API key
-    string story = 4;
+    int32 story_Id = 4;
 
     // JSON navigation properties
     ThemeBlock theme = 5;
@@ -31,6 +31,13 @@ message BotBlock {
     bool allow_fullscreen = 10;
     bool show_branding = 11;
     string background_style = 12;
+
+    string primary_color = 14;
+    string secondary_color = 15;
+    string image_url = 16;
+    bool is_active = 17;
+    string welcome_message = 18;
+    string fallback_message = 19;
 
     LandingConfigBlock landing_config = 13;
 }

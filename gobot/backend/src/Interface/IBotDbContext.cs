@@ -9,6 +9,7 @@ namespace Netlarx.Products.Gobot.Interface
     using Gobot.Models;
     using Microsoft.EntityFrameworkCore;
     using Netlarx.Products.Gobot.Models;
+    using Netlarx.Products.Gobot.Models.FacebookIntegration;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -64,6 +65,10 @@ namespace Netlarx.Products.Gobot.Interface
         DbSet<PageMessage> PageMessages { get; set; }
 
         DbSet<BotPublishRequest> BotPublishRequests { get; set; }
+
+        DbSet<UserToken> UserTokens { get; set; }
+        DbSet<PageToken> PageTokens { get; set; }
+        DbSet<BotConnection> BotConnections { get; set; }
         void addStory(Stories model);
 
         void addConnection(Connection connection);

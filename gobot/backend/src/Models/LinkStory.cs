@@ -7,12 +7,12 @@
 
 namespace Netlarx.Products.Gobot.Models
 {
-
+    using System;
     using System.ComponentModel.DataAnnotations;
 
     public class LinkStory : BaseComponent
     {
-        public string BotId { get; set; }
+        public Guid BotId { get; set; }
         [Required]
         public int StoryId { get; set; }
         public string Type { get; set; } // "linkStory"

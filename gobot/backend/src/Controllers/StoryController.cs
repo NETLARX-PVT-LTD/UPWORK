@@ -1262,6 +1262,8 @@ namespace Netlarx.Products.Gobot.Controllers
                     MapId(c.FromComponentId);
                 }
 
+                MapId(session.Story.BotId);
+
                 // 2️⃣ Save Story first
                 var rootBlockGuid = GetMappedId(session.Story.RootBlockConnectionId);
 
@@ -1272,7 +1274,7 @@ namespace Netlarx.Products.Gobot.Controllers
                                     : session.Story.Name,
                                     RootBlockConnectionId = rootBlockGuid,
                                     CreatedDate = DateTime.UtcNow,
-                                    BotId = session.Story.Name
+                                    BotId = GetMappedId(session.Story.BotId)
                 };
 
 
