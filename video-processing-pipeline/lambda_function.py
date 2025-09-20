@@ -673,6 +673,7 @@ def vm_cleanup(cursor):
 def create_new_vm_instance():
     """
     Launches a new VM instance using the Lambda Cloud API with retry and region fallback.
+    Tries multiple regions and multiple GPU types before giving up.
     """
     log_step("Creating New VM Instance", "INFO")
 
@@ -690,56 +691,90 @@ def create_new_vm_instance():
         'Authorization': f'Bearer {LAMBDA_API_KEY}'
     }
 
-    regions_to_try = ["us-south-1"]
-    max_retries = 1
-    retry_delay_seconds = 15
+    # Multiple regions to try
+    regions_to_try = ["us-south-1", "us-east-1", "us-west-1", "us-west-2"]
+    
+    # Multiple GPU types to try 
+    gpu_types_to_try = [
+        "gpu_4x_a6000",
+        "gpu_1x_a100", 
+        "gpu_8x_a100",
+        "gpu_1x_a6000",
+        "gpu_2x_a6000",
+        "gpu_1x_h100"
+    ]
+    
+    max_retries = 2
+    retry_delay_seconds = 10
 
+    url = f"{BASE_URL}/launch"
+
+    if TESTING_MODE:
+        log_step("VM Creation Simulation", "TESTING", "Simulating VM launch request")
+        fake_instance_id = f"test-vm-{uuid.uuid4().hex[:8]}"
+        log_step("VM Launch", "SUCCESS", f"SIMULATED: New instance created with ID: {fake_instance_id}")
+        return fake_instance_id
+
+    # Try each region
     for region in regions_to_try:
-        for attempt in range(max_retries):
-            log_step("Sending Launch Request", "INFO", f"Trying region: {region}, Attempt {attempt + 1}/{max_retries}")
+        log_step("Trying Region", "INFO", f"Attempting region: {region}")
+        
+        # Try each GPU type in this region
+        for gpu_type in gpu_types_to_try:
+            log_step("Trying GPU Type", "INFO", f"Attempting {gpu_type} in {region}")
+            
+            # Retry mechanism for this specific region/GPU combination
+            for attempt in range(max_retries):
+                log_step("Launch Attempt", "INFO", f"Region: {region}, GPU: {gpu_type}, Attempt: {attempt + 1}/{max_retries}")
 
-            payload = {
-                "region_name": region,
-                "instance_type_name": "gpu_4x_a6000",
-                "ssh_key_names": [SSH_KEY_NAME],
-            }
-            url = f"{BASE_URL}/launch"
+                payload = {
+                    "region_name": region,
+                    "instance_type_name": gpu_type,
+                    "ssh_key_names": [SSH_KEY_NAME],
+                }
 
-            if TESTING_MODE:
-                log_step("VM Creation Simulation", "TESTING", "Simulating VM launch request")
-                fake_instance_id = f"test-vm-{uuid.uuid4().hex[:8]}"
-                log_step("VM Launch", "SUCCESS", f"SIMULATED: New instance created with ID: {fake_instance_id}")
-                return fake_instance_id
+                try:
+                    response = requests.post(url, headers=headers, json=payload, timeout=120)
+                    response.raise_for_status()
 
-            try:
-                response = requests.post(url, headers=headers, json=payload, timeout=120)
-                response.raise_for_status()
+                    response_data = response.json()
+                    if 'data' in response_data and 'instance_ids' in response_data['data'] and response_data['data']['instance_ids']:
+                        new_instance_id = response_data['data']['instance_ids'][0]
+                        log_step("VM Launch", "SUCCESS", f"New instance created: {new_instance_id} ({gpu_type} in {region})")
+                        return new_instance_id
+                    else:
+                        log_step("VM Launch", "ERROR", "Unexpected API response structure")
+                        log_step("API Response", "INFO", f"Full response: {response_data}")
+                        break  # Try next GPU type
 
-                response_data = response.json()
-                if 'data' in response_data and 'instance_ids' in response_data['data'] and response_data['data']['instance_ids']:
-                    new_instance_id = response_data['data']['instance_ids'][0]
-                    log_step("VM Launch", "SUCCESS", f"New instance created in {region} with ID: {new_instance_id}")
-                    return new_instance_id
-                else:
-                    log_step("VM Launch", "ERROR", "Unexpected API response structure.")
-                    log_step("API Response", "INFO", f"Full response: {response_data}")
-                    return None
+                except requests.exceptions.RequestException as e:
+                    if e.response and e.response.status_code == 400:
+                        if "insufficient-capacity" in e.response.text:
+                            log_step("Insufficient Capacity", "WARNING", f"No {gpu_type} capacity in {region}")
+                            break  # No point retrying, try next GPU type
+                        else:
+                            log_step("API Error", "WARNING", f"API error for {gpu_type} in {region} (attempt {attempt + 1}): {str(e)}")
+                            if attempt < max_retries - 1:
+                                log_step("Retrying", "INFO", f"Retrying in {retry_delay_seconds} seconds...")
+                                time.sleep(retry_delay_seconds)
+                            continue  # Retry this same combination
+                    else:
+                        log_step("Request Error", "WARNING", f"Request failed for {gpu_type} in {region}: {str(e)}")
+                        if e.response:
+                            log_step("API Response", "ERROR", f"Response content: {e.response.text}")
+                        break  # Try next GPU type
+                        
+                except Exception as e:
+                    log_step("Unexpected Error", "ERROR", f"Unexpected error for {gpu_type} in {region}: {str(e)}")
+                    break  # Try next GPU type
+            
+            # Small delay between GPU types to avoid API rate limiting
+            time.sleep(2)
+        
+        # Small delay between regions
+        time.sleep(5)
 
-            except requests.exceptions.RequestException as e:
-                if e.response and e.response.status_code == 400 and "insufficient-capacity" in e.response.text:
-                    log_step("Insufficient Capacity", "WARNING", f"No capacity in {region}. Retrying in {retry_delay_seconds} seconds...")
-                    time.sleep(retry_delay_seconds)
-                    continue
-                else:
-                    log_step("VM Launch", "ERROR", f"API request failed for {region}: {str(e)}")
-                    if e.response:
-                        log_step("API Response", "ERROR", f"Response content: {e.response.text}")
-                    return None
-            except Exception as e:
-                log_step("VM Launch", "ERROR", f"An unexpected error occurred for {region}: {str(e)}")
-                return None
-
-    log_step("VM Launch", "ERROR", "Failed to find an available VM in any of the specified regions after all attempts.")
+    log_step("VM Launch", "ERROR", f"Failed to create VM after trying all {len(regions_to_try)} regions and {len(gpu_types_to_try)} GPU types")
     return None
 
 def assign_vm_to_match_safely(cursor, vm_id, match_id):
