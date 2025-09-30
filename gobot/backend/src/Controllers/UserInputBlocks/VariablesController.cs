@@ -8,6 +8,7 @@
 
 namespace Netlarx.Products.Gobot.Controllers.UserInputBlocks
 {
+    using Chatbot;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
@@ -18,7 +19,7 @@ namespace Netlarx.Products.Gobot.Controllers.UserInputBlocks
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Chatbot;
+    using static System.Runtime.InteropServices.JavaScript.JSType;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -34,17 +35,38 @@ namespace Netlarx.Products.Gobot.Controllers.UserInputBlocks
         }
 
         // GET /variables
+        // GET /variables
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Models.Variable>>> GetVariables()
         {
-            return Ok(await _db.Variables.ToListAsync());
+            try
+            {
+                var variables = await _db.Variables.ToListAsync();
+                return Ok(new { Success = true, Data = variables });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error occurred while fetching variables.");
+                return StatusCode(500, new
+                {
+                    Success = false,
+                    FailureCode = "FailedToGetFromDb",
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
+            }
         }
+
 
         // POST /variables (Create new variables)
         [HttpPost]
         public async Task<IActionResult> CreateVariable([FromBody] VariableBlock variable)
         {
             if (variable == null) return BadRequest("Invalid data");
+
+            if (string.IsNullOrEmpty(variable.Name) || string.IsNullOrWhiteSpace(variable.Type))
+            {
+                return BadRequest(new { Success = true, FailureCode="Invalid Data" });
+            }
 
             var newVariable = new Models.Variable
             {
@@ -63,7 +85,21 @@ namespace Netlarx.Products.Gobot.Controllers.UserInputBlocks
         [HttpGet("/all-variables")]
         public async Task<ActionResult<IEnumerable<Models.Variable>>> GetAvailableVariables()
         {
-            return Ok(await _db.Variables.ToListAsync());
+            try
+            {
+                var variables = await _db.Variables.ToListAsync();
+                return Ok(new { Success = true, Data = variables });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error occurred while fetching variables.");
+                return StatusCode(500, new
+                {
+                    Success = false,
+                    FailureCode = "FailedToGetFromDb",
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
+            }
         }
     }
 }

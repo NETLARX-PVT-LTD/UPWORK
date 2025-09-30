@@ -7,10 +7,11 @@
 namespace Netlarx.Products.Gobot.Models
 {
     using System.ComponentModel.DataAnnotations;
+    using System;
     public class Theme
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string PrimaryColor { get; set; }
     }

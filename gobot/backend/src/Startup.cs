@@ -17,6 +17,7 @@ namespace Netlarx.Products.Gobot
     using Netlarx.Products.Gobot.Services;
     using Netlarx.Products.Gobot.Middlewares;
     using Microsoft.AspNetCore.Mvc.Formatters;
+    using Netlarx.Products.Gobot.Validations;
 
     public class Startup(IConfiguration configuration)
     {
@@ -42,6 +43,7 @@ namespace Netlarx.Products.Gobot
 
             services.AddScoped<IBotDbContext>(provider => provider.GetRequiredService<BotDbContext>());
             services.AddSingleton<StorySessionManager>();
+            services.AddSingleton<StoryControllerValidation>();
 
             services.AddCors(options =>
             {

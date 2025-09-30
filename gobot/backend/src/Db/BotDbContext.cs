@@ -9,6 +9,11 @@ namespace Netlarx.Products.Gobot.Db
     using Microsoft.EntityFrameworkCore;
     using Netlarx.Products.Gobot.Interface;
     using Netlarx.Products.Gobot.Models;
+    using Netlarx.Products.Gobot.Models.Email_Setting;
+    using Netlarx.Products.Gobot.Models.FacebookIntegration;
+    using Netlarx.Products.Gobot.Models.TelegramIntegration;
+    using Netlarx.Products.Gobot.Models.TwilioIntegration;
+    using Netlarx.Products.Gobot.Models.WhiteLabelRequestIntegration;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -69,6 +74,14 @@ namespace Netlarx.Products.Gobot.Db
         public DbSet<BotMenu> BotMenus { get; set; }
         public DbSet<PageMessage> PageMessages { get; set; }
         public DbSet<BotPublishRequest> BotPublishRequests { get; set; }
+
+        public DbSet<UserToken> UserTokens { get; set; }
+        public DbSet<PageToken> PageTokens { get; set; }
+        public DbSet<BotConnection> BotConnections { get; set; }
+        public DbSet<TelegramConfig> TelegramConfigs { get; set; }
+        public DbSet<TwilioConfig> TwilioConfigs { get; set; }
+        public DbSet<WhiteLableRequest> WhiteLableRequests { get; set; }
+        public DbSet<EmailSetting> EmailSettings { get; set; }
 
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
@@ -167,6 +180,18 @@ namespace Netlarx.Products.Gobot.Db
             //          .WithMany(tr => tr.QuickReplies)
             //          .HasForeignKey(qr => qr.TextResponseId);
             //});
+
+            modelBuilder.Entity<Bot>()
+                                    .HasOne(b => b.LandingConfig)
+                                    .WithOne()
+                                    .HasForeignKey<LandingConfig>(lc => lc.Id)
+                                    .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Bot>()
+                                    .HasOne(b => b.Theme)
+                                    .WithOne()
+                                    .HasForeignKey<Theme>(th => th.Id)
+                                    .OnDelete(DeleteBehavior.Cascade);
+
             base.OnModelCreating(modelBuilder);
         }
     }

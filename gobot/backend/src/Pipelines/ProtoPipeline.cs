@@ -1,5 +1,5 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="School.cs" company="Netlarx">
+// <copyright file="ProtoPipeline.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------

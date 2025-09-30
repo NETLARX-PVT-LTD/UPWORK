@@ -11,7 +11,7 @@ namespace Netlarx.Products.Gobot.Models
     public class Variable
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         [Required]
         public string Name { get; set; } // e.g., "Name"

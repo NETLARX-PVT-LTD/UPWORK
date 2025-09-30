@@ -34,7 +34,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
 
         // GET /api/bots/{botId}/stories
         [HttpGet]
-        public async Task<IActionResult> GetStories(string botId)
+        public async Task<IActionResult> GetStories(Guid botId)
         {
             var bot = await _context.Bots.FirstOrDefaultAsync(b => b.BotId == botId);
 
@@ -70,7 +70,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
             {
                 bot = new Bot
                 {// ✅ Make sure BotId is not auto-generated in DB
-                    BotId = Guid.NewGuid().ToString("N"),
+                    BotId = Guid.NewGuid(),
                     BotName = $"Bot-{botId}"
                 };
 
@@ -98,7 +98,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
         [HttpPut("{storyId}")]
         [MiddlewareFilter(typeof(ProtoPipeline))]
         [Consumes("application/x-protobuf")]
-        public async Task<IActionResult> UpdateStory(string botId, int storyId)
+        public async Task<IActionResult> UpdateStory(Guid botId, int storyId)
         {
             //Retrieve the deserialized Protobuf object from middleware
             if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not StoryBlock updateRequest)
@@ -133,7 +133,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
 
         // DELETE: /api/bots/{botId}/stories/{storyId}
         [HttpDelete("{storyId}")]
-        public async Task<IActionResult> DeleteStory(string botId, int storyId)
+        public async Task<IActionResult> DeleteStory(Guid botId, int storyId)
         {
             // Find the story belonging to the bot
             var story = await _context.Stories

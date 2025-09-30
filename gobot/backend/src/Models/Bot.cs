@@ -14,7 +14,7 @@ namespace Netlarx.Products.Gobot.Models
     public class Bot
     {
         [Key]
-        public string BotId { get; set; }
+        public Guid BotId { get; set; }
 
         [Required]
         public string BotName { get; set; }
@@ -22,7 +22,9 @@ namespace Netlarx.Products.Gobot.Models
         [Required]
         public string ApiKey { get; set; } // generated API key
 
-        public string Story { get; set; }
+
+        // remove this a bot consist multiple stories not a single stories in TEST CASE WRITING
+        //public int StoryId { get; set; } 
 
         // JSON navigation properties
         public Theme Theme { get; set; }
@@ -34,6 +36,13 @@ namespace Netlarx.Products.Gobot.Models
         public bool ShowBranding { get; set; }
         public string BackgroundStyle { get; set; }
 
+        public string PrimaryColor { get; set; }
+        public string SecondaryColor { get; set; }
+        public string ImageUrl { get; set; }
+        public string WelcomeMessage { get; set; }
+        //public string InputPlaceholder { get; set; }
+        public string FallbackMessage { get; set; }
+        public bool IsActive { get; set; }
         public LandingConfig LandingConfig { get; set; }
     }
 }

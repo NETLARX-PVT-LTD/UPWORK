@@ -32,7 +32,7 @@ namespace Netlarx.Products.Gobot.Controllers.LinkStories
 
         // GET /api/bots/{botId}/linkstories
         [HttpGet]
-        public async Task<IActionResult> GetLinkStories(string botId)
+        public async Task<IActionResult> GetLinkStories(Guid botId)
         {
             var bot = await _context.Bots.FirstOrDefaultAsync(b => b.BotId == botId);
 
@@ -49,7 +49,7 @@ namespace Netlarx.Products.Gobot.Controllers.LinkStories
         [HttpPost]
         [MiddlewareFilter(typeof(ProtoPipeline))]
         [Consumes("application/x-protobuf")]
-        public async Task<IActionResult> AddLinkStory(string botId, [FromBody] LinkStoryBlock linkStoryDto)
+        public async Task<IActionResult> AddLinkStory(Guid botId, [FromBody] LinkStoryBlock linkStoryDto)
         {
             // Try to find the bot
             var bot = await _context.Bots.FindAsync(botId);
@@ -85,7 +85,7 @@ namespace Netlarx.Products.Gobot.Controllers.LinkStories
 
         // PUT: /api/bots/{botId}/linkstories/{linkStoryId}
         [HttpPut("{linkStoryId}")]
-        public async Task<IActionResult> UpdateLinkStory(string botId, Guid linkStoryId, [FromBody] LinkStoryBlock updateRequest)
+        public async Task<IActionResult> UpdateLinkStory(Guid botId, Guid linkStoryId, [FromBody] LinkStoryBlock updateRequest)
         {
             if (updateRequest == null)
                 return BadRequest("Invalid link story data.");
@@ -109,7 +109,7 @@ namespace Netlarx.Products.Gobot.Controllers.LinkStories
 
         // DELETE: /api/bots/{botId}/linkstories/{linkStoryId}
         [HttpDelete("{linkStoryId}")]
-        public async Task<IActionResult> DeleteLinkStory(string botId, Guid linkId)
+        public async Task<IActionResult> DeleteLinkStory(Guid botId, Guid linkId)
         {
             var linkStory = await _context.LinkStory
                 .FirstOrDefaultAsync(ls => ls.ID == linkId && ls.BotId == botId);

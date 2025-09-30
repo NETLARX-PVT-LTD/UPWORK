@@ -18,10 +18,11 @@ namespace Netlarx.Products.Gobot.Models
         public string BotName { get; set; }
         public string PrimaryColor { get; set; }
         public string SecondaryColor { get; set; }
-        public string LogoUrl { get; set; }
-        public string FaviconUrl { get; set; }
+        public string ImageURL { get; set; }
         public string WelcomeMessage { get; set; }
         public string InputPlaceholder { get; set; }
+        public string FallbackMessage { get; set; }
+        public bool IsActive { get; set; }
     }
 
     // Response DTO (matches your required payload)
