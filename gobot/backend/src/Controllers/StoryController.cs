@@ -16,6 +16,7 @@ namespace Netlarx.Products.Gobot.Controllers
     using Netlarx.Products.Gobot.Models;
     using Netlarx.Products.Gobot.Pipelines;
     using Netlarx.Products.Gobot.Services;
+    using Netlarx.Products.Gobot.Validations;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -29,11 +30,13 @@ namespace Netlarx.Products.Gobot.Controllers
     {
         private readonly IBotDbContext _db;
         private readonly ILogger<StoryController> _logger;
+        private readonly StoryControllerValidation validation;
 
-        public StoryController(IBotDbContext context, ILogger<StoryController> logger)
+        public StoryController(IBotDbContext context, ILogger<StoryController> logger, StoryControllerValidation _validation)
         {
             _db = context;
             _logger = logger;
+            validation = _validation;
         }
 
         [HttpGet("GetAllStorySchemaById/{storyId}")]
@@ -44,7 +47,7 @@ namespace Netlarx.Products.Gobot.Controllers
                 if (storyId <= 0)
                 {
                     _logger.LogWarning("Invalid StoryId received: {StoryId}", storyId);
-                    return BadRequest(new { message = "Invalid StoryId. It must be greater than zero." });
+                    return BadRequest(new { Success = false, FailureCode = "Invalid StoryId. It must be greater than zero." });
                 }
 
                 _logger.LogInformation("Fetching story schema for StoryId: {StoryId}", storyId);
@@ -52,13 +55,18 @@ namespace Netlarx.Products.Gobot.Controllers
                 var result = new List<object>();
                 var story = _db.Stories.FirstOrDefault(s => s.ID == storyId);
 
+                if(story == null)
+                {
+                    return BadRequest(new { Success = false, FailureCode = "InvalidInput" });
+                }
+
                 var connection = await _db.Connection
                     .FirstOrDefaultAsync(c => c.ID == story.RootBlockConnectionId);
 
                 if (connection == null)
                 {
                     _logger.LogWarning("No connection found for StoryId: {StoryId}", storyId);
-                    return NotFound(new { message = $"No connection found for StoryId {storyId}" });
+                    return NotFound(new { Success = false, message = $"No connection found for StoryId {storyId}, only storyId is present but block is absent" });
                 }
 
                 string currentType = connection.FromComponentType;
@@ -1193,6 +1201,7 @@ namespace Netlarx.Products.Gobot.Controllers
         //        return StatusCode(500, new { error = innerMessage });
         //    }
         //}
+
         [MiddlewareFilter(typeof(ProtoPipeline))]
         [HttpPost("SaveStoryToDbBlock")]
         public async Task<ActionResult> SaveStoryToDbBlock()
@@ -1225,6 +1234,11 @@ namespace Netlarx.Products.Gobot.Controllers
                     return idMap.TryGetValue(frontId, out var guid) ? guid : Guid.NewGuid();
                 }
 
+                // Validate RootBlockConnectionId (if provided)
+                if (validation.Validate(session.Story.RootBlockConnectionId, "Story.RootBlockConnectionId", _logger) != null)
+                {
+                    return validation.Validate(session.Story.RootBlockConnectionId, "Story.RootBlockConnectionId", _logger);
+                }
                 // Map Story RootBlockConnectionId
                 MapId(session.Story.RootBlockConnectionId);
 
@@ -1238,13 +1252,22 @@ namespace Netlarx.Products.Gobot.Controllers
                              .Concat(session.JsonAPIs.Cast<dynamic>())
                              .Concat(session.Medias.Cast<dynamic>()))
                 {
+                    if (validation.Validate(b.Id, $"{b}", _logger) != null)
+                    {
+                        return validation.Validate(b.Id, $"{b}", _logger);
+                    }
                     MapId(b.Id);
                     MapId(b.ToComponentId);
                 }
 
                 foreach (var form in session.ConversationalForms)
                 {
+                    if (validation.Validate(form.FormId, $"{form}", _logger) != null)
+                    {
+                        return validation.Validate(form.FormId, $"{form}", _logger);
+                    }
                     MapId(form.FormId);
+                    
                     MapId(form.ToComponentId);
                 }
 
@@ -1252,16 +1275,26 @@ namespace Netlarx.Products.Gobot.Controllers
                 {
                     foreach (var qr in tr.QuickReplies)
                     {
+                        
                         MapId(qr.ToComponentId);
                     }
                 }
 
                 foreach (var c in session.Connections)
                 {
+                    if (validation.Validate(c.Id, $"{c}", _logger) != null)
+                    {
+                        return validation.Validate(c.Id, $"{c}", _logger);
+                    }
                     MapId(c.Id);
+                    if (validation.Validate(c.FromComponentId, $"{c}", _logger) != null)
+                    {
+                        return validation.Validate(c.FromComponentId, $"{c}", _logger);
+                    }
                     MapId(c.FromComponentId);
                 }
 
+           
                 MapId(session.Story.BotId);
 
                 // 2️⃣ Save Story first
@@ -1272,9 +1305,9 @@ namespace Netlarx.Products.Gobot.Controllers
                     Name = string.IsNullOrWhiteSpace(session.Story.Name)
                                     ? "New Story"
                                     : session.Story.Name,
-                                    RootBlockConnectionId = rootBlockGuid,
-                                    CreatedDate = DateTime.UtcNow,
-                                    BotId = GetMappedId(session.Story.BotId)
+                    RootBlockConnectionId = rootBlockGuid,
+                    CreatedDate = DateTime.UtcNow,
+                    BotId = GetMappedId(session.Story.BotId)
                 };
 
 
@@ -1592,16 +1625,470 @@ namespace Netlarx.Products.Gobot.Controllers
             }
         }
 
+
+        //[MiddlewareFilter(typeof(ProtoPipeline))]
+        //[HttpPost("SaveStoryToDbBlock")]
+        //public async Task<ActionResult> SaveStoryToDbBlock()
+        //{
+        //    // Retrieve the deserialized Protobuf object from middleware
+        //    if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not StorySessionDataBlock session)
+        //    {
+        //        _logger.LogWarning("Protobuf body missing or invalid");
+        //        return BadRequest("Protobuf body missing or invalid");
+        //    }
+
+        //    try
+        //    {
+        //        if (session.Story == null)
+        //            return BadRequest("Story data is required");
+
+        //        // 1️⃣ Generate backend GUIDs for all blocks including Story
+        //        var idMap = new Dictionary<string, Guid>(); // frontend ID -> backend GUID
+
+        //        void MapId(string frontId)
+        //        {
+        //            if (string.IsNullOrEmpty(frontId)) return;
+        //            if (!idMap.ContainsKey(frontId))
+        //                idMap[frontId] = Guid.NewGuid();
+        //        }
+
+        //        Guid GetMappedId(string frontId)
+        //        {
+        //            if (string.IsNullOrEmpty(frontId)) return Guid.Empty; // fallback for empty IDs
+        //            return idMap.TryGetValue(frontId, out var guid) ? guid : Guid.NewGuid();
+        //        }
+
+        //        // Validate RootBlockConnectionId (if provided)
+        //        if (validation.Validate(session.Story.RootBlockConnectionId,"Story.RootBlockConnectionId",_logger) != null)
+        //        {
+        //            return validation.Validate(session.Story.RootBlockConnectionId, "Story.RootBlockConnectionId", _logger);
+        //        }
+        //        // Map Story RootBlockConnectionId
+        //        MapId(session.Story.RootBlockConnectionId);
+
+        //        // Map all block IDs and ToComponentIds
+        //        foreach (var b in session.Phrases.Cast<dynamic>()
+        //                     .Concat(session.Keywords.Cast<dynamic>())
+        //                     .Concat(session.Anythings.Cast<dynamic>())
+        //                     .Concat(session.TypingDelays.Cast<dynamic>())
+        //                     .Concat(session.LinkStories.Cast<dynamic>())
+        //                     .Concat(session.TextResponses.Cast<dynamic>())
+        //                     .Concat(session.JsonAPIs.Cast<dynamic>())
+        //                     .Concat(session.Medias.Cast<dynamic>()))
+        //        {
+        //            if (validation.Validate(b.Id, $"{b}-{b.Id}", _logger) != null)
+        //            {
+        //                _logger.LogWarning("Invalid Problem in Id and ToComponentId of Block format");
+        //                return validation.Validate(b.Id, $"{b}-{b.Id}", _logger);
+        //            }
+
+        //            MapId(b.Id);
+        //            //if (validation.Validate(b.ToComponentId, $"{b.ToComponentId}", _logger) !=  null)
+        //            //{
+        //            //    _logger.LogWarning("Invalid Problem in Id and ToComponentId of Block format");
+        //            //    return validation.Validate(b.Id, $"{b}-{b.ToComponentId}", _logger);
+        //            //}
+        //            MapId(b.ToComponentId);
+        //        }
+
+        //        foreach (var form in session.ConversationalForms)
+        //        {
+        //            if (validation.Validate(form.FormId,$"{form}-{form.FormId}", _logger) != null)
+        //            {
+        //                _logger.LogWarning("Invalid, Problem in FormId of Block format");
+        //                return validation.Validate(form.FormId, $"{form}-{form.FormId}", _logger);
+        //            }
+        //            MapId(form.FormId);
+        //            //if (validation.Validate(form.ToComponentId, $"{form}-{form.ToComponentId}", _logger) != null)
+        //            //{
+        //            //    _logger.LogWarning("Invalid, Problem in ToComponentId of Block format");
+        //            //    return validation.Validate(form.ToComponentId, $"{form}-{form.ToComponentId}", _logger);
+        //            //}
+        //            MapId(form.ToComponentId);
+        //        }
+
+        //        foreach (var tr in session.TextResponses)
+        //        {
+        //            foreach (var qr in tr.QuickReplies)
+        //            {
+        //                //var resultt = validation.Validate(qr.ToComponentId, $"{qr}-{qr.ToComponentId}", _logger);
+        //                //if (resultt != null)
+        //                //{
+        //                //    _logger.LogWarning("Invalid, Problem in ToComponentId of QuickReplies Block format");
+        //                //    return resultt;
+        //                //}
+        //                MapId(qr.ToComponentId);
+        //            }
+        //        }
+
+        //        foreach (var c in session.Connections)
+        //        {
+        //            var resultt = validation.Validate(c.Id, $"{c}-{c.Id}", _logger);
+        //            if (resultt != null)
+        //            {
+        //                //_logger.LogWarning("Invalid, Problem in ToComponentId of QuickReplies Block format");
+        //                return resultt;
+        //            }
+                    
+        //            MapId(c.Id);
+        //            resultt = validation.Validate(c.Id, $"{c}-{c.FromComponentId}", _logger);
+        //            if (resultt != null)
+        //            {
+        //                //_logger.LogWarning("Invalid, Problem in ToComponentId of QuickReplies Block format");
+        //                return resultt;
+        //            }
+        //            MapId(c.FromComponentId);
+        //        }
+
+        //        var result = validation.Validate(session.Story.BotId, $"{session.Story}-{session.Story.BotId}", _logger);
+        //        if (result != null)
+        //        {
+        //            //_logger.LogWarning("Invalid, Problem in ToComponentId of QuickReplies Block format");
+        //            return result;
+        //        }
+        //        MapId(session.Story.BotId);
+
+        //        // 2️⃣ Save Story first
+        //        var rootBlockGuid = GetMappedId(session.Story.RootBlockConnectionId);
+
+        //        var Story = new Stories
+        //        {
+        //            Name = string.IsNullOrWhiteSpace(session.Story.Name)
+        //                            ? "New Story"
+        //                            : session.Story.Name,
+        //                            RootBlockConnectionId = rootBlockGuid,
+        //                            CreatedDate = DateTime.UtcNow,
+        //                            BotId = GetMappedId(session.Story.BotId)
+        //        };
+
+
+        //        _db.Stories.Add(Story);
+        //        await _db.SaveChangesAsync();
+
+        //        // 3️⃣ Save Phrases
+        //        foreach (var a in session.Phrases)
+        //        {
+        //            var phraseGuid = GetMappedId(a.Id);
+        //            var userInputPhrase = new Models.UserInputPhrase
+        //            {
+        //                ID = phraseGuid,
+        //                StoryId = Story.ID,
+        //                Phrase = a.PhraseText,
+        //                ToComponentId = GetMappedId(a.ToComponentId),
+        //                ToComponentType = a.ToComponentType
+        //            };
+
+        //            if (a.AvailableVariables != null)
+        //            {
+        //                foreach (var variable in a.AvailableVariables)
+        //                {
+        //                    _db.PhraseVariables.Add(new Models.VariablePhrase
+        //                    {
+        //                        UserInputPhraseId = phraseGuid,
+        //                        Name = variable.Name,
+        //                        Type = variable.Type
+        //                    });
+        //                }
+        //            }
+
+        //            _db.UserInputPhrases.Add(userInputPhrase);
+        //        }
+
+        //        // 4️⃣ Save Keywords
+        //        foreach (var kw in session.Keywords)
+        //        {
+        //            var kwGuid = GetMappedId(kw.Id);
+        //            var userInputKeyword = new Models.UserInputKeyword
+        //            {
+        //                ID = kwGuid,
+        //                StoryId = Story.ID,
+        //                ToComponentId = GetMappedId(kw.ToComponentId),
+        //                ToComponentType = kw.ToComponentType
+        //            };
+        //            _db.UserInputKeywords.Add(userInputKeyword);
+
+        //            foreach (var kwGro in kw.KeywordGroups)
+        //            {
+        //                var keywordGroup = new Models.KeywordGroupp
+        //                {
+        //                    UserInputKeywordId = kwGuid
+        //                };
+        //                _db.KeywordGroups.Add(keywordGroup);
+        //                await _db.SaveChangesAsync();
+
+        //                foreach (var kwVal in kwGro.Keywords)
+        //                {
+        //                    _db.Keywords.Add(new Models.Keyword
+        //                    {
+        //                        Value = kwVal,
+        //                        KeywordGroupId = keywordGroup.Id
+        //                    });
+        //                }
+        //            }
+
+        //            foreach (var k in kw.Keywords)
+        //            {
+        //                _db.PlainKeywords.Add(new Models.PlainKeyword
+        //                {
+        //                    UserInputKeywordId = kwGuid,
+        //                    Value = k
+        //                });
+        //            }
+
+        //            foreach (var v in kw.AvailableVariables)
+        //            {
+        //                _db.KeywordVariables.Add(new Models.VariableKeyword
+        //                {
+        //                    UserInputKeywordId = kwGuid,
+        //                    Name = v.Name,
+        //                    Type = v.Type
+        //                });
+        //            }
+        //        }
+
+        //        // 5️⃣ Save Anythings
+        //        foreach (var a in session.Anythings)
+        //        {
+        //            var anyGuid = GetMappedId(a.Id);
+        //            var userInputAnything = new Models.UserInputTypeAnything
+        //            {
+        //                ID = anyGuid,
+        //                StoryId = Story.ID,
+        //                Anything = a.CustomMessage,
+        //                ToComponentId = GetMappedId(a.ToComponentId),
+        //                ToComponentType = a.ToComponentType
+        //            };
+        //            _db.UserInputTypeAnythings.Add(userInputAnything);
+
+        //            if (a.AvailableVariables != null)
+        //            {
+        //                foreach (var variable in a.AvailableVariables)
+        //                {
+        //                    _db.AnythingVariables.Add(new Models.VariableAnything
+        //                    {
+        //                        UserInputTypeAnything = userInputAnything,
+        //                        Name = variable.Name,
+        //                        Type = variable.Type
+        //                    });
+        //                }
+        //            }
+        //        }
+
+        //        // 6️⃣ Save Connections
+        //        foreach (var c in session.Connections)
+        //        {
+        //            _db.Connection.Add(new Models.Connection
+        //            {
+        //                ID = GetMappedId(c.Id),
+        //                StoryId = Story.ID,
+        //                FromComponentId = GetMappedId(c.FromComponentId),
+        //                FromComponentType = c.FromComponentType
+        //            });
+        //        }
+
+        //        // 7️⃣ Save TypingDelays
+        //        foreach (var t in session.TypingDelays)
+        //        {
+        //            _db.TypingDelay.Add(new Models.TypingDelay
+        //            {
+        //                ID = GetMappedId(t.Id),
+        //                StoryId = Story.ID,
+        //                DelaySeconds = t.DelaySeconds,
+        //                ToComponentId = GetMappedId(t.ToComponentId),
+        //                ToComponentType = t.ToComponentType,
+        //                Type = t.Type,
+        //                CreatedDate = DateTime.UtcNow
+        //            });
+        //        }
+
+        //        // 8️⃣ Save Conversational Forms
+        //        foreach (var cf in session.ConversationalForms)
+        //        {
+        //            var formGuid = GetMappedId(cf.FormId);
+        //            var form = new Models.ConversationalForm
+        //            {
+        //                ID = formGuid,
+        //                StoryId = Story.ID,
+        //                FormName = cf.FormName,
+        //                WebhookUrl = cf.WebhookUrl,
+        //                SendEmailNotification = cf.SendEmailNotification,
+        //                NotificationEmail = cf.NotificationEmail,
+        //                ShowAsInlineForm = cf.ShowAsInlineForm,
+        //                RenderFormResponses = cf.RenderFormResponses,
+        //                AllowMultipleSubmission = cf.AllowMultipleSubmission,
+        //                MultipleSubmissionMessage = cf.MultipleSubmissionMessage,
+        //                AllowExitForm = cf.AllowExitForm,
+        //                ExitFormMessage = cf.ExitFormMessage,
+        //                SuccessResponseType = cf.SuccessResponseType,
+        //                ValidateEmail = cf.ValidateEmail,
+        //                ValidatePhone = cf.ValidatePhone,
+        //                SpamProtection = cf.SpamProtection,
+        //                RequireCompletion = cf.RequireCompletion,
+        //                SuccessMessage = cf.SuccessMessage,
+        //                RedirectUrl = cf.RedirectUrl,
+        //                Type = cf.Type
+        //            };
+
+        //            foreach (var f in cf.FormFields)
+        //            {
+        //                _db.FormFields.Add(new Models.FormField
+        //                {
+        //                    Name = f.Name,
+        //                    Type = f.Type,
+        //                    Required = f.Required,
+        //                    PromptPhrase = f.PromptPhrase,
+        //                    Options = f.Options?.ToList(),
+        //                    OptionsText = f.OptionsText,
+        //                    ConversationalFormId = formGuid
+        //                });
+        //            }
+        //            _db.ConversationalForm.Add(form);
+        //        }
+
+        //        // 9️⃣ Save TextResponses
+        //        foreach (var tr in session.TextResponses)
+        //        {
+        //            var trGuid = GetMappedId(tr.Id);
+        //            var quickReplyId = Guid.NewGuid();
+        //            foreach (var qr in tr.QuickReplies)
+        //            {
+        //                _db.QuickReplies.Add(new Models.QuickReplyModel
+        //                {
+        //                    ID = Guid.NewGuid(),
+        //                    Text = qr.Text,
+        //                    ToComponentType = tr.ToComponentType,
+        //                    ToComponentId = GetMappedId(qr.ToComponentId),
+        //                    textResponseId = trGuid
+        //                });
+        //            }
+
+        //            _db.TextResponse.Add(new Models.TextResponse
+        //            {
+        //                ID = trGuid,
+        //                StoryId = Story.ID,
+        //                Type = tr.Type,
+        //                Content = tr.Content,
+        //                QuickReplyId = quickReplyId,
+        //                ToComponentId = GetMappedId(tr.ToComponentId),
+        //                ToComponentType = tr.ToComponentType,
+        //                AlternateResponses = tr.AlternateResponses?.ToList() ?? new List<string>()
+        //            });
+        //        }
+
+        //        // 🔟 Save LinkStories
+        //        foreach (var ls in session.LinkStories)
+        //        {
+        //            _db.LinkStory.Add(new Models.LinkStory
+        //            {
+        //                ID = GetMappedId(ls.Id),
+        //                LinkStoryId = ls.LinkStoryId,
+        //                LinkStoryName = ls.LinkStoryName,
+        //                ToComponentId = GetMappedId(ls.ToComponentId),
+        //                ToComponentType = ls.ToComponentType,
+        //                Type = ls.Type
+        //            });
+        //        }
+
+        //        // 1️⃣1️⃣ Save JsonAPIs
+        //        foreach (var api in session.JsonAPIs)
+        //        {
+        //            var apiGuid = GetMappedId(api.Id);
+        //            var jsonApi = new Models.JsonAPI
+        //            {
+        //                ID = apiGuid,
+        //                StoryId = Story.ID,
+        //                Type = api.Type,
+        //                ApiEndpoint = api.ApiEndpoint,
+        //                RequestType = api.RequestType,
+        //                ToComponentType = api.ToComponentType,
+        //                ToComponentId = GetMappedId(api.ToComponentId),
+        //                ApiHeaders = (api.ApiHeaders).Select(h => new Models.ApiHeader
+        //                {
+        //                    jsonId = apiGuid,
+        //                    Key = h.HeaderKey,
+        //                    Value = h.HeaderValue
+        //                }).ToList()
+        //            };
+
+        //            //foreach (var f in api.ApiHeaders)
+        //            //{
+        //            //    _db.ApiHeaders.Add(new Models.ApiHeader
+        //            //    {
+        //            //        jsonId = apiGuid,
+        //            //        Key = f.HeaderKey,
+        //            //        Value = f.HeaderValue,
+        //            //        Id = Guid.NewGuid()
+        //            //    });
+        //            //}
+        //            _db.JsonAPI.Add(jsonApi);
+        //        }
+
+        //        // 1️⃣2️⃣ Save Medias
+        //        foreach (var m in session.Medias)
+        //        {
+        //            var mediaGuid = GetMappedId(m.Id);
+        //            var media = new Models.Media
+        //            {
+        //                ID = mediaGuid,
+        //                StoryId = Story.ID,
+        //                MediaId = m.MediaId,
+        //                MediaType = (Models.MediaTypeblock)m.MediaType,
+        //                SingleImageUrl = m.SingleImageUrl,
+        //                VideoUrl = m.VideoUrl,
+        //                AudioUrl = m.AudioUrl,
+        //                FileUrl = m.FileUrl,
+        //                MediaName = m.MediaName,
+        //                ButtonTitle = m.ButtonTitle,
+        //                ButtonTextMessage = m.ButtonTextMessage,
+        //                ButtonType = m.ButtonType,
+        //                ButtonLinkedMediaId = m.ButtonLinkedMediaId,
+        //                ButtonUrl = m.ButtonUrl,
+        //                ToComponentType = m.ToComponentType,
+        //                ToComponentId = GetMappedId(m.ToComponentId),
+        //                Slides = (m.Slides).Select(s => new Models.ImageSlideblock
+        //                {
+        //                    Url = s.Url,
+        //                    Title = s.Title,
+        //                    Description = s.Description
+        //                }).ToList(),
+        //                Buttons = (m.Buttons).Select(b => new Models.Buttonblock
+        //                {
+        //                    Title = b.Title,
+        //                    Type = b.Type,
+        //                    Url = b.Url,
+        //                    TextMessage = b.TextMessage,
+        //                    LinkedMediaId = b.LinkedMediaId
+        //                }).ToList()
+        //            };
+        //            _db.Medias.Add(media);
+        //        }
+
+        //        // 🔹 Finally save everything
+        //        await _db.SaveChangesAsync();
+        //        _logger.LogInformation("Story session saved successfully with backend-generated GUIDs.");
+        //        return Ok(new { message = "Story saved successfully." });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var innerMessage = ex.InnerException?.Message ?? ex.Message;
+        //        _logger.LogError(ex, "Error saving story session to DB");
+        //        return StatusCode(500, new { error = innerMessage });
+        //    }
+        //}
+
         [HttpDelete("DeleteStory/{storyId}")]
         public async Task<IActionResult> DeleteStory(int storyId)
         {
+            if (storyId <= 0)
+                return BadRequest(new { Success = false, FailureCode = "InvalidInput" });
+
             try
             {
                 // 🔹 Fetch the story
                 var story = await _db.Stories.FirstOrDefaultAsync(s => s.ID == storyId);
                 if (story == null)
                 {
-                    return NotFound(new { message = "Story not found" });
+                    return NotFound(new { Success = false, message = "Story not found" });
                 }
 
                 // 🔹 Delete related entities manually (cascade-like)
@@ -1678,7 +2165,13 @@ namespace Netlarx.Products.Gobot.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting story {StoryId}", storyId);
-                return StatusCode(500, new { error = ex.Message });
+
+                return StatusCode(500, new
+                {
+                    error = ex.Message,
+                    stackTrace = ex.StackTrace,
+                    innerError = ex.InnerException?.Message
+                });
             }
         }
 

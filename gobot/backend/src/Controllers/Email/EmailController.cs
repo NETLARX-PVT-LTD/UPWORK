@@ -56,7 +56,7 @@ namespace Gobot.Controllers.Email
             ";
 
             // Send email using SendGrid
-            var apiKey = _config["SendGrid:ApiKey"]; // stored securely in appsettings.json or Azure KeyVault
+            var apiKey = _config["SendGrid:ApiKey"]; 
             var client = new SendGridClient(apiKey);
             var from = new EmailAddress("noreply@yourdomain.com", "Chatbot Service");
             var to = new EmailAddress(request.To);

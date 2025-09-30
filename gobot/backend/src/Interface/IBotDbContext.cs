@@ -9,7 +9,11 @@ namespace Netlarx.Products.Gobot.Interface
     using Gobot.Models;
     using Microsoft.EntityFrameworkCore;
     using Netlarx.Products.Gobot.Models;
+    using Netlarx.Products.Gobot.Models.Email_Setting;
     using Netlarx.Products.Gobot.Models.FacebookIntegration;
+    using Netlarx.Products.Gobot.Models.TelegramIntegration;
+    using Netlarx.Products.Gobot.Models.TwilioIntegration;
+    using Netlarx.Products.Gobot.Models.WhiteLabelRequestIntegration;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -69,6 +73,13 @@ namespace Netlarx.Products.Gobot.Interface
         DbSet<UserToken> UserTokens { get; set; }
         DbSet<PageToken> PageTokens { get; set; }
         DbSet<BotConnection> BotConnections { get; set; }
+
+        DbSet<TelegramConfig> TelegramConfigs { get; set; }
+
+        DbSet<TwilioConfig> TwilioConfigs { get; set; }
+
+        DbSet<WhiteLableRequest> WhiteLableRequests { get; set; }
+        DbSet<EmailSetting> EmailSettings { get; set; }
         void addStory(Stories model);
 
         void addConnection(Connection connection);

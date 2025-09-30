@@ -61,7 +61,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
                 BotId = Guid.Parse(block.BotId),
                 BotName = block.BotName,
                 ApiKey = string.IsNullOrEmpty(block.ApiKey) ? Guid.NewGuid().ToString("N") : block.ApiKey,
-                StoryId = block.StoryId,
+                //StoryId = block.StoryId,
                 Position = block.Position,
                 Size = block.Size,
                 Greeting = block.Greeting,
@@ -116,7 +116,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
 
             // 🔄 Map fields from BotBlock → existing Bot
             existingBot.BotName = botRequest.BotName ?? existingBot.BotName;
-            existingBot.StoryId = botRequest.StoryId;
+            //existingBot.StoryId = botRequest.StoryId;
             existingBot.Position = botRequest.Position ?? existingBot.Position;
             existingBot.Size = botRequest.Size ?? existingBot.Size;
             existingBot.Greeting = botRequest.Greeting ?? existingBot.Greeting;

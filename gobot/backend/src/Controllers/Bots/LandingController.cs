@@ -44,7 +44,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
                 botConfig = new
                 {
                     id = bot.BotId,
-                    story = bot.StoryId,
+                    //story = bot.StoryId,
                     primaryColor = bot.Theme?.PrimaryColor,
                     name = bot.BotName,
                     greeting = bot.Greeting

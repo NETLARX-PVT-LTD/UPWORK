@@ -49,29 +49,97 @@ namespace Netlarx.Products.Gobot.Controllers
         }
 
         [HttpPost("AddStory")]
-        public async Task<IActionResult> AddStory([FromBody] Stories model)
+        public async Task<IActionResult> AddStory([FromBody] StoryBlock model)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
                     _logger.LogWarning("Invalid Story model received");
-                    return BadRequest(ModelState);
+                    return BadRequest(new { Success = false, FailureCode = "InvalidInput" });
                 }
 
-                model.CreatedDate = DateTime.UtcNow;
-                _db.addStory(model);
-                await _db.SaveChangesAsync();
+                if (model.Name == null ||  model.Name.Length == 0)
+                {
+                    return BadRequest(new { Success = false, FailureCode = "InvalidInput" });
+                }
+                // Validate BotId
+                if (string.IsNullOrWhiteSpace(model.BotId) || model.BotId == null)
+                {
+                    _logger.LogWarning("BotId is null or empty");
+                    return BadRequest(new { Success = false, FailureCode = "InvalidRequest" });
+                }
 
-                _logger.LogInformation("Story created with ID: {StoryId}", model.ID);
-                return Ok(new { message = "Story created", storyId = model.ID });
+                // Validate RootBlockConnectionId (if provided)
+                if (model.RootBlockConnectionId==null && string.IsNullOrWhiteSpace(model.RootBlockConnectionId))
+                {
+                    _logger.LogWarning("Invalid RootBlockConnectionId format");
+                    return BadRequest(new { Success = false, FailureCode = "InvalidInput" });
+                }
+
+                var existingBot = await _db.Bots
+                                           .FirstOrDefaultAsync(s => s.BotId == Guid.Parse(model.BotId));
+                var BotID = Guid.NewGuid();
+
+                if (existingBot == null)
+                {
+                    var bot = new Bot
+                    {
+                        BotId = BotID,
+                        BotName = "Bot-${BotID}"
+                    };
+                    model.BotId = BotID.ToString();
+
+                    await _db.Bots.AddAsync(bot);
+                }
+
+                // Check if BotId already exists
+                var existingStory = await _db.Stories
+                                           .FirstOrDefaultAsync(s => s.ID == model.Id);
+
+                if (existingStory != null)
+                {
+                    // BotId exists → proceed with validations/updates
+                    existingStory.CreatedDate = DateTime.Now;
+                    existingStory.Name = model.Name ?? existingStory.Name;
+                    existingStory.RootBlockConnectionId = Guid.Parse(model.RootBlockConnectionId);
+                    existingStory.BotId = Guid.Parse(model.BotId);
+
+                    _db.Stories.Update(existingStory);
+                    await _db.SaveChangesAsync();
+
+                    _logger.LogInformation("Story updated for BotId: {BotId}", model.BotId);
+                    return Ok(new { Success = true, message = "Story updated", storyId = existingStory.ID });
+                }
+                else
+                {
+                    var story = new Stories();
+                    if (model.RootBlockConnectionId == "")
+                    {
+                        story.RootBlockConnectionId = Guid.Empty;
+                    }else
+                    {
+                        story.RootBlockConnectionId = Guid.Parse(model.RootBlockConnectionId);
+                    }
+
+                    story.Name = model.Name;
+                    story.BotId = Guid.Parse(model.BotId);
+                    story.CreatedDate = DateTime.Now;
+
+                    await _db.Stories.AddAsync(story);
+                    await _db.SaveChangesAsync();
+
+                    _logger.LogInformation("Story created with ID: {StoryId}", model.Id);
+                    return Ok(new { Success = true, message = "Story created", storyId = model.Id });
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while creating story");
-                return StatusCode(500, new { error = ex.Message });
+                _logger.LogError(ex, "Error occurred while creating/updating story");
+                return StatusCode(500, new { Success = false, FailureCode = "FailedToGetFromDb", error = ex.Message });
             }
         }
+
 
         private IActionResult AddComponent<T>(int storyId, T model, string compType, Action<T> addToCollection) where T : BaseComponent
         {
@@ -291,19 +359,30 @@ namespace Netlarx.Products.Gobot.Controllers
                   g => manager.GetStory(storyId).Anythings.Add(g));
         }
 
-        [HttpGet("AllStories")]
-        public async Task<IActionResult> AllStories()
+        [HttpGet("allstories")]
+        public async Task<IActionResult> GetAllStories()
         {
             try
             {
-                var data = await _db.Stories.ToListAsync();
-                _logger.LogInformation("Fetched all stories. Count: {Count}", data.Count);
-                return Ok(data);
+                var stories = await _db.Stories
+                    .Select(s => new
+                    {
+                        s.ID,
+                        s.Name,
+                        s.CreatedDate,
+                        RootBlockConnectionId = s.RootBlockConnectionId.ToString(), // Convert Guid to string
+                        BotId =
+                        // ... other properties
+                        s.BotId.ToString(),
+                    })
+                    .ToListAsync();
+
+                return Ok(stories);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching all stories");
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { Success = false, FailureCode = "FailedToGetFromDb", error = ex.Message });
             }
         }
 

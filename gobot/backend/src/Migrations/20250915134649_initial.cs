@@ -6,22 +6,89 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Gobot.Migrations
 {
     /// <inheritdoc />
-    public partial class intital : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Bots",
+                name: "AiAssistants",
                 columns: table => new
                 {
-                    BotId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    BotName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AssistantName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ApiKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Plateform = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Instruction = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Model = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    source = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FallbackTextMessage = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FallbackStory = table.Column<int>(type: "int", nullable: false),
+                    MaxToken = table.Column<int>(type: "int", nullable: false),
+                    Temperature = table.Column<double>(type: "float", nullable: false),
+                    TopP = table.Column<double>(type: "float", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Bots", x => x.BotId);
+                    table.PrimaryKey("PK_AiAssistants", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BotConfigs",
+                columns: table => new
+                {
+                    BotConfigId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    BotId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BotName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PrimaryColor = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SecondaryColor = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LogoUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FaviconUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    WelcomeMessage = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    InputPlaceholder = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BotConfigs", x => x.BotConfigId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BotMenus",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    BotId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MenuJson = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BotMenus", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BotPublishRequests",
+                columns: table => new
+                {
+                    BotPublishRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BotId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BotName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ApiType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    WebhookUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VerifyToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AccessToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumberId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BusinessAccountId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    storyId = table.Column<int>(type: "int", nullable: false),
+                    PublishedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    isActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BotPublishRequests", x => x.BotPublishRequestId);
                 });
 
             migrationBuilder.CreateTable(
@@ -44,9 +111,9 @@ namespace Gobot.Migrations
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BotId = table.Column<int>(type: "int", nullable: false),
                     StoryId = table.Column<int>(type: "int", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FormId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FormName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     WebhookUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SendEmailNotification = table.Column<bool>(type: "bit", nullable: false),
@@ -74,6 +141,19 @@ namespace Gobot.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FormSubmissions",
+                columns: table => new
+                {
+                    SubmissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ConversationalFormId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SubmittedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FormSubmissions", x => x.SubmissionId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "JsonAPI",
                 columns: table => new
                 {
@@ -92,13 +172,28 @@ namespace Gobot.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "LandingConfigs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BackgroundStyle = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LandingConfigs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "LinkStory",
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BotId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StoryId = table.Column<int>(type: "int", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LinkStoryId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LinkStoryId = table.Column<int>(type: "int", nullable: false),
                     LinkStoryName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ToComponentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -141,9 +236,11 @@ namespace Gobot.Migrations
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TextResponseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    textResponseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ToComponentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ToComponentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -156,9 +253,9 @@ namespace Gobot.Migrations
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    BotId = table.Column<int>(type: "int", nullable: false),
+                    BotId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RootBlockConnectionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RootBlockConnectionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -167,11 +264,26 @@ namespace Gobot.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "StoryReference",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StoryReference", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TextResponse",
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BotId = table.Column<int>(type: "int", nullable: false),
                     StoryId = table.Column<int>(type: "int", nullable: false),
+                    QuickReplyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AlternateResponses = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -185,12 +297,26 @@ namespace Gobot.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Themes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PrimaryColor = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Themes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TypingDelay",
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StoryId = table.Column<int>(type: "int", nullable: false),
                     DelaySeconds = table.Column<double>(type: "float", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ToComponentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ToComponentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
@@ -248,51 +374,127 @@ namespace Gobot.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "FormField",
+                name: "Variables",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Variables", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WebsiteSources",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    WebsiteType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AssistantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AutoSync = table.Column<bool>(type: "bit", nullable: false),
+                    MaxPages = table.Column<int>(type: "int", nullable: true),
+                    MaxDepth = table.Column<int>(type: "int", nullable: true),
+                    IncludeSubdomains = table.Column<bool>(type: "bit", nullable: true),
+                    ExcludePatterns = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CssSelector = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RespectRobots = table.Column<bool>(type: "bit", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WebsiteSources", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TrainingFiles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AssistantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrainingFiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TrainingFiles_AiAssistants_AssistantId",
+                        column: x => x.AssistantId,
+                        principalTable: "AiAssistants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FormFields",
                 columns: table => new
                 {
                     FormFieldId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    ConversationalFormId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Required = table.Column<bool>(type: "bit", nullable: false),
                     PromptPhrase = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Options = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OptionsText = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConversationalFormID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    OptionsText = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FormField", x => x.FormFieldId);
+                    table.PrimaryKey("PK_FormFields", x => x.FormFieldId);
                     table.ForeignKey(
-                        name: "FK_FormField_CoversationalForm_ConversationalFormID",
-                        column: x => x.ConversationalFormID,
+                        name: "FK_FormFields_CoversationalForm_ConversationalFormId",
+                        column: x => x.ConversationalFormId,
                         principalTable: "CoversationalForm",
-                        principalColumn: "ID");
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ApiHeader",
+                name: "FormResponses",
                 columns: table => new
                 {
-                    jsonId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FormId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SubmittedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FormResponses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FormResponses_CoversationalForm_FormId",
+                        column: x => x.FormId,
+                        principalTable: "CoversationalForm",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ApiHeaders",
+                columns: table => new
+                {
+                    jsonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Key = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     JsonAPIID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ApiHeader", x => x.jsonId);
+                    table.PrimaryKey("PK_ApiHeaders", x => x.jsonId);
                     table.ForeignKey(
-                        name: "FK_ApiHeader_JsonAPI_JsonAPIID",
+                        name: "FK_ApiHeaders_JsonAPI_JsonAPIID",
                         column: x => x.JsonAPIID,
                         principalTable: "JsonAPI",
                         principalColumn: "ID");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Buttonblock",
+                name: "Buttonblocks",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -324,9 +526,9 @@ namespace Gobot.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Buttonblock", x => x.Id);
+                    table.PrimaryKey("PK_Buttonblocks", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Buttonblock_Medias_MediaId",
+                        name: "FK_Buttonblocks_Medias_MediaId",
                         column: x => x.MediaId,
                         principalTable: "Medias",
                         principalColumn: "ID",
@@ -334,11 +536,10 @@ namespace Gobot.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ImageSlideblock",
+                name: "ImageSlideblocks",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -346,12 +547,71 @@ namespace Gobot.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ImageSlideblock", x => x.Id);
+                    table.PrimaryKey("PK_ImageSlideblocks", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ImageSlideblock_Medias_MediaId",
+                        name: "FK_ImageSlideblocks_Medias_MediaId",
                         column: x => x.MediaId,
                         principalTable: "Medias",
                         principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PageMessages",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    BotId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Urls = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ShowAfterDelay = table.Column<bool>(type: "bit", nullable: false),
+                    Delay = table.Column<int>(type: "int", nullable: false),
+                    MessageType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TextMessage = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SelectedStoryId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PageMessages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PageMessages_StoryReference_SelectedStoryId",
+                        column: x => x.SelectedStoryId,
+                        principalTable: "StoryReference",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Bots",
+                columns: table => new
+                {
+                    BotId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    BotName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ApiKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Story = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ThemeId = table.Column<int>(type: "int", nullable: false),
+                    Position = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Size = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Greeting = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Placeholder = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AllowFullscreen = table.Column<bool>(type: "bit", nullable: false),
+                    ShowBranding = table.Column<bool>(type: "bit", nullable: false),
+                    BackgroundStyle = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LandingConfigId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Bots", x => x.BotId);
+                    table.ForeignKey(
+                        name: "FK_Bots_LandingConfigs_LandingConfigId",
+                        column: x => x.LandingConfigId,
+                        principalTable: "LandingConfigs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Bots_Themes_ThemeId",
+                        column: x => x.ThemeId,
+                        principalTable: "Themes",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -453,6 +713,26 @@ namespace Gobot.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FormFieldResponses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FormResponseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FieldName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FormFieldResponses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FormFieldResponses_FormResponses_FormResponseId",
+                        column: x => x.FormResponseId,
+                        principalTable: "FormResponses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ApiHeaderblock",
                 columns: table => new
                 {
@@ -466,9 +746,9 @@ namespace Gobot.Migrations
                 {
                     table.PrimaryKey("PK_ApiHeaderblock", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ApiHeaderblock_Buttonblock_ButtonblockId",
+                        name: "FK_ApiHeaderblock_Buttonblocks_ButtonblockId",
                         column: x => x.ButtonblockId,
-                        principalTable: "Buttonblock",
+                        principalTable: "Buttonblocks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -498,28 +778,48 @@ namespace Gobot.Migrations
                 column: "UserInputTypeAnythingId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApiHeader_JsonAPIID",
-                table: "ApiHeader",
-                column: "JsonAPIID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ApiHeaderblock_ButtonblockId",
                 table: "ApiHeaderblock",
                 column: "ButtonblockId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Buttonblock_MediaId",
-                table: "Buttonblock",
+                name: "IX_ApiHeaders_JsonAPIID",
+                table: "ApiHeaders",
+                column: "JsonAPIID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bots_LandingConfigId",
+                table: "Bots",
+                column: "LandingConfigId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bots_ThemeId",
+                table: "Bots",
+                column: "ThemeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Buttonblocks_MediaId",
+                table: "Buttonblocks",
                 column: "MediaId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FormField_ConversationalFormID",
-                table: "FormField",
-                column: "ConversationalFormID");
+                name: "IX_FormFieldResponses_FormResponseId",
+                table: "FormFieldResponses",
+                column: "FormResponseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ImageSlideblock_MediaId",
-                table: "ImageSlideblock",
+                name: "IX_FormFields_ConversationalFormId",
+                table: "FormFields",
+                column: "ConversationalFormId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FormResponses_FormId",
+                table: "FormResponses",
+                column: "FormId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ImageSlideblocks_MediaId",
+                table: "ImageSlideblocks",
                 column: "MediaId");
 
             migrationBuilder.CreateIndex(
@@ -538,6 +838,11 @@ namespace Gobot.Migrations
                 column: "UserInputKeywordId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PageMessages_SelectedStoryId",
+                table: "PageMessages",
+                column: "SelectedStoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PhraseVariables_UserInputPhraseId",
                 table: "PhraseVariables",
                 column: "UserInputPhraseId");
@@ -546,6 +851,11 @@ namespace Gobot.Migrations
                 name: "IX_PlainKeywords_UserInputKeywordId",
                 table: "PlainKeywords",
                 column: "UserInputKeywordId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TrainingFiles_AssistantId",
+                table: "TrainingFiles",
+                column: "AssistantId");
         }
 
         /// <inheritdoc />
@@ -555,10 +865,19 @@ namespace Gobot.Migrations
                 name: "AnythingVariables");
 
             migrationBuilder.DropTable(
-                name: "ApiHeader");
+                name: "ApiHeaderblock");
 
             migrationBuilder.DropTable(
-                name: "ApiHeaderblock");
+                name: "ApiHeaders");
+
+            migrationBuilder.DropTable(
+                name: "BotConfigs");
+
+            migrationBuilder.DropTable(
+                name: "BotMenus");
+
+            migrationBuilder.DropTable(
+                name: "BotPublishRequests");
 
             migrationBuilder.DropTable(
                 name: "Bots");
@@ -567,10 +886,16 @@ namespace Gobot.Migrations
                 name: "Connection");
 
             migrationBuilder.DropTable(
-                name: "FormField");
+                name: "FormFieldResponses");
 
             migrationBuilder.DropTable(
-                name: "ImageSlideblock");
+                name: "FormFields");
+
+            migrationBuilder.DropTable(
+                name: "FormSubmissions");
+
+            migrationBuilder.DropTable(
+                name: "ImageSlideblocks");
 
             migrationBuilder.DropTable(
                 name: "Keywords");
@@ -580,6 +905,9 @@ namespace Gobot.Migrations
 
             migrationBuilder.DropTable(
                 name: "LinkStory");
+
+            migrationBuilder.DropTable(
+                name: "PageMessages");
 
             migrationBuilder.DropTable(
                 name: "PhraseVariables");
@@ -597,28 +925,52 @@ namespace Gobot.Migrations
                 name: "TextResponse");
 
             migrationBuilder.DropTable(
+                name: "TrainingFiles");
+
+            migrationBuilder.DropTable(
                 name: "TypingDelay");
+
+            migrationBuilder.DropTable(
+                name: "Variables");
+
+            migrationBuilder.DropTable(
+                name: "WebsiteSources");
 
             migrationBuilder.DropTable(
                 name: "UserInputTypeAnythings");
 
             migrationBuilder.DropTable(
+                name: "Buttonblocks");
+
+            migrationBuilder.DropTable(
                 name: "JsonAPI");
 
             migrationBuilder.DropTable(
-                name: "Buttonblock");
+                name: "LandingConfigs");
 
             migrationBuilder.DropTable(
-                name: "CoversationalForm");
+                name: "Themes");
+
+            migrationBuilder.DropTable(
+                name: "FormResponses");
 
             migrationBuilder.DropTable(
                 name: "KeywordGroups");
 
             migrationBuilder.DropTable(
+                name: "StoryReference");
+
+            migrationBuilder.DropTable(
                 name: "UserInputPhrases");
 
             migrationBuilder.DropTable(
+                name: "AiAssistants");
+
+            migrationBuilder.DropTable(
                 name: "Medias");
+
+            migrationBuilder.DropTable(
+                name: "CoversationalForm");
 
             migrationBuilder.DropTable(
                 name: "UserInputKeywords");

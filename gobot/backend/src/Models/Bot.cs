@@ -22,7 +22,9 @@ namespace Netlarx.Products.Gobot.Models
         [Required]
         public string ApiKey { get; set; } // generated API key
 
-        public int StoryId { get; set; }
+
+        // remove this a bot consist multiple stories not a single stories in TEST CASE WRITING
+        //public int StoryId { get; set; } 
 
         // JSON navigation properties
         public Theme Theme { get; set; }

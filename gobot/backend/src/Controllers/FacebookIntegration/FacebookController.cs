@@ -277,5 +277,40 @@ namespace Netlarx.Products.Gobot.Controllers.FacebookIntegration
             var url = $"https://graph.facebook.com/v20.0/me/messages?access_token={pageAccessToken}";
             await httpClient.PostAsync(url, content);
         }
+
+        // ✅ Check Bot Status
+        [HttpGet("bot-status/{pageId}")]
+        public async Task<IActionResult> GetBotStatus(string pageId)
+        {
+            if (string.IsNullOrEmpty(pageId))
+                return BadRequest(new { status = "error", message = "PageId is required." });
+
+            var botConnection = await _context.BotConnections.FirstOrDefaultAsync(b => b.PageId == pageId);
+
+            if (botConnection == null)
+            {
+                return Ok(new
+                {
+                    status = "success",
+                    data = new
+                    {
+                        connected = false,
+                        botName = (string)null
+                    }
+                });
+            }
+
+            return Ok(new
+            {
+                status = "success",
+                data = new
+                {
+                    connected = botConnection.WebhookStatus == "connected",
+                    botName = botConnection.BotName
+                }
+            });
+        }
+
+
     }
 }
