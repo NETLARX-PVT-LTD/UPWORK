@@ -15,7 +15,7 @@ namespace Netlarx.Products.Gobot.Models
     public class AiAssistant
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
         public string AssistantName { get; set; } = null!;
@@ -24,7 +24,7 @@ namespace Netlarx.Products.Gobot.Models
         public string ApiKey { get; set; } = null!;
 
         [Required]
-        public string Plateform { get; set; } // OpenAPI, Gemini, openRouter
+        public string Platform { get; set; } // OpenAPI, Gemini, openRouter
 
         public string Instruction { get; set; } = null!;
 

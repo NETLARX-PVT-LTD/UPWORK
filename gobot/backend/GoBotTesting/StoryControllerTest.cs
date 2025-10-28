@@ -13,6 +13,7 @@ namespace Netlarx.Products.Gobot.UnitTest
     using Netlarx.Products.Gobot.Controllers;
     using Netlarx.Products.Gobot.Interface;
     using Netlarx.Products.Gobot.Models;
+    using Netlarx.Products.Gobot.Validations;
     using System;
     using System.Collections.Generic;
     using System.Threading;
@@ -31,8 +32,8 @@ namespace Netlarx.Products.Gobot.UnitTest
 
             var loggerMock = new Mock<ILogger<ComponentsController>>();
             var stloggerMock = new Mock<ILogger<StoryController>>();
-
-            _stController = new StoryController(_db.Object, stloggerMock.Object);
+            var validationMock = new Mock<StoryControllerValidation>();
+            _stController = new StoryController(_db.Object, stloggerMock.Object, validationMock.Object);
         }
 
         [Fact]

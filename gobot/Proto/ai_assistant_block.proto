@@ -6,7 +6,7 @@ message AiAssistantBlock {
   string id = 1;                    // Guid in C# → string in proto
   string assistantName = 2;         // Required string
   string apiKey = 3;                // Required string
-  string plateform = 4;             // OpenAPI, Gemini, OpenRouter
+  string platform = 4;             // OpenAPI, Gemini, OpenRouter
   string instruction = 5;           
   string model = 6;                 // GPT, Gemini, GPT Pro
   string source = 7;                // My content

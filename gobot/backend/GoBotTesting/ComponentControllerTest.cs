@@ -47,11 +47,19 @@ namespace Netlarx.Products.Gobot.UnitTest
         public async Task AddStories()
         {
             // Arrange
-            var story = new Stories { ID = 1, Name = "Test Story" };
+            var storyBlock = new StoryBlock
+            {
+                Id = 1,
+                Name = "Welcome Story",
+                BotId = Guid.NewGuid().ToString(),
+                RootBlockConnectionId = Guid.NewGuid().ToString()
+            };
+
+            // Act
             _db.Setup(x => x.addStory(It.IsAny<Stories>()));
 
             // Act
-            var result = await _controller.AddStory(story);
+            var result = await _controller.AddStory(storyBlock);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);

@@ -5,7 +5,7 @@ package chatbot;
 import "google/protobuf/timestamp.proto";
 
 message WebsiteDataBlock {
-  int32 id = 1;                       // int in C# → int32 in proto
+  string id = 1;                       // Guid in C# → string in proto
   string websiteType = 2;             // Website type (string)
 
   string assistantId = 3;             // Guid → string

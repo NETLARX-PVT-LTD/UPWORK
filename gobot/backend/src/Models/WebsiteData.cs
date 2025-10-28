@@ -13,7 +13,7 @@ namespace Netlarx.Products.Gobot.Models
     public class WebsiteData
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public string WebsiteType { get; set; }
 
         [Required]

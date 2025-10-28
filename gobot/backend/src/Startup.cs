@@ -18,6 +18,12 @@ namespace Netlarx.Products.Gobot
     using Netlarx.Products.Gobot.Middlewares;
     using Microsoft.AspNetCore.Mvc.Formatters;
     using Netlarx.Products.Gobot.Validations;
+    using Netlarx.Products.Gobot.Interface.Ai;
+    using Netlarx.Products.Gobot.Service.AiAssistant;
+    using Netlarx.Products.Gobot.Controllers.AiAssistant;
+    using Netlarx.Products.Gobot.Interface.Assistant;
+    using Netlarx.Products.Gobot.Services.AiAssistant;
+    using Netlarx.Products.Gobot.Db.DbLayer.AiAssistant.Assistant;
 
     public class Startup(IConfiguration configuration)
     {
@@ -42,8 +48,16 @@ namespace Netlarx.Products.Gobot
             );
 
             services.AddScoped<IBotDbContext>(provider => provider.GetRequiredService<BotDbContext>());
+
             services.AddSingleton<StorySessionManager>();
             services.AddSingleton<StoryControllerValidation>();
+
+            services.AddScoped<IAiService,AiService>();
+            services.AddHttpClient<AIController>();
+
+            services.AddScoped<IAssistantService, AssistantService>();
+            services.AddScoped<IAssistantRepository, AssistantRepository>();
+            services.AddHttpClient<AssistantsController>();
 
             services.AddCors(options =>
             {
