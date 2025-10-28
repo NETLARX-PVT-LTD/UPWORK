@@ -23,16 +23,6 @@ namespace Netlarx.Products.Gobot.Db.DbLayer.AiAssistant.Assistant
             try
             {
                 await _context.AiAssistants.AddAsync(assistantEntity);
-
-                if (assistantEntity.TrainingFiles != null && assistantEntity.TrainingFiles.Any())
-                {
-                    foreach (var file in assistantEntity.TrainingFiles)
-                    {
-                        file.AssistantId = assistantEntity.Id;
-                        await _context.TrainingFiles.AddAsync(file);
-                    }
-                }
-
                 await _context.SaveChangesAsync();
                 return (true, assistantEntity.Id);
             }
