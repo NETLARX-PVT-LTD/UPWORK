@@ -14,7 +14,7 @@ namespace Netlarx.Products.Gobot.Models
     public class Bot
     {
         [Key]
-        public Guid BotId { get; set; }
+        public Guid BotId { get; set; } = Guid.NewGuid();
 
         [Required]
         public string BotName { get; set; }

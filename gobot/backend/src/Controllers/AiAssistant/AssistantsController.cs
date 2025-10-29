@@ -10,6 +10,7 @@ namespace Netlarx.Products.Gobot.Controllers.AiAssistant
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Netlarx.Products.Gobot.Errors;
+    using Netlarx.Products.Gobot.Helper;
     using Netlarx.Products.Gobot.Interface.Assistant;
     using Netlarx.Products.Gobot.ModelDTO.AIAssistant;
     using System;
@@ -32,6 +33,7 @@ namespace Netlarx.Products.Gobot.Controllers.AiAssistant
         {
             var errors = new Errors();
             var result = await _assistantService.CreateAssistantAsync(request, errors);
+            HttpStatusCodeHelper.SetStatusCodeFromString(Response, result.StatusCode);
             return result;
         }
 
@@ -40,6 +42,7 @@ namespace Netlarx.Products.Gobot.Controllers.AiAssistant
         {
             var errors = new Errors();
             var result = await _assistantService.UpdateAssistantAsync(assistantId, request, errors);
+            HttpStatusCodeHelper.SetStatusCodeFromString(Response, result.StatusCode);
             return result;
         }
 
@@ -48,6 +51,7 @@ namespace Netlarx.Products.Gobot.Controllers.AiAssistant
         {
             var errors = new Errors();
             var result = await _assistantService.GetAiAssistantByIdAsync(assistantId, errors);
+            HttpStatusCodeHelper.SetStatusCodeFromString(Response, result.StatusCode);
             return result;
         }
 
@@ -56,6 +60,7 @@ namespace Netlarx.Products.Gobot.Controllers.AiAssistant
         {
             var errors = new Errors();
             var result = await _assistantService.UploadTrainingFilesAsync(assistantId, files, errors);
+            HttpStatusCodeHelper.SetStatusCodeFromString(Response, result.StatusCode);
             return result;
         }
 
@@ -64,6 +69,7 @@ namespace Netlarx.Products.Gobot.Controllers.AiAssistant
         {
             var errors = new Errors();
             var result = await _assistantService.AddWebsiteSourcesAsync(assistantId, webSiteData, errors);
+            HttpStatusCodeHelper.SetStatusCodeFromString(Response, result.StatusCode);
             return result;
         }
 

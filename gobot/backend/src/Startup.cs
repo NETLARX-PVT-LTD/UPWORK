@@ -24,6 +24,10 @@ namespace Netlarx.Products.Gobot
     using Netlarx.Products.Gobot.Interface.Assistant;
     using Netlarx.Products.Gobot.Services.AiAssistant;
     using Netlarx.Products.Gobot.Db.DbLayer.AiAssistant.Assistant;
+    using Netlarx.Products.Gobot.Interface.Bots;
+    using Netlarx.Products.Gobot.Services.Bots;
+    using Netlarx.Products.Gobot.Db.DbLayer.Bots.Bot;
+    using Netlarx.Products.Gobot.Controllers.Bots;
 
     public class Startup(IConfiguration configuration)
     {
@@ -58,6 +62,11 @@ namespace Netlarx.Products.Gobot
             services.AddScoped<IAssistantService, AssistantService>();
             services.AddScoped<IAssistantRepository, AssistantRepository>();
             services.AddHttpClient<AssistantsController>();
+
+            services.AddScoped<IBotService, BotService>();
+            services.AddScoped<IBotRepository, BotRepository>();
+            services.AddHttpClient<BotsController>();
+
 
             services.AddCors(options =>
             {

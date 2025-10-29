@@ -4,7 +4,7 @@ package chatbot;
 
 // Represents theme details
 message ThemeBlock {
-  int32 id = 1;
+  string id = 1;
   string primary_color = 2;
 }
 

@@ -2,11 +2,13 @@
 
 namespace Netlarx.Products.Gobot.Controllers.AiAssistant
 {
+    using Gobot.Helper;
     using Gobot.Interface.Ai;
     using Gobot.ModelDTO.AiAssistant;
     using Microsoft.AspNetCore.Mvc;
     using Netlarx.Products.Gobot.Errors;
     using System;
+    using System.Net;
     using System.Threading.Tasks;
 
     [ApiController]
@@ -26,6 +28,7 @@ namespace Netlarx.Products.Gobot.Controllers.AiAssistant
         {
             var errors = new Errors();
             var result = await _aiService.GenerateTextAsync(request, errors);
+            HttpStatusCodeHelper.SetStatusCodeFromString(Response, result.StatusCode);
             return result;
         }
     }
