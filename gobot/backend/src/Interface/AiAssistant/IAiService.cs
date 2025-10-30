@@ -1,4 +1,9 @@
-﻿
+﻿// ---------------------------------------------------------------------
+// <copyright file="IAiService.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
+
 namespace Netlarx.Products.Gobot.Interface.Ai
 {
     using Gobot.Errors;

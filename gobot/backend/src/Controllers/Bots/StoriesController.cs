@@ -14,7 +14,6 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
     using Netlarx.Products.Gobot.Models;
     using Netlarx.Products.Gobot.Pipelines;
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
 

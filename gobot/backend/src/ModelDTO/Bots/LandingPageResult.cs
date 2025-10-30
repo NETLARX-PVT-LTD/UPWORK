@@ -1,12 +1,16 @@
-﻿
+﻿// ---------------------------------------------------------------------
+// <copyright file="LandingPageResult.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
+
 namespace Netlarx.Products.Gobot.ModelDTO.Bots
 {
-    using Chatbot;
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Result;
     using System;
 
-    public class LandingPageResult:Result
+    public class LandingPageResult : Result
     {
         public LandingPageResult(bool success, string statusCode, LandingPageDto? landingBlock, Errors? error = null)
             : base(success, error, statusCode)

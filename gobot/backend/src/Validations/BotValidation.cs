@@ -1,8 +1,14 @@
-﻿using Chatbot;
-using Netlarx.Products.Gobot.Errors;
+﻿// ---------------------------------------------------------------------
+// <copyright file="BotValidation.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
 namespace Gobot.Validations
 {
+    using Chatbot;
+    using Netlarx.Products.Gobot.Errors;
+
     public static class BotValidation
     {
         public static Errors? Validate(BotBlock? block)

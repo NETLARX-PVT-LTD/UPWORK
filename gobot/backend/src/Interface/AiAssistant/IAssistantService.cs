@@ -1,4 +1,9 @@
-﻿
+﻿// ---------------------------------------------------------------------
+// <copyright file="IAssistantService.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
+
 namespace Netlarx.Products.Gobot.Interface.Assistant
 {
     using Chatbot;

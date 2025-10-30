@@ -1,4 +1,8 @@
-﻿
+﻿// ---------------------------------------------------------------------
+// <copyright file="AIController.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
 
 namespace Netlarx.Products.Gobot.Controllers.AiAssistant
 {
@@ -7,8 +11,6 @@ namespace Netlarx.Products.Gobot.Controllers.AiAssistant
     using Gobot.ModelDTO.AiAssistant;
     using Microsoft.AspNetCore.Mvc;
     using Netlarx.Products.Gobot.Errors;
-    using System;
-    using System.Net;
     using System.Threading.Tasks;
 
     [ApiController]
@@ -20,7 +22,6 @@ namespace Netlarx.Products.Gobot.Controllers.AiAssistant
         {
             _aiService = aiService;
         }
-
 
         // POST /api/ai/GenerateText
         [HttpPost("GenerateText")]

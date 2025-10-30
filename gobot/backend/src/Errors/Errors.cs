@@ -17,11 +17,5 @@
             this.FaultCode = failureCode;
             this.FaultMessage = faultMessage;
         }
-        public void Fill(string message, FailureCode failureCode)
-        {
-            this.FaultMessage = message;
-            this.FaultCode = failureCode;
-        }
     }
-
 }

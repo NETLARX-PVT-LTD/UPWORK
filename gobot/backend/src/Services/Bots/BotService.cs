@@ -1,4 +1,9 @@
-﻿
+﻿// ---------------------------------------------------------------------
+// <copyright file="AiService.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
+
 namespace Netlarx.Products.Gobot.Services.Bots
 {
     using Chatbot;
@@ -6,12 +11,10 @@ namespace Netlarx.Products.Gobot.Services.Bots
     using Gobot.Db.DbLayer.Bots.Bot;
     using Gobot.Interface.Bots;
     using Gobot.ModelDTO.Bots;
-    using Microsoft.AspNetCore.Http.HttpResults;
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Models;
     using System;
     using System.Threading.Tasks;
-    using Twilio.Rest.Trunking.V1;
 
     public class BotService : IBotService
     {
@@ -42,7 +45,7 @@ namespace Netlarx.Products.Gobot.Services.Bots
                 BotId = bot.BotId.ToString(),
                 BotName = bot.BotName,
                 ApiKey = bot.ApiKey,
-                // story_Id = bot.StoryId, // removed as per model comments
+                // story_Id = bot.StoryId, 
 
                 Theme = bot.Theme != null ? new ThemeBlock
                 {
@@ -111,7 +114,7 @@ namespace Netlarx.Products.Gobot.Services.Bots
             };
 
             var (success, botId) = await _botRepository.CreateBot(botEntity, errors);
-            if (!success || botId==Guid.Empty)
+            if (!success || botId == Guid.Empty)
             {
                 errors.Fill(FailureCode.DatabaseError, "Failed to create bot.");
                 return new BotActionResult(false, "500", Guid.Empty, errors);
@@ -127,11 +130,11 @@ namespace Netlarx.Products.Gobot.Services.Bots
                 return new BotActionResult(false, "400", Guid.Empty, errors);
             }
 
-            var(success, existingBot) = await _botRepository.GetBotById(botId,errors);
+            var (success, existingBot) = await _botRepository.GetBotById(botId, errors);
 
-            if (!success||existingBot == null)
+            if (!success || existingBot == null)
             {
-                return new BotActionResult(false,"404",Guid.Empty,errors);
+                return new BotActionResult(false, "404", Guid.Empty, errors);
             }
 
             existingBot.BotName = botRequest.BotName ?? existingBot.BotName;
@@ -175,8 +178,8 @@ namespace Netlarx.Products.Gobot.Services.Bots
                 existingBot.LandingConfig.BackgroundStyle = botRequest.LandingConfig.BackgroundStyle ?? existingBot.LandingConfig.BackgroundStyle;
             }
 
-            var successUpdate =  await _botRepository.UpdateBot(existingBot,errors);
-            if(!successUpdate)
+            var successUpdate = await _botRepository.UpdateBot(existingBot, errors);
+            if (!successUpdate)
             {
                 return new BotActionResult(false, "500", Guid.Empty, errors);
             }
@@ -186,19 +189,20 @@ namespace Netlarx.Products.Gobot.Services.Bots
 
         public async Task<BotActionResult> DeleteBotAsync(Guid botId, Errors errors)
         {
-            if(botId == Guid.Empty)
+            if (botId == Guid.Empty)
             {
                 errors.Fill(FailureCode.ValidationError, "Bot Id is Required");
-                return new BotActionResult(false,"400",Guid.Empty, errors);
+                return new BotActionResult(false, "400", Guid.Empty, errors);
             }
-            var (success, bot) = await _botRepository.GetBotById(botId,errors);
+
+            var (success, bot) = await _botRepository.GetBotById(botId, errors);
             if (!success || bot == null)
             {
                 return new BotActionResult(false, "404", Guid.Empty, errors);
             }
 
-            var deleteSuccess = await _botRepository.DeleteBot(bot,errors);
-            if(!deleteSuccess)
+            var deleteSuccess = await _botRepository.DeleteBot(bot, errors);
+            if (!deleteSuccess)
             {
                 return new BotActionResult(false, "500", Guid.Empty, errors);
             }
@@ -216,7 +220,6 @@ namespace Netlarx.Products.Gobot.Services.Bots
             }
 
             var (success, bot) = await _botRepository.GetLandingPage(botId, errors);
-
             if (!success || bot == null)
             {
                 return new LandingPageResult(false, "404", null, errors);
@@ -239,6 +242,5 @@ namespace Netlarx.Products.Gobot.Services.Bots
 
             return new LandingPageResult(true, "200", landingPageDto);
         }
-
     }
 }

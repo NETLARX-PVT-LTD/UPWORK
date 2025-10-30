@@ -1,4 +1,9 @@
-﻿
+﻿// ---------------------------------------------------------------------
+// <copyright file="IBotService.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
+
 namespace Netlarx.Products.Gobot.Interface.Bots
 {
     using Chatbot;
@@ -17,7 +22,5 @@ namespace Netlarx.Products.Gobot.Interface.Bots
 
         //Landing
         Task<LandingPageResult> GetLandingPageAsync(Guid botId, Errors errors);
-
-
     }
 }

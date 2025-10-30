@@ -72,6 +72,5 @@ namespace Netlarx.Products.Gobot.Controllers.AiAssistant
             HttpStatusCodeHelper.SetStatusCodeFromString(Response, result.StatusCode);
             return result;
         }
-
     }
 }

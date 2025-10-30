@@ -1,4 +1,9 @@
-﻿
+﻿// ---------------------------------------------------------------------
+// <copyright file="AiService.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
+
 namespace Netlarx.Products.Gobot.Services.AiAssistant
 {
     using Chatbot;
@@ -149,7 +154,6 @@ namespace Netlarx.Products.Gobot.Services.AiAssistant
                 }
 
                 var (success, assistant) = await _repository.GetAiAssistantById(assistantId, errors);
-
                 if (!success || assistant == null)
                 {
                     return new AssistantResult(false, GetStatusCode(errors), null, errors);

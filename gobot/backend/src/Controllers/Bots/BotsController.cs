@@ -10,12 +10,9 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
     using Gobot.Interface.Bots;
     using Gobot.ModelDTO.Bots;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Helper;
-    using Netlarx.Products.Gobot.Interface;
-    using Netlarx.Products.Gobot.Models;
     using System;
     using System.Threading.Tasks;
 
@@ -23,15 +20,12 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
     [ApiController]
     public class BotsController : ControllerBase
     {
-        private readonly IBotDbContext _context;
         private readonly IBotService _botService;
 
-
         private readonly ILogger<StoriesController> _logger;
-        public BotsController(IBotDbContext context, ILogger<StoriesController> logger)
+        public BotsController(IBotService botService)
         {
-            _context = context;
-            _logger = logger;
+            _botService = botService;
         }
 
         // api/bots/{botId}
@@ -39,40 +33,50 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
         public async Task<BotResult> GetBotByBotIdAsync(Guid botId)
         {
             var errors = new Errors();
-            var result =await _botService.GetBotByIdAsync(botId,errors);
+            var result = await _botService.GetBotByIdAsync(botId, errors);
             HttpStatusCodeHelper.SetStatusCodeFromString(Response, result.StatusCode);
             return result;
         }
 
         // POST /api/bots/{botId}
         [HttpPost("CreateBot")]
-        public async Task<ActionResult<BotActionResult>> CreateBotAsync()
+        public async Task<BotActionResult> CreateBotAsync()
         {
             var errors = new Errors();
+            BotActionResult result;
+
             if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not BotBlock block)
             {
                 errors.Fill(FailureCode.InvalidInput, "Protobuf body missing or invalid.");
-                return BadRequest(new BotActionResult(false, "400", Guid.Empty, errors));
+                result = new BotActionResult(false, "400", Guid.Empty, errors);
+            }
+            else
+            {
+                result = await _botService.CreateBotAsync(block, errors);
             }
 
-            var result = await _botService.CreateBotAsync(block, errors);
-            return StatusCode(int.Parse(result.StatusCode), result);
+            HttpStatusCodeHelper.SetStatusCodeFromString(Response, result.StatusCode);
+            return result;
         }
 
-
-
-        [HttpPut("UpdateBotByBotId{botId}")]
-        public async Task<IActionResult> UpdateBotByBotIdAsync(Guid botId)
+        [HttpPut("UpdateBotByBotId/{botId}")]
+        public async Task<BotActionResult> UpdateBotByBotIdAsync(Guid botId)
         {
             var errors = new Errors();
+            BotActionResult result;
+
             if (!HttpContext.Items.TryGetValue("ProtobufBody", out var obj) || obj is not BotBlock block)
             {
                 errors.Fill(FailureCode.InvalidInput, "Protobuf body missing or invalid.");
-                return BadRequest(new BotActionResult(false, "400", Guid.Empty, errors));
+                result = new BotActionResult(false, "400", Guid.Empty, errors);
+            }
+            else
+            {
+                result = await _botService.UpdateBotAsync(botId, block, errors);
             }
 
-            var result = await _botService.UpdateBotAsync(botId,block, errors);
-            return StatusCode(int.Parse(result.StatusCode), result);
+            HttpStatusCodeHelper.SetStatusCodeFromString(Response, result.StatusCode);
+            return result;
         }
 
         //  DELETE /api/bots/{botId}
@@ -95,4 +99,5 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
             HttpStatusCodeHelper.SetStatusCodeFromString(Response, result.StatusCode);
             return result;
         }
+    }
 }

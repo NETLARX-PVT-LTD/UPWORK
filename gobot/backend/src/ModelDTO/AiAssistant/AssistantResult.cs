@@ -1,10 +1,14 @@
-﻿
+﻿// ---------------------------------------------------------------------
+// <copyright file="AssistantResult.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
+
 namespace Netlarx.Products.Gobot.ModelDTO.AIAssistant
 {
     using Chatbot;
     using Gobot.Errors;
     using Gobot.Result;
-    using Netlarx.Products.Gobot.Models;
 
     public class AssistantResult : Result
     {

@@ -1,10 +1,14 @@
-﻿
+﻿// ---------------------------------------------------------------------
+// <copyright file="AiService.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
+
 namespace Netlarx.Products.Gobot.Validation
 {
     using Chatbot;
     using Gobot.Errors;
     using System;
-    using System.Linq;
     public static class AiAssistantValidation
     {
         public static Errors? AssistantValidate(AiAssistantBlock request)
@@ -94,7 +98,7 @@ namespace Netlarx.Products.Gobot.Validation
                 return errors;
             }
 
-            return  null;
+            return null;
         }
     }
 }
