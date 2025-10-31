@@ -1,0 +1,29 @@
+﻿// ---------------------------------------------------------------------
+// <copyright file="IAssistantService.cs" company="Netlarx">
+// Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
+// </copyright>
+// ---------------------------------------------------------------------
+
+namespace Netlarx.Products.Gobot.Interface.Assistant
+{
+    using Microsoft.AspNetCore.Http;
+    using Netlarx.Products.Gobot.Errors;
+    using Netlarx.Products.Gobot.ModelDTO.AiAssistant;
+    using Netlarx.Products.Gobot.ModelDTO.AIAssistant;
+    using Netlaxr.Products.Gobot.ModelDTO.AiAssistant;
+    using System;
+    using System.Threading.Tasks;
+
+    public interface IAssistantService
+    {
+        Task<AssistantActionResult> CreateAssistantAsync(AiAssistantBlockRequest request, Errors errors);
+
+        Task<AssistantActionResult> UpdateAssistantAsync(Guid assistantId, AiAssistantBlockRequest request, Errors errors);
+
+        Task<AssistantResult> GetAiAssistantByIdAsync(Guid assistantId, Errors errors);
+
+        Task<AssistantActionResult> UploadTrainingFilesAsync(Guid assistantId, IFormFileCollection files, Errors errors);
+
+        Task<AssistantWebSiteResult> AddWebsiteSourcesAsync(Guid assistantId, AiAssistantWebsiteRequest webSiteData, Errors errors);
+    }
+}

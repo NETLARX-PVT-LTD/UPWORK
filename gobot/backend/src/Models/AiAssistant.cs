@@ -24,7 +24,7 @@ namespace Netlarx.Products.Gobot.Models
         public string ApiKey { get; set; } = null!;
 
         [Required]
-        public string Plateform { get; set; } // OpenAPI, Gemini, openRouter
+        public string Platform { get; set; } // OpenAPI, Gemini, openRouter
 
         public string Instruction { get; set; } = null!;
 
