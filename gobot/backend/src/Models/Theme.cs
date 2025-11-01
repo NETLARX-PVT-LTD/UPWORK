@@ -11,7 +11,7 @@ namespace Netlarx.Products.Gobot.Models
     public class Theme
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         public string PrimaryColor { get; set; }
     }
