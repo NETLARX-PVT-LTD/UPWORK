@@ -20,6 +20,7 @@ namespace Netlarx.Products.Gobot.Db.Bots.Bot
         {
             _context = context;
         }
+
         public async Task<(bool success, Bot? bot)> GetBotById(Guid botId, Errors errors)
         {
             try
@@ -42,7 +43,6 @@ namespace Netlarx.Products.Gobot.Db.Bots.Bot
                 errors.Fill(FailureCode.DatabaseError, $"Failed to get bot detail : {ex.Message}");
                 return (false, null);
             }
-
         }
 
         public async Task<(bool success, Guid? botId)> CreateBot(Bot bot, Errors errors)

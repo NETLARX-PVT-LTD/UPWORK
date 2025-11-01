@@ -29,7 +29,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
 
         // api/bots/{botId}
         [HttpGet("GetBotByBotId{botId}")]
-        public async Task<BotResult> GetBotByBotIdAsync(Guid botId)
+        public async Task<BotDetail> GetBotByBotIdAsync(Guid botId)
         {
             var errors = new Errors();
             var result = await _botService.GetBotByIdAsync(botId, errors);
@@ -39,7 +39,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
 
         // POST /api/bots/{botId}
         [HttpPost("CreateBot")]
-        public async Task<BotActionResult> CreateBotAsync(BotRequestDto block)
+        public async Task<BotResult> CreateBotAsync(BotRequestDto block)
         {
             var errors = new Errors();
             var result = await _botService.CreateBotAsync(block, errors);
@@ -48,7 +48,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
         }
 
         [HttpPut("UpdateBotByBotId/{botId}")]
-        public async Task<BotActionResult> UpdateBotByBotIdAsync(Guid botId, BotRequestDto block)
+        public async Task<BotResult> UpdateBotByBotIdAsync(Guid botId, BotRequestDto block)
         {
             var errors = new Errors();
             var result = await _botService.UpdateBotAsync(botId, block, errors);
@@ -58,7 +58,7 @@ namespace Netlarx.Products.Gobot.Controllers.Bots
 
         //  DELETE /api/bots/{botId}
         [HttpDelete("DeleteBotById{botId}")]
-        public async Task<BotActionResult> DeleteBoAsynctById(Guid botId)
+        public async Task<BotResult> DeleteBoAsynctById(Guid botId)
         {
             var errors = new Errors();
             var result = await _botService.DeleteBotAsync(botId, errors);

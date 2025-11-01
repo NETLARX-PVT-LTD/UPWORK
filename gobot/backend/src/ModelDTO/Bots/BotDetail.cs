@@ -8,16 +8,15 @@ namespace Netlarx.Products.Gobot.ModelDTO.Bots
 {
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Result;
-    using System;
 
-    public class BotActionResult : Result
+    public class BotDetail : Result
     {
-        public BotActionResult(bool success, string statusCode, Guid? botId, Errors? error = null)
+        public BotDetail(bool success, string statusCode, BotBlockDto? bot, Errors? error = null)
             : base(success, error, statusCode)
         {
-            BotId = botId;
+            Bot = bot;
         }
 
-        public Guid? BotId { get; set; }
+        public BotBlockDto? Bot { get; set; }
     }
 }

@@ -24,19 +24,19 @@ namespace Netlarx.Products.Gobot.Services.Bots
             _botRepository = botRepository;
         }
 
-        public async Task<BotResult> GetBotByIdAsync(Guid botId, Errors errors)
+        public async Task<BotDetail> GetBotByIdAsync(Guid botId, Errors errors)
         {
             if (botId == Guid.Empty)
             {
                 errors.Fill(FailureCode.InvalidInput, "Bot ID cannot be empty.");
-                return new BotResult(false, "400", null, errors);
+                return new BotDetail(false, "400", null, errors);
             }
 
             var (success, bot) = await _botRepository.GetBotById(botId, errors);
             if (!success || bot == null)
             {
                 errors.Fill(FailureCode.NotFound, $"Bot with ID {botId} not found.");
-                return new BotResult(false, "404", null, errors);
+                return new BotDetail(false, "404", null, errors);
             }
 
             var botblock = new BotBlockDto
@@ -73,15 +73,15 @@ namespace Netlarx.Products.Gobot.Services.Bots
                 } : null,
             };
 
-            return new BotResult(true, "200", botblock);
+            return new BotDetail(true, "200", botblock);
         }
 
-        public async Task<BotActionResult> CreateBotAsync(BotRequestDto block, Errors errors)
+        public async Task<BotResult> CreateBotAsync(BotRequestDto block, Errors errors)
         {
             var check = UniversalValidation.Validate(block, errors);
             if (!check)
             {
-                return new BotActionResult(false, "400", Guid.Empty, errors);
+                return new BotResult(false, "400", Guid.Empty, errors);
             }
 
             var botEntity = new Bot
@@ -119,23 +119,23 @@ namespace Netlarx.Products.Gobot.Services.Bots
             if (!success || botId == Guid.Empty)
             {
                 errors.Fill(FailureCode.DatabaseError, "Failed to create bot.");
-                return new BotActionResult(false, "500", Guid.Empty, errors);
+                return new BotResult(false, "500", Guid.Empty, errors);
             }
-            return new BotActionResult(true, "201", botId);
+            return new BotResult(true, "201", botId);
         }
 
-        public async Task<BotActionResult> UpdateBotAsync(Guid botId, BotRequestDto botRequest, Errors errors)
+        public async Task<BotResult> UpdateBotAsync(Guid botId, BotRequestDto botRequest, Errors errors)
         {
             var isValid = UniversalValidation.Validate(botRequest, errors);
             if (!isValid)
             {
-                return new BotActionResult(false, "400", Guid.Empty, errors);
+                return new BotResult(false, "400", Guid.Empty, errors);
             }
 
             var (success, existingBot) = await _botRepository.GetBotById(botId, errors);
             if (!success || existingBot == null)
             {
-                return new BotActionResult(false, "404", Guid.Empty, errors);
+                return new BotResult(false, "404", Guid.Empty, errors);
             }
 
             existingBot.BotName = botRequest.BotName ?? existingBot.BotName;
@@ -186,33 +186,33 @@ namespace Netlarx.Products.Gobot.Services.Bots
             var updateSuccess = await _botRepository.UpdateBot(existingBot, errors);
             if (!updateSuccess)
             {
-                return new BotActionResult(false, "500", Guid.Empty, errors);
+                return new BotResult(false, "500", Guid.Empty, errors);
             }
 
-            return new BotActionResult(true, "200", botId);
+            return new BotResult(true, "200", botId);
         }
 
-        public async Task<BotActionResult> DeleteBotAsync(Guid botId, Errors errors)
+        public async Task<BotResult> DeleteBotAsync(Guid botId, Errors errors)
         {
             if (botId == Guid.Empty)
             {
                 errors.Fill(FailureCode.ValidationError, "Bot Id is Required");
-                return new BotActionResult(false, "400", Guid.Empty, errors);
+                return new BotResult(false, "400", Guid.Empty, errors);
             }
 
             var (success, bot) = await _botRepository.GetBotById(botId, errors);
             if (!success || bot == null)
             {
-                return new BotActionResult(false, "404", Guid.Empty, errors);
+                return new BotResult(false, "404", Guid.Empty, errors);
             }
 
             var deleteSuccess = await _botRepository.DeleteBot(bot, errors);
             if (!deleteSuccess)
             {
-                return new BotActionResult(false, "500", Guid.Empty, errors);
+                return new BotResult(false, "500", Guid.Empty, errors);
             }
 
-            return new BotActionResult(true, "200", botId);
+            return new BotResult(true, "200", botId);
         }
 
         //Landing

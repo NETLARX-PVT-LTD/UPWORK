@@ -14,10 +14,10 @@ namespace Netlarx.Products.Gobot.Interface.Bots
     public interface IBotService
     {
         // Bot
-        Task<BotResult> GetBotByIdAsync(Guid botId, Errors errors);
-        Task<BotActionResult> CreateBotAsync(BotRequestDto block, Errors errors);
-        Task<BotActionResult> UpdateBotAsync(Guid botId, BotRequestDto block, Errors errors);
-        Task<BotActionResult> DeleteBotAsync(Guid botId, Errors errors);
+        Task<BotDetail> GetBotByIdAsync(Guid botId, Errors errors);
+        Task<BotResult> CreateBotAsync(BotRequestDto block, Errors errors);
+        Task<BotResult> UpdateBotAsync(Guid botId, BotRequestDto block, Errors errors);
+        Task<BotResult> DeleteBotAsync(Guid botId, Errors errors);
 
         //Landing
         Task<LandingPageResult> GetLandingPageAsync(Guid botId, Errors errors);
