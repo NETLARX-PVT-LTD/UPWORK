@@ -1,33 +1,18 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="Bot.cs" company="Netlarx">
+// <copyright file="BotBlockDto.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
 
-namespace Netlarx.Products.Gobot.Models
+namespace Netlarx.Products.Gobot.ModelDTO.Bots
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.Runtime.CompilerServices;
-
-    public class Bot
+    public class BotBlockDto
     {
-        [Key]
-        public Guid BotId { get; set; } = Guid.NewGuid();
-
-        [Required]
+        public string BotId { get; set; }
         public string BotName { get; set; }
+        public string ApiKey { get; set; }
 
-        [Required]
-        public string ApiKey { get; set; } // generated API key
-
-
-        // remove this a bot consist multiple stories not a single stories in TEST CASE WRITING
-        //public int StoryId { get; set; } 
-
-        // JSON navigation properties
-        public Theme Theme { get; set; }
+        //  public int StoryId { get; set; }
         public string Position { get; set; }
         public string Size { get; set; }
         public string Greeting { get; set; }
@@ -35,14 +20,28 @@ namespace Netlarx.Products.Gobot.Models
         public bool AllowFullscreen { get; set; }
         public bool ShowBranding { get; set; }
         public string BackgroundStyle { get; set; }
-
         public string PrimaryColor { get; set; }
         public string SecondaryColor { get; set; }
         public string ImageUrl { get; set; }
-        public string WelcomeMessage { get; set; }
-        //public string InputPlaceholder { get; set; }
-        public string FallbackMessage { get; set; }
         public bool IsActive { get; set; }
-        public LandingConfig LandingConfig { get; set; }
+        public string WelcomeMessage { get; set; }
+        public string FallbackMessage { get; set; }
+        public ThemeBlockDto Themes { get; set; }
+        public LandingConfigBlockDto LandingConfigs { get; set; }
     }
+
+    public class ThemeBlockDto
+    {
+        public string Id { get; set; }
+        public string PrimaryColor { get; set; }
+    }
+
+    public class LandingConfigBlockDto
+    {
+        public string Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string BackgroundStyle { get; set; }
+    }
+
 }

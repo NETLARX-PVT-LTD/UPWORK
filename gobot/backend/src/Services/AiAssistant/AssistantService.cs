@@ -14,7 +14,7 @@ namespace Netlarx.Products.Gobot.Services.AiAssistant
     using Netlarx.Products.Gobot.Interface.Assistant;
     using Netlarx.Products.Gobot.ModelDTO.AIAssistant;
     using Netlarx.Products.Gobot.Models;
-    using Netlarx.Products.Gobot.Validation;
+    using Netlarx.Products.Gobot.Validations;
     using Netlaxr.Products.Gobot.ModelDTO.AiAssistant;
     using System;
     using System.Collections.Generic;
@@ -54,7 +54,7 @@ namespace Netlarx.Products.Gobot.Services.AiAssistant
 
         public async Task<AssistantActionResult> CreateAssistantAsync(AiAssistantBlockRequest request, Errors errors)
         {
-            var check = AiAssistantValidation.AssistantValidate(request, errors);
+            var check = UniversalValidation.Validate(request, errors);
             if (!check)
             {
                 return new AssistantActionResult(false, "400", Guid.Empty, errors);
@@ -124,7 +124,7 @@ namespace Netlarx.Products.Gobot.Services.AiAssistant
 
         public async Task<AssistantActionResult> UpdateAssistantAsync(Guid assistantId, AiAssistantBlockRequest request, Errors errors)
         {
-            var check = AiAssistantValidation.AssistantValidate(request, errors);
+            var check = UniversalValidation.Validate(request, errors);
             if (!check)
             {
                 return new AssistantActionResult(false, "400", Guid.Empty, errors);
@@ -309,7 +309,7 @@ namespace Netlarx.Products.Gobot.Services.AiAssistant
         {
             try
             {
-                var check = AiAssistantValidation.WebSiteBlockValidate(dto, errors);
+                var check = UniversalValidation.Validate(dto, errors);
                 if (!check)
                 {
                     return new AssistantWebSiteResult(false, "400", -1, errors);

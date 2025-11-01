@@ -12,7 +12,7 @@ namespace Netlarx.Products.Gobot.Models
     public class LandingConfig
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         public string Title { get; set; }
         public string Description { get; set; }
