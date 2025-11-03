@@ -6,18 +6,10 @@
 
 namespace Netlarx.Products.Gobot.ModelDTO.Bots
 {
-    using Netlarx.Products.Gobot.Errors;
-    using Netlarx.Products.Gobot.Result;
     using System;
-
-    public class StoriesResult : Result
+    public class StoriesRequest
     {
-        public StoriesResult(bool success, string statusCode, int? storyId, Errors? error = null)
-            : base(success, error, statusCode)
-        {
-            StoryId = storyId;
-        }
-
-        public int? StoryId { get; set; }
+        public string Name { get; set; }
+        public string RootBlockConnectionId { get; set; }
     }
 }

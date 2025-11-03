@@ -1,23 +1,24 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="BotActionResult.cs" company="Netlarx">
+// <copyright file="StoriesResult.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
 
 namespace Netlarx.Products.Gobot.ModelDTO.Bots
 {
+    using Chatbot;
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Result;
-    using System;
+    using System.Collections.Generic;
 
-    public class StoriesActionResult : Result
+    public class StoriesDetail : Result
     {
-        public StoriesActionResult(bool success, string statusCode, Guid? storyId, Errors? error = null)
+        public StoriesDetail(bool success, string statusCode, List<StoryBlockdto>? stories, Errors? error = null)
             : base(success, error, statusCode)
         {
-            StoryId = storyId;
+            Stories = stories;
         }
 
-        public Guid? StoryId { get; set; }
+        public List<StoryBlockdto>? Stories { get; set; }
     }
 }
