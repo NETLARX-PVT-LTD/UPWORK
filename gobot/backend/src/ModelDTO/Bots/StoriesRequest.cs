@@ -6,7 +6,6 @@
 
 namespace Netlarx.Products.Gobot.ModelDTO.Bots
 {
-    using System;
     public class StoriesRequest
     {
         public string Name { get; set; }

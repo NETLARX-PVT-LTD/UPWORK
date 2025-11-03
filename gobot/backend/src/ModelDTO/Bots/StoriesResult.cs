@@ -8,7 +8,6 @@ namespace Netlarx.Products.Gobot.ModelDTO.Bots
 {
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Result;
-    using System;
 
     public class StoriesResult : Result
     {

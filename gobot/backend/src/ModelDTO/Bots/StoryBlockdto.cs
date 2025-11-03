@@ -4,10 +4,10 @@
 // </copyright>
 // ---------------------------------------------------------------------
 
-using System;
-
 namespace Netlarx.Products.Gobot.ModelDTO.Bots
 {
+    using System;
+
     public class StoryBlockdto
     {
         public int StoryId { get; set; }

@@ -4,7 +4,6 @@
 // </copyright>
 // ---------------------------------------------------------------------
 
-
 namespace Netlarx.Products.Gobot.Db.DbLayer.Bots.Stories
 {
     using Netlarx.Products.Gobot.Errors;
@@ -15,9 +14,9 @@ namespace Netlarx.Products.Gobot.Db.DbLayer.Bots.Stories
 
     public interface IStoriesRepository
     {
-        Task<(bool success,List<Stories>? stories)> GetStoriesAsync(Guid botId,Errors errors);
+        Task<(bool success,List<Stories>? stories)> GetStoriesAsync(Guid botId, Errors errors);
         Task<(bool success, Stories? story)> GetStoryAsync(Guid botId, int storyId, Errors errors);
-        Task<bool> AddStoryAsync(Stories story,Errors errors);
+        Task<bool> AddStoryAsync(Stories story, Errors errors);
         Task<bool> UpdateStoryAsync(Stories story, Errors errors);
         Task<bool> DeleteStoryAsync(Stories story, Errors errors);
     }

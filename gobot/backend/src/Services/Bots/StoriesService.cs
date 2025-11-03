@@ -6,7 +6,6 @@
 
 namespace Netlarx.Products.Gobot.Services.Bots
 {
-    using Chatbot;
     using Gobot.Db.DbLayer.Bots.Stories;
     using Microsoft.Extensions.Logging;
     using Netlarx.Products.Gobot.Db.Bots.Bot;
@@ -59,7 +58,7 @@ namespace Netlarx.Products.Gobot.Services.Bots
                 Name = s.Name,
                 RootBlockConnectionId = s.RootBlockConnectionId.ToString(),
                 BotId = s.BotId.ToString(),
-                CreatedDate =s.CreatedDate,
+                CreatedDate = s.CreatedDate,
             }).ToList();
 
             return new StoriesDetail(true, "200", dtoList);
@@ -135,7 +134,7 @@ namespace Netlarx.Products.Gobot.Services.Bots
 
         public async Task<StoriesResult> UpdateStoryAsync(Guid botId, int storyId, StoriesRequest storyDto, Errors errors)
         {
-            if (botId == Guid.Empty || storyId <0)
+            if (botId == Guid.Empty || storyId < 0)
             {
                 errors.Fill(FailureCode.ValidationError, "Invalid BotId or StoryId provided.");
                 return new StoriesResult(false, "400", null, errors);
