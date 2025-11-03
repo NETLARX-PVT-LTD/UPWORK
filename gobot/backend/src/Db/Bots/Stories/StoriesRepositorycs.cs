@@ -19,8 +19,8 @@ namespace Nelarx.Products.Gobot.Db.DbLayer.Bots.Stories
 
     public class StoriesRepository:IStoriesRepository
     {
-        private readonly BotDbContext _context;
-        public StoriesRepository(BotDbContext context)
+          private readonly BotDbContext _context;
+          public StoriesRepository(BotDbContext context)
           {
                 _context = context;
           }
