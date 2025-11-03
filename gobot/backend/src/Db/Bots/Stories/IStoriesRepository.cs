@@ -4,6 +4,7 @@
 // </copyright>
 // ---------------------------------------------------------------------
 
+
 namespace Netlarx.Products.Gobot.Db.DbLayer.Bots.Stories
 {
     using Netlarx.Products.Gobot.Errors;

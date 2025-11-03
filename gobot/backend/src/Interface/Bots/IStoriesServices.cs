@@ -6,7 +6,6 @@
 
 namespace Netlarx.Products.Gobot.Interface.Bots
 {
-    using Chatbot;
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.ModelDTO.Bots;
     using System;

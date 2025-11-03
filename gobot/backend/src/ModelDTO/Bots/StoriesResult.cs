@@ -1,5 +1,5 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="BotActionResult.cs" company="Netlarx">
+// <copyright file="StoriesResult.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
@@ -8,6 +8,7 @@ namespace Netlarx.Products.Gobot.ModelDTO.Bots
 {
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Result;
+    using System;
 
     public class StoriesResult : Result
     {
