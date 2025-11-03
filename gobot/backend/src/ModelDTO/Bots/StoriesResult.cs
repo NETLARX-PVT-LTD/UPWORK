@@ -6,19 +6,18 @@
 
 namespace Netlarx.Products.Gobot.ModelDTO.Bots
 {
-    using Chatbot;
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Result;
-    using System.Collections.Generic;
+    using System;
 
     public class StoriesResult : Result
     {
-        public StoriesResult(bool success, string statusCode, List<StoryBlock>? stories, Errors? error = null)
+        public StoriesResult(bool success, string statusCode, int? storyId, Errors? error = null)
             : base(success, error, statusCode)
         {
-            Stories = stories;
+            StoryId = storyId;
         }
 
-        public List<StoryBlock>? Stories { get; set; }
+        public int? StoryId { get; set; }
     }
 }

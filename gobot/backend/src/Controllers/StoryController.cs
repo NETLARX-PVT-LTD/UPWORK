@@ -7,11 +7,9 @@
 namespace Netlarx.Products.Gobot.Controllers
 {
     using Chatbot;
-    using Google.Protobuf.WellKnownTypes;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
-    using Microsoft.SqlServer.Server;
     using Netlarx.Products.Gobot.Interface;
     using Netlarx.Products.Gobot.Models;
     using Netlarx.Products.Gobot.Pipelines;
@@ -21,8 +19,6 @@ namespace Netlarx.Products.Gobot.Controllers
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
-    using static System.Net.Mime.MediaTypeNames;
 
     [ApiController]
     [Route("api/[controller]")]
@@ -55,7 +51,7 @@ namespace Netlarx.Products.Gobot.Controllers
                 var result = new List<object>();
                 var story = _db.Stories.FirstOrDefault(s => s.ID == storyId);
 
-                if(story == null)
+                if (story == null)
                 {
                     return BadRequest(new { Success = false, FailureCode = "InvalidInput" });
                 }
@@ -113,7 +109,7 @@ namespace Netlarx.Products.Gobot.Controllers
                         nextId = data.ToComponentId;
                         _logger.LogDebug("Fetched typingDelay ID : ", currentId);
                     }
-                    else if(currentType == ComponentTypes.LinkStory)
+                    else if (currentType == ComponentTypes.LinkStory)
                     {
                         var data = await _db.LinkStory.FirstOrDefaultAsync(u => u.ID == currentId);
                         if (data == null) break;
@@ -122,7 +118,7 @@ namespace Netlarx.Products.Gobot.Controllers
                         nextId = data.ToComponentId;
                         _logger.LogDebug("Fetched LinkStory ID: {Id}", currentId);
                     }
-                    else if(currentType == ComponentTypes.JsonAPI)
+                    else if (currentType == ComponentTypes.JsonAPI)
                     {
                         var data = await _db.JsonAPI.FirstOrDefaultAsync(u => u.ID == currentId);
                         if (data == null) break;
@@ -130,8 +126,8 @@ namespace Netlarx.Products.Gobot.Controllers
                         nextType = data.ToComponentType;
                         nextId = data.ToComponentId;
                         _logger.LogDebug("Fetched LinkStory ID: {Id}", currentId);
-                    } 
-                    else if(currentType == ComponentTypes.ConversationalForm)
+                    }
+                    else if (currentType == ComponentTypes.ConversationalForm)
                     {
                         var data = await _db.ConversationalForm.FirstOrDefaultAsync(u => u.ID == currentId);
                         if (data == null) break;
@@ -139,8 +135,8 @@ namespace Netlarx.Products.Gobot.Controllers
                         nextType = data.ToComponentType;
                         nextId = data.ToComponentId;
                         _logger.LogDebug("Fetched LinkStory ID: {Id}", currentId);
-                    } 
-                    else if(currentType == ComponentTypes.TextResponse)
+                    }
+                    else if (currentType == ComponentTypes.TextResponse)
                     {
                         var data = await _db.TextResponse.FirstOrDefaultAsync(u => u.ID == currentId);
                         if (data == null) break;
@@ -1267,7 +1263,7 @@ namespace Netlarx.Products.Gobot.Controllers
                         return validation.Validate(form.FormId, $"{form}", _logger);
                     }
                     MapId(form.FormId);
-                    
+
                     MapId(form.ToComponentId);
                 }
 
@@ -1275,7 +1271,7 @@ namespace Netlarx.Products.Gobot.Controllers
                 {
                     foreach (var qr in tr.QuickReplies)
                     {
-                        
+
                         MapId(qr.ToComponentId);
                     }
                 }
@@ -1294,7 +1290,7 @@ namespace Netlarx.Products.Gobot.Controllers
                     MapId(c.FromComponentId);
                 }
 
-           
+
                 MapId(session.Story.BotId);
 
                 // 2️⃣ Save Story first
@@ -1729,7 +1725,7 @@ namespace Netlarx.Products.Gobot.Controllers
         //                //_logger.LogWarning("Invalid, Problem in ToComponentId of QuickReplies Block format");
         //                return resultt;
         //            }
-                    
+
         //            MapId(c.Id);
         //            resultt = validation.Validate(c.Id, $"{c}-{c.FromComponentId}", _logger);
         //            if (resultt != null)

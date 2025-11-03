@@ -6,13 +6,14 @@
 
 namespace Netlarx.Products.Gobot
 {
+    using Gobot.Db.DbLayer.Bots.Stories;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Mvc.Formatters;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Nelarx.Products.Gobot.Db.DbLayer.Bots.Stories;
     using Netlarx.Products.Gobot.Controllers.AiAssistant;
     using Netlarx.Products.Gobot.Controllers.Bots;
     using Netlarx.Products.Gobot.Db;
@@ -22,7 +23,6 @@ namespace Netlarx.Products.Gobot
     using Netlarx.Products.Gobot.Interface.Ai;
     using Netlarx.Products.Gobot.Interface.Assistant;
     using Netlarx.Products.Gobot.Interface.Bots;
-    using Netlarx.Products.Gobot.Middlewares;
     using Netlarx.Products.Gobot.Service.AiAssistant;
     using Netlarx.Products.Gobot.Services;
     using Netlarx.Products.Gobot.Services.AiAssistant;
@@ -65,6 +65,10 @@ namespace Netlarx.Products.Gobot
             services.AddScoped<IBotService, BotService>();
             services.AddScoped<IBotRepository, BotRepository>();
             services.AddHttpClient<BotsController>();
+
+            services.AddScoped<IStoriesService, StoriesService>();
+            services.AddScoped<IStoriesRepository, StoriesRepository>();
+            services.AddHttpClient<StoriesController>();
 
             services.AddCors(options =>
             {
