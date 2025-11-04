@@ -9,7 +9,7 @@ namespace Netlarx.Products.Gobot.Services
     using Netlarx.Products.Gobot.Models;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-
+    
     public class StorySessionData
     {
         public List<UserInputPhrase> Phrases { get; set; } = new();
@@ -20,7 +20,7 @@ namespace Netlarx.Products.Gobot.Services
 
         public List<Connection> Connections { get; set; } = new();
 
-        public List<ConversationalForm> ConversationalForms { get; set; } = new();
+        public List<Netlarx.Products.Gobot.Models.ConversationalForm> ConversationalForms { get; set; } = new();
 
         public List<TypingDelay> TypingDelays { get; set; } = new();
 
