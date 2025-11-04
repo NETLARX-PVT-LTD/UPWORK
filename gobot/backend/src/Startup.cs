@@ -16,17 +16,21 @@ namespace Netlarx.Products.Gobot
     using Nelarx.Products.Gobot.Db.DbLayer.Bots.Stories;
     using Netlarx.Products.Gobot.Controllers.AiAssistant;
     using Netlarx.Products.Gobot.Controllers.Bots;
+    using Netlarx.Products.Gobot.Controllers.ConversationalForms;
     using Netlarx.Products.Gobot.Db;
     using Netlarx.Products.Gobot.Db.Bots.Bot;
+    using Netlarx.Products.Gobot.Db.ConversationalForms;
     using Netlarx.Products.Gobot.Db.DbLayer.AiAssistant.Assistant;
     using Netlarx.Products.Gobot.Interface;
     using Netlarx.Products.Gobot.Interface.Ai;
     using Netlarx.Products.Gobot.Interface.Assistant;
     using Netlarx.Products.Gobot.Interface.Bots;
+    using Netlarx.Products.Gobot.Interface.ConversationalForms;
     using Netlarx.Products.Gobot.Service.AiAssistant;
     using Netlarx.Products.Gobot.Services;
     using Netlarx.Products.Gobot.Services.AiAssistant;
     using Netlarx.Products.Gobot.Services.Bots;
+    using Netlarx.Products.Gobot.Services.ConversationalForm;
     using Netlarx.Products.Gobot.Validations;
 
     public class Startup(IConfiguration configuration)
@@ -69,6 +73,10 @@ namespace Netlarx.Products.Gobot
             services.AddScoped<IStoriesService, StoriesService>();
             services.AddScoped<IStoriesRepository, StoriesRepository>();
             services.AddHttpClient<StoriesController>();
+
+            services.AddScoped<IConversationalFormsServcie, ConversationalFormsService>();
+            services.AddScoped<IConversationalFormsRepository, ConversationalFormsRepository>();
+            services.AddHttpClient<FormsController>();
 
             services.AddCors(options =>
             {

@@ -13,31 +13,6 @@ namespace Netlarx.Products.Gobot.Models
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
-    public class FormField
-    {
-        [Key]
-        public int FormFieldId { get; set; }
-        public Guid ConversationalFormId { get; set; }
-        [ForeignKey(nameof(ConversationalFormId))]
-        public virtual ConversationalForm ConversationalForm { get; set; }
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public bool Required { get; set; }
-        public string PromptPhrase { get; set; }
-        public List<string>? Options { get; set; }
-        public string? OptionsText { get; set; }
-
-        //public class Validation
-        //{
-        //    public int validationId { get; set; }
-        //    public int MinLength { get; set; }
-        //    public int MaxLength { get; set; }
-        //    public string Pattern { get; set; }
-        //    public double Min { get; set; }
-        //    public double Max { get; set; }
-        //}
-    }
-
     public class ConversationalForm : BaseComponent
     {
         public int BotId { get; set; }
@@ -65,4 +40,30 @@ namespace Netlarx.Products.Gobot.Models
         public string RedirectUrl { get; set; }
         public ICollection<FormField> FormFields { get; set; } = new List<FormField>();
     }
+
+    public class FormField
+    {
+        [Key]
+        public int FormFieldId { get; set; }
+        public Guid ConversationalFormId { get; set; }
+        [ForeignKey(nameof(ConversationalFormId))]
+        public virtual ConversationalForm ConversationalForm { get; set; }
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public bool Required { get; set; }
+        public string PromptPhrase { get; set; }
+        public List<string>? Options { get; set; }
+        public string? OptionsText { get; set; }
+
+        //public class Validation
+        //{
+        //    public int validationId { get; set; }
+        //    public int MinLength { get; set; }
+        //    public int MaxLength { get; set; }
+        //    public string Pattern { get; set; }
+        //    public double Min { get; set; }
+        //    public double Max { get; set; }
+        //}
+    }
+
 }
