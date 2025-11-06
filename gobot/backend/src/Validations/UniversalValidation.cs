@@ -25,10 +25,6 @@ namespace Netlarx.Products.Gobot.Validations
             foreach (var prop in properties)
             {
                 var value = prop.GetValue(block);
-                if (prop.GetIndexParameters().Length > 0)
-                {
-                    continue; // Skip properties with index parameters
-                }
 
                 if (prop.PropertyType == typeof(string))
                 {
