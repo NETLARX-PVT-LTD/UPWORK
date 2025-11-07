@@ -3,7 +3,7 @@
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // ---------------------------------------------------------------------
 
-namespace Netlarx.Product.Gobot.Services.FacebookIntegration
+namespace Netlarx.Products.Gobot.Services.FacebookIntegration
 {
     using Microsoft.Extensions.Logging;
     using Netlarx.Products.Gobot.Db.FacebookIntegration.BotConnection;
@@ -11,7 +11,7 @@ namespace Netlarx.Product.Gobot.Services.FacebookIntegration
     using Netlarx.Products.Gobot.Db.FacebookIntegration.UserToken;
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Interface.FacebookIntegration;
-    using Netlarx.Products.Gobot.ModelDTO.FaceBookIntegration;
+    using Netlarx.Products.Gobot.ModelDTO.FacebookIntegration;
     using Netlarx.Products.Gobot.Models.FacebookIntegration;
     using Netlarx.Products.Gobot.Result;
     using Netlarx.Products.Gobot.Validations;
@@ -24,23 +24,23 @@ namespace Netlarx.Product.Gobot.Services.FacebookIntegration
     using System.Threading.Tasks;
 
 
-    public class FaceBookIntegrationService : IFacebookIntegrationService
+    public class FacebookIntegrationService : IFacebookIntegrationService
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly UserTokenRepository _userTokenRepo;
         private readonly PageTokenRepository _pageTokenRepo;
         private readonly BotConnectionRepository _botConnectionRepo;
-        private readonly ILogger<FaceBookIntegrationService> _logger;
+        private readonly ILogger<FacebookIntegrationService> _logger;
 
         private const string AppId = "YOUR_APP_ID";
         private const string AppSecret = "YOUR_APP_SECRET";
 
-        public FaceBookIntegrationService(
+        public FacebookIntegrationService(
             IHttpClientFactory httpClientFactory,
             UserTokenRepository userTokenRepo,
             PageTokenRepository pageTokenRepo,
             BotConnectionRepository botConnectionRepo,
-            ILogger<FaceBookIntegrationService> logger)
+            ILogger<FacebookIntegrationService> logger)
         {
             _httpClientFactory = httpClientFactory;
             _userTokenRepo = userTokenRepo;

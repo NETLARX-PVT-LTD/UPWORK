@@ -15,8 +15,6 @@ namespace Netlarx.Products.Gobot
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Nelarx.Products.Gobot.Db.DbLayer.Bots.Stories;
-    using Netlarx.Product.Gobot.Db.FacebookIntegration.UserToken;
-    using Netlarx.Product.Gobot.Services.FacebookIntegration;
     using Netlarx.Products.Gobot.Controllers.AiAssistant;
     using Netlarx.Products.Gobot.Controllers.Bots;
     using Netlarx.Products.Gobot.Controllers.Config;
@@ -48,11 +46,17 @@ namespace Netlarx.Products.Gobot
     using Netlarx.Products.Gobot.Services.ConversationalForm;
     using Netlarx.Products.Gobot.Services.Email;
     using Netlarx.Products.Gobot.Services.EmailSetting;
+    using Netlarx.Products.Gobot.Services.FacebookIntegration;
     using Netlarx.Products.Gobot.Validations;
 
-    public class Startup(IConfiguration configuration)
+    public class Startup
     {
-        private readonly IConfiguration configuration = configuration;
+        private readonly IConfiguration _configuration;
+
+        public Startup(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -69,7 +73,7 @@ namespace Netlarx.Products.Gobot
             //});
 
             services.AddDbContext<BotDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("BootsifyConnection"))
+                options.UseSqlServer(_configuration.GetConnectionString("BootsifyConnection"))
             );
 
             services.AddScoped<IBotDbContext>(provider => provider.GetRequiredService<BotDbContext>());
@@ -105,10 +109,10 @@ namespace Netlarx.Products.Gobot
             services.AddScoped<IEmailSettingsRepository, EmailSettingsRepository>();
             services.AddHttpClient<EmailSettingController>();
 
-            services.AddScoped<IFacebookIntegrationService, FaceBookIntegrationService>();
-            services.AddScoped<IUserTokenRepository,UserTokenRepository>();
+            services.AddScoped<IFacebookIntegrationService, FacebookIntegrationService>();
+            services.AddScoped<IUserTokenRepository, UserTokenRepository>();
+            services.AddScoped<IPageTokenRepository, PageTokenRepository>();
             services.AddScoped<IBotConnectionRepository, BotConnectionRepository>();
-            services.AddScoped<IPageTokenRepository , PageTokenRepository>();
             services.AddHttpClient<FacebookIntegrationController>();
 
             services.AddCors(options =>
@@ -137,9 +141,9 @@ namespace Netlarx.Products.Gobot
                 app.UseSwaggerUI();
             }
             app.UseHttpsRedirection();
-            app.UseAuthorization();
             app.UseRouting();
             app.UseCors("AllowAll");
+            app.UseAuthorization();
             //app.UseMiddleware<DeserializationMiddleware>();
 
             app.UseEndpoints(endpoints =>

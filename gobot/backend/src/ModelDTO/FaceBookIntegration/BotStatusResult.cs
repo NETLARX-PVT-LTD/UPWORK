@@ -4,7 +4,7 @@
 // </copyright>
 // ------------------------------------------------------------------
 
-namespace Netlarx.Products.Gobot.ModelDTO.FaceBookIntegration
+namespace Netlarx.Products.Gobot.ModelDTO.FacebookIntegration
 {
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Result;

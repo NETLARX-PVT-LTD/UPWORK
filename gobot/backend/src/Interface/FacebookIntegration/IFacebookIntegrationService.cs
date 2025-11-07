@@ -7,7 +7,7 @@
 namespace Netlarx.Products.Gobot.Interface.FacebookIntegration
 {
     using Netlarx.Products.Gobot.Errors;
-    using Netlarx.Products.Gobot.ModelDTO.FaceBookIntegration;
+    using Netlarx.Products.Gobot.ModelDTO.FacebookIntegration;
     using Netlarx.Products.Gobot.Result;
     using System.Threading.Tasks;
 

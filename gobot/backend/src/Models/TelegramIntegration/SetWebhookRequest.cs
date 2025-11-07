@@ -4,7 +4,7 @@
 // </copyright>
 // ---------------------------------------------------------------------
 
-namespace Netlarx.Product.Gobot.Models.TelegramIntegration
+namespace Netlarx.Products.Gobot.Models.TelegramIntegration
 {
     public class SetWebhookRequest
     {

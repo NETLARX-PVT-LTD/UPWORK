@@ -4,7 +4,7 @@
 // </copyright>
 // ---------------------------------------------------------------------
 
-namespace Netlarx.Product.Gobot.Db.FacebookIntegration.UserToken
+namespace Netlarx.Products.Gobot.Db.FacebookIntegration.UserToken
 {
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Models.FacebookIntegration;

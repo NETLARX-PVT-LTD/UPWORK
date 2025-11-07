@@ -4,7 +4,7 @@
 // </copyright>
 // ---------------------------------------------------------------------
 
-namespace Netlarx.Product.Gobot.Models.TelegramIntegration
+namespace Netlarx.Products.Gobot.Models.TelegramIntegration
 {
     // C# classes to map Telegram API response
     public class TelegramWebhookInfoResponse

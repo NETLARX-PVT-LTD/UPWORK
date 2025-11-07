@@ -1,5 +1,5 @@
 ﻿// ---------------------------------------------------------------------
-// <copyright file="FacebookService.cs" company="Netlarx">
+// <copyright file="FacebookIntegrationController.cs" company="Netlarx">
 // Copyright (c) Netlarx softwares pvt ltd. All rights reserved.
 // </copyright>
 // ---------------------------------------------------------------------
@@ -11,7 +11,7 @@ namespace Netlarx.Products.Gobot.Controllers.FacebookIntegration
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Helper;
     using Netlarx.Products.Gobot.Interface.FacebookIntegration;
-    using Netlarx.Products.Gobot.ModelDTO.FaceBookIntegration;
+    using Netlarx.Products.Gobot.ModelDTO.FacebookIntegration;
     using Netlarx.Products.Gobot.Result;
     using System.Threading.Tasks;
 

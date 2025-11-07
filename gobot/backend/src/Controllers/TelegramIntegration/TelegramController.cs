@@ -7,7 +7,7 @@
 namespace Gobot.Controllers.TelegramIntegration
 {
     using Microsoft.AspNetCore.Mvc;
-    using Netlarx.Product.Gobot.Models.TelegramIntegration;
+    using Netlarx.Products.Gobot.Models.TelegramIntegration;
     using System;
     using System.Net.Http;
     using System.Text;
