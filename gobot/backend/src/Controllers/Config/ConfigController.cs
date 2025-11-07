@@ -7,9 +7,9 @@
 namespace Netlarx.Products.Gobot.Controllers.Config
 {
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
-    using Netlarx.Products.Gobot.Interface;
-    using Netlarx.Products.Gobot.Models;
+    using Netlarx.Products.Gobot.Helper;
+    using Netlarx.Products.Gobot.Interface.Config;
+    using Netlarx.Products.Gobot.ModelDTO.Config;
     using System;
     using System.Threading.Tasks;
 
@@ -18,35 +18,21 @@ namespace Netlarx.Products.Gobot.Controllers.Config
     [ApiController]
     public class ConfigController : ControllerBase
     {
-        private readonly IBotDbContext _db;
+        private readonly IConfigService _configService;
 
-        public ConfigController(IBotDbContext db)
+        public ConfigController(IConfigService configService)
         {
-            _db = db;
+            _configService = configService;
         }
 
-        // ✅ GET /api/config/{botId}
-        [HttpGet("{botId}")]
-        public async Task<IActionResult> GetConfig(Guid botId)
+        //  GET /api/config/{botId}
+        [HttpGet("GetConfigByBotId{botId}")]
+        public async Task<BotConfigResult> GetConfigByBotIdAsync(Guid botId)
         {
-            var bot = await _db.Bots.FirstOrDefaultAsync(b => b.BotId == botId);
-            if (bot == null)
-                return NotFound(new { message = $"Bot with Id '{botId}' not found." });
-
-            var response = new BotConfigResponse
-            {
-                Branding = new Branding
-                {
-                    BotName = bot.BotName,
-                    PrimaryColor = bot.PrimaryColor,
-                    SecondaryColor = bot.SecondaryColor,
-                    ImageUrl = bot.ImageUrl
-                },
-                WelcomeMessage = bot.WelcomeMessage,
-                InputPlaceholder = bot.Placeholder
-            };
-
-            return Ok(response);
+            var errors = new Errors.Errors();
+            var result = await _configService.GetConfig(botId, errors);
+            HttpStatusCodeHelper.SetStatusCodeFromString(Response, result.StatusCode);
+            return result;
         }
     }
 }
