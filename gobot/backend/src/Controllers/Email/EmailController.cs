@@ -4,7 +4,7 @@
 // </copyright>
 // ---------------------------------------------------------------------
 
-namespace Gobot.Controllers.Email
+namespace Netlarx.Products.Gobot.Controllers.Email
 {
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Helper;

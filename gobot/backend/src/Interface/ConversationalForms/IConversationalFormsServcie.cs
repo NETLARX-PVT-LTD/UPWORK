@@ -6,7 +6,6 @@
 
 namespace Netlarx.Products.Gobot.Interface.ConversationalForms
 {
-    using Chatbot;
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.ModelDTO.ConversationalForms;
     using System;

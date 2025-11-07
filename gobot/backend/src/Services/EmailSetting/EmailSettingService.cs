@@ -12,7 +12,7 @@ namespace Netlarx.Products.Gobot.Services.EmailSetting
     using Netlarx.Products.Gobot.Helper;
     using Netlarx.Products.Gobot.Interface.EmailSetting;
     using Netlarx.Products.Gobot.ModelDTO.EmailSetting;
-    using Netlarx.Products.Gobot.Models.Email_Setting;
+    using Netlarx.Products.Gobot.Models.EmailSetting;
     using Netlarx.Products.Gobot.Result;
     using Netlarx.Products.Gobot.Validations;
     using System;
