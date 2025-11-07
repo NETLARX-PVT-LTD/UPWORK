@@ -27,9 +27,9 @@ namespace Netlarx.Products.Gobot.Services.FacebookIntegration
     public class FacebookIntegrationService : IFacebookIntegrationService
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly UserTokenRepository _userTokenRepo;
-        private readonly PageTokenRepository _pageTokenRepo;
-        private readonly BotConnectionRepository _botConnectionRepo;
+        private readonly IUserTokenRepository _userTokenRepo;
+        private readonly IPageTokenRepository _pageTokenRepo;
+        private readonly IBotConnectionRepository _botConnectionRepo;
         private readonly ILogger<FacebookIntegrationService> _logger;
 
         private const string AppId = "YOUR_APP_ID";
@@ -37,9 +37,9 @@ namespace Netlarx.Products.Gobot.Services.FacebookIntegration
 
         public FacebookIntegrationService(
             IHttpClientFactory httpClientFactory,
-            UserTokenRepository userTokenRepo,
-            PageTokenRepository pageTokenRepo,
-            BotConnectionRepository botConnectionRepo,
+            IUserTokenRepository userTokenRepo,
+            IPageTokenRepository pageTokenRepo,
+            IBotConnectionRepository botConnectionRepo,
             ILogger<FacebookIntegrationService> logger)
         {
             _httpClientFactory = httpClientFactory;
