@@ -4,7 +4,7 @@
 // </copyright>
 // ---------------------------------------------------------------------
 
-namespace Netlarx.Product.Gobot.Controllers.TelegramIntegration
+namespace Netlarx.Products.Gobot.Controllers.TelegramIntegration
 {
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;

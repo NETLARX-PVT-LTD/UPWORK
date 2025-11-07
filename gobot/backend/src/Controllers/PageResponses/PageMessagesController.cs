@@ -7,7 +7,6 @@
 namespace Netlarx.Products.Gobot.Controllers.PageResponses
 {
     using Chatbot;
-    using global::Gobot.Controllers.Email;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using Netlarx.Products.Gobot.Interface;
@@ -62,7 +61,7 @@ namespace Netlarx.Products.Gobot.Controllers.PageResponses
                         Id = request.SelectedStory.Id,
                         Name = request.SelectedStory.Name
                     }
-                
+
             };
 
             await _db.PageMessages.AddAsync(newMessage);

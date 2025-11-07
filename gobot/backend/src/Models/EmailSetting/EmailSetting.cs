@@ -1,4 +1,4 @@
-﻿namespace Netlarx.Products.Gobot.Models.Email_Setting
+﻿namespace Netlarx.Products.Gobot.Models.EmailSetting
 {
     using System;
 

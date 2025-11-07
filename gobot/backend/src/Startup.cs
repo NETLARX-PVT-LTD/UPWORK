@@ -6,6 +6,7 @@
 
 namespace Netlarx.Products.Gobot
 {
+    using Gobot.Controllers.Email;
     using Gobot.Db.DbLayer.Bots.Stories;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -18,27 +19,44 @@ namespace Netlarx.Products.Gobot
     using Netlarx.Products.Gobot.Controllers.Bots;
     using Netlarx.Products.Gobot.Controllers.Config;
     using Netlarx.Products.Gobot.Controllers.ConversationalForms;
+    using Netlarx.Products.Gobot.Controllers.EmailSettings;
+    using Netlarx.Products.Gobot.Controllers.FacebookIntegration;
     using Netlarx.Products.Gobot.Db;
     using Netlarx.Products.Gobot.Db.Bots.Bot;
     using Netlarx.Products.Gobot.Db.ConversationalForms;
     using Netlarx.Products.Gobot.Db.DbLayer.AiAssistant.Assistant;
+    using Netlarx.Products.Gobot.Db.FacebookIntegration.BotConnection;
+    using Netlarx.Products.Gobot.Db.FacebookIntegration.PageToken;
+    using Netlarx.Products.Gobot.Db.FacebookIntegration.UserToken;
     using Netlarx.Products.Gobot.Interface;
     using Netlarx.Products.Gobot.Interface.Ai;
     using Netlarx.Products.Gobot.Interface.Assistant;
     using Netlarx.Products.Gobot.Interface.Bots;
     using Netlarx.Products.Gobot.Interface.Config;
     using Netlarx.Products.Gobot.Interface.ConversationalForms;
+    using Netlarx.Products.Gobot.Interface.Email;
+    using Netlarx.Products.Gobot.Interface.EmailSetting;
+    using Netlarx.Products.Gobot.Interface.FacebookIntegration;
+    using Netlarx.Products.Gobot.Repository.EmailSetting;
     using Netlarx.Products.Gobot.Service.AiAssistant;
     using Netlarx.Products.Gobot.Services;
     using Netlarx.Products.Gobot.Services.AiAssistant;
     using Netlarx.Products.Gobot.Services.Bots;
     using Netlarx.Products.Gobot.Services.Config;
     using Netlarx.Products.Gobot.Services.ConversationalForm;
+    using Netlarx.Products.Gobot.Services.Email;
+    using Netlarx.Products.Gobot.Services.EmailSetting;
+    using Netlarx.Products.Gobot.Services.FacebookIntegration;
     using Netlarx.Products.Gobot.Validations;
 
-    public class Startup(IConfiguration configuration)
+    public class Startup
     {
-        private readonly IConfiguration configuration = configuration;
+        private readonly IConfiguration _configuration;
+
+        public Startup(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -55,7 +73,7 @@ namespace Netlarx.Products.Gobot
             //});
 
             services.AddDbContext<BotDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("BootsifyConnection"))
+                options.UseSqlServer(_configuration.GetConnectionString("BootsifyConnection"))
             );
 
             services.AddScoped<IBotDbContext>(provider => provider.GetRequiredService<BotDbContext>());
@@ -84,6 +102,19 @@ namespace Netlarx.Products.Gobot
             services.AddScoped<IConfigService, ConfigService>();
             services.AddHttpClient<ConfigController>();
 
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddHttpClient<EmailController>();
+
+            services.AddScoped<IEmailSettingsService, EmailSettingsService>();
+            services.AddScoped<IEmailSettingsRepository, EmailSettingsRepository>();
+            services.AddHttpClient<EmailSettingController>();
+
+           services.AddScoped<IFacebookIntegrationService, FacebookIntegrationService>();
+            services.AddScoped<IUserTokenRepository, UserTokenRepository>();
+            services.AddScoped<IPageTokenRepository, PageTokenRepository>();
+            services.AddScoped<IBotConnectionRepository, BotConnectionRepository>();
+            services.AddHttpClient<FacebookIntegrationController>();
+
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
@@ -110,9 +141,9 @@ namespace Netlarx.Products.Gobot
                 app.UseSwaggerUI();
             }
             app.UseHttpsRedirection();
-            app.UseAuthorization();
             app.UseRouting();
             app.UseCors("AllowAll");
+            app.UseAuthorization();
             //app.UseMiddleware<DeserializationMiddleware>();
 
             app.UseEndpoints(endpoints =>

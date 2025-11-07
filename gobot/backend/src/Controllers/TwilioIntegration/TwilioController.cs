@@ -4,7 +4,7 @@
 // </copyright>
 // ---------------------------------------------------------------------
 
-namespace Netlarx.Product.Gobot.Controllers.TwilioIntegration
+namespace Netlarx.Products.Gobot.Controllers.TwilioIntegration
 {
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;

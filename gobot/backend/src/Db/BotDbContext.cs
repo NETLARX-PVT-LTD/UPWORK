@@ -9,7 +9,7 @@ namespace Netlarx.Products.Gobot.Db
     using Microsoft.EntityFrameworkCore;
     using Netlarx.Products.Gobot.Interface;
     using Netlarx.Products.Gobot.Models;
-    using Netlarx.Products.Gobot.Models.Email_Setting;
+    using Netlarx.Products.Gobot.Models.EmailSetting;
     using Netlarx.Products.Gobot.Models.FacebookIntegration;
     using Netlarx.Products.Gobot.Models.TelegramIntegration;
     using Netlarx.Products.Gobot.Models.TwilioIntegration;

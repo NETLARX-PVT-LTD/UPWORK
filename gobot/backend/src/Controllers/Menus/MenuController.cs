@@ -7,13 +7,11 @@
 namespace Netlarx.Products.Gobot.Controllers.Menus
 {
     using Chatbot;
-    using global::Gobot.Controllers.Email;
     using Gobot.Models;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using Netlarx.Products.Gobot.Interface;
-    using Netlarx.Products.Gobot.Models;
     using Netlarx.Products.Gobot.Pipelines;
     using System;
     using System.Collections.Generic;

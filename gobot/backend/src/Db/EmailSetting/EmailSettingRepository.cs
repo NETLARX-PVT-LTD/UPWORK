@@ -10,7 +10,7 @@ namespace Netlarx.Products.Gobot.Repository.EmailSetting
     using Netlarx.Products.Gobot.Db;
     using Netlarx.Products.Gobot.Errors;
     using Netlarx.Products.Gobot.Interface.EmailSetting;
-    using Netlarx.Products.Gobot.Models.Email_Setting;
+    using Netlarx.Products.Gobot.Models.EmailSetting;
     using System;
     using System.Linq;
     using System.Threading.Tasks;

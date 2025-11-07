@@ -7,7 +7,7 @@
 namespace Netlarx.Products.Gobot.Interface.EmailSetting
 {
     using Netlarx.Products.Gobot.Errors;
-    using Netlarx.Products.Gobot.Models.Email_Setting;
+    using Netlarx.Products.Gobot.Models.EmailSetting;
     using System.Threading.Tasks;
 
     public interface IEmailSettingsRepository
