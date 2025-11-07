@@ -109,7 +109,7 @@ namespace Netlarx.Products.Gobot
             services.AddScoped<IEmailSettingsRepository, EmailSettingsRepository>();
             services.AddHttpClient<EmailSettingController>();
 
-            services.AddScoped<IFacebookIntegrationService, FacebookIntegrationService>();
+           services.AddScoped<IFacebookIntegrationService, FacebookIntegrationService>();
             services.AddScoped<IUserTokenRepository, UserTokenRepository>();
             services.AddScoped<IPageTokenRepository, PageTokenRepository>();
             services.AddScoped<IBotConnectionRepository, BotConnectionRepository>();

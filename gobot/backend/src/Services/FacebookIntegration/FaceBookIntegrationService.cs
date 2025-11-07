@@ -49,7 +49,6 @@ namespace Netlarx.Products.Gobot.Services.FacebookIntegration
             _logger = logger;
         }
 
-
         public async Task<SyncPagesResult> SyncPages(TokenRequest request, Errors errors)
         {
             if (string.IsNullOrEmpty(request.ShortLivedAccessToken))
@@ -100,7 +99,8 @@ namespace Netlarx.Products.Gobot.Services.FacebookIntegration
                     LongLivedUserToken = longLivedUserToken
                 };
 
-                if (!await _userTokenRepo.AddUserToken(userToken, errors))
+                var successUserToken = await _userTokenRepo.AddUserToken(userToken,errors);
+                if (!successUserToken)
                 {
                     return new SyncPagesResult(false, "500", null, errors);
                 }
