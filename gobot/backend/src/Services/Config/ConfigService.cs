@@ -45,6 +45,7 @@ namespace Netlarx.Products.Gobot.Services.Config
                     SecondaryColor = bot.SecondaryColor,
                     ImageUrl = bot.ImageUrl
                 },
+
                 WelcomeMessage = bot.WelcomeMessage,
                 InputPlaceholder = bot.Placeholder
             };

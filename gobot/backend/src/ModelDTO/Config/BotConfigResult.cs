@@ -19,6 +19,7 @@ namespace Netlarx.Products.Gobot.ModelDTO.Config
 
         public BotConfigdto BotConfig { get; set; }
     }
+
     public class BotConfigdto
     {
         public BrandingResult Branding { get; set; }
